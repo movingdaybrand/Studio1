@@ -3575,11 +3575,26 @@ body{
     };
   }
 
-  function applyClientPaletteToGuide(){
-    const source =
-      state.aiSuggestions.colors ||
-      state.aiSuggestions._raw?.colors ||
-      state.colors;
+function applyPaletteToGuide() {
+  const colors = [
+    document.getElementById("color1")?.value,
+    document.getElementById("color2")?.value,
+    document.getElementById("color3")?.value,
+    document.getElementById("color4")?.value,
+    document.getElementById("color5")?.value
+  ];
+["color1", "color2", "color3", "color4", "color5"].forEach((id) => {
+  const input = document.getElementById(id);
+  if (!input) return;
+
+  input.addEventListener("input", applyPaletteToGuide);
+  input.addEventListener("change", applyPaletteToGuide);
+});
+  colors.forEach((color, index) => {
+    if (!color) return;
+    document.documentElement.style.setProperty(`--c${index + 1}`, color);
+  });
+}
 
     if(!Array.isArray(source) || !source.length)return;
 
