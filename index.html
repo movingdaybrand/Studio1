@@ -9,86 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
-/* ── CLIENT PALETTE APPLICATION RULES ── */
-/* These rules make the detected/edited brand palette affect the guide backgrounds. */
 
-.hero{
-  background:var(--c1)!important;
-  color:var(--c4)!important;
-}
-
-.hero::after{
-  background:var(--c2)!important;
-}
-
-.logo-cell.dark{
-  background:var(--c1)!important;
-  color:var(--c4)!important;
-}
-
-.logo-cell.brand{
-  background:var(--c5)!important;
-  color:var(--c4)!important;
-}
-
-.palette-row .swatch:nth-child(1){background:var(--c1)!important;}
-.palette-row .swatch:nth-child(2){background:var(--c2)!important;}
-.palette-row .swatch:nth-child(3){background:var(--c3)!important;}
-.palette-row .swatch:nth-child(4){background:var(--c4)!important;}
-.palette-row .swatch:nth-child(5){background:var(--c5)!important;}
-
-.colour-detail:nth-child(1) .colour-dot{background:var(--c1)!important;}
-.colour-detail:nth-child(2) .colour-dot{background:var(--c2)!important;}
-.colour-detail:nth-child(3) .colour-dot{background:var(--c3)!important;}
-.colour-detail:nth-child(4) .colour-dot{background:var(--c4)!important;}
-.colour-detail:nth-child(5) .colour-dot{background:var(--c5)!important;}
-
-.mockup-profile{
-  background:var(--c1)!important;
-  color:var(--c4)!important;
-}
-
-.mockup-web{
-  background:var(--c4)!important;
-  color:var(--c5)!important;
-}
-
-.mockup-print{
-  background:var(--c5)!important;
-  color:var(--c4)!important;
-}
-
-.mockup-social{
-  background:var(--c3)!important;
-  color:var(--c5)!important;
-}
-
-.usage-card.do{
-  border-top-color:var(--c1)!important;
-}
-
-.usage-card.do .usage-tag,
-.usage-card.do .usage-list li::before{
-  color:var(--c1)!important;
-}
-
-.download-card:hover{
-  border-color:var(--c1)!important;
-}
-
-.download-icon{
-  background:var(--c4)!important;
-  color:var(--c1)!important;
-}
-
-.download-btn{
-  color:var(--c1)!important;
-}
-
-footer{
-  background:var(--c5)!important;
-  color:var(--c4)!important;
-}
 <style>
   :root {
     --cream:#F1ECDF;
@@ -2269,6 +2190,92 @@ body{
   color: #1F3D2E !important;
 }
 
+
+
+/* ── CLIENT PALETTE APPLICATION RULES ──
+   Final override: client palette controls the customer-facing guide backgrounds.
+   The internal Moving Day builder remains protected by the .builder-app rules above. */
+.hero{
+  background:var(--c1)!important;
+  color:var(--c4)!important;
+}
+.hero::after{background:var(--c2)!important;}
+.hero .eyebrow,
+.hero-name em{color:var(--c3)!important;}
+.hero .eyebrow .dot{background:var(--c3)!important;}
+.logo-cell.dark,
+.brand-logo-suite .logo-card-dark{
+  background:var(--c1)!important;
+  color:var(--c4)!important;
+}
+.logo-cell.brand,
+.brand-logo-suite .logo-card-brand{
+  background:var(--c5)!important;
+  color:var(--c4)!important;
+}
+.logo-card-primary{
+  background:linear-gradient(135deg,var(--c4),rgba(255,255,255,.78))!important;
+  color:var(--c5)!important;
+}
+.palette-row .swatch:nth-child(1),
+.swatch:nth-child(1){background:var(--c1)!important;}
+.palette-row .swatch:nth-child(2),
+.swatch:nth-child(2){background:var(--c2)!important;}
+.palette-row .swatch:nth-child(3),
+.swatch:nth-child(3){background:var(--c3)!important;}
+.palette-row .swatch:nth-child(4),
+.swatch:nth-child(4){background:var(--c4)!important;}
+.palette-row .swatch:nth-child(5),
+.swatch:nth-child(5){background:var(--c5)!important;}
+.colour-detail:nth-child(1) .colour-dot{background:var(--c1)!important;}
+.colour-detail:nth-child(2) .colour-dot{background:var(--c2)!important;}
+.colour-detail:nth-child(3) .colour-dot{background:var(--c3)!important;}
+.colour-detail:nth-child(4) .colour-dot{background:var(--c4)!important;}
+.colour-detail:nth-child(5) .colour-dot{background:var(--c5)!important;}
+.section-label::before{background:var(--c1)!important;}
+.section-title em{color:var(--c1)!important;}
+.mockup-profile,
+.applications-grid .mockup-profile{
+  background:var(--c1)!important;
+  color:var(--c4)!important;
+}
+.mockup-web,
+.applications-grid .mockup-web{
+  background:var(--c4)!important;
+  color:var(--c5)!important;
+}
+.mockup-print,
+.applications-grid .mockup-print{
+  background:var(--c5)!important;
+  color:var(--c4)!important;
+}
+.mockup-social,
+.applications-grid .mockup-social{
+  background:var(--c3)!important;
+  color:var(--c5)!important;
+}
+.applications-grid .mockup{
+  border-color:color-mix(in srgb,var(--c5) 18%,transparent)!important;
+}
+.usage-card.do{border-top-color:var(--c1)!important;}
+.usage-card.do .usage-tag,
+.usage-card.do .usage-list li::before{color:var(--c1)!important;}
+.download-card:hover{border-color:var(--c1)!important;}
+.download-icon{
+  background:var(--c4)!important;
+  color:var(--c1)!important;
+}
+.download-btn{color:var(--c1)!important;}
+.quick-download:hover{
+  background:var(--c1)!important;
+  color:var(--c4)!important;
+  border-color:var(--c1)!important;
+}
+footer{
+  background:var(--c5)!important;
+  color:var(--c4)!important;
+}
+
 </style>
 </head>
 
@@ -3575,26 +3582,11 @@ body{
     };
   }
 
-function applyPaletteToGuide() {
-  const colors = [
-    document.getElementById("color1")?.value,
-    document.getElementById("color2")?.value,
-    document.getElementById("color3")?.value,
-    document.getElementById("color4")?.value,
-    document.getElementById("color5")?.value
-  ];
-["color1", "color2", "color3", "color4", "color5"].forEach((id) => {
-  const input = document.getElementById(id);
-  if (!input) return;
-
-  input.addEventListener("input", applyPaletteToGuide);
-  input.addEventListener("change", applyPaletteToGuide);
-});
-  colors.forEach((color, index) => {
-    if (!color) return;
-    document.documentElement.style.setProperty(`--c${index + 1}`, color);
-  });
-}
+  function applyClientPaletteToGuide(){
+    const source =
+      state.aiSuggestions.colors ||
+      state.aiSuggestions._raw?.colors ||
+      state.colors;
 
     if(!Array.isArray(source) || !source.length)return;
 
