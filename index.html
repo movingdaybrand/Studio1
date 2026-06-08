@@ -2445,6 +2445,124 @@ footer{
     grid-template-columns:1fr!important;
   }
 }
+
+
+/* ─────────────────────────────────────────────
+   MANUAL MODE OVERRIDES
+   No automatic file moving, smart sorting, or color extraction.
+───────────────────────────────────────────── */
+#aiPanel,.ai-panel,#aiRawJson,#aiResults,#aiEndpoint,#analyzeFilesBtn,#applyHighConfidenceBtn,#localAnalyzeBtn,#autoBuildToggle,.auto-build-toggle{
+  display:none!important;
+  visibility:hidden!important;
+  height:0!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
+}
+
+/* ─────────────────────────────────────────────
+   CLIENT HERO FIX — PREMIUM FINAL GUIDE HERO
+───────────────────────────────────────────── */
+.hero{
+  background:var(--c5)!important;
+  color:var(--c4)!important;
+  padding:96px 0 78px!important;
+  min-height:auto!important;
+  display:flex!important;
+  align-items:center!important;
+}
+.hero::after{display:none!important;}
+.hero .wrap{
+  width:100%!important;
+  max-width:1080px!important;
+  margin:0 auto!important;
+  padding:0 40px!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) 320px!important;
+  gap:80px!important;
+  align-items:center!important;
+}
+.hero-logo-wrap{
+  grid-column:2!important;
+  grid-row:1 / span 4!important;
+  width:100%!important;
+  min-height:320px!important;
+  margin:0!important;
+  background:var(--c4)!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  border-radius:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:54px!important;
+  box-shadow:0 24px 80px rgba(0,0,0,.22)!important;
+}
+.hero-logo-wrap:empty{display:none!important;}
+.hero-logo-wrap .asset-img{
+  max-width:100%!important;
+  max-height:180px!important;
+  object-fit:contain!important;
+  margin:0!important;
+  filter:none!important;
+}
+.hero .eyebrow{
+  color:var(--c3)!important;
+  font-size:11px!important;
+  letter-spacing:.22em!important;
+  text-transform:uppercase!important;
+  margin-bottom:24px!important;
+}
+.hero .eyebrow .dot{background:var(--c3)!important;}
+.hero-name{
+  color:var(--c3)!important;
+  font-family:var(--display)!important;
+  font-size:clamp(58px,7vw,96px)!important;
+  line-height:.9!important;
+  letter-spacing:-.045em!important;
+  max-width:680px!important;
+  margin:0!important;
+}
+.hero-name em{color:var(--c3)!important;}
+.hero-tagline{
+  color:var(--c4)!important;
+  font-family:var(--display)!important;
+  font-size:clamp(22px,2vw,30px)!important;
+  line-height:1.16!important;
+  max-width:620px!important;
+  margin-top:34px!important;
+  opacity:.92!important;
+}
+.hero-meta{
+  grid-column:1!important;
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:26px!important;
+  margin-top:44px!important;
+  padding-top:24px!important;
+  border-top:1px solid rgba(255,255,255,.16)!important;
+}
+.hero-meta-label{
+  color:rgba(255,255,255,.38)!important;
+  font-size:9px!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+  margin-bottom:7px!important;
+}
+.hero-meta-value{
+  color:var(--c4)!important;
+  font-size:12px!important;
+  font-weight:600!important;
+  line-height:1.35!important;
+}
+@media(max-width:900px){
+  .hero{padding:72px 0 62px!important;}
+  .hero .wrap{grid-template-columns:1fr!important;gap:36px!important;padding:0 24px!important;}
+  .hero-logo-wrap{grid-column:1!important;grid-row:auto!important;width:100%!important;min-height:220px!important;padding:38px!important;order:-1!important;}
+  .hero-name{font-size:clamp(48px,13vw,72px)!important;}
+  .hero-tagline{font-size:22px!important;margin-top:26px!important;}
+  .hero-meta{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:20px!important;}
+}
+@media(max-width:520px){.hero-meta{grid-template-columns:1fr!important;}}
+
 </style>
 </head>
 
@@ -2572,18 +2690,7 @@ footer{
         </article>
       </div>
 
-      <div class="builder-panel ai-panel" id="aiPanel" aria-hidden="true">
-        <div class="ai-controls">
-          <div class="builder-field"><label>Server endpoint</label><input id="aiEndpoint" value="/api/analyze-brand-files" placeholder="/api/analyze-brand-files"></div>
-          <button class="builder-btn primary" id="analyzeFilesBtn">Rebuild Guide Now</button>
-          <button class="builder-btn" id="applyHighConfidenceBtn">Apply High Confidence</button>
-          <button class="builder-btn" id="localAnalyzeBtn">Local Smart Sort</button>
-          <label class="auto-build-toggle"><input type="checkbox" id="autoBuildToggle" checked> Auto-build after upload</label>
-        </div>
-        <p class="ai-warning">Hidden internal automation controls.</p>
-        <textarea class="ai-json builder-hidden" id="aiRawJson"></textarea>
-        <div class="ai-results" id="aiResults"><div class="ai-suggestion"><span><strong>Ready</strong><span>Hidden.</span></span><button type="button" disabled>Hidden</button></div></div>
-      </div>
+      <!-- Manual mode: automation panel removed. -->
     </section>
   </div>
 </div>
@@ -2884,6 +2991,10 @@ footer{
   const slotLabels={heroLogo:'Hero Logo',primaryLogo:'Primary Logo',iconMark:'Icon Mark',iconVariant:'Icon Variant',profileImage:'Profile Image',websiteHeader:'Website Header',businessCard:'Business Card',socialPost:'Social Post'};
   const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
   const status=(msg)=>{const el=$('#builderStatus'); if(el) el.textContent=msg};
+
+  /* Manual-first mode: uploads stay in the file library until you place them. */
+  const MOVING_DAY_MANUAL_MODE = true;
+  function automationBlocked(){ return MOVING_DAY_MANUAL_MODE === true; }
   function safeName(s){return String(s||'moving-day-guide').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'moving-day-guide'}
   function fileExt(name){const p=String(name||'').split('.'); return p.length>1?p.pop().toLowerCase():'file'}
   function readFile(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)})}
@@ -3051,10 +3162,10 @@ footer{
 
     state.assets[slot]=asset;
 
-    maybeApplyPaletteFromAsset(asset);
+    // Manual mode: do not auto-apply colors from uploaded files.
     renderAssets();
     status(`${slotLabels[slot]} uploaded: ${file.name}`);
-    scheduleAutoBuild(`${file.name} added to ${slotLabels[slot]}`);
+    // Manual mode: do not auto-build after slot upload.
   }
 
   async function analyzeImageVisuals(dataUrl){
@@ -3308,28 +3419,7 @@ footer{
   }
 
   function maybeApplyPaletteFromAsset(asset){
-    if(!asset?.visualAnalysis?.dominant?.length)return;
-
-    const colors=asset.visualAnalysis.dominant
-      .filter(c=>c.saturation>0.10)
-      .map(c=>c.hex)
-      .slice(0,5);
-
-    if(!colors.length)return;
-
-    const inputs=[...document.querySelectorAll('.color-edit input[type="text"]')];
-    const defaults=['#1F3D2E','#2D5642','#C4D9CB','#F1ECDF','#15140F',''];
-
-    colors.forEach((hex,index)=>{
-      const input=inputs[index];
-      if(!input)return;
-
-      const current=String(input.value||'').toUpperCase();
-      if(defaults.includes(current)){
-        input.value=hex;
-        input.dispatchEvent(new Event('input',{bubbles:true}));
-      }
-    });
+    return;
   }
 
   function getCssVar(name,fallback){
@@ -3428,20 +3518,12 @@ footer{
   let lastAutoBuildFingerprint='';
   function assetFingerprint(){return allUploadedAssets().map(a=>`${a.name}:${a.size||0}:${a.width||0}x${a.height||0}`).sort().join('|');}
   function scheduleAutoBuild(reason='assets updated'){
-    const toggle=$('#autoBuildToggle');
-    if(toggle && !toggle.checked)return;
-    const assets=allUploadedAssets();
-    if(!assets.length)return;
-    clearTimeout(autoBuildTimer);
-    status(`Auto-Builder queued — ${reason}.`);
-    autoBuildTimer=setTimeout(()=>autoBuildGuide(),900);
+    status('Manual mode: uploads stay in the library until you place them.');
+    return;
   }
   async function autoBuildGuide(){
-    const fingerprint=assetFingerprint();
-    if(!fingerprint || fingerprint===lastAutoBuildFingerprint)return;
-    lastAutoBuildFingerprint=fingerprint;
-    status('Auto-Builder analyzing assets and placing files...');
-    await analyzeFilesWithEndpoint({autoApply:true});
+    status('Manual mode: Auto-Builder is disabled. Place files manually.');
+    return;
   }
 
   function compactAssetForAI(asset){
@@ -3858,26 +3940,7 @@ function applyClientBackgroundsToCards(){
   }
 
   function fillEmptySlotsWithBestAvailableAssets(){
-    const all=allUploadedAssets();
-    const images=all.filter(a=>String(a.type||'').startsWith('image/'));
-    if(!images.length)return;
-
-    const wideImages=images.filter(a=>a.width&&a.height&&a.width/a.height>1.6);
-    const squareImages=images.filter(a=>a.width&&a.height&&Math.abs(a.width-a.height)/Math.max(a.width,a.height)<0.25);
-
-    const logoLike=images.filter(a=>/logo|wordmark|primary|horizontal|brand/i.test(a.name||''));
-    const markLike=images.filter(a=>/mark|icon|badge|symbol|favicon|avatar|seal/i.test(a.name||''));
-    const socialLike=images.filter(a=>/social|post|instagram|facebook|linkedin|graphic|story/i.test(a.name||''));
-    const printLike=images.filter(a=>/card|business|print|flyer|poster|sign|stationery/i.test(a.name||''));
-
-    setSlotIfEmpty('heroLogo', bestAsset(logoLike)||bestAsset(wideImages)||bestAsset(images));
-    setSlotIfEmpty('primaryLogo', bestAsset(logoLike)||bestAsset(wideImages)||bestAsset(images));
-    setSlotIfEmpty('iconMark', bestAsset(markLike)||bestAsset(squareImages)||bestAsset(images));
-    setSlotIfEmpty('iconVariant', secondBestAsset(markLike)||secondBestAsset(logoLike)||secondBestAsset(images)||bestAsset(images));
-    setSlotIfEmpty('profileImage', bestAsset(squareImages)||bestAsset(markLike)||bestAsset(images));
-    setSlotIfEmpty('websiteHeader', bestAsset(wideImages)||bestAsset(logoLike)||bestAsset(images));
-    setSlotIfEmpty('businessCard', bestAsset(printLike)||bestAsset(wideImages)||bestAsset(logoLike)||bestAsset(images));
-    setSlotIfEmpty('socialPost', bestAsset(socialLike)||bestAsset(squareImages)||bestAsset(markLike)||bestAsset(images));
+    return;
   }
 
   function setSlotIfEmpty(slot,asset){
@@ -3917,104 +3980,8 @@ function applyClientBackgroundsToCards(){
     }).join('');
   }
   async function analyzeFilesWithEndpoint(options={}){
-    const assets=allUploadedAssets();
-    if(!assets.length){status('Upload files before running AI analysis.');return;}
-
-    const endpoint=($('#aiEndpoint')?.value||'').trim() || '/.netlify/functions/analyze-brand-files';
-
-    status('Auto-Builder analyzing assets through secure endpoint...');
-    try{
-      const payload={
-        project:state.fields,
-        colors:state.colors,
-        assets:assets.map(compactAssetForAI),
-        requestedOutput:{
-          mode:'designer_brand_identity_guide',
-          requirements:[
-            'Act like a professional brand identity designer and production designer.',
-            'Infer the client name, category, colors, typography, and best asset placements from the uploaded files.',
-            'Use exact filenames only.',
-            'Separate final usable assets from references, screenshots, duplicates, blurry files, and low-quality exports.',
-            'Choose the strongest wide logo as primaryLogo.',
-            'Choose the strongest square/icon asset as iconMark or profileImage.',
-            'Choose a wide mockup or website screenshot as websiteHeader.',
-            'Choose square social graphics as socialPost.',
-            'Choose print, card, signage, packaging, or stationery files as businessCard.',
-            'Return assetDisplay instructions for every image: white-background logos on white/light, transparent dark logos on light, transparent white logos on dark, screenshots/mockups staged using their own background or edge colors.',
-            'Never place a white-background JPG on a dark or saturated card.',
-            'Never place a transparent light logo on a light card.',
-            'Never place a dark logo on a dark card.',
-            'Prioritize clean SVG and transparent PNG files for logo slots.',
-            'Return JSON only.'
-          ],
-          expectedShape:{
-            suggestions:{
-              clientName:'string',
-              category:'string',
-              tagline:'string',
-              primaryLogo:'exact filename',
-              iconMark:'exact filename',
-              iconVariant:'exact filename',
-              profileImage:'exact filename',
-              websiteHeader:'exact filename',
-              businessCard:'exact filename',
-              socialPost:'exact filename',
-              colors:['#HEX','#HEX','#HEX','#HEX','#HEX'],
-              displayFont:'string',
-              bodyFont:'string',
-              assetDisplay:{
-                'exact filename':{
-                  recommendedBackground:'white | light | dark | brand-primary | brand-secondary | image-edge | original',
-                  backgroundHex:'#HEX',
-                  logoTreatment:'centered | padded | full-bleed | avoid-cropping',
-                  contrastMode:'dark-logo-on-light | light-logo-on-dark | mixed | unknown',
-                  designerNote:'short reason'
-                }
-              },
-              usageDo:['string'],
-              usageDont:['string'],
-              assetReport:[],
-              downloadCards:[],
-              warnings:[],
-              confidence:{}
-            }
-          }
-        }
-      };
-
-      const res=await fetch(endpoint,{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(payload)
-      });
-
-      if(!res.ok)throw new Error(`Endpoint returned ${res.status}`);
-
-      const json=await res.json();
-      const suggestions=normalizeAiResponse(json);
-      state.aiSuggestions=suggestions;
-
-      $('#aiRawJson')?.classList.remove('builder-hidden');
-      if($('#aiRawJson'))$('#aiRawJson').value=JSON.stringify(suggestions,null,2);
-
-      renderAiSuggestions(suggestions);
-
-      if(options.autoApply){
-        applyAiSuggestion('high',normalizeSuggestionList(state.aiSuggestions));
-        applyAssetDisplayTreatmentsFromAI();
-        renderAssets();
-        status('Auto-Builder applied high-confidence placements and smart display treatments.');
-      }else{
-        status('Auto-Builder suggestions ready. Review and apply what fits.');
-      }
-    }catch(err){
-      console.warn(err);
-      status('AI endpoint failed. Running automatic Local Smart Sort instead.');
-      await localSmartAnalyze({autoApply:!!options.autoApply});
-      applyAssetDisplayTreatmentsFromAI();
-      renderAssets();
-    }
-
+    status('Manual mode: AI rebuild is disabled. Upload files, then assign them manually.');
+    return;
   }
 
   async function extractColorsFromImages(){
@@ -4041,38 +4008,41 @@ function applyClientBackgroundsToCards(){
   function qualityReason(a){const parts=[]; if(a.width&&a.height)parts.push(`${a.width}×${a.height}px`); if(a.size)parts.push(`${Math.round(a.size/1024)}KB`); if(['svg','pdf','ai','eps'].includes(String(a.ext).toLowerCase()))parts.push('source/vector-friendly'); if(a.qualityScore<55)parts.push('needs review'); return parts.join(' · ')||'filename and file type reviewed';}
   function buildDownloadCardSuggestions(assets){const groups={logos:[],social:[],print:[],fonts:[],source:[],misc:[]}; assets.forEach(a=>{const p=suggestPlacement(a); if(/Logo|Icon|Mark/.test(p))groups.logos.push(a.name); else if(/Social/.test(p))groups.social.push(a.name); else if(/Print/.test(p))groups.print.push(a.name); else if(/Font/.test(p))groups.fonts.push(a.name); else if(/Source/.test(p))groups.source.push(a.name); else groups.misc.push(a.name);}); return Object.entries(groups).filter(([_,files])=>files.length).map(([key,files])=>({title:key.replace(/^./,m=>m.toUpperCase())+' Files',files}));}
   async function localSmartAnalyze(options={}){
-    const assets=allUploadedAssets();
-    const nameGuess=state.fields.clientName==='Client Name'&&assets[0]?assets[0].name.replace(/\.[^.]+$/,'').replace(/[-_]+/g,' ').replace(/\b\w/g,m=>m.toUpperCase()):state.fields.clientName;
-    const by=(terms)=>assets.find(a=>terms.some(t=>String(a.name).toLowerCase().includes(t))&&String(a.type).startsWith('image/'));
-    const colors=await extractColorsFromImages();
-    const ranked=rankAssets(assets);
-    const bestImage=ranked.find(a=>String(a.type).startsWith('image/'))||{};
-    const suggestions={clientName:nameGuess,category:state.fields.category==='Category'?'Brand Identity':state.fields.category,tagline:state.fields.tagline,heroLogo:(by(['primary','logo','wordmark','horizontal'])||bestImage||{}).name,primaryLogo:(by(['primary','logo','wordmark','horizontal'])||bestImage||{}).name,iconMark:(by(['icon','mark','favicon','profile','avatar'])||ranked.find(a=>isSquareish(a)&&String(a.type).startsWith('image/'))||{}).name,iconVariant:(by(['white','reverse','dark','light','variant','alt'])||{}).name,profileImage:(by(['profile','avatar','icon','favicon'])||{}).name,websiteHeader:(by(['website','web','header','hero','homepage'])||ranked.find(a=>isWide(a))||{}).name,businessCard:(by(['card','business','print'])||{}).name,socialPost:(by(['social','instagram','post','1080'])||ranked.find(a=>isSquareish(a)&&String(a.type).startsWith('image/'))||{}).name,colors:colors.length?colors:state.colors,displayFont:state.fields.displayFont,bodyFont:state.fields.bodyFont,usageDo:['Use the highest-resolution primary logo for web headers and presentation use','Use the icon mark for profile images, favicons, and tight spaces','Keep approved colors consistent across social, print, and web','Use SVG/PDF source files for vendors whenever available','Keep clear space around the logo equal to the height of the icon mark'],usageDont:['Do not stretch, rotate, or distort any logo file','Do not use low-resolution screenshots when vector or transparent files are available','Do not place dark logos on dark backgrounds without a reversed version','Do not mix in colors outside the approved palette','Do not rebuild the logo manually from a flattened image'],assetReport:ranked.map(a=>({name:a.name,placement:suggestPlacement(a),quality:a.qualityScore?`${a.qualityScore}/100`:'review',reason:qualityReason(a)})),downloadCards:buildDownloadCardSuggestions(assets),confidence:{assetMapping:88,colors:colors.length?82:58,usage:76},warnings:[]};
-    if(!suggestions.primaryLogo)suggestions.warnings.push('No image/logo file detected for the primary logo slot.');
-    if(assets.length<3)suggestions.warnings.push('Upload more logo variations, mockups, or source files for a stronger guide.');
-    if(!assets.some(a=>['svg','pdf','ai','eps'].includes(String(a.ext).toLowerCase())))suggestions.warnings.push('No vector/source files detected. Add SVG, PDF, AI, or EPS files if available.');
-    $('#aiRawJson')?.classList.remove('builder-hidden'); if($('#aiRawJson'))$('#aiRawJson').value=JSON.stringify(suggestions,null,2);
-    renderAiSuggestions(suggestions);
-    if(options.autoApply){applyAiSuggestion('high',normalizeSuggestionList(state.aiSuggestions)); status('Local Auto-Builder placed high-confidence files automatically. Review before exporting.');}
-    else status('Local Auto-Builder complete. Review suggestions before applying.');
+    status('Manual mode: Local Smart Sort is disabled. Upload files, then assign them manually.');
+    return;
   }
 
   function wireFields(){
     $$('[data-edit]').forEach(inp=>inp.addEventListener('input',e=>{state.fields[e.target.dataset.edit]=e.target.value;renderFields();}));
     $('#uploadFilesBtn')?.addEventListener('click',()=>$('#extraFileInput').click());
-    $('#extraFileInput')?.addEventListener('change',async e=>{for(const file of Array.from(e.target.files||[])){const data=await readFile(file); const meta=await getImageMeta(data,file.type); const asset={name:file.name,type:file.type||'application/octet-stream',ext:fileExt(file.name),size:file.size,data,...meta}; asset.qualityScore=scoreAsset(asset); if(String(asset.type||'').startsWith('image/')){asset.visualAnalysis=await analyzeImageVisuals(asset.data); asset.stageRecommendation=recommendStageForImage(asset,asset.visualAnalysis); maybeApplyPaletteFromAsset(asset);} state.extraFiles.push(asset);} renderFileList(); status(`${state.extraFiles.length} extra file(s) added to the downloadable library.`); scheduleAutoBuild('extra files uploaded'); e.target.value='';});
+    $('#extraFileInput')?.addEventListener('change',async e=>{
+      for(const file of Array.from(e.target.files||[])){
+        const data=await readFile(file);
+        const meta=await getImageMeta(data,file.type);
+        const asset={
+          name:file.name,
+          type:file.type||'application/octet-stream',
+          ext:fileExt(file.name),
+          size:file.size,
+          data,
+          ...meta
+        };
+        asset.qualityScore=scoreAsset(asset);
+        state.extraFiles.push(asset);
+      }
+      renderFileList();
+      status(`${state.extraFiles.length} file(s) uploaded to the manual asset library. Choose a slot to place them.`);
+      e.target.value='';
+    });
     $('#clearBuilderBtn')?.addEventListener('click',()=>{if(confirm('Reset all uploaded files, colors, and text?')){localStorage.removeItem('movingDayGuideBuilder');location.reload();}});
     $('#displayFontUpload')?.addEventListener('change',e=>uploadFont('displayFont',e.target.files[0]));
     $('#bodyFontUpload')?.addEventListener('change',e=>uploadFont('bodyFont',e.target.files[0]));
     $('#downloadHtmlBtn')?.addEventListener('click',downloadHtml);
-    $('#analyzeFilesBtn')?.addEventListener('click',()=>analyzeFilesWithEndpoint({autoApply:true}));
-    $('#localAnalyzeBtn')?.addEventListener('click',()=>localSmartAnalyze({autoApply:true}));
-    $('#applyHighConfidenceBtn')?.addEventListener('click',()=>{const cards=normalizeSuggestionList(state.aiSuggestions); if(!cards.length){status('Run Analyze & Build Guide first.');return;} applyAiSuggestion('high',cards);});
-    $('#aiRawJson')?.addEventListener('change',e=>{try{renderAiSuggestions(JSON.parse(e.target.value));status('Manual AI JSON loaded.');}catch(err){status('Could not parse AI JSON.');}});
+    // Manual mode: all AI/auto-sort controls removed.
   }
   async function uploadFont(kind,file){if(!file)return; const data=await readFile(file); const fontName=kind==='displayFont'?'Uploaded Display Font':'Uploaded Body Font'; state.fields[kind]=fontName; const style=document.createElement('style'); style.dataset.fontStyle=kind; style.textContent=`@font-face{font-family:'${fontName}';src:url('${data}');font-display:swap;}`; document.head.appendChild(style); renderFields(); status(`${fontName} embedded from ${file.name}`);}
   function downloadHtml(){
-    renderFields(); renderColors(); fillEmptySlotsWithBestAvailableAssets(); applyClientPaletteToGuide(); applyClientBackgroundsToCards(); renderAssets(); renderFileList();
+    renderFields(); renderColors(); applyClientPaletteToGuide(); applyClientBackgroundsToCards(); renderAssets(); renderFileList();
     const clone=document.documentElement.cloneNode(true);
 
     // Remove the internal customer/builder interface from the finished file.
@@ -4130,6 +4100,5 @@ function applyClientBackgroundsToCards(){
   init();
 })();
 </script>
-<script src="./assets/gold-standard-rules.js"></script>
 </body>
 </html>
