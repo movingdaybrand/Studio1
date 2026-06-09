@@ -7,6 +7,14 @@
     {
       "source": "/api/analyze-brand-files",
       "destination": "/api/analyze-brand-files.js"
+    },
+    {
+      "source": "/api/smart-fill",
+      "destination": "/api/smart-fill.js"
+    },
+    {
+      "source": "/api/render-brand-guide",
+      "destination": "/api/render-brand-guide.js"
     }
   ]
 }
