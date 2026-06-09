@@ -2701,7 +2701,7 @@ footer{
         <div class="ai-panel-top">
           <div>
             <h3>Auto-Builder</h3>
-            <p class="ai-panel-copy">Local Smart Sort works instantly without a key. AI Analyze uses your deployed endpoint when <code>OPENAI_API_KEY</code> is configured on Vercel or Netlify.</p>
+            <p class="ai-panel-copy">Local Smart Sort works instantly without a key. AI Analyze uses your Vercel API endpoints when <code>OPENAI_API_KEY</code> is configured in Vercel Environment Variables.</p>
           </div>
           <label class="auto-build-toggle" id="autoBuildToggle">
             <input type="checkbox" checked />
@@ -4304,14 +4304,14 @@ function applyClientBackgroundsToCards(){
       const data = await response.json().catch(() => ({}));
       if(!response.ok) throw new Error(data.error || 'Smart Fill failed. Please try again.');
 
-      state.fields.clientName = data.clientName;
-      state.fields.category = data.category;
-      state.fields.tagline = data.brandStatement;
-      state.fields.displayFont = data.displayFont;
-      state.fields.bodyFont = data.bodyFont;
+      state.fields.clientName = data.clientName || state.fields.clientName || 'Client Name';
+      state.fields.category = data.category || state.fields.category || 'Brand';
+      state.fields.tagline = data.brandStatement || data.tagline || state.fields.tagline || '';
+      state.fields.displayFont = data.displayFont || state.fields.displayFont || 'Instrument Serif';
+      state.fields.bodyFont = data.bodyFont || state.fields.bodyFont || 'Geist';
       state.colors = [
         data.color1, data.color2, data.color3, data.color4, data.color5
-      ].map(normalizeHexInput);
+      ].map((value, index) => normalizeHexInput(value || state.colors[index] || ['#1F3D2E','#2D5642','#C4D9CB','#F1ECDF','#15140F'][index]));
 
       const colorBuilder = $('#builderColors');
       if(colorBuilder) colorBuilder.dataset.ready = '';
