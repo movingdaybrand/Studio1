@@ -585,7 +585,6 @@
 .color-edit input[type=color]{width:100%;height:34px;border:0;background:transparent;padding:0;cursor:pointer;}
 .color-edit input[type=text]{margin-top:6px;width:100%;border:0;border-radius:9px;background:#fff;padding:7px;font:800 10px ui-monospace,SFMono-Regular,Menlo,monospace;text-transform:uppercase;color:var(--ink);}
 .font-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px;}
-.ai-panel,.ai-controls,.ai-warning,.ai-json,.ai-results,.auto-build-toggle{display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;pointer-events:none!important;}
 .drop-active{outline:2px dashed var(--sage);outline-offset:-10px;background:rgba(196,217,203,.18)!important}.image-download-wrap{cursor:pointer}.asset-img{position:relative;z-index:2;max-width:min(100%,360px);max-height:170px;object-fit:contain;margin:0 auto;filter:drop-shadow(0 12px 28px rgba(0,0,0,.16))}.upload-hint{position:absolute;left:12px;top:12px;z-index:6;background:rgba(31,61,46,.92);color:var(--cream);border-radius:999px;padding:5px 9px;font-size:9px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;pointer-events:none}.builder-hidden{display:none!important}.download-file-list{margin-top:18px;border:1px solid var(--rule);background:rgba(251,248,240,.55);padding:16px}.download-file-list h3{font-size:12px;text-transform:uppercase;letter-spacing:.16em;color:var(--forest);margin-bottom:10px}.download-file-item{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-top:1px solid rgba(21,20,15,.10);font-size:13px}.download-file-item:first-of-type{border-top:0}.download-file-item a{color:var(--forest);font-weight:600;text-decoration:none}.download-file-item span{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.editable-chip{display:inline-block;margin-left:8px;font:700 9px var(--sans);letter-spacing:.1em;text-transform:uppercase;color:rgba(21,20,15,.42)}
 @media(max-width:980px){.builder-app-inner{grid-template-columns:1fr}.studio-hero{min-height:auto}.studio-cards{grid-template-columns:1fr}.builder-fields,.font-row{grid-template-columns:1fr}.builder-colors{grid-template-columns:repeat(2,1fr)}.studio-metrics{grid-template-columns:1fr 1fr 1fr}}
 @media(max-width:640px){.builder-app-inner{padding:22px 24px}.studio-hero,.studio-console{border-radius:24px;padding:20px}.studio-metrics{grid-template-columns:1fr}.studio-action-row{display:grid}.builder-btn{width:100%}}
@@ -616,10 +615,6 @@
 
   .auto-build-toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(241,236,223,.22);border-radius:999px;padding:9px 12px;color:var(--cream);font:700 10px var(--sans);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;background:rgba(251,248,240,.07)}
   .auto-build-toggle input{accent-color:var(--sage);}
-
-/* Final studio polish override */
-#aiPanel,.ai-panel,#aiRawJson,#aiResults,#aiEndpoint,#analyzeFilesBtn,#applyHighConfidenceBtn,#localAnalyzeBtn,#autoBuildToggle{display:none!important;visibility:hidden!important;}
-
 
 /* ── EXPENSIVE SAAS SPACING + FINISH OVERRIDE ── */
 .builder-app{
@@ -680,7 +675,6 @@
 .color-edit{border-radius:18px!important;padding:10px!important;background:rgba(31,61,46,.045)!important;}
 .color-edit input[type=color]{height:54px!important;border-radius:12px!important;overflow:hidden;}
 .color-edit input[type=text]{border:1px solid rgba(31,61,46,.10)!important;border-radius:11px!important;padding:9px 8px!important;background:#fff!important;}
-.ai-panel,.ai-controls,.ai-warning,.ai-json,.ai-results,.auto-build-toggle,#aiPanel,#aiRawJson,#aiResults,#aiEndpoint,#analyzeFilesBtn,#applyHighConfidenceBtn,#localAnalyzeBtn,#autoBuildToggle{display:none!important;visibility:hidden!important;height:0!important;overflow:hidden!important;pointer-events:none!important;}
 @media(max-width:1060px){.studio-hero.expensive{grid-template-columns:1fr!important;padding:42px!important;gap:34px;}.studio-control-grid{grid-template-columns:1fr!important}.project-card,.palette-card{grid-column:auto!important;grid-row:auto!important}.studio-nav{align-items:flex-start;flex-direction:column}.studio-nav-meta{flex-wrap:wrap}.builder-app h1{font-size:clamp(48px,10vw,82px)!important}.builder-shell{padding:26px 24px 40px}.builder-colors{grid-template-columns:repeat(2,1fr)!important;}}
 @media(max-width:640px){.studio-hero.expensive,.studio-console.expensive{border-radius:26px!important;padding:24px!important}.studio-card{padding:18px!important;border-radius:22px!important}.builder-fields,.font-row{grid-template-columns:1fr!important}.studio-action-row{display:grid!important}.studio-nav-meta{display:none}.lux-steps div{align-items:flex-start;flex-direction:column}.builder-app h1{font-size:46px!important}.builder-copy{font-size:15px!important}}
 
@@ -1193,7 +1187,21 @@ body::before{opacity:.18!important;}
 }
 .color-edit input[type=color]{height:54px!important;border-radius:10px!important;box-shadow:inset 0 0 0 1px rgba(21,20,15,.12)!important;}
 .color-edit input[type=text]{height:30px!important;padding:6px 8px!important;border-radius:10px!important;background:#F7F4EC!important;border:1px solid rgba(31,61,46,.08)!important;font-size:10px!important;}
-.ai-panel{display:none!important;}
+.smart-fill-shell{margin-bottom:22px;padding-bottom:20px;border-bottom:1px solid rgba(31,61,46,.10);}
+.smart-fill-controls{display:flex;gap:10px;align-items:center;}
+.smart-fill-controls input{flex:1;min-width:0;}
+.smart-fill-error{color:#b42318;font-size:12px;margin:8px 0 0;}
+.studio-console .ai-panel{grid-column:1/-1;border:1px solid rgba(31,61,46,.12);background:linear-gradient(135deg,rgba(31,61,46,.04),rgba(196,217,203,.14));border-radius:28px;padding:24px;}
+.studio-console .ai-panel h3{font-size:11px;text-transform:uppercase;letter-spacing:.16em;color:var(--forest);font-weight:900;margin:0 0 6px;}
+.studio-console .ai-panel-copy{font-size:12px;color:#6B6558;line-height:1.55;max-width:720px;}
+.studio-console .ai-suggestion{border:1px solid rgba(31,61,46,.10);background:#fff;border-radius:16px;padding:12px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;}
+.studio-console .ai-suggestion strong{display:block;font-size:12px;color:var(--forest);margin-bottom:3px;}
+.studio-console .ai-suggestion span{display:block;font-size:12px;color:#6B6558;line-height:1.4;}
+.studio-console .ai-suggestion button{border:1px solid rgba(31,61,46,.14);background:var(--forest);color:var(--cream);border-radius:999px;padding:8px 10px;font:800 9px var(--sans);text-transform:uppercase;letter-spacing:.1em;cursor:pointer;}
+.studio-console .ai-warning{font-size:12px;color:#6B6558;line-height:1.45;margin-top:10px;}
+.studio-console .ai-json{width:100%;min-height:110px;border:1px solid rgba(31,61,46,.12);background:#FBF8F0;color:var(--ink);border-radius:14px;padding:10px;font:500 11px ui-monospace,SFMono-Regular,Menlo,monospace;resize:vertical;margin-top:10px;}
+.studio-console .auto-build-toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid rgba(31,61,46,.14);border-radius:999px;padding:9px 12px;color:var(--forest);font:700 10px var(--sans);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;background:#fff;}
+.studio-console .auto-build-toggle input{accent-color:var(--forest);}
 
 @media(max-width:1100px){
   .builder-shell{padding:24px 22px 40px!important;}
@@ -2448,18 +2456,6 @@ footer{
 
 
 /* ─────────────────────────────────────────────
-   MANUAL MODE OVERRIDES
-   No automatic file moving, smart sorting, or color extraction.
-───────────────────────────────────────────── */
-#aiPanel,.ai-panel,#aiRawJson,#aiResults,#aiEndpoint,#analyzeFilesBtn,#applyHighConfidenceBtn,#localAnalyzeBtn,#autoBuildToggle,.auto-build-toggle{
-  display:none!important;
-  visibility:hidden!important;
-  height:0!important;
-  overflow:hidden!important;
-  pointer-events:none!important;
-}
-
-/* ─────────────────────────────────────────────
    CLIENT HERO FIX — PREMIUM FINAL GUIDE HERO
 ───────────────────────────────────────────── */
 .hero{
@@ -2599,7 +2595,7 @@ footer{
         </div>
         <input id="extraFileInput" type="file" multiple hidden />
         <input id="slotFileInput" type="file" hidden />
-        <p class="builder-status" id="builderStatus">Upload a client asset pack, then use the guide slots below to place or replace specific files.</p>
+        <p class="builder-status" id="builderStatus">Upload a client asset pack or paste a website URL in Smart Fill. Auto-Builder can sort files into the guide automatically.</p>
       </div>
 
       <aside class="studio-lux-panel" aria-label="Guide readiness">
@@ -2625,6 +2621,17 @@ footer{
           <p class="console-sub">Quiet, focused controls. The dashboard stays Moving Day branded; the client guide below follows the Invisible Challenge gold-standard layout system.</p>
         </div>
         <div class="console-pill">Gold standard mode</div>
+      </div>
+
+      <div class="smart-fill-shell">
+        <div class="builder-field full">
+          <label for="clientWebsiteUrl">Client Website URL</label>
+          <div class="smart-fill-controls">
+            <input type="url" id="clientWebsiteUrl" placeholder="https://example.com" autocomplete="url" />
+            <button class="builder-btn primary" type="button" id="smartFillBtn">Smart Fill</button>
+          </div>
+          <p class="smart-fill-error" id="smartFillError" hidden></p>
+        </div>
       </div>
 
       <div class="studio-control-grid">
@@ -2690,7 +2697,32 @@ footer{
         </article>
       </div>
 
-      <!-- Manual mode: automation panel removed. -->
+      <article class="studio-card ai-panel" id="aiPanel">
+        <div class="ai-panel-top">
+          <div>
+            <h3>Auto-Builder</h3>
+            <p class="ai-panel-copy">Local Smart Sort works instantly without a key. AI Analyze uses your deployed endpoint when <code>OPENAI_API_KEY</code> is configured on Vercel or Netlify.</p>
+          </div>
+          <label class="auto-build-toggle" id="autoBuildToggle">
+            <input type="checkbox" checked />
+            Auto-build on upload
+          </label>
+        </div>
+        <div class="ai-controls">
+          <div class="builder-field">
+            <label for="aiEndpoint">AI endpoint</label>
+            <input id="aiEndpoint" value="/api/analyze-brand-files" />
+          </div>
+          <button class="builder-btn" type="button" id="localAnalyzeBtn">Local Smart Sort</button>
+          <button class="builder-btn primary" type="button" id="analyzeFilesBtn">AI Analyze + Place</button>
+        </div>
+        <p class="ai-warning">AI requests send metadata and trimmed previews only. Full assets stay in-browser until you export.</p>
+        <div class="ai-results" id="aiResults"></div>
+        <details style="margin-top:10px">
+          <summary class="ai-mini">Raw JSON</summary>
+          <textarea class="ai-json" id="aiRawJson" readonly></textarea>
+        </details>
+      </article>
     </section>
   </div>
 </div>
@@ -2992,9 +3024,57 @@ footer{
   const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
   const status=(msg)=>{const el=$('#builderStatus'); if(el) el.textContent=msg};
 
-  /* Manual-first mode: uploads stay in the file library until you place them. */
-  const MOVING_DAY_MANUAL_MODE = true;
+  const STORAGE_KEY = 'movingDayGuideBuilder';
+  let saveStateTimer = null;
+
+  const MOVING_DAY_MANUAL_MODE = false;
   function automationBlocked(){ return MOVING_DAY_MANUAL_MODE === true; }
+
+  function normalizeHexInput(value){
+    let v = String(value || '').trim();
+    if (!v) return '#000000';
+    if (!v.startsWith('#')) v = '#' + v;
+    return /^#[0-9A-Fa-f]{6}$/.test(v) ? v.toUpperCase() : '#000000';
+  }
+
+  function saveBuilderState(){
+    clearTimeout(saveStateTimer);
+    saveStateTimer = setTimeout(()=>{
+      try{
+        localStorage.setItem(STORAGE_KEY, JSON.stringify({
+          fields: state.fields,
+          colors: state.colors,
+          assets: state.assets,
+          extraFiles: state.extraFiles,
+          downloadCards: state.downloadCards,
+          aiSuggestions: state.aiSuggestions,
+          savedAt: Date.now()
+        }));
+      }catch(error){
+        status('Could not save session (browser storage full). Export your guide to keep progress.');
+      }
+    }, 400);
+  }
+
+  function loadBuilderState(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(!raw) return false;
+      const data = JSON.parse(raw);
+      if(data.fields) state.fields = { ...state.fields, ...data.fields };
+      if(Array.isArray(data.colors) && data.colors.length) state.colors = data.colors;
+      if(data.assets && typeof data.assets === 'object') state.assets = data.assets;
+      if(Array.isArray(data.extraFiles)) state.extraFiles = data.extraFiles;
+      if(Array.isArray(data.downloadCards)) state.downloadCards = data.downloadCards;
+      if(data.aiSuggestions) state.aiSuggestions = data.aiSuggestions;
+      const colorBuilder = $('#builderColors');
+      if(colorBuilder) colorBuilder.dataset.ready = '';
+      if(state.downloadCards.length) renderDownloadCardsFromAI();
+      return true;
+    }catch(error){
+      return false;
+    }
+  }
   function safeName(s){return String(s||'moving-day-guide').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'moving-day-guide'}
   function fileExt(name){const p=String(name||'').split('.'); return p.length>1?p.pop().toLowerCase():'file'}
   function readFile(file){return new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)})}
@@ -3016,8 +3096,8 @@ footer{
     const details=$('#colourDetails'); if(details){details.innerHTML=state.colors.map((hex,i)=>`<div class="colour-detail"><div class="colour-dot" style="background:${hex}"></div><div class="colour-detail-name">Color ${i+1}</div><div class="colour-detail-values">${hex}<br>${hexToRgb(hex)}<br>${hexToCmyk(hex)}</div></div>`).join('')}
     const b=$('#builderColors'); if(b && !b.dataset.ready){
       b.dataset.ready='1'; b.innerHTML=state.colors.map((hex,i)=>`<div class="color-edit"><input type="color" data-color="${i}" value="${hex}"><input type="text" data-hex="${i}" value="${hex}"></div>`).join('');
-      $$('[data-color]').forEach(inp=>inp.addEventListener('input',e=>{const i=+e.target.dataset.color;state.colors[i]=e.target.value.toUpperCase();$(`[data-hex="${i}"]`).value=state.colors[i];renderColors();}));
-      $$('[data-hex]').forEach(inp=>inp.addEventListener('change',e=>{const i=+e.target.dataset.hex;let v=e.target.value.trim();if(!v.startsWith('#'))v='#'+v;if(/^#[0-9A-Fa-f]{6}$/.test(v)){state.colors[i]=v.toUpperCase();$(`[data-color="${i}"]`).value=state.colors[i];renderColors();}}));
+      $$('[data-color]').forEach(inp=>inp.addEventListener('input',e=>{const i=+e.target.dataset.color;state.colors[i]=e.target.value.toUpperCase();$(`[data-hex="${i}"]`).value=state.colors[i];renderColors();saveBuilderState();}));
+      $$('[data-hex]').forEach(inp=>inp.addEventListener('change',e=>{const i=+e.target.dataset.hex;let v=e.target.value.trim();if(!v.startsWith('#'))v='#'+v;if(/^#[0-9A-Fa-f]{6}$/.test(v)){state.colors[i]=v.toUpperCase();$(`[data-color="${i}"]`).value=state.colors[i];renderColors();saveBuilderState();}}));
     } else if(b){state.colors.forEach((hex,i)=>{const c=$(`[data-color="${i}"]`),h=$(`[data-hex="${i}"]`); if(c)c.value=hex; if(h)h.value=hex;});}
     syncGuideMockupBackgrounds();
   }
@@ -3162,10 +3242,10 @@ footer{
 
     state.assets[slot]=asset;
 
-    // Manual mode: do not auto-apply colors from uploaded files.
     renderAssets();
     status(`${slotLabels[slot]} uploaded: ${file.name}`);
-    // Manual mode: do not auto-build after slot upload.
+    saveBuilderState();
+    scheduleAutoBuild('slot updated');
   }
 
   async function analyzeImageVisuals(dataUrl){
@@ -3518,12 +3598,25 @@ footer{
   let lastAutoBuildFingerprint='';
   function assetFingerprint(){return allUploadedAssets().map(a=>`${a.name}:${a.size||0}:${a.width||0}x${a.height||0}`).sort().join('|');}
   function scheduleAutoBuild(reason='assets updated'){
-    status('Manual mode: uploads stay in the library until you place them.');
-    return;
+    if(automationBlocked()) return;
+    const toggle = $('#autoBuildToggle')?.querySelector('input');
+    if(toggle && !toggle.checked) return;
+    const fingerprint = assetFingerprint();
+    if(!fingerprint || fingerprint === lastAutoBuildFingerprint) return;
+    clearTimeout(autoBuildTimer);
+    autoBuildTimer = setTimeout(()=>autoBuildGuide(reason), 900);
   }
-  async function autoBuildGuide(){
-    status('Manual mode: Auto-Builder is disabled. Place files manually.');
-    return;
+  async function autoBuildGuide(reason='assets updated'){
+    if(automationBlocked()) return;
+    const assets = allUploadedAssets();
+    if(!assets.length) return;
+    lastAutoBuildFingerprint = assetFingerprint();
+    status(`Auto-Builder running (${reason})...`);
+    try{
+      await analyzeFilesWithEndpoint({ autoApply: true });
+    }catch(error){
+      await localSmartAnalyze({ autoApply: true });
+    }
   }
 
   function compactAssetForAI(asset){
@@ -3643,9 +3736,9 @@ footer{
     $$('[data-apply-ai]').forEach(btn=>btn.addEventListener('click',e=>applyAiSuggestion(e.currentTarget.dataset.applyAi,cards)));
   }
   function applyAiSuggestion(id,cards){
-    if(id==='high'){cards.filter(c=>(c.confidence||0)>=75).forEach(c=>applyCard(c)); status('High-confidence Auto-Builder suggestions applied. Review before downloading.'); return;}
-    if(id==='all'){cards.forEach(c=>applyCard(c)); status('All Auto-Builder suggestions applied. Review before downloading.'); return;}
-    const card=cards[Number(id)]; if(!card||card.type==='info'||card.type==='report')return; applyCard(card);
+    if(id==='high'){cards.filter(c=>(c.confidence||0)>=75).forEach(c=>applyCard(c)); saveBuilderState(); status('High-confidence Auto-Builder suggestions applied. Review before downloading.'); return;}
+    if(id==='all'){cards.forEach(c=>applyCard(c)); saveBuilderState(); status('All Auto-Builder suggestions applied. Review before downloading.'); return;}
+    const card=cards[Number(id)]; if(!card||card.type==='info'||card.type==='report')return; applyCard(card); saveBuilderState();
   }
   function applyCard(card){
     if(card.type==='field'){
@@ -3940,7 +4033,27 @@ function applyClientBackgroundsToCards(){
   }
 
   function fillEmptySlotsWithBestAvailableAssets(){
-    return;
+    const assets = rankAssets(allUploadedAssets());
+    const used = new Set(Object.values(state.assets).map(asset => asset?.name).filter(Boolean));
+    const slotFilters = {
+      heroLogo: asset => isWide(asset) && /logo|wordmark/.test(asset.name),
+      primaryLogo: asset => /logo|wordmark|primary/.test(asset.name),
+      iconMark: asset => /icon|mark|favicon/.test(asset.name) || isSquareish(asset),
+      iconVariant: asset => /variant|secondary|white|reverse/.test(asset.name),
+      profileImage: asset => /profile|avatar|social/.test(asset.name) || isSquareish(asset),
+      websiteHeader: asset => /web|header|hero|homepage/.test(asset.name) || isWide(asset),
+      businessCard: asset => /card|print|flyer|sign/.test(asset.name),
+      socialPost: asset => /social|instagram|post/.test(asset.name) || isSquareish(asset)
+    };
+
+    Object.entries(slotFilters).forEach(([slot, test])=>{
+      if(state.assets[slot]) return;
+      const match = assets.find(asset => !used.has(asset.name) && test(asset)) || assets.find(asset => !used.has(asset.name));
+      if(match){
+        setSlotIfEmpty(slot, match);
+        used.add(match.name);
+      }
+    });
   }
 
   function setSlotIfEmpty(slot,asset){
@@ -3980,8 +4093,54 @@ function applyClientBackgroundsToCards(){
     }).join('');
   }
   async function analyzeFilesWithEndpoint(options={}){
-    status('Manual mode: AI rebuild is disabled. Upload files, then assign them manually.');
-    return;
+    if(automationBlocked()){
+      status('Manual mode: AI rebuild is disabled. Upload files, then assign them manually.');
+      return;
+    }
+    const assets = allUploadedAssets();
+    if(!assets.length){
+      status('Upload files first, then run AI Analyze.');
+      renderAiSuggestions(null);
+      return;
+    }
+
+    const endpoint = ($('#aiEndpoint')?.value || '/api/analyze-brand-files').trim();
+    status('Calling AI analyze endpoint...');
+
+    try{
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project: state.fields,
+          colors: state.colors,
+          assets: assets.map(compactAssetForAI)
+        })
+      });
+
+      const data = await response.json();
+      if(!response.ok || data.error){
+        throw new Error(data.error || `Request failed (${response.status})`);
+      }
+
+      renderAiSuggestions(data);
+      const rawBox = $('#aiRawJson');
+      if(rawBox) rawBox.value = JSON.stringify(data, null, 2);
+
+      if(options.autoApply){
+        const cards = normalizeSuggestionList(normalizeAiResponse(data));
+        cards.filter(card => (card.confidence || 0) >= 75).forEach(card => applyCard(card));
+        status('AI suggestions applied. Review the guide before downloading.');
+      }else{
+        status('AI analysis complete. Review suggestions below.');
+      }
+
+      saveBuilderState();
+      return data;
+    }catch(error){
+      status(`AI analyze failed: ${error.message}. Falling back to local smart sort...`);
+      return localSmartAnalyze({ autoApply: options.autoApply });
+    }
   }
 
   async function extractColorsFromImages(){
@@ -4007,13 +4166,181 @@ function applyClientBackgroundsToCards(){
   function suggestPlacement(a){const n=String(a.name||'').toLowerCase(), ext=String(a.ext||'').toLowerCase(); if(/font|\.otf|\.ttf|\.woff/.test(n)||['otf','ttf','woff','woff2'].includes(ext))return 'Typography / Font Files'; if(/business|card|print|flyer|sign|sticker/.test(n))return 'Print Assets'; if(/social|instagram|post|profile|avatar/.test(n))return 'Social Assets'; if(/web|website|header|hero|homepage/.test(n)||isWide(a))return 'Website/Application Mockups'; if(/icon|mark|favicon/.test(n)||isSquareish(a))return 'Brand Mark / Icon'; if(/logo|wordmark|primary/.test(n))return 'Primary Logo'; if(['ai','eps','svg','pdf'].includes(ext))return 'Source Files / Downloads'; return 'Downloads / Review';}
   function qualityReason(a){const parts=[]; if(a.width&&a.height)parts.push(`${a.width}×${a.height}px`); if(a.size)parts.push(`${Math.round(a.size/1024)}KB`); if(['svg','pdf','ai','eps'].includes(String(a.ext).toLowerCase()))parts.push('source/vector-friendly'); if(a.qualityScore<55)parts.push('needs review'); return parts.join(' · ')||'filename and file type reviewed';}
   function buildDownloadCardSuggestions(assets){const groups={logos:[],social:[],print:[],fonts:[],source:[],misc:[]}; assets.forEach(a=>{const p=suggestPlacement(a); if(/Logo|Icon|Mark/.test(p))groups.logos.push(a.name); else if(/Social/.test(p))groups.social.push(a.name); else if(/Print/.test(p))groups.print.push(a.name); else if(/Font/.test(p))groups.fonts.push(a.name); else if(/Source/.test(p))groups.source.push(a.name); else groups.misc.push(a.name);}); return Object.entries(groups).filter(([_,files])=>files.length).map(([key,files])=>({title:key.replace(/^./,m=>m.toUpperCase())+' Files',files}));}
+  function pickAssetForSlot(assets, used, primaryTest, fallbackTest){
+    const pool = assets.filter(asset => !used.has(asset.name));
+    const match = pool.find(primaryTest) || pool.find(fallbackTest) || pool[0];
+    if(match) used.add(match.name);
+    return match ? match.name : '';
+  }
+
   async function localSmartAnalyze(options={}){
-    status('Manual mode: Local Smart Sort is disabled. Upload files, then assign them manually.');
-    return;
+    if(automationBlocked()){
+      status('Manual mode: Local Smart Sort is disabled. Upload files, then assign them manually.');
+      return;
+    }
+
+    const assets = rankAssets(allUploadedAssets());
+    if(!assets.length){
+      status('Upload files first, then run Local Smart Sort.');
+      renderAiSuggestions(null);
+      return;
+    }
+
+    status('Running local smart sort...');
+
+    const colors = await extractColorsFromImages();
+    while(colors.length < 5) colors.push(state.colors[colors.length] || '#F1ECDF');
+
+    const used = new Set();
+    const selectedAssets = {
+      heroLogo: pickAssetForSlot(assets, used, asset => /logo|wordmark|brand/.test(asset.name) && isWide(asset), asset => (asset.qualityScore || 0) > 70),
+      primaryLogo: pickAssetForSlot(assets, used, asset => /logo|wordmark|primary/.test(asset.name), asset => /logo/.test(asset.name)),
+      iconMark: pickAssetForSlot(assets, used, asset => /icon|mark|favicon/.test(asset.name) || isSquareish(asset), asset => isSquareish(asset)),
+      iconVariant: pickAssetForSlot(assets, used, asset => /variant|secondary|white|reverse/.test(asset.name), asset => /logo|mark/.test(asset.name)),
+      profileImage: pickAssetForSlot(assets, used, asset => /profile|avatar|social/.test(asset.name) || isSquareish(asset), asset => isSquareish(asset)),
+      websiteHeader: pickAssetForSlot(assets, used, asset => /web|header|hero|homepage/.test(asset.name) || isWide(asset), asset => isWide(asset)),
+      businessCard: pickAssetForSlot(assets, used, asset => /card|print|flyer|sign|sticker/.test(asset.name), asset => /print/.test(asset.name)),
+      socialPost: pickAssetForSlot(assets, used, asset => /social|instagram|post/.test(asset.name), asset => isSquareish(asset))
+    };
+
+    const assetReport = assets.map(asset => ({
+      name: asset.name,
+      placement: suggestPlacement(asset),
+      quality: `${asset.qualityScore || scoreAsset(asset)}/100`,
+      reason: qualityReason(asset)
+    }));
+
+    const suggestions = {
+      guide: {
+        clientName: state.fields.clientName,
+        category: state.fields.category,
+        heroDescription: state.fields.tagline,
+        deliveryDate: state.fields.date,
+        assetCount: assets.length
+      },
+      selectedAssets,
+      colors: colors.slice(0, 5).map((hex, index) => ({ hex, role: ['primary', 'secondary', 'accent', 'light', 'dark'][index] })),
+      typography: {
+        displayFont: state.fields.displayFont,
+        bodyFont: state.fields.bodyFont
+      },
+      usage: {
+        do: [
+          'Use the primary logo on light backgrounds with clear space around the mark.',
+          'Keep brand colors consistent across web, print, and social applications.',
+          'Use the icon mark only where the full logo does not fit.',
+          'Maintain readable contrast when placing logos on photography.',
+          'Export vendor-ready files from the downloads section before sharing externally.'
+        ],
+        dont: [
+          'Do not stretch, skew, or recolor the approved logo files.',
+          'Do not place low-contrast logo versions on busy photography.',
+          'Do not use screenshots when vector logo files are available.',
+          'Do not crop the logo into unapproved shapes or badges.',
+          'Do not mix unapproved fonts with the brand typography system.'
+        ]
+      },
+      downloadCards: buildDownloadCardSuggestions(assets).map(card => ({
+        ...card,
+        description: 'Client-ready files grouped by use.',
+        formats: ['SVG', 'PNG']
+      })),
+      assetReport,
+      warnings: assets.filter(asset => (asset.qualityScore || scoreAsset(asset)) < 55).map(asset => `${asset.name} may need review before client delivery.`),
+      confidence: { overall: 78, assetMapping: 82, colors: 74, typography: 70, downloads: 76 }
+    };
+
+    renderAiSuggestions(suggestions);
+    const rawBox = $('#aiRawJson');
+    if(rawBox) rawBox.value = JSON.stringify(suggestions, null, 2);
+
+    if(options.autoApply){
+      const cards = normalizeSuggestionList(normalizeAiResponse(suggestions));
+      cards.filter(card => (card.confidence || 0) >= 70).forEach(card => applyCard(card));
+      status('Local smart sort applied. Review placements before exporting.');
+    }else{
+      status(`Local smart sort complete. ${assets.length} files analyzed.`);
+    }
+
+    saveBuilderState();
+    return suggestions;
+  }
+
+  async function smartFillFromWebsite(){
+    const urlInput = $('#clientWebsiteUrl');
+    const button = $('#smartFillBtn');
+    const errorEl = $('#smartFillError');
+    const url = urlInput?.value?.trim();
+
+    if(errorEl){
+      errorEl.hidden = true;
+      errorEl.textContent = '';
+    }
+
+    if(!url){
+      if(errorEl){ errorEl.textContent = 'Please enter a client website URL.'; errorEl.hidden = false; }
+      return;
+    }
+
+    try{
+      new URL(url);
+    }catch(error){
+      if(errorEl){ errorEl.textContent = 'Please enter a valid URL (e.g. https://example.com).'; errorEl.hidden = false; }
+      return;
+    }
+
+    const originalLabel = button?.textContent || 'Smart Fill';
+    if(button){
+      button.disabled = true;
+      button.textContent = 'Filling…';
+    }
+
+    try{
+      const response = await fetch('/api/smart-fill', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+      const data = await response.json().catch(() => ({}));
+      if(!response.ok) throw new Error(data.error || 'Smart Fill failed. Please try again.');
+
+      state.fields.clientName = data.clientName;
+      state.fields.category = data.category;
+      state.fields.tagline = data.brandStatement;
+      state.fields.displayFont = data.displayFont;
+      state.fields.bodyFont = data.bodyFont;
+      state.colors = [
+        data.color1, data.color2, data.color3, data.color4, data.color5
+      ].map(normalizeHexInput);
+
+      const colorBuilder = $('#builderColors');
+      if(colorBuilder) colorBuilder.dataset.ready = '';
+      renderFields();
+      renderColors();
+      applyClientPaletteToGuide();
+      applyClientBackgroundsToCards();
+      renderAssets();
+      saveBuilderState();
+      status(`Smart Fill applied from ${url}. Review fields before exporting.`);
+    }catch(error){
+      if(errorEl){
+        errorEl.textContent = error.message || 'Smart Fill failed. Please try again.';
+        errorEl.hidden = false;
+      }
+    }finally{
+      if(button){
+        button.disabled = false;
+        button.textContent = originalLabel;
+      }
+    }
   }
 
   function wireFields(){
-    $$('[data-edit]').forEach(inp=>inp.addEventListener('input',e=>{state.fields[e.target.dataset.edit]=e.target.value;renderFields();}));
+    $$('[data-edit]').forEach(inp=>inp.addEventListener('input',e=>{
+      state.fields[e.target.dataset.edit]=e.target.value;
+      renderFields();
+      saveBuilderState();
+    }));
     $('#uploadFilesBtn')?.addEventListener('click',()=>$('#extraFileInput').click());
     $('#extraFileInput')?.addEventListener('change',async e=>{
       for(const file of Array.from(e.target.files||[])){
@@ -4028,19 +4355,27 @@ function applyClientBackgroundsToCards(){
           ...meta
         };
         asset.qualityScore=scoreAsset(asset);
+        if(String(asset.type||'').startsWith('image/')){
+          asset.visualAnalysis=await analyzeImageVisuals(asset.data);
+          asset.stageRecommendation=recommendStageForImage(asset, asset.visualAnalysis);
+        }
         state.extraFiles.push(asset);
       }
       renderFileList();
-      status(`${state.extraFiles.length} file(s) uploaded to the manual asset library. Choose a slot to place them.`);
+      status(`${state.extraFiles.length} file(s) uploaded to the asset library.`);
+      saveBuilderState();
+      scheduleAutoBuild('files uploaded');
       e.target.value='';
     });
-    $('#clearBuilderBtn')?.addEventListener('click',()=>{if(confirm('Reset all uploaded files, colors, and text?')){localStorage.removeItem('movingDayGuideBuilder');location.reload();}});
+    $('#clearBuilderBtn')?.addEventListener('click',()=>{if(confirm('Reset all uploaded files, colors, and text?')){localStorage.removeItem(STORAGE_KEY);location.reload();}});
     $('#displayFontUpload')?.addEventListener('change',e=>uploadFont('displayFont',e.target.files[0]));
     $('#bodyFontUpload')?.addEventListener('change',e=>uploadFont('bodyFont',e.target.files[0]));
     $('#downloadHtmlBtn')?.addEventListener('click',downloadHtml);
-    // Manual mode: all AI/auto-sort controls removed.
+    $('#smartFillBtn')?.addEventListener('click',smartFillFromWebsite);
+    $('#localAnalyzeBtn')?.addEventListener('click',()=>localSmartAnalyze({ autoApply: false }));
+    $('#analyzeFilesBtn')?.addEventListener('click',()=>analyzeFilesWithEndpoint({ autoApply: false }));
   }
-  async function uploadFont(kind,file){if(!file)return; const data=await readFile(file); const fontName=kind==='displayFont'?'Uploaded Display Font':'Uploaded Body Font'; state.fields[kind]=fontName; const style=document.createElement('style'); style.dataset.fontStyle=kind; style.textContent=`@font-face{font-family:'${fontName}';src:url('${data}');font-display:swap;}`; document.head.appendChild(style); renderFields(); status(`${fontName} embedded from ${file.name}`);}
+  async function uploadFont(kind,file){if(!file)return; const data=await readFile(file); const fontName=kind==='displayFont'?'Uploaded Display Font':'Uploaded Body Font'; state.fields[kind]=fontName; const style=document.createElement('style'); style.dataset.fontStyle=kind; style.textContent=`@font-face{font-family:'${fontName}';src:url('${data}');font-display:swap;}`; document.head.appendChild(style); renderFields(); saveBuilderState(); status(`${fontName} embedded from ${file.name}`);}
   function downloadHtml(){
     renderFields(); renderColors(); applyClientPaletteToGuide(); applyClientBackgroundsToCards(); renderAssets(); renderFileList();
     const clone=document.documentElement.cloneNode(true);
@@ -4096,7 +4431,15 @@ function applyClientBackgroundsToCards(){
     const a=document.createElement('a'); a.href=url; a.download=`${safeName(state.fields.clientName)}-brand-identity-guide.html`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),1000);
     status('Finished brand-only HTML downloaded. Empty placeholders and generic template cards were removed.');
   }
-  function init(){renderFields();renderColors();wireSlots();wireFields();renderAssets();}
+  function init(){
+    const restored = loadBuilderState();
+    renderFields();
+    renderColors();
+    wireSlots();
+    wireFields();
+    renderAssets();
+    if(restored) status('Previous studio session restored from browser storage.');
+  }
   init();
 })();
 </script>
