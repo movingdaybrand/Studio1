@@ -9,7 +9,13 @@
   from = "/api/analyze-brand-files"
   to = "/.netlify/functions/analyze-brand-files"
   status = 200
-  [[redirects]]
+
+[[redirects]]
+  from = "/api/smart-fill"
+  to = "/.netlify/functions/smart-fill"
+  status = 200
+
+[[redirects]]
   from = "/api/render-brand-guide"
   to = "/.netlify/functions/render-brand-guide"
   status = 200
