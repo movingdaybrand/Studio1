@@ -1,0 +1,45 @@
+{
+  "clientName": "Demo Client",
+  "category": "Brand Identity",
+  "date": "June 2026",
+  "sprint": "Brand Identity Guide",
+  "delivered": "7 days",
+  "tagline": "A clean, flexible brand system built for everyday use.",
+
+  "colors": {
+    "primary": "#1F3D2E",
+    "secondary": "#2D5642",
+    "softAccent": "#C4D9CB",
+    "lightBase": "#F1ECDF",
+    "deepBase": "#15140F"
+  },
+
+  "fonts": {
+    "display": "Instrument Serif",
+    "body": "Geist"
+  },
+
+  "logos": {
+    "heroLogo": "",
+    "primaryLogo": "",
+    "iconMark": "",
+    "brandVariant": ""
+  },
+
+  "mockups": {
+    "profile": "",
+    "digital": "",
+    "print": "",
+    "social": ""
+  },
+
+  "sections": {
+    "hero": true,
+    "logos": true,
+    "colors": true,
+    "typography": true,
+    "inUse": true,
+    "usage": true,
+    "downloads": true
+  }
+}
