@@ -2792,6 +2792,186 @@ footer{
   box-shadow:none!important;
 }
 
+
+/* ─────────────────────────────────────────────
+   LOGO SUITE LEGIBILITY + CLEANUP
+   Fixes washed-out primary logo card and keeps empty slot copy readable.
+───────────────────────────────────────────── */
+
+.brand-logo-suite{
+  gap:18px!important;
+  align-items:stretch!important;
+}
+
+.brand-logo-suite .logo-cell{
+  min-height:420px!important;
+  border-radius:30px!important;
+  overflow:hidden!important;
+  display:grid!important;
+  grid-template-rows:auto 1fr auto!important;
+  box-shadow:0 22px 70px rgba(31,61,46,.08), inset 0 1px 0 rgba(255,255,255,.72)!important;
+}
+
+/* Explicit card colors instead of relying on inherited currentColor */
+.brand-logo-suite .logo-card-primary{
+  background:
+    radial-gradient(circle at 80% 10%, rgba(31,61,46,.055), transparent 34%),
+    linear-gradient(145deg,var(--c4),#FFFFFF)!important;
+  color:var(--c5)!important;
+  --slot-text:var(--c5)!important;
+  --slot-muted:color-mix(in srgb,var(--c5) 66%,transparent)!important;
+  --slot-pill-bg:color-mix(in srgb,var(--c5) 8%,transparent)!important;
+  --slot-pill-border:color-mix(in srgb,var(--c5) 14%,transparent)!important;
+}
+
+.brand-logo-suite .logo-card-dark{
+  background:
+    radial-gradient(circle at 70% 8%, rgba(255,255,255,.10), transparent 34%),
+    linear-gradient(145deg,var(--c1),color-mix(in srgb,var(--c1) 78%,#000 22%))!important;
+  color:var(--c4)!important;
+  --slot-text:var(--c4)!important;
+  --slot-muted:color-mix(in srgb,var(--c4) 72%,transparent)!important;
+  --slot-pill-bg:color-mix(in srgb,var(--c4) 12%,transparent)!important;
+  --slot-pill-border:color-mix(in srgb,var(--c4) 20%,transparent)!important;
+}
+
+.brand-logo-suite .logo-card-brand{
+  background:
+    radial-gradient(circle at 70% 8%, rgba(255,255,255,.08), transparent 34%),
+    linear-gradient(145deg,var(--c5),color-mix(in srgb,var(--c5) 82%,#000 18%))!important;
+  color:var(--c4)!important;
+  --slot-text:var(--c4)!important;
+  --slot-muted:color-mix(in srgb,var(--c4) 72%,transparent)!important;
+  --slot-pill-bg:color-mix(in srgb,var(--c4) 12%,transparent)!important;
+  --slot-pill-border:color-mix(in srgb,var(--c4) 20%,transparent)!important;
+}
+
+.brand-logo-suite .logo-card-top,
+.brand-logo-suite .logo-card-bottom{
+  color:inherit!important;
+  position:relative!important;
+  z-index:4!important;
+}
+
+.brand-logo-suite .logo-card-top{
+  padding:24px 26px 16px!important;
+}
+
+.brand-logo-suite .logo-card-top span{
+  color:var(--slot-text)!important;
+  opacity:1!important;
+  font:900 10px/1 var(--sans)!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+}
+
+.brand-logo-suite .logo-card-top small{
+  color:var(--slot-muted)!important;
+  opacity:1!important;
+  font:700 11px/1 var(--sans)!important;
+}
+
+.brand-logo-suite .logo-card-bottom{
+  padding:18px 26px 24px!important;
+  border-top:1px solid color-mix(in srgb,var(--slot-text) 13%,transparent)!important;
+}
+
+.brand-logo-suite .logo-card-bottom span{
+  color:var(--slot-muted)!important;
+  opacity:1!important;
+  font-size:12px!important;
+  line-height:1.48!important;
+  max-width:430px!important;
+}
+
+/* Cleaner empty state: no washed-out center panel */
+.brand-logo-suite .logo-stage{
+  min-height:280px!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:36px!important;
+}
+
+.brand-logo-suite .logo-stage::before{
+  display:none!important;
+}
+
+.brand-logo-suite .logo-empty-state{
+  color:var(--slot-text)!important;
+  background:transparent!important;
+  max-width:360px!important;
+  margin:0 auto!important;
+  text-align:center!important;
+}
+
+.brand-logo-suite .slot-kicker{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  margin-bottom:16px!important;
+  padding:8px 12px!important;
+  border-radius:999px!important;
+  background:var(--slot-pill-bg)!important;
+  border:1px solid var(--slot-pill-border)!important;
+  color:var(--slot-text)!important;
+  opacity:1!important;
+  font:900 9px/1 var(--sans)!important;
+  letter-spacing:.13em!important;
+  text-transform:uppercase!important;
+}
+
+.brand-logo-suite .logo-empty-state strong{
+  display:block!important;
+  margin:0 0 10px!important;
+  color:var(--slot-text)!important;
+  opacity:1!important;
+  font:900 14px/1.15 var(--sans)!important;
+  letter-spacing:.17em!important;
+  text-transform:uppercase!important;
+}
+
+.brand-logo-suite .logo-empty-state p{
+  margin:0 auto!important;
+  color:var(--slot-muted)!important;
+  opacity:1!important;
+  font-size:13px!important;
+  line-height:1.55!important;
+  max-width:285px!important;
+}
+
+.brand-logo-suite .upload-hint{
+  background:var(--slot-pill-bg)!important;
+  border:1px solid var(--slot-pill-border)!important;
+  color:var(--slot-text)!important;
+  opacity:0!important;
+  box-shadow:none!important;
+}
+
+.brand-logo-suite .image-download-wrap:hover .upload-hint{
+  opacity:1!important;
+}
+
+.brand-logo-suite .quick-download{
+  background:color-mix(in srgb,var(--slot-text) 9%, var(--c4))!important;
+  border:1px solid var(--slot-pill-border)!important;
+  color:var(--c5)!important;
+}
+
+/* Once an asset is placed, the copy disappears completely */
+.brand-logo-suite .logo-cell.has-asset .logo-empty-state,
+.brand-logo-suite .logo-cell.has-asset .placeholder{
+  display:none!important;
+}
+
+@media(max-width:980px){
+  .brand-logo-suite{
+    grid-template-columns:1fr!important;
+  }
+  .brand-logo-suite .logo-cell{
+    min-height:360px!important;
+  }
+}
+
 </style>
 </head>
 
@@ -3335,6 +3515,7 @@ footer{
       $$('[data-hex]').forEach(inp=>inp.addEventListener('change',e=>{const i=+e.target.dataset.hex;let v=e.target.value.trim();if(!v.startsWith('#'))v='#'+v;if(/^#[0-9A-Fa-f]{6}$/.test(v)){state.colors[i]=v.toUpperCase();$(`[data-color="${i}"]`).value=state.colors[i];renderColors();saveBuilderState();}}));
     } else if(b){state.colors.forEach((hex,i)=>{const c=$(`[data-color="${i}"]`),h=$(`[data-hex="${i}"]`); if(c)c.value=hex; if(h)h.value=hex;});}
     syncGuideMockupBackgrounds();
+    if(typeof setLogoCardContrast === 'function') setLogoCardContrast();
   }
   function makePlaceholder(slot) {
   if (slot === "heroLogo") return "";
@@ -4221,6 +4402,38 @@ footer{
     });
   }
 
+
+  function setLogoCardContrast(){
+    const c1=state.colors[0]||'#1F3D2E';
+    const c4=state.colors[3]||'#F1ECDF';
+    const c5=state.colors[4]||'#15140F';
+
+    const primary=document.querySelector('.brand-logo-suite .logo-card-primary');
+    const dark=document.querySelector('.brand-logo-suite .logo-card-dark');
+    const brand=document.querySelector('.brand-logo-suite .logo-card-brand');
+
+    if(primary && !primary.querySelector('.asset-img')){
+      primary.style.background=`linear-gradient(145deg,${c4},#FFFFFF)`;
+      primary.style.color=c5;
+      primary.style.setProperty('--slot-text',c5);
+      primary.style.setProperty('--stage-fg',c5);
+    }
+
+    if(dark && !dark.querySelector('.asset-img')){
+      dark.style.background=`linear-gradient(145deg,${c1},${mixHex(c1,'#000000',0.22)})`;
+      dark.style.color=c4;
+      dark.style.setProperty('--slot-text',c4);
+      dark.style.setProperty('--stage-fg',c4);
+    }
+
+    if(brand && !brand.querySelector('.asset-img')){
+      brand.style.background=`linear-gradient(145deg,${c5},${mixHex(c5,'#000000',0.18)})`;
+      brand.style.color=c4;
+      brand.style.setProperty('--slot-text',c4);
+      brand.style.setProperty('--stage-fg',c4);
+    }
+  }
+
   function syncGuideMockupBackgrounds(){
     const c1=state.colors[0]||'#1F3D2E';
     const c2=state.colors[1]||c1;
@@ -4235,9 +4448,8 @@ footer{
     document.documentElement.style.setProperty('--mockup-4',c4);
     document.documentElement.style.setProperty('--mockup-5',c5);
 
-    // Logo section: client-facing cards only
-    setPaletteBackground('.brand-logo-suite .logo-card-dark', c1);
-    setPaletteBackground('.brand-logo-suite .logo-card-brand', c2);
+    // Logo section: fixed roles for legibility
+    setLogoCardContrast();
 
     // 04 — In Use: keep these aligned with the guide rules and palette labels
     setPaletteBackground('.applications-grid .mockup-profile', c1);
