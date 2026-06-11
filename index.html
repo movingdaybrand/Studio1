@@ -1037,6 +1037,150 @@ body{
   .color input[type="color"]{height:120px!important;}
 }
 
+
+
+/* ── FINAL FIX: softer text + reliable placed asset visibility ── */
+:root{
+  --soft-ink:#242019;
+  --soft-copy:rgba(36,32,25,.68);
+  --soft-muted:rgba(36,32,25,.50);
+}
+.console,
+.card,
+.field input,
+.field textarea,
+.field select,
+.slot-card,
+.color,
+.preview-shell,
+.guide-section,
+.type-card-preview,
+.usage-card{
+  color:var(--soft-ink)!important;
+}
+.console-sub,
+.note,
+.field label,
+.upload-zone p,
+.color span,
+.slot-spec small,
+.section-copy,
+.usage-card ul,
+.asset-row span:first-child{
+  color:var(--soft-copy)!important;
+}
+.field input,
+.field textarea,
+.field select,
+.slot-card select,
+.color input[type="text"]{
+  color:#243326!important;
+  background:#F8F4EA!important;
+}
+.guide-title,
+.section-title,
+.guide-library-title{
+  color:var(--soft-ink)!important;
+}
+.guide-hero .guide-title,
+.guide-hero .guide-tagline,
+.guide-hero .guide-meta,
+.guide-hero .guide-eyebrow{
+  color:inherit!important;
+}
+.logo-cell,
+.mockup{
+  isolation:isolate;
+}
+.logo-cell .placed-asset,
+.mockup .placed-asset{
+  width:100%;
+  height:100%;
+  display:flex!important;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+  z-index:2;
+}
+.logo-cell .placed-asset img,
+.mockup .placed-asset img{
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  max-width:88%!important;
+  max-height:82%!important;
+  width:auto!important;
+  height:auto!important;
+  object-fit:contain!important;
+  filter:drop-shadow(0 16px 32px rgba(0,0,0,.14));
+}
+#pvHeroLogo.visible{
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  max-width:380px!important;
+  max-height:140px!important;
+  object-fit:contain!important;
+}
+.slot-card.is-filled{
+  border-color:rgba(31,61,46,.26)!important;
+  box-shadow:0 18px 46px rgba(31,61,46,.10), inset 0 1px 0 rgba(255,255,255,.85)!important;
+}
+.slot-card.is-filled .slot-thumb::after{
+  content:"PLACED";
+  position:absolute;
+  top:8px;
+  right:8px;
+  z-index:4;
+  border-radius:999px;
+  padding:4px 7px;
+  background:rgba(251,248,240,.92);
+  color:#244834;
+  font:900 8px var(--sans);
+  letter-spacing:.12em;
+}
+.slot-thumb{position:relative;}
+.slot-thumb img{
+  display:block!important;
+  width:auto!important;
+  height:auto!important;
+  max-width:86%!important;
+  max-height:78%!important;
+  object-fit:contain!important;
+}
+
+</style>
+
+<style id="md-text-only-legibility-patch">
+/* Text-only patch: keeps the previous visual layout intact, only improves readability. */
+.studio-hero h1{
+  color:#F6F0E4!important;
+  text-shadow:0 18px 44px rgba(0,0,0,.28)!important;
+}
+.studio-hero h1 em{
+  color:#DDEBDE!important;
+  text-shadow:0 18px 44px rgba(0,0,0,.22)!important;
+}
+.studio-hero .kicker,
+.hero-brand-line{
+  color:rgba(221,235,222,.86)!important;
+}
+.builder-copy,
+.builder-status{
+  color:rgba(246,240,228,.82)!important;
+}
+.readiness strong{
+  color:#F6F0E4!important;
+}
+.readiness span,
+.steps div{
+  color:rgba(246,240,228,.70)!important;
+}
+</style>
+
+<style id="md-placement-visibility-patch">
+.guide-logo.visible{display:block!important;opacity:1!important;visibility:visible!important;}
+.placed-asset img{display:block!important;opacity:1!important;visibility:visible!important;}
 </style>
 </head>
 <body>
@@ -1585,9 +1729,10 @@ body{
   function safeName(s){return String(s||'client').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'client'}
   function status(msg){$('#builderStatus').textContent=msg}
   function readFile(file){return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file)})}
-  function isImage(a){return a && String(a.type||'').startsWith('image/')}
+  function isImage(a){return !!(a && (String(a.type||'').startsWith('image/') || ['svg','png','jpg','jpeg','webp','gif'].includes(String(a.ext||'').toLowerCase())))}
   function assetById(id){return state.assets.find(a=>a.id===id)}
   function fileExt(name){const p=String(name||'').split('.');return p.length>1?p.pop().toLowerCase():'file'}
+  function normalizeDataUrl(data,ext){const map={svg:'image/svg+xml',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif'};const mime=map[String(ext||'').toLowerCase()];if(!mime||!String(data||'').startsWith('data:'))return data;return String(data).replace(/^data:[^;]+;/,`data:${mime};`)}
   function escapeHtml(str){return String(str??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]))}
   function normalizeHex(v){v=String(v||'').trim();if(!v.startsWith('#'))v='#'+v;return /^#[0-9a-f]{6}$/i.test(v)?v.toUpperCase():'#000000'}
   function textColor(hex){const n=hex.replace('#','');const r=parseInt(n.slice(0,2),16),g=parseInt(n.slice(2,4),16),b=parseInt(n.slice(4,6),16);return ((r*299+g*587+b*114)/1000)>155?'#15140F':'#F1ECDF'}
@@ -1630,18 +1775,78 @@ body{
     $('#previewBtn').addEventListener('click',showPreview); $('#backToEditorBtn').addEventListener('click',backToEditor); $('#publishBtn').addEventListener('click',lockGuide); $('#lockFromPreviewBtn').addEventListener('click',lockGuide); $('#downloadHtmlBtn').addEventListener('click',downloadLockedHtml);
     $('#uploadFilesBtn').addEventListener('click',()=>$('#assetInput').click()); $('#chooseFilesBtn').addEventListener('click',()=>$('#assetInput').click()); $('#assetInput').addEventListener('change',async e=>{await addFiles(e.target.files);e.target.value=''});
     const uz=$('#uploadZone'); ['dragenter','dragover'].forEach(ev=>uz.addEventListener(ev,e=>{e.preventDefault();uz.style.borderColor='rgba(31,61,46,.4)'})); ['dragleave','drop'].forEach(ev=>uz.addEventListener(ev,e=>{e.preventDefault();uz.style.borderColor='rgba(31,61,46,.18)'})); uz.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
-    document.addEventListener('change',async e=>{if(e.target.matches('[data-slot-select]')){state.slots[e.target.dataset.slotSelect]=e.target.value||null;state.published=false;renderAll()} if(e.target.matches('[data-slot-bg]')){state.slotBgs[e.target.dataset.slotBg]=e.target.value||DEFAULT_SLOT_BGS[e.target.dataset.slotBg]||'c1';state.published=false;renderAll()} if(e.target.matches('[data-direct-slot]')){const file=e.target.files[0]; if(file){const a=await makeAsset(file);state.assets.push(a);state.slots[e.target.dataset.directSlot]=a.id;populateSelects();renderAll();status(`${file.name} assigned to ${slotDefs.find(s=>s.key===e.target.dataset.directSlot).label}.`)} e.target.value=''}});
+    document.addEventListener('change',async e=>{
+      if(e.target.matches('[data-slot-select]')){
+        const key=e.target.dataset.slotSelect;
+        state.slots[key]=e.target.value||null;
+        const label=slotDefs.find(s=>s.key===key)?.label||'Guide slot';
+        const asset=assetById(state.slots[key]);
+        renderAll();
+        ensureLivePreview(asset?`${asset.name} placed in ${label}.`:`${label} cleared.`);
+      }
+      if(e.target.matches('[data-slot-bg]')){
+        const key=e.target.dataset.slotBg;
+        state.slotBgs[key]=e.target.value||DEFAULT_SLOT_BGS[key]||'c1';
+        const label=slotDefs.find(s=>s.key===key)?.label||'Guide slot';
+        ensureLivePreview(`${label} background updated.`);
+      }
+      if(e.target.matches('[data-direct-slot]')){
+        const file=e.target.files[0];
+        const key=e.target.dataset.directSlot;
+        if(file){
+          const a=await makeAsset(file);
+          state.assets.push(a);
+          state.slots[key]=a.id;
+          populateSelects();
+          renderAll();
+          const label=slotDefs.find(s=>s.key===key)?.label||'Guide slot';
+          ensureLivePreview(`${file.name} placed in ${label}.`);
+        }
+        e.target.value='';
+      }
+    });
     document.addEventListener('input',e=>{if(e.target.matches('[data-color]')){const i=+e.target.dataset.color;state.colors[i]=e.target.value.toUpperCase();$(`[data-hex="${i}"]`).value=state.colors[i];state.published=false;renderAll()} if(e.target.matches('[data-hex]')){const i=+e.target.dataset.hex;const v=normalizeHex(e.target.value);state.colors[i]=v;$(`[data-color="${i}"]`).value=v;e.target.value=v;state.published=false;renderAll()} if(e.target.matches('[data-edit-preview]')&&!state.published){const k=e.target.dataset.editPreview;state.fields[k]=e.target.innerText.trim();const field=$(`[data-field="${k}"]`); if(field) field.value=state.fields[k];renderAll(false)}});
     $('#displayFontUpload').addEventListener('change',e=>uploadFont('display',e.target.files[0])); $('#bodyFontUpload').addEventListener('change',e=>uploadFont('body',e.target.files[0]));
     $('#resetBtn').addEventListener('click',()=>{if(confirm('Reset all builder data and uploaded assets?')) location.reload()});
   }
-  async function makeAsset(file){return {id:'a'+Date.now()+Math.random().toString(16).slice(2),name:file.name,type:file.type||'application/octet-stream',ext:fileExt(file.name),data:await readFile(file)}}
+  async function makeAsset(file){const ext=fileExt(file.name);const raw=await readFile(file);return {id:'a'+Date.now()+Math.random().toString(16).slice(2),name:file.name,type:file.type||({svg:'image/svg+xml',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif'}[ext]||'application/octet-stream'),ext,data:normalizeDataUrl(raw,ext)}}
   async function addFiles(files){for(const file of Array.from(files||[])){state.assets.push(await makeAsset(file))} if(!state.fields.assetCount) state.fields.assetCount=`${state.assets.length} file${state.assets.length!==1?'s':''}`;populateSelects();renderAll();status(`${state.assets.length} file(s) loaded. Assign them to guide slots below.`)}
   async function uploadFont(kind,file){if(!file)return;const data=await readFile(file);const fam=kind==='display'?'Uploaded Display Font':'Uploaded Body Font';state.fontData[kind]={name:file.name,data,family:fam};if(kind==='display')state.fields.displayFont=fam;else state.fields.bodyFont=fam;injectFonts();$$(`[data-field="${kind==='display'?'displayFont':'bodyFont'}"]`).forEach(i=>i.value=fam);renderAll();status(`${file.name} loaded as ${kind} font.`)}
   function injectFonts(){let style=$('#uploadedFontStyles');if(!style){style=document.createElement('style');style.id='uploadedFontStyles';document.head.appendChild(style)}let css='';if(state.fontData.display)css+=`@font-face{font-family:'${state.fontData.display.family}';src:url('${state.fontData.display.data}');font-display:swap;}`;if(state.fontData.body)css+=`@font-face{font-family:'${state.fontData.body.family}';src:url('${state.fontData.body.data}');font-display:swap;}`;style.textContent=css}
   function populateSelects(){const opts='<option value="">Select uploaded file</option>'+state.assets.map(a=>`<option value="${a.id}">${escapeHtml(a.name)}</option>`).join('');$$('[data-slot-select]').forEach(sel=>{const v=sel.value;sel.innerHTML=opts;sel.value=state.slots[sel.dataset.slotSelect]||v||''})}
   function renderAssetList(){const box=$('#assetList');if(!state.assets.length){box.style.display='none';return}box.style.display='block';box.innerHTML=state.assets.map(a=>`<div class="asset-row"><span>${escapeHtml(a.name)}</span><span>${escapeHtml(a.ext)}</span></div>`).join('')}
-  function setImgWrap(id,asset,missing){const el=$(id);if(!el)return;if(isImage(asset)){el.className='';el.innerHTML=`<img src="${asset.data}" alt="${escapeHtml(asset.name)}">`}else{el.className='missing';el.textContent=missing}}
+  function setImgWrap(id,asset,missing){const el=$(id);if(!el)return;if(isImage(asset)){el.className='placed-asset';el.innerHTML=imageHtml(asset)}else{el.className='missing';el.textContent=missing}}
+
+  function imageHtml(asset){return `<img src="${asset.data}" alt="${escapeHtml(asset.name)}" loading="eager" decoding="async">`;}
+  function forceGuideSlotPlacement(){
+    const map={
+      primaryLogo:'#pvPrimaryLogoWrap',
+      iconMark:'#pvIconMarkWrap',
+      iconVariant:'#pvIconVariantWrap',
+      profileImage:'#pvProfileImageWrap',
+      websiteHeader:'#pvWebsiteHeaderWrap',
+      businessCard:'#pvBusinessCardWrap',
+      socialPost:'#pvSocialPostWrap'
+    };
+    Object.entries(map).forEach(([key,selector])=>{
+      const el=$(selector);
+      const asset=assetById(state.slots[key]);
+      if(!el)return;
+      if(isImage(asset)){
+        el.className='placed-asset';
+        el.innerHTML=imageHtml(asset);
+      }
+    });
+    const hero=assetById(state.slots.heroLogo);
+    const heroImg=$('#pvHeroLogo');
+    if(heroImg && isImage(hero)){
+      heroImg.src=hero.data;
+      heroImg.alt=hero.name || 'Hero Logo';
+      heroImg.classList.add('visible');
+      heroImg.style.display='block';
+    }
+  }
+
   function renderAll(updateEditable=true){
     const f=state.fields; $('#readinessClient').textContent=f.clientName||'Client Name'; $('#navClientLabel').textContent=`Internal builder · ${f.clientName&&f.clientName!=='Client Name'?f.clientName:'No client loaded'}`;
     if(updateEditable){$('#pvClientName').textContent=f.clientName||'Client Name';$('#pvTagline').textContent=f.tagline||'A sharper brand, delivered in seven days.';$('#pvDate').textContent=f.date||'Month Year';$('#pvCategory').textContent=f.category||'Category';$('#pvSprint').textContent=f.sprint||'Brand Identity Guide';$('#pvAssetCount').textContent=f.assetCount||`${state.assets.length||'—'} files`;}
@@ -1657,7 +1862,7 @@ body{
     });
     const hero=assetById(state.slots.heroLogo);const heroImg=$('#pvHeroLogo');if(isImage(hero)){heroImg.src=hero.data;heroImg.classList.add('visible')}else{heroImg.removeAttribute('src');heroImg.classList.remove('visible')}
     applySlotBackgrounds();
-    setImgWrap('#pvPrimaryLogoWrap',assetById(state.slots.primaryLogo),'Primary Logo');setImgWrap('#pvIconMarkWrap',assetById(state.slots.iconMark),'Icon Mark');setImgWrap('#pvIconVariantWrap',assetById(state.slots.iconVariant),'Brand Variant');setImgWrap('#pvProfileImageWrap',assetById(state.slots.profileImage),'Profile Image');setImgWrap('#pvWebsiteHeaderWrap',assetById(state.slots.websiteHeader),'Digital Mockup');setImgWrap('#pvBusinessCardWrap',assetById(state.slots.businessCard),'Print Mockup');setImgWrap('#pvSocialPostWrap',assetById(state.slots.socialPost),'Social Post');
+    setImgWrap('#pvPrimaryLogoWrap',assetById(state.slots.primaryLogo),'Primary Logo');setImgWrap('#pvIconMarkWrap',assetById(state.slots.iconMark),'Icon Mark');setImgWrap('#pvIconVariantWrap',assetById(state.slots.iconVariant),'Brand Variant');setImgWrap('#pvProfileImageWrap',assetById(state.slots.profileImage),'Profile Image');setImgWrap('#pvWebsiteHeaderWrap',assetById(state.slots.websiteHeader),'Digital Mockup');setImgWrap('#pvBusinessCardWrap',assetById(state.slots.businessCard),'Print Mockup');setImgWrap('#pvSocialPostWrap',assetById(state.slots.socialPost),'Social Post');forceGuideSlotPlacement();
     renderAssetList();populateSelects();updateProgress();
   }
   function applySlotBackgrounds(){
@@ -1669,7 +1874,21 @@ body{
     });
   }
   function updateProgress(){const hasDetails=state.fields.clientName&&state.fields.clientName!=='Client Name';const hasAssets=Object.values(state.slots).some(Boolean);const pct=(hasDetails?33:0)+(hasAssets?34:0)+(state.published?33:0);$('#progressFill').style.width=pct+'%';[['#checkDetails',hasDetails],['#checkAssets',hasAssets],['#checkPublished',state.published]].forEach(([id,done])=>{$(id).classList.toggle('done',done);$(id).textContent=done?'✓':''})}
-  function showPreview(){renderAll();$('#previewShell').classList.add('active');$('#previewShell').scrollIntoView({behavior:'smooth',block:'start'});status('Live preview is open. Changes in the editor update the guide instantly.');}
+  function ensureLivePreview(message,scroll=false){
+    state.published=false;
+    const shell=$('#previewShell');
+    if(shell){
+      shell.classList.add('active','builder-mode');
+      shell.classList.remove('locked');
+      const mode=$('#previewModeText');
+      if(mode) mode.textContent='Builder preview · live updating';
+      $$('[data-edit-preview]').forEach(el=>el.setAttribute('contenteditable','true'));
+      if(scroll) shell.scrollIntoView({behavior:'smooth',block:'start'});
+    }
+    renderAll();
+    if(message) status(message);
+  }
+  function showPreview(){ensureLivePreview('Live preview is open. Changes in the editor update the guide instantly.',true);}
   function backToEditor(){$('#builderApp').scrollIntoView({behavior:'smooth',block:'start'})}
   function lockGuide(){state.published=true;renderAll();$('#previewShell').classList.add('active','locked');$('#previewShell').classList.remove('builder-mode');$$('[data-edit-preview]').forEach(el=>el.setAttribute('contenteditable','false'));$('#previewModeText').textContent='Published guide · editing locked';$('#previewShell').scrollIntoView({behavior:'smooth',block:'start'});status('Guide is locked. Use Download HTML to save a static client-ready version.');}
   function cloneForDownload(){const clone=document.documentElement.cloneNode(true);clone.querySelector('#builderApp')?.remove();const toolbar=clone.querySelector('.preview-toolbar'); if(toolbar) toolbar.remove();clone.querySelector('#previewShell')?.classList.add('active','locked');clone.querySelector('#previewShell')?.classList.remove('builder-mode');clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));return '<!DOCTYPE html>\n'+clone.outerHTML}
