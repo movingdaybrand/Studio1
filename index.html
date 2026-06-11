@@ -2693,6 +2693,105 @@ footer{
 }
 @media(max-width:520px){.builder-colors{grid-template-columns:1fr!important;}}
 
+
+/* ─────────────────────────────────────────────
+   FINAL SLOT CONTRAST SYSTEM
+   Empty slot text automatically flips for legibility on any client color.
+   Uploaded assets remove the empty-state copy entirely.
+───────────────────────────────────────────── */
+.logo-cell.slot-empty,
+.mockup.slot-empty{
+  --slot-text:var(--stage-fg,currentColor);
+  --slot-muted:color-mix(in srgb,var(--slot-text) 62%,transparent);
+  --slot-pill-bg:color-mix(in srgb,var(--slot-text) 12%,transparent);
+  --slot-pill-border:color-mix(in srgb,var(--slot-text) 16%,transparent);
+}
+.logo-cell.slot-empty .logo-empty-state,
+.mockup.slot-empty .logo-empty-state,
+.logo-cell.slot-empty .placeholder,
+.mockup.slot-empty .placeholder{
+  color:var(--slot-text)!important;
+}
+.logo-cell.slot-empty .logo-empty-state strong,
+.mockup.slot-empty .logo-empty-state strong,
+.logo-cell.slot-empty .placeholder strong,
+.mockup.slot-empty .placeholder strong{
+  color:var(--slot-text)!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+.logo-cell.slot-empty .logo-empty-state p,
+.mockup.slot-empty .logo-empty-state p,
+.logo-cell.slot-empty .placeholder span,
+.mockup.slot-empty .placeholder span{
+  color:var(--slot-muted)!important;
+  opacity:1!important;
+}
+.logo-cell.slot-empty .slot-kicker,
+.mockup.slot-empty .slot-kicker,
+.logo-cell.slot-empty .upload-hint,
+.mockup.slot-empty .upload-hint{
+  background:var(--slot-pill-bg)!important;
+  border:1px solid var(--slot-pill-border)!important;
+  color:var(--slot-text)!important;
+  opacity:1!important;
+}
+.logo-cell.has-asset .logo-empty-state,
+.mockup.has-asset .logo-empty-state,
+.logo-cell.has-asset .placeholder,
+.mockup.has-asset .placeholder{
+  display:none!important;
+}
+.logo-cell.has-asset .upload-hint,
+.mockup.has-asset .upload-hint{
+  opacity:0!important;
+}
+.logo-cell.has-asset:hover .upload-hint,
+.mockup.has-asset:hover .upload-hint{
+  opacity:1!important;
+}
+
+
+/* ─────────────────────────────────────────────
+   SLOT LEGIBILITY HARDENING
+   Keeps empty-state copy readable on both light and dark client backgrounds.
+───────────────────────────────────────────── */
+.mockup.slot-empty .placeholder,
+.logo-cell.slot-empty .logo-empty-state{
+  background:color-mix(in srgb,var(--slot-text) 4%, transparent)!important;
+  border-color:color-mix(in srgb,var(--slot-text) 18%, transparent)!important;
+}
+.mockup.slot-empty .placeholder{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+.mockup.slot-empty .placeholder > div,
+.logo-cell.slot-empty .logo-empty-state{
+  max-width:340px!important;
+  margin:0 auto!important;
+}
+.mockup.slot-empty .placeholder strong,
+.logo-cell.slot-empty .logo-empty-state strong{
+  color:var(--slot-text)!important;
+  opacity:1!important;
+}
+.mockup.slot-empty .placeholder span,
+.logo-cell.slot-empty .logo-empty-state p{
+  color:color-mix(in srgb,var(--slot-text) 76%, transparent)!important;
+  opacity:1!important;
+}
+.mockup.slot-empty .mockup-label{
+  color:color-mix(in srgb,var(--slot-text) 48%, transparent)!important;
+  opacity:1!important;
+}
+.mockup.slot-empty .upload-hint,
+.logo-cell.slot-empty .upload-hint,
+.mockup.slot-empty .slot-kicker,
+.logo-cell.slot-empty .slot-kicker{
+  box-shadow:none!important;
+}
+
 </style>
 </head>
 
@@ -3153,7 +3252,7 @@ footer{
   const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
   const status=(msg)=>{const el=$('#builderStatus'); if(el) el.textContent=msg};
 
-  const STORAGE_KEY = 'movingDayGuideBuilder';
+  const STORAGE_KEY = 'movingDayGuideBuilder_reset_preview_v2';
   let saveStateTimer = null;
 
   const MOVING_DAY_MANUAL_MODE = true;
@@ -3314,11 +3413,17 @@ footer{
     host.style.removeProperty("--stage-bg");
     host.style.removeProperty("--stage-fg");
     host.style.removeProperty("--stage-border");
+    host.classList.remove("has-asset");
+    host.classList.remove("slot-empty");
 
     if (!asset) {
+      host.classList.add("slot-empty");
       wrap.innerHTML = makePlaceholder(slot);
+      applyEmptySlotContrast(host);
       return;
     }
+
+    host.classList.add("has-asset");
 
     const isImage = String(asset.type || "").startsWith("image/");
     const fname = `${safeName(state.fields.clientName)}-${safeName(slotLabels[slot])}.${asset.ext || "file"}`;
@@ -4075,10 +4180,42 @@ footer{
     return ((r*299 + g*587 + b*114) / 1000) > 160;
   }
 
+  function textColorForBackground(hex){
+    return isLightHex(hex) ? (state.colors[4] || '#15140F') : (state.colors[3] || '#F1ECDF');
+  }
+
+  function applyEmptySlotContrast(el, color){
+    if(!el)return;
+    const bg = color || el.style.background || getComputedStyle(el).backgroundColor || state.colors[3] || '#F1ECDF';
+    let fg = '#15140F';
+    if(String(bg).startsWith('#')){
+      fg = textColorForBackground(bg);
+    }else{
+      const match = String(bg).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/i);
+      if(match){
+        const hex = rgbToHex(Number(match[1]), Number(match[2]), Number(match[3]));
+        fg = textColorForBackground(hex);
+      }else{
+        fg = getComputedStyle(el).color || '#15140F';
+      }
+    }
+    el.style.setProperty('--slot-text', fg);
+    el.style.setProperty('--stage-fg', fg);
+    el.style.color = fg;
+    el.classList.toggle('is-light', fg === (state.colors[4] || '#15140F'));
+    el.classList.toggle('is-dark', fg !== (state.colors[4] || '#15140F'));
+  }
+
   function setPaletteBackground(selector, color){
     document.querySelectorAll(selector).forEach(el=>{
       if(el.querySelector('.asset-img'))return;
       el.style.background=color;
+      const fg = textColorForBackground(color);
+      el.style.color = fg;
+      el.style.setProperty('--stage-bg', color);
+      el.style.setProperty('--stage-fg', fg);
+      el.style.setProperty('--slot-text', fg);
+      el.style.setProperty('--stage-border', hexToRgba(fg,.16));
       el.classList.toggle('is-light', isLightHex(color));
       el.classList.toggle('is-dark', !isLightHex(color));
     });
@@ -4102,11 +4239,11 @@ footer{
     setPaletteBackground('.brand-logo-suite .logo-card-dark', c1);
     setPaletteBackground('.brand-logo-suite .logo-card-brand', c2);
 
-    // 04 — In Use: all four mockup/application cards now follow the client palette
+    // 04 — In Use: keep these aligned with the guide rules and palette labels
     setPaletteBackground('.applications-grid .mockup-profile', c1);
-    setPaletteBackground('.applications-grid .mockup-web', c2);
-    setPaletteBackground('.applications-grid .mockup-print', c3);
-    setPaletteBackground('.applications-grid .mockup-social', c4);
+    setPaletteBackground('.applications-grid .mockup-web', c4);
+    setPaletteBackground('.applications-grid .mockup-print', c5);
+    setPaletteBackground('.applications-grid .mockup-social', c3);
 
     document.querySelectorAll('.applications-grid .mockup').forEach(el=>{
       el.style.borderColor = hexToRgba(c5,.18);
@@ -4126,17 +4263,21 @@ function applyClientBackgroundsToCards(){
       const isWeb=card.classList.contains('mockup-web');
 
       if(isDark){
-        card.style.background=state.colors[0]||'#1F3D2E';
-        card.style.color=state.colors[3]||'#F1ECDF';
+        const bg=state.colors[0]||'#1F3D2E';
+        card.style.background=bg;
+        applyEmptySlotContrast(card,bg);
       }else if(isBrand){
-        card.style.background=state.colors[1]||'#2D5642';
-        card.style.color=state.colors[3]||'#F1ECDF';
+        const bg=state.colors[1]||'#2D5642';
+        card.style.background=bg;
+        applyEmptySlotContrast(card,bg);
       }else if(isSoft){
-        card.style.background=state.colors[2]||'#C4D9CB';
-        card.style.color=state.colors[4]||'#15140F';
+        const bg=state.colors[2]||'#C4D9CB';
+        card.style.background=bg;
+        applyEmptySlotContrast(card,bg);
       }else if(isWeb){
-        card.style.background=state.colors[3]||'#F1ECDF';
-        card.style.color=state.colors[4]||'#15140F';
+        const bg=state.colors[3]||'#F1ECDF';
+        card.style.background=bg;
+        applyEmptySlotContrast(card,bg);
       }
     });
   }
