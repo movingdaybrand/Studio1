@@ -1567,6 +1567,375 @@ body{
 
 </style>
 
+
+<style id="md-premium-commandbar-downloads-patch">
+/* ─────────────────────────────────────────────
+   PREMIUM COMMAND BAR + DOWNLOAD SECTION PATCH
+   Keeps all guide controls in two clean sticky dropdown bubbles.
+───────────────────────────────────────────── */
+.preview-toolbar{
+  position:sticky!important;
+  top:0!important;
+  z-index:80!important;
+  background:rgba(241,236,223,.86)!important;
+  border-bottom:1px solid rgba(31,61,46,.10)!important;
+  box-shadow:0 14px 36px rgba(21,20,15,.07)!important;
+  backdrop-filter:blur(22px)!important;
+}
+.preview-toolbar-inner{
+  max-width:1240px!important;
+  min-height:74px!important;
+  padding:12px 34px!important;
+  display:grid!important;
+  grid-template-columns:minmax(260px,1fr) auto minmax(260px,1fr)!important;
+  align-items:center!important;
+  gap:18px!important;
+}
+.preview-brand-wrap{
+  justify-self:start!important;
+  display:flex!important;
+  align-items:center!important;
+  min-width:0!important;
+}
+.preview-brand{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  min-width:0!important;
+  padding:7px 10px!important;
+  border-radius:999px!important;
+  color:#1F3D2E!important;
+  background:rgba(31,61,46,.045)!important;
+  border:1px solid rgba(31,61,46,.075)!important;
+}
+.preview-brand-icon{
+  width:28px!important;
+  height:28px!important;
+  border-radius:9px!important;
+  padding:5px!important;
+  background:rgba(31,61,46,.08)!important;
+  border-color:rgba(31,61,46,.10)!important;
+  flex:0 0 auto!important;
+}
+.preview-brand-logo{
+  width:112px!important;
+  flex:0 0 auto!important;
+}
+.preview-brand-studio{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  margin-left:4px!important;
+  font:900 9px/1 var(--sans)!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+  color:rgba(31,61,46,.60)!important;
+  white-space:nowrap!important;
+}
+.preview-brand-studio::before{
+  content:"";
+  width:1px;
+  height:14px;
+  background:rgba(31,61,46,.18);
+  display:block;
+}
+.preview-nav-center{
+  justify-self:center!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:8px!important;
+  min-width:0!important;
+}
+.platform-pill,
+.locked-badge{
+  min-height:38px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  white-space:nowrap!important;
+  border-radius:999px!important;
+  padding:0 18px!important;
+  border:1px solid rgba(31,61,46,.13)!important;
+  background:rgba(31,61,46,.055)!important;
+  color:#244834!important;
+  font:900 10px/1 var(--sans)!important;
+  letter-spacing:.16em!important;
+  text-transform:uppercase!important;
+}
+.locked-badge{display:none!important;background:rgba(196,217,203,.44)!important;}
+.locked .locked-badge{display:inline-flex!important;}
+.preview-actions{
+  justify-self:end!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:10px!important;
+  flex-wrap:nowrap!important;
+  min-width:0!important;
+}
+.action-bubble{
+  position:relative!important;
+  z-index:2!important;
+}
+.action-bubble summary{
+  list-style:none!important;
+  user-select:none!important;
+  min-height:42px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  border-radius:999px!important;
+  padding:0 16px!important;
+  border:1px solid rgba(31,61,46,.13)!important;
+  background:#FBF8F0!important;
+  color:#1F3D2E!important;
+  box-shadow:0 8px 22px rgba(31,61,46,.055), inset 0 1px 0 rgba(255,255,255,.82)!important;
+  font:900 10px/1 var(--sans)!important;
+  letter-spacing:.14em!important;
+  text-transform:uppercase!important;
+  cursor:pointer!important;
+}
+.action-bubble summary::-webkit-details-marker{display:none!important;}
+.action-bubble summary::after{
+  content:"⌄";
+  font-size:14px;
+  line-height:1;
+  opacity:.58;
+  transform:translateY(-1px);
+}
+.action-bubble[open] summary{
+  background:#1F3D2E!important;
+  color:#F1ECDF!important;
+  border-color:#1F3D2E!important;
+}
+.bubble-panel{
+  position:absolute!important;
+  top:calc(100% + 10px)!important;
+  left:0!important;
+  min-width:210px!important;
+  display:grid!important;
+  gap:7px!important;
+  padding:9px!important;
+  border-radius:20px!important;
+  border:1px solid rgba(31,61,46,.12)!important;
+  background:rgba(251,248,240,.96)!important;
+  box-shadow:0 24px 60px rgba(21,20,15,.16)!important;
+  backdrop-filter:blur(18px)!important;
+}
+.bubble-panel-right{right:0!important;left:auto!important;}
+.bubble-item{
+  width:100%!important;
+  min-height:38px!important;
+  border-radius:14px!important;
+  border:1px solid rgba(31,61,46,.08)!important;
+  background:transparent!important;
+  color:#1F3D2E!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:space-between!important;
+  padding:0 12px!important;
+  font:900 10px/1 var(--sans)!important;
+  letter-spacing:.12em!important;
+  text-transform:uppercase!important;
+  text-align:left!important;
+  box-shadow:none!important;
+}
+.bubble-item:hover{background:rgba(31,61,46,.07)!important;transform:none!important;}
+.bubble-item.primary{background:#1F3D2E!important;color:#F1ECDF!important;border-color:#1F3D2E!important;}
+.bubble-item.publish{background:rgba(196,217,203,.36)!important;border-color:rgba(31,61,46,.10)!important;}
+.locked #lockFromPreviewBtn{display:none!important;}
+.locked #previewModeText{background:rgba(196,217,203,.38)!important;}
+
+/* Premium downloadable files section */
+.asset-package-section{
+  background:linear-gradient(180deg,#FBF8F0 0%,#F1ECDF 100%)!important;
+  padding:92px 0 96px!important;
+  border-bottom:1px solid rgba(21,20,15,.10)!important;
+}
+.asset-package-head{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:end!important;
+  gap:28px!important;
+  padding-bottom:28px!important;
+  margin-bottom:22px!important;
+  border-bottom:1px solid rgba(31,61,46,.10)!important;
+}
+.asset-package-intro .section-label{
+  color:#1F3D2E!important;
+  opacity:.78!important;
+}
+.asset-package-intro .section-title{
+  max-width:820px!important;
+  margin-bottom:14px!important;
+}
+.asset-package-intro .section-copy{
+  margin-bottom:0!important;
+  max-width:720px!important;
+}
+.asset-package-action{
+  min-height:46px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  white-space:nowrap!important;
+  border-radius:999px!important;
+  padding:0 18px!important;
+  border:1px solid rgba(31,61,46,.14)!important;
+  background:#1F3D2E!important;
+  color:#F1ECDF!important;
+  text-decoration:none!important;
+  font:900 10px/1 var(--sans)!important;
+  letter-spacing:.14em!important;
+  text-transform:uppercase!important;
+  box-shadow:0 16px 36px rgba(31,61,46,.14)!important;
+}
+.asset-package-grid{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:18px!important;
+  margin-top:28px!important;
+}
+.asset-package-card{
+  min-width:0!important;
+  display:grid!important;
+  grid-template-rows:178px auto!important;
+  gap:0!important;
+  align-items:stretch!important;
+  justify-content:stretch!important;
+  overflow:hidden!important;
+  padding:0!important;
+  border-radius:28px!important;
+  border:1px solid rgba(31,61,46,.11)!important;
+  background:#fff!important;
+  color:#15140F!important;
+  text-decoration:none!important;
+  box-shadow:0 18px 52px rgba(31,61,46,.075), inset 0 1px 0 rgba(255,255,255,.86)!important;
+  transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease!important;
+}
+.asset-package-card:hover{
+  transform:translateY(-3px)!important;
+  border-color:rgba(31,61,46,.18)!important;
+  box-shadow:0 24px 68px rgba(31,61,46,.11), inset 0 1px 0 rgba(255,255,255,.9)!important;
+}
+.asset-package-thumb{
+  height:178px!important;
+  display:grid!important;
+  place-items:center!important;
+  padding:26px!important;
+  background:radial-gradient(circle at 80% 0%,rgba(196,217,203,.42),transparent 42%),linear-gradient(135deg,#F8F4EA 0%,#E8E0CF 100%)!important;
+  border-bottom:1px solid rgba(21,20,15,.08)!important;
+}
+.asset-package-thumb.dark{
+  background:radial-gradient(circle at 78% 0%,rgba(196,217,203,.24),transparent 42%),linear-gradient(135deg,#1F3D2E 0%,#14291F 100%)!important;
+}
+.asset-package-thumb img{
+  max-width:100%!important;
+  max-height:124px!important;
+  object-fit:contain!important;
+  filter:drop-shadow(0 10px 22px rgba(21,20,15,.14))!important;
+}
+.asset-package-file-icon{
+  width:78px!important;
+  height:78px!important;
+  border-radius:24px!important;
+  display:grid!important;
+  place-items:center!important;
+  background:#1F3D2E!important;
+  color:#F1ECDF!important;
+  font:900 13px/1 var(--sans)!important;
+  letter-spacing:.12em!important;
+  text-transform:uppercase!important;
+  box-shadow:0 14px 28px rgba(31,61,46,.18)!important;
+}
+.asset-package-body{
+  display:grid!important;
+  grid-template-rows:auto auto 1fr auto!important;
+  gap:12px!important;
+  padding:20px!important;
+}
+.asset-package-meta{
+  display:flex!important;
+  flex-wrap:wrap!important;
+  gap:7px!important;
+}
+.asset-package-chip{
+  min-height:24px!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  padding:0 9px!important;
+  border-radius:999px!important;
+  border:1px solid rgba(31,61,46,.12)!important;
+  background:#F5F0E6!important;
+  color:#1F3D2E!important;
+  font:900 8px/1 var(--sans)!important;
+  letter-spacing:.12em!important;
+  text-transform:uppercase!important;
+}
+.asset-package-card h3{
+  margin:0!important;
+  color:#15140F!important;
+  font:800 17px/1.15 var(--sans)!important;
+  letter-spacing:-.03em!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+}
+.asset-package-card p{
+  margin:0!important;
+  color:rgba(21,20,15,.60)!important;
+  font:500 13px/1.45 var(--sans)!important;
+}
+.asset-package-download{
+  display:flex!important;
+  justify-content:space-between!important;
+  gap:12px!important;
+  padding-top:12px!important;
+  border-top:1px solid rgba(21,20,15,.08)!important;
+  color:#1F3D2E!important;
+}
+.asset-package-download span{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+  font:900 9px/1 var(--sans)!important;
+  letter-spacing:.13em!important;
+  text-transform:uppercase!important;
+}
+.asset-package-note{
+  margin-top:22px!important;
+  padding:16px 18px!important;
+  border-radius:20px!important;
+  border:1px solid rgba(31,61,46,.10)!important;
+  background:rgba(255,255,255,.56)!important;
+  color:rgba(21,20,15,.64)!important;
+  font-size:13px!important;
+  line-height:1.55!important;
+}
+.asset-package-note strong{color:#1F3D2E!important;}
+@media(max-width:980px){
+  .preview-toolbar-inner{grid-template-columns:1fr!important;justify-items:stretch!important;gap:10px!important;}
+  .preview-brand-wrap,.preview-nav-center,.preview-actions{justify-self:stretch!important;justify-content:center!important;}
+  .asset-package-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  .asset-package-head{grid-template-columns:1fr!important;align-items:start!important;}
+  .asset-package-action{width:max-content!important;}
+}
+@media(max-width:620px){
+  .preview-actions{justify-content:center!important;}
+  .asset-package-grid{grid-template-columns:1fr!important;}
+  .bubble-panel,.bubble-panel-right{left:50%!important;right:auto!important;transform:translateX(-50%)!important;}
+}
+@media print{
+  .action-bubble,.preview-actions,.preview-nav-center{display:none!important;}
+  .asset-package-card{box-shadow:none!important;}
+}
+</style>
+
 </head>
 <body>
 <div class="builder-app" id="builderApp">
@@ -2018,9 +2387,28 @@ body{
 </svg></span>
           <span class="preview-brand-studio">Studio</span>
         </div>
-        <div class="studio-nav-meta" id="previewModeText">Brand Restoration Platform</div>
       </div>
-      <div class="preview-actions"><span class="locked-badge">Published / locked</span><button class="builder-btn" id="backToEditorBtn">Back to editor</button><button class="builder-btn publish" id="lockFromPreviewBtn">Publish / Lock</button><button class="builder-btn" id="downloadAssetsBtn">Download Asset Package</button><button class="builder-btn" id="generatePdfBtn">Generate PDF</button><button class="builder-btn primary" id="downloadHtmlBtn">Download HTML</button></div>
+      <div class="preview-nav-center">
+        <span class="platform-pill" id="previewModeText">Brand Restoration Platform</span>
+        <span class="locked-badge">Published / locked</span>
+      </div>
+      <div class="preview-actions">
+        <details class="action-bubble">
+          <summary>Guide</summary>
+          <div class="bubble-panel">
+            <button class="bubble-item" id="backToEditorBtn">Back to editor</button>
+            <button class="bubble-item publish" id="lockFromPreviewBtn">Publish / Lock</button>
+          </div>
+        </details>
+        <details class="action-bubble export-bubble">
+          <summary>Export</summary>
+          <div class="bubble-panel bubble-panel-right">
+            <button class="bubble-item" id="downloadAssetsBtn">Asset Package</button>
+            <button class="bubble-item" id="generatePdfBtn">Generate PDF</button>
+            <button class="bubble-item primary" id="downloadHtmlBtn">Download HTML</button>
+          </div>
+        </details>
+      </div>
     </div>
   </div>
 
@@ -2368,7 +2756,7 @@ body{
   function packagePageHtml(items){
     const title=`${state.fields.clientName||'Client'} · Downloadable Brand Assets`;
     const cards=assetPackageCardsHtml(items);
-    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${escapeHtml(title)}</title><style>body{margin:0;background:#F1ECDF;color:#15140F;font-family:Arial,sans-serif;padding:42px}h1{font-family:Georgia,serif;font-size:clamp(40px,7vw,72px);line-height:.95;font-weight:400;letter-spacing:-.05em;max-width:780px}p{max-width:680px;color:rgba(21,20,15,.62);font-size:16px;line-height:1.55}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:30px}.asset-package-card{display:grid;grid-template-rows:160px auto;overflow:hidden;border:1px solid rgba(31,61,46,.13);border-radius:24px;background:#fff;color:#15140F;text-decoration:none;box-shadow:0 18px 48px rgba(31,61,46,.08)}.asset-package-thumb{height:160px;display:grid;place-items:center;padding:22px;background:linear-gradient(135deg,#F8F4EA,#EDE6D8);border-bottom:1px solid rgba(21,20,15,.08)}.asset-package-thumb.dark{background:linear-gradient(135deg,#1F3D2E,#14291F)}.asset-package-thumb img{max-width:100%;max-height:112px;object-fit:contain}.asset-package-file-icon{width:70px;height:70px;border-radius:22px;display:grid;place-items:center;background:#1F3D2E;color:#F1ECDF;font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase}.asset-package-body{display:grid;gap:12px;padding:20px}.asset-package-meta{display:flex;flex-wrap:wrap;gap:8px}.asset-package-chip{display:inline-flex;align-items:center;min-height:25px;padding:0 9px;border-radius:999px;border:1px solid rgba(31,61,46,.13);background:#F5F0E6;color:#1F3D2E;font-weight:900;font-size:8px;letter-spacing:.13em;text-transform:uppercase}.asset-package-card h3{margin:0;font-size:16px;line-height:1.15}.asset-package-card p{margin:0;font-size:13px;line-height:1.45}.asset-package-download{display:flex;justify-content:space-between;gap:12px;padding-top:10px;border-top:1px solid rgba(21,20,15,.07);color:#1F3D2E;font-weight:900;font-size:9px;letter-spacing:.13em;text-transform:uppercase}</style></head><body><h1>${escapeHtml(title)}</h1><p>Each file is embedded directly in this page. Click any card to download that specific asset. Use vector files for vendors and print, PNG/JPG files for quick digital use, and PDFs for reference.</p><div class="grid">${cards}</div></body></html>`;
+    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${escapeHtml(title)}</title><style>:root{--cream:#F1ECDF;--paper:#FBF8F0;--forest:#1F3D2E;--deep:#14291F;--ink:#15140F;--sage:#C4D9CB}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,var(--cream),#E8E0CF);color:var(--ink);font-family:Inter,Arial,sans-serif;padding:42px}.shell{max-width:1160px;margin:0 auto}.eyebrow{font-weight:900;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--forest);margin-bottom:22px}.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end;border-bottom:1px solid rgba(31,61,46,.12);padding-bottom:30px;margin-bottom:30px}h1{font-family:Georgia,serif;font-size:clamp(44px,7vw,78px);line-height:.92;font-weight:400;letter-spacing:-.055em;max-width:820px;margin:0}p{max-width:700px;color:rgba(21,20,15,.62);font-size:16px;line-height:1.58}.index-pill{display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:999px;padding:0 18px;background:var(--forest);color:var(--cream);font-weight:900;font-size:10px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:30px}.asset-package-card{display:grid;grid-template-rows:178px auto;overflow:hidden;border:1px solid rgba(31,61,46,.13);border-radius:28px;background:#fff;color:#15140F;text-decoration:none;box-shadow:0 20px 56px rgba(31,61,46,.09);transition:.18s}.asset-package-card:hover{transform:translateY(-3px);box-shadow:0 28px 72px rgba(31,61,46,.13)}.asset-package-thumb{height:178px;display:grid;place-items:center;padding:26px;background:radial-gradient(circle at 80% 0%,rgba(196,217,203,.42),transparent 42%),linear-gradient(135deg,#F8F4EA,#E8E0CF);border-bottom:1px solid rgba(21,20,15,.08)}.asset-package-thumb.dark{background:radial-gradient(circle at 78% 0%,rgba(196,217,203,.24),transparent 42%),linear-gradient(135deg,#1F3D2E,#14291F)}.asset-package-thumb img{max-width:100%;max-height:124px;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(21,20,15,.14))}.asset-package-file-icon{width:78px;height:78px;border-radius:24px;display:grid;place-items:center;background:#1F3D2E;color:#F1ECDF;font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase}.asset-package-body{display:grid;grid-template-rows:auto auto 1fr auto;gap:12px;padding:20px}.asset-package-meta{display:flex;flex-wrap:wrap;gap:7px}.asset-package-chip{display:inline-flex;align-items:center;min-height:24px;padding:0 9px;border-radius:999px;border:1px solid rgba(31,61,46,.12);background:#F5F0E6;color:#1F3D2E;font-weight:900;font-size:8px;letter-spacing:.12em;text-transform:uppercase}.asset-package-card h3{margin:0;color:#15140F;font-size:17px;line-height:1.15;letter-spacing:-.03em}.asset-package-card p{margin:0;font-size:13px;line-height:1.45}.asset-package-download{display:flex;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid rgba(21,20,15,.08);color:#1F3D2E;font-weight:900;font-size:9px;letter-spacing:.13em;text-transform:uppercase}@media(max-width:720px){body{padding:24px}.hero{grid-template-columns:1fr}.index-pill{width:max-content}}</style></head><body><main class="shell"><div class="eyebrow">Moving Day · Asset Handoff</div><section class="hero"><div><h1>${escapeHtml(title)}</h1><p>Every uploaded file is embedded directly in this handoff page. Click any card to download the asset. Use vector files for vendors and print, PNG files for transparent digital use, JPG files for previews, and PDFs for reference.</p></div><a class="index-pill" href="#files">Asset index</a></section><div class="grid" id="files">${cards}</div></main></body></html>`;
   }
   function assetPackageSectionHtml(){
     const items=packageItems();
