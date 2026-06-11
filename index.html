@@ -2348,6 +2348,7 @@ body{
         <div class="studio-action-row">
           <button class="builder-btn primary" id="previewBtn">Preview Guide</button>
           <button class="builder-btn" id="uploadFilesBtn">Upload Assets</button>
+          <button class="builder-btn ai-btn" id="analyzeBrandBtn" type="button">Analyze Brand</button>
           <button class="builder-btn publish" id="publishBtn">Publish / Lock</button>
           <button class="builder-btn danger" id="resetBtn">Reset Studio</button>
         </div>
@@ -3039,7 +3040,388 @@ body{
   function packagePageHtml(items){
     const title=`${state.fields.clientName||'Client'} · Downloadable Brand Assets`;
     const cards=assetPackageCardsHtml(items);
-    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${escapeHtml(title)}</title><style>:root{--cream:#F1ECDF;--paper:#FBF8F0;--forest:#1F3D2E;--deep:#14291F;--ink:#15140F;--sage:#C4D9CB}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,var(--cream),#E8E0CF);color:var(--ink);font-family:Inter,Arial,sans-serif;padding:42px}.shell{max-width:1160px;margin:0 auto}.eyebrow{font-weight:900;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--forest);margin-bottom:22px}.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end;border-bottom:1px solid rgba(31,61,46,.12);padding-bottom:30px;margin-bottom:30px}h1{font-family:Georgia,serif;font-size:clamp(44px,7vw,78px);line-height:.92;font-weight:400;letter-spacing:-.055em;max-width:820px;margin:0}p{max-width:700px;color:rgba(21,20,15,.62);font-size:16px;line-height:1.58}.index-pill{display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:999px;padding:0 18px;background:var(--forest);color:var(--cream);font-weight:900;font-size:10px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:30px}.asset-package-card{display:grid;grid-template-rows:178px auto;overflow:hidden;border:1px solid rgba(31,61,46,.13);border-radius:28px;background:#fff;color:#15140F;text-decoration:none;box-shadow:0 20px 56px rgba(31,61,46,.09);transition:.18s}.asset-package-card:hover{transform:translateY(-3px);box-shadow:0 28px 72px rgba(31,61,46,.13)}.asset-package-thumb{height:178px;display:grid;place-items:center;padding:26px;background:radial-gradient(circle at 80% 0%,rgba(196,217,203,.42),transparent 42%),linear-gradient(135deg,#F8F4EA,#E8E0CF);border-bottom:1px solid rgba(21,20,15,.08)}.asset-package-thumb.dark{background:radial-gradient(circle at 78% 0%,rgba(196,217,203,.24),transparent 42%),linear-gradient(135deg,#1F3D2E,#14291F)}.asset-package-thumb img{max-width:100%;max-height:124px;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(21,20,15,.14))}.asset-package-file-icon{width:78px;height:78px;border-radius:24px;display:grid;place-items:center;background:#1F3D2E;color:#F1ECDF;font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase}.asset-package-body{display:grid;grid-template-rows:auto auto 1fr auto;gap:12px;padding:20px}.asset-package-meta{display:flex;flex-wrap:wrap;gap:7px}.asset-package-chip{display:inline-flex;align-items:center;min-height:24px;padding:0 9px;border-radius:999px;border:1px solid rgba(31,61,46,.12);background:#F5F0E6;color:#1F3D2E;font-weight:900;font-size:8px;letter-spacing:.12em;text-transform:uppercase}.asset-package-card h3{margin:0;color:#15140F;font-size:17px;line-height:1.15;letter-spacing:-.03em}.asset-package-card p{margin:0;font-size:13px;line-height:1.45}.asset-package-download{display:flex;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid rgba(21,20,15,.08);color:#1F3D2E;font-weight:900;font-size:9px;letter-spacing:.13em;text-transform:uppercase}@media(max-width:720px){body{padding:24px}.hero{grid-template-columns:1fr}.index-pill{width:max-content}}</style></head><body><main class="shell"><div class="eyebrow">Moving Day · Asset Handoff</div><section class="hero"><div><h1>${escapeHtml(title)}</h1><p>Every uploaded file is embedded directly in this handoff page. Click any card to download the asset. Use vector files for vendors and print, PNG files for transparent digital use, JPG files for previews, and PDFs for reference.</p></div><a class="index-pill" href="#files">Asset index</a></section><div class="grid" id="files">${cards}</div></main></body></html>`;
+    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${escapeHtml(title)}</title><style>:root{--cream:#F1ECDF;--paper:#FBF8F0;--forest:#1F3D2E;--deep:#14291F;--ink:#15140F;--sage:#C4D9CB}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,var(--cream),#E8E0CF);color:var(--ink);font-family:Inter,Arial,sans-serif;padding:42px}.shell{max-width:1160px;margin:0 auto}.eyebrow{font-weight:900;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--forest);margin-bottom:22px}.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end;border-bottom:1px solid rgba(31,61,46,.12);padding-bottom:30px;margin-bottom:30px}h1{font-family:Georgia,serif;font-size:clamp(44px,7vw,78px);line-height:.92;font-weight:400;letter-spacing:-.055em;max-width:820px;margin:0}p{max-width:700px;color:rgba(21,20,15,.62);font-size:16px;line-height:1.58}.index-pill{display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:999px;padding:0 18px;background:var(--forest);color:var(--cream);font-weight:900;font-size:10px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:30px}.asset-package-card{display:grid;grid-template-rows:178px auto;overflow:hidden;border:1px solid rgba(31,61,46,.13);border-radius:28px;background:#fff;color:#15140F;text-decoration:none;box-shadow:0 20px 56px rgba(31,61,46,.09);transition:.18s}.asset-package-card:hover{transform:translateY(-3px);box-shadow:0 28px 72px rgba(31,61,46,.13)}.asset-package-thumb{height:178px;display:grid;place-items:center;padding:26px;background:radial-gradient(circle at 80% 0%,rgba(196,217,203,.42),transparent 42%),linear-gradient(135deg,#F8F4EA,#E8E0CF);border-bottom:1px solid rgba(21,20,15,.08)}.asset-package-thumb.dark{background:radial-gradient(circle at 78% 0%,rgba(196,217,203,.24),transparent 42%),linear-gradient(135deg,#1F3D2E,#14291F)}.asset-package-thumb img{max-width:100%;max-height:124px;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(21,20,15,.14))}.asset-package-file-icon{width:78px;height:78px;border-radius:24px;display:grid;place-items:center;background:#1F3D2E;color:#F1ECDF;font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase}.asset-package-body{display:grid;grid-template-rows:auto auto 1fr auto;gap:12px;padding:20px}.asset-package-meta{display:flex;flex-wrap:wrap;gap:7px}.asset-package-chip{display:inline-flex;align-items:center;min-height:24px;padding:0 9px;border-radius:999px;border:1px solid rgba(31,61,46,.12);background:#F5F0E6;color:#1F3D2E;font-weight:900;font-size:8px;letter-spacing:.12em;text-transform:uppercase}.asset-package-card h3{margin:0;color:#15140F;font-size:17px;line-height:1.15;letter-spacing:-.03em}.asset-package-card p{margin:0;font-size:13px;line-height:1.45}.asset-package-download{display:flex;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid rgba(21,20,15,.08);color:#1F3D2E;font-weight:900;font-size:9px;letter-spacing:.13em;text-transform:uppercase}@media(max-width:720px){body{padding:24px}.hero{grid-template-columns:1fr}.index-pill{width:max-content}}</style></head><body><main class="shell"><div class="eyebrow">Moving Day · Asset Handoff</div><section class="hero"><div><h1>${escapeHtml(title)}</h1><p>Every uploaded file is embedded directly in this handoff page. Click any card to download the asset. Use vector files for vendors and print, PNG files for transparent digital use, JPG files for previews, and PDFs for reference.</p></div><a class="index-pill" href="#files">Asset index</a></section><div class="grid" id="files">${cards}</div></main>
+
+<!-- Moving Day AI Analysis Layer · v13 -->
+<style id="md-ai-analysis-style">
+  .ai-btn{
+    position:relative!important;
+    overflow:hidden!important;
+    border-color:rgba(196,217,203,.32)!important;
+    background:linear-gradient(135deg,rgba(196,217,203,.18),rgba(241,236,223,.06))!important;
+    color:var(--cream)!important;
+  }
+  .ai-btn:before{
+    content:"";
+    position:absolute;
+    inset:-1px;
+    background:linear-gradient(90deg,transparent,rgba(196,217,203,.34),transparent);
+    transform:translateX(-110%);
+    animation:mdAiSweep 3.8s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes mdAiSweep{0%,64%{transform:translateX(-110%)}100%{transform:translateX(110%)}}
+  .md-ai-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(7,17,12,.62);
+    backdrop-filter:blur(12px);
+    z-index:1000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:28px;
+  }
+  .md-ai-backdrop.active{display:flex;}
+  .md-ai-panel{
+    width:min(1120px,100%);
+    max-height:90vh;
+    overflow:hidden;
+    border-radius:36px;
+    background:linear-gradient(145deg,#F7F3EA,#E9E1D2);
+    color:#15140F;
+    border:1px solid rgba(255,255,255,.68);
+    box-shadow:0 42px 140px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.82);
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr);
+  }
+  .md-ai-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:24px;
+    padding:26px 30px 22px;
+    border-bottom:1px solid rgba(31,61,46,.10);
+    background:radial-gradient(circle at 90% 0%,rgba(196,217,203,.30),transparent 34%),rgba(255,255,255,.38);
+  }
+  .md-ai-kicker{
+    font:900 10px var(--sans);
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:#244834;
+    margin-bottom:8px;
+  }
+  .md-ai-title{
+    font-family:var(--display);
+    font-size:clamp(34px,4vw,54px);
+    font-weight:400;
+    letter-spacing:-.04em;
+    line-height:.95;
+    margin:0;
+  }
+  .md-ai-sub{
+    color:rgba(21,20,15,.60);
+    max-width:680px;
+    font-size:14px;
+    line-height:1.55;
+    margin-top:10px;
+  }
+  .md-ai-close{
+    width:42px;
+    height:42px;
+    border:1px solid rgba(31,61,46,.12);
+    background:#fff;
+    color:#1F3D2E;
+    border-radius:999px;
+    font-weight:900;
+  }
+  .md-ai-body{
+    overflow:auto;
+    padding:24px 30px 30px;
+  }
+  .md-ai-runbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+    padding:14px;
+    border:1px solid rgba(31,61,46,.09);
+    border-radius:22px;
+    background:rgba(255,255,255,.54);
+  }
+  .md-ai-runbar p{margin:0;color:rgba(21,20,15,.58);font-size:13px;max-width:720px;line-height:1.45;}
+  .md-ai-action-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .md-ai-button{
+    border:1px solid rgba(31,61,46,.12);
+    background:#1F3D2E;
+    color:#F1ECDF;
+    border-radius:999px;
+    padding:11px 14px;
+    font:900 9px var(--sans);
+    letter-spacing:.13em;
+    text-transform:uppercase;
+  }
+  .md-ai-button.secondary{background:#fff;color:#1F3D2E;}
+  .md-ai-button.ghost{background:rgba(31,61,46,.06);color:#1F3D2E;}
+  .md-ai-button:disabled{opacity:.48;cursor:not-allowed;}
+  .md-ai-status{
+    display:none;
+    margin:0 0 18px;
+    padding:14px 16px;
+    border-radius:18px;
+    border:1px solid rgba(31,61,46,.10);
+    background:rgba(31,61,46,.06);
+    color:#244834;
+    font-size:13px;
+    font-weight:700;
+  }
+  .md-ai-status.active{display:block;}
+  .md-ai-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  .md-ai-card{
+    border:1px solid rgba(31,61,46,.10);
+    background:rgba(255,255,255,.70);
+    border-radius:28px;
+    box-shadow:0 16px 44px rgba(31,61,46,.07),inset 0 1px 0 rgba(255,255,255,.86);
+    overflow:hidden;
+  }
+  .md-ai-card.full{grid-column:1/-1;}
+  .md-ai-card-head{
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+    align-items:flex-start;
+    padding:20px 22px 14px;
+    border-bottom:1px solid rgba(21,20,15,.07);
+  }
+  .md-ai-card h3{
+    margin:0;
+    color:#1F3D2E;
+    font:900 10px var(--sans);
+    letter-spacing:.18em;
+    text-transform:uppercase;
+  }
+  .md-ai-confidence{
+    display:inline-flex;
+    align-items:center;
+    border-radius:999px;
+    min-height:26px;
+    padding:0 10px;
+    background:#EAF0E8;
+    color:#1F3D2E;
+    font:900 9px var(--sans);
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .md-ai-card-body{padding:18px 22px 22px;}
+  .md-ai-list{display:grid;gap:10px;}
+  .md-ai-line{
+    display:grid;
+    gap:4px;
+    padding:12px;
+    border-radius:16px;
+    background:rgba(251,248,240,.70);
+    border:1px solid rgba(31,61,46,.07);
+  }
+  .md-ai-line strong{font-size:13px;color:#15140F;line-height:1.25;}
+  .md-ai-line span,.md-ai-line small{font-size:12px;color:rgba(21,20,15,.58);line-height:1.4;}
+  .md-ai-swatches{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;}
+  .md-ai-swatch{overflow:hidden;border-radius:18px;border:1px solid rgba(21,20,15,.10);background:#fff;min-height:150px;display:grid;grid-template-rows:76px 1fr;}
+  .md-ai-swatch-chip{height:76px;border-bottom:1px solid rgba(21,20,15,.08);}
+  .md-ai-swatch div:last-child{padding:12px;display:grid;gap:5px;}
+  .md-ai-swatch b{font:900 9px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:#1F3D2E;line-height:1.2;}
+  .md-ai-swatch code{font:900 11px ui-monospace,monospace;color:#15140F;}
+  .md-ai-copy-grid{display:grid;gap:12px;}
+  .md-ai-copy-card{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:stretch;border:1px solid rgba(31,61,46,.08);background:rgba(251,248,240,.70);border-radius:20px;padding:12px;}
+  .md-ai-copy-card b{display:block;font:900 8px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:rgba(21,20,15,.46);margin-bottom:6px;}
+  .md-ai-copy-card p{margin:0;font-size:13px;line-height:1.42;color:rgba(21,20,15,.70);}
+  .md-ai-copy-card .suggested p{color:#15140F;font-weight:650;}
+  .md-ai-empty{padding:36px;text-align:center;color:rgba(21,20,15,.52);font-size:13px;border:1px dashed rgba(31,61,46,.18);border-radius:22px;background:rgba(255,255,255,.42);}
+  .md-ai-error{background:#fff3ef!important;color:#7f2d22!important;border-color:rgba(156,60,60,.18)!important;}
+  @media(max-width:900px){.md-ai-grid{grid-template-columns:1fr}.md-ai-copy-card{grid-template-columns:1fr}.md-ai-swatches{grid-template-columns:repeat(2,minmax(0,1fr))}.md-ai-panel{max-height:94vh}.md-ai-head{padding:22px}.md-ai-body{padding:18px}.md-ai-backdrop{padding:12px}}
+</style>
+
+<div class="md-ai-backdrop" id="mdAiBackdrop" aria-hidden="true">
+  <section class="md-ai-panel" role="dialog" aria-modal="true" aria-labelledby="mdAiTitle">
+    <header class="md-ai-head">
+      <div>
+        <div class="md-ai-kicker">Moving Day Analysis</div>
+        <h2 class="md-ai-title" id="mdAiTitle">Brand restoration recommendations.</h2>
+        <p class="md-ai-sub">The AI reviews uploads, current copy, palette, and slot assignments. Nothing changes until you approve a specific recommendation.</p>
+      </div>
+      <button class="md-ai-close" type="button" id="mdAiClose" aria-label="Close analysis">×</button>
+    </header>
+    <div class="md-ai-body">
+      <div class="md-ai-runbar">
+        <p><strong>Controlled delivery:</strong> analysis comes back as review cards. Apply palette, placements, copy, or preflight fixes separately.</p>
+        <div class="md-ai-action-row">
+          <button class="md-ai-button" type="button" id="mdAiRunBtn">Run Analysis</button>
+          <button class="md-ai-button secondary" type="button" id="mdAiApplySafeBtn" disabled>Apply Safe Suggestions</button>
+        </div>
+      </div>
+      <div class="md-ai-status" id="mdAiStatus"></div>
+      <div id="mdAiResults" class="md-ai-empty">Upload assets, then run analysis. Recommendations will appear here as clean approval cards.</div>
+    </div>
+  </section>
+</div>
+
+<script id="md-ai-analysis-script">
+(function(){
+  let mdAiLastAnalysis = null;
+  const SLOT_LABELS = {
+    heroLogo:'Hero logo', primaryLogo:'Primary logo', iconMark:'Icon / mark', iconVariant:'Icon variant', profileImage:'Profile image', websiteHeader:'Website header', businessCard:'Business card', socialPost:'Social post'
+  };
+  function getEl(id){ return document.getElementById(id); }
+  function openAiPanel(autoRun=false){
+    const panel=getEl('mdAiBackdrop'); if(!panel) return;
+    panel.classList.add('active'); panel.setAttribute('aria-hidden','false');
+    if(autoRun && (!mdAiLastAnalysis)) setTimeout(runBrandAnalysis, 150);
+  }
+  function closeAiPanel(){ const panel=getEl('mdAiBackdrop'); if(panel){ panel.classList.remove('active'); panel.setAttribute('aria-hidden','true'); } }
+  function aiStatus(msg, error=false){ const el=getEl('mdAiStatus'); if(!el) return; el.textContent=msg; el.classList.add('active'); el.classList.toggle('md-ai-error', !!error); }
+  function setRunLoading(loading){ const btn=getEl('mdAiRunBtn'); if(btn){ btn.disabled=loading; btn.textContent=loading?'Analyzing…':'Run Analysis'; } }
+  async function buildAiPayload(){
+    const assets = (window.state?.assets || state.assets || []).slice(0, 12);
+    const mappedAssets=[];
+    for(const a of assets){
+      const item={ id:a.id, name:a.name, type:a.type, ext:a.ext, assignedSlot: findSlotForAsset(a.id), dataUrl:null };
+      if(isAiImage(a)) item.dataUrl = await shrinkDataUrl(a.data, 900, .74);
+      mappedAssets.push(item);
+    }
+    return {
+      currentFields: {...state.fields},
+      currentColors: [...state.colors],
+      slots: {...state.slots},
+      availableSlots: (typeof slotDefs!=='undefined'?slotDefs:[]).map(s=>({key:s.key,label:s.label,requirements:s.req})),
+      assets: mappedAssets,
+      previewText: collectPreviewText()
+    };
+  }
+  function findSlotForAsset(assetId){
+    const entries=Object.entries(state.slots||{}).find(([,v])=>v===assetId);
+    return entries?entries[0]:null;
+  }
+  function isAiImage(a){ return a && a.data && /^data:image\/(png|jpeg|jpg|webp|gif|svg\+xml)/i.test(a.data); }
+  function shrinkDataUrl(dataUrl, max=900, quality=.74){
+    return new Promise(resolve=>{
+      if(!dataUrl || dataUrl.length < 700000 || dataUrl.startsWith('data:image/svg+xml')) return resolve(dataUrl);
+      const img=new Image();
+      img.onload=()=>{
+        try{
+          const scale=Math.min(1, max/Math.max(img.width,img.height));
+          const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(img.width*scale)); c.height=Math.max(1,Math.round(img.height*scale));
+          const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,c.width,c.height);
+          resolve(c.toDataURL('image/jpeg', quality));
+        }catch(err){ resolve(dataUrl); }
+      };
+      img.onerror=()=>resolve(dataUrl);
+      img.src=dataUrl;
+    });
+  }
+  function collectPreviewText(){
+    return Array.from(document.querySelectorAll('#guidePreview [contenteditable], #guidePreview .section-title, #guidePreview .section-copy, #guidePreview .guide-title, #guidePreview .guide-tagline'))
+      .map((el,i)=>({index:i, tag:el.tagName, text:(el.textContent||'').trim().slice(0,240)}))
+      .filter(x=>x.text);
+  }
+  async function postAnalysis(payload){
+    const endpoints=['/api/analyze-brand','/.netlify/functions/analyze-brand'];
+    let lastError;
+    for(const url of endpoints){
+      try{
+        const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        const text=await res.text();
+        let json; try{ json=JSON.parse(text); }catch(_){ json={error:text}; }
+        if(res.ok && json.analysis) return json.analysis;
+        lastError = new Error(json.error || json.message || `${url} returned ${res.status}`);
+      }catch(err){ lastError=err; }
+    }
+    throw lastError || new Error('No analysis endpoint responded.');
+  }
+  async function runBrandAnalysis(){
+    if(!state.assets.length){ aiStatus('Upload at least one brand asset before running analysis.', true); return; }
+    try{
+      setRunLoading(true);
+      aiStatus('Reviewing assets, colors, copy, and slot assignments…');
+      const payload=await buildAiPayload();
+      const analysis=await postAnalysis(payload);
+      mdAiLastAnalysis=analysis;
+      renderAiResults(analysis);
+      getEl('mdAiApplySafeBtn').disabled=false;
+      aiStatus('Analysis ready. Review and apply only what you want.');
+    }catch(err){
+      console.error(err);
+      aiStatus(`Analysis failed: ${err.message || err}. Check your backend function and OPENAI_API_KEY.`, true);
+    }finally{ setRunLoading(false); }
+  }
+  function renderAiResults(a){
+    const root=getEl('mdAiResults'); if(!root) return;
+    root.className='md-ai-grid';
+    const brand=a.brand||{};
+    const palette=Array.isArray(a.palette)?a.palette:[];
+    const assignments=Array.isArray(a.assetAssignments)?a.assetAssignments:[];
+    const copy=Array.isArray(a.copySuggestions)?a.copySuggestions:[];
+    const preflight=Array.isArray(a.preflight)?a.preflight:[];
+    root.innerHTML=`
+      <article class="md-ai-card">
+        <div class="md-ai-card-head"><h3>Brand Identity</h3><span class="md-ai-confidence">${pct(brand.confidence)} confidence</span></div>
+        <div class="md-ai-card-body md-ai-list">
+          <div class="md-ai-line"><strong>${esc(brand.name||state.fields.clientName||'Detected brand')}</strong><span>${esc(brand.industry||'Industry not detected')}</span><small>${esc((brand.tone||[]).join(' · ')||'Tone pending')}</small></div>
+          <button class="md-ai-button secondary" type="button" data-ai-apply="brand">Apply brand details</button>
+        </div>
+      </article>
+      <article class="md-ai-card">
+        <div class="md-ai-card-head"><h3>Asset Placement</h3><span class="md-ai-confidence">${assignments.length} suggestions</span></div>
+        <div class="md-ai-card-body md-ai-list">
+          ${assignments.length?assignments.map(x=>`<div class="md-ai-line"><strong>${esc(SLOT_LABELS[x.slot]||x.slot)} → ${esc(assetName(x.fileId))}</strong><span>${esc(x.reason||'Recommended placement')}</span><small>${pct(x.confidence)} confidence</small></div>`).join(''):'<div class="md-ai-line"><strong>No placement suggestions yet.</strong><span>Upload more image assets for better classification.</span></div>'}
+          <button class="md-ai-button secondary" type="button" data-ai-apply="placements" ${assignments.length?'':'disabled'}>Apply placements</button>
+        </div>
+      </article>
+      <article class="md-ai-card full">
+        <div class="md-ai-card-head"><h3>Color System</h3><span class="md-ai-confidence">${palette.length} colors</span></div>
+        <div class="md-ai-card-body">
+          <div class="md-ai-swatches">${palette.slice(0,5).map(c=>`<div class="md-ai-swatch"><div class="md-ai-swatch-chip" style="background:${esc(c.hex)}"></div><div><b>${esc(c.name||'Color')}</b><code>${esc(c.hex||'')}</code><small>${esc(c.usage||'Suggested brand use')}</small></div></div>`).join('')}</div>
+          <div class="md-ai-action-row" style="margin-top:14px"><button class="md-ai-button secondary" type="button" data-ai-apply="palette" ${palette.length?'':'disabled'}>Apply palette</button></div>
+        </div>
+      </article>
+      <article class="md-ai-card full">
+        <div class="md-ai-card-head"><h3>Copy Suggestions</h3><span class="md-ai-confidence">Review before applying</span></div>
+        <div class="md-ai-card-body md-ai-copy-grid">
+          ${copy.length?copy.map((x,i)=>`<div class="md-ai-copy-card"><div><b>Current</b><p>${esc(x.current||'')}</p></div><div class="suggested"><b>Suggested</b><p>${esc(x.suggested||'')}</p></div><button class="md-ai-button secondary" type="button" data-ai-copy="${i}">Apply</button></div>`).join(''):'<div class="md-ai-empty">No copy recommendations returned.</div>'}
+        </div>
+      </article>
+      <article class="md-ai-card full">
+        <div class="md-ai-card-head"><h3>Preflight Issues</h3><span class="md-ai-confidence">${preflight.length} checks</span></div>
+        <div class="md-ai-card-body md-ai-list">
+          ${preflight.length?preflight.map(x=>`<div class="md-ai-line"><strong>${esc((x.severity||'note').toUpperCase())}: ${esc(x.issue||'Issue')}</strong><span>${esc(x.suggestedFix||'Review manually before publishing.')}</span></div>`).join(''):'<div class="md-ai-line"><strong>No major issues found.</strong><span>Still review exported files before sending to clients.</span></div>'}
+        </div>
+      </article>`;
+  }
+  function applyBrand(){ const b=mdAiLastAnalysis?.brand||{}; if(b.name) state.fields.clientName=b.name; if(b.industry) state.fields.category=b.industry; if(b.tagline) state.fields.tagline=b.tagline; syncFieldInputs(); renderAll(); status('AI brand details applied.'); }
+  function applyPalette(){ const p=mdAiLastAnalysis?.palette||[]; if(!p.length) return; state.colors=p.slice(0,5).map(c=>normalizeHex(c.hex||'#1F3D2E')); while(state.colors.length<5) state.colors.push('#F1ECDF'); renderAll(); status('AI palette applied.'); }
+  function applyPlacements(){ const arr=mdAiLastAnalysis?.assetAssignments||[]; arr.forEach(x=>{ if(x.slot && x.fileId && state.assets.some(a=>a.id===x.fileId)) state.slots[x.slot]=x.fileId; }); populateSelects(); renderAll(); status('AI asset placements applied.'); }
+  function applyCopy(i){ const item=(mdAiLastAnalysis?.copySuggestions||[])[i]; if(!item) return; let done=false; const current=(item.current||'').trim(); const suggested=(item.suggested||'').trim(); if(!suggested) return; if(current){
+      const candidates=Array.from(document.querySelectorAll('#guidePreview [contenteditable], #guidePreview .editable, #guidePreview .section-title, #guidePreview .section-copy'));
+      const match=candidates.find(el=>(el.textContent||'').trim()===current) || candidates.find(el=>(el.textContent||'').trim().includes(current));
+      if(match){ match.textContent=suggested; done=true; }
+    }
+    if(!done && item.target && state.fields[item.target]!==undefined){ state.fields[item.target]=suggested; syncFieldInputs(); done=true; }
+    renderAll(false); status(done?'AI copy suggestion applied.':'Could not find the exact text in the preview. Try applying manually.'); }
+  function applySafe(){ applyBrand(); applyPalette(); applyPlacements(); }
+  function syncFieldInputs(){ Object.entries(state.fields).forEach(([k,v])=>{ const el=document.querySelector(`[data-field="${k}"]`); if(el) el.value=v||''; }); }
+  function assetName(id){ return (state.assets.find(a=>a.id===id)||{}).name || id || 'Unassigned file'; }
+  function pct(v){ const n=Number(v); return Number.isFinite(n)?Math.round(n*100)+'%':'—'; }
+  function esc(s){ return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+  document.addEventListener('click',e=>{
+    if(e.target?.id==='analyzeBrandBtn'){ openAiPanel(true); }
+    if(e.target?.id==='mdAiClose' || e.target?.id==='mdAiBackdrop'){ closeAiPanel(); }
+    if(e.target?.id==='mdAiRunBtn'){ runBrandAnalysis(); }
+    if(e.target?.id==='mdAiApplySafeBtn'){ applySafe(); }
+    const apply=e.target?.dataset?.aiApply;
+    if(apply==='brand') applyBrand();
+    if(apply==='palette') applyPalette();
+    if(apply==='placements') applyPlacements();
+    if(e.target?.dataset?.aiCopy) applyCopy(Number(e.target.dataset.aiCopy));
+  });
+})();
+</script>
+
+</body></html>`;
   }
   function assetPackageSectionHtml(){
     const items=packageItems();
@@ -3369,7 +3751,388 @@ body{
 <body><div class="lab-shell"><nav class="lab-nav"><div class="brand"><span class="brand-mark"></span><span>Moving Day · Putt Lab</span></div><div class="lab-pill">Brand Restoration Platform</div></nav><section class="hero"><div><div class="kicker">Mouse / touch mini-game</div><h1>Put it forward.</h1><p>Pull back from the ball like a putter, then release toward the cup. The ball starts at the bottom of the green and rolls forward toward the hole.</p></div><div class="stat-card"><span>Current guide</span><strong>${esc(client)}</strong></div></section><section class="game-card"><div class="scorebar"><div><strong id="status">Ready on the green</strong><span id="score">Strokes 0 · Best —</span></div><div class="controls"><button class="btn" id="startBtn">Start Round</button><button class="btn secondary" id="resetBtn">Reset</button></div></div><div class="green-wrap"><div class="direction-pill">Putting direction ↑</div><canvas id="puttCanvas" width="1100" height="650"></canvas><div class="hint"><span>Pull back behind the ball, release forward</span><i>Putting bottom → top</i></div></div></section></div>
 <script>
 const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:0,y:0,vx:0,vy:0,r:12},hole:{x:0,y:0,r:22},drag:{x:0,y:0}};const canvas=document.getElementById('puttCanvas'),ctx=canvas.getContext('2d');function pos(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*(canvas.width/r.width),y:(e.clientY-r.top)*(canvas.height/r.height)}}function resize(){const r=canvas.getBoundingClientRect();canvas.width=Math.max(780,Math.floor(r.width*devicePixelRatio));canvas.height=Math.max(540,Math.floor((r.width*.60)*devicePixelRatio));reset(false)}function reset(update=true){game.active=false;game.dragging=false;game.strokes=0;game.ball={x:canvas.width*.50,y:canvas.height*.82,vx:0,vy:0,r:Math.max(10,canvas.width*.012)};game.hole={x:canvas.width*.50,y:canvas.height*.18,r:Math.max(18,canvas.width*.021)};statusText('Ready on the green');score();draw();}function statusText(t){document.getElementById('status').textContent=t}function score(){document.getElementById('score').textContent='Strokes '+game.strokes+' · Best '+(game.best||'—')}canvas.addEventListener('pointerdown',e=>{e.preventDefault();const p=pos(e),b=game.ball;if(Math.hypot(p.x-b.x,p.y-b.y)<b.r*3.2&&!game.active){game.dragging=true;game.drag=p;canvas.setPointerCapture(e.pointerId);statusText('Line it up · release to putt');draw();}});canvas.addEventListener('pointermove',e=>{if(!game.dragging)return;e.preventDefault();game.drag=pos(e);draw();});canvas.addEventListener('pointerup',e=>{if(!game.dragging)return;e.preventDefault();const p=pos(e),b=game.ball;let dx=b.x-p.x,dy=b.y-p.y;const power=Math.min(28,Math.hypot(dx,dy)*.08);const len=Math.hypot(dx,dy)||1;b.vx=(dx/len)*power;b.vy=(dy/len)*power;game.strokes++;game.dragging=false;game.active=true;score();statusText('Rolling forward...');requestAnimationFrame(step);});function step(){if(!game.active)return;const b=game.ball,h=game.hole;b.x+=b.vx;b.y+=b.vy;b.vx*=.982;b.vy*=.982;const m=b.r+8;if(b.x<m||b.x>canvas.width-m){b.vx*=-.68;b.x=Math.max(m,Math.min(canvas.width-m,b.x))}if(b.y<m||b.y>canvas.height-m){b.vy*=-.68;b.y=Math.max(m,Math.min(canvas.height-m,b.y))}const d=Math.hypot(b.x-h.x,b.y-h.y),speed=Math.hypot(b.vx,b.vy);if(d<h.r*.86&&speed<8.2){game.active=false;b.x=h.x;b.y=h.y;b.vx=0;b.vy=0;if(!game.best||game.strokes<game.best)game.best=game.strokes;statusText(game.strokes===1?'One-putt energy.':'Nice putt. Moving Day.');score();draw(true);return}if(speed<.12){game.active=false;b.vx=0;b.vy=0;statusText('Stopped short. Pull back and putt forward.')}draw();if(game.active)requestAnimationFrame(step)}function draw(made=false){const w=canvas.width,h=canvas.height;const bg=ctx.createLinearGradient(0,h,0,0);bg.addColorStop(0,'#123a27');bg.addColorStop(.44,'#1d5738');bg.addColorStop(1,'#2c7048');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);for(let y=-80;y<h+80;y+=58){ctx.fillStyle=(Math.floor(y/58)%2)?'rgba(255,255,255,.034)':'rgba(0,0,0,.035)';ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y-120);ctx.lineTo(w,y-64);ctx.lineTo(0,y+56);ctx.closePath();ctx.fill()}const lane=ctx.createRadialGradient(w*.5,h*.52,10,w*.5,h*.52,w*.42);lane.addColorStop(0,'rgba(196,217,203,.22)');lane.addColorStop(1,'rgba(196,217,203,0)');ctx.fillStyle=lane;ctx.fillRect(0,0,w,h);for(let i=0;i<260;i++){ctx.fillStyle='rgba(241,236,223,.04)';ctx.fillRect((i*97)%w,(i*149)%h,1.2,1.2)}const hole=game.hole;ctx.beginPath();ctx.ellipse(hole.x+2,hole.y+5,hole.r*1.18,hole.r*.82,0,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.34)';ctx.fill();ctx.beginPath();ctx.arc(hole.x,hole.y,hole.r,0,Math.PI*2);ctx.fillStyle='#050806';ctx.fill();ctx.strokeStyle='rgba(241,236,223,.72)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(hole.x,hole.y-hole.r*4.2);ctx.lineTo(hole.x,hole.y-hole.r*.75);ctx.stroke();ctx.beginPath();ctx.moveTo(hole.x,hole.y-hole.r*4.2);ctx.lineTo(hole.x+hole.r*1.7,hole.y-hole.r*3.45);ctx.lineTo(hole.x,hole.y-hole.r*2.8);ctx.closePath();ctx.fillStyle='#C4D9CB';ctx.fill();const b=game.ball;if(game.dragging){const dx=b.x-game.drag.x,dy=b.y-game.drag.y,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;ctx.setLineDash([9,9]);ctx.strokeStyle='rgba(241,236,223,.60)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x+ux*Math.min(300,len*1.55),b.y+uy*Math.min(300,len*1.55));ctx.stroke();ctx.setLineDash([]);ctx.strokeStyle='rgba(13,18,14,.78)';ctx.lineWidth=Math.max(6,w*.006);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(game.drag.x,game.drag.y);ctx.lineTo(game.drag.x-uy*52,game.drag.y+ux*52);ctx.stroke();ctx.strokeStyle='rgba(241,236,223,.60)';ctx.lineWidth=Math.max(3,w*.004);ctx.beginPath();ctx.moveTo(game.drag.x-uy*32,game.drag.y+ux*32);ctx.lineTo(game.drag.x+uy*32,game.drag.y-ux*32);ctx.stroke()}ctx.beginPath();ctx.ellipse(b.x+5,b.y+8,b.r*1.08,b.r*.56,0,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.24)';ctx.fill();const ball=ctx.createRadialGradient(b.x-b.r*.35,b.y-b.r*.45,1,b.x,b.y,b.r*1.25);ball.addColorStop(0,'#ffffff');ball.addColorStop(.55,'#EDECE4');ball.addColorStop(1,'#b8b8ae');ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fillStyle=ball;ctx.fill();ctx.beginPath();ctx.arc(b.x-b.r*.34,b.y-b.r*.38,b.r*.22,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.88)';ctx.fill();if(made){ctx.fillStyle='rgba(241,236,223,.92)';ctx.font='900 '+Math.max(20,w*.032)+'px Geist, Arial';ctx.textAlign='center';ctx.fillText('MADE IT',w/2,h*.50)}}document.getElementById('startBtn').onclick=()=>reset();document.getElementById('resetBtn').onclick=()=>reset();window.addEventListener('resize',resize);resize();
-<\/script></body></html>`;
+<\/script>
+
+<!-- Moving Day AI Analysis Layer · v13 -->
+<style id="md-ai-analysis-style">
+  .ai-btn{
+    position:relative!important;
+    overflow:hidden!important;
+    border-color:rgba(196,217,203,.32)!important;
+    background:linear-gradient(135deg,rgba(196,217,203,.18),rgba(241,236,223,.06))!important;
+    color:var(--cream)!important;
+  }
+  .ai-btn:before{
+    content:"";
+    position:absolute;
+    inset:-1px;
+    background:linear-gradient(90deg,transparent,rgba(196,217,203,.34),transparent);
+    transform:translateX(-110%);
+    animation:mdAiSweep 3.8s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes mdAiSweep{0%,64%{transform:translateX(-110%)}100%{transform:translateX(110%)}}
+  .md-ai-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(7,17,12,.62);
+    backdrop-filter:blur(12px);
+    z-index:1000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:28px;
+  }
+  .md-ai-backdrop.active{display:flex;}
+  .md-ai-panel{
+    width:min(1120px,100%);
+    max-height:90vh;
+    overflow:hidden;
+    border-radius:36px;
+    background:linear-gradient(145deg,#F7F3EA,#E9E1D2);
+    color:#15140F;
+    border:1px solid rgba(255,255,255,.68);
+    box-shadow:0 42px 140px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.82);
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr);
+  }
+  .md-ai-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:24px;
+    padding:26px 30px 22px;
+    border-bottom:1px solid rgba(31,61,46,.10);
+    background:radial-gradient(circle at 90% 0%,rgba(196,217,203,.30),transparent 34%),rgba(255,255,255,.38);
+  }
+  .md-ai-kicker{
+    font:900 10px var(--sans);
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:#244834;
+    margin-bottom:8px;
+  }
+  .md-ai-title{
+    font-family:var(--display);
+    font-size:clamp(34px,4vw,54px);
+    font-weight:400;
+    letter-spacing:-.04em;
+    line-height:.95;
+    margin:0;
+  }
+  .md-ai-sub{
+    color:rgba(21,20,15,.60);
+    max-width:680px;
+    font-size:14px;
+    line-height:1.55;
+    margin-top:10px;
+  }
+  .md-ai-close{
+    width:42px;
+    height:42px;
+    border:1px solid rgba(31,61,46,.12);
+    background:#fff;
+    color:#1F3D2E;
+    border-radius:999px;
+    font-weight:900;
+  }
+  .md-ai-body{
+    overflow:auto;
+    padding:24px 30px 30px;
+  }
+  .md-ai-runbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+    padding:14px;
+    border:1px solid rgba(31,61,46,.09);
+    border-radius:22px;
+    background:rgba(255,255,255,.54);
+  }
+  .md-ai-runbar p{margin:0;color:rgba(21,20,15,.58);font-size:13px;max-width:720px;line-height:1.45;}
+  .md-ai-action-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .md-ai-button{
+    border:1px solid rgba(31,61,46,.12);
+    background:#1F3D2E;
+    color:#F1ECDF;
+    border-radius:999px;
+    padding:11px 14px;
+    font:900 9px var(--sans);
+    letter-spacing:.13em;
+    text-transform:uppercase;
+  }
+  .md-ai-button.secondary{background:#fff;color:#1F3D2E;}
+  .md-ai-button.ghost{background:rgba(31,61,46,.06);color:#1F3D2E;}
+  .md-ai-button:disabled{opacity:.48;cursor:not-allowed;}
+  .md-ai-status{
+    display:none;
+    margin:0 0 18px;
+    padding:14px 16px;
+    border-radius:18px;
+    border:1px solid rgba(31,61,46,.10);
+    background:rgba(31,61,46,.06);
+    color:#244834;
+    font-size:13px;
+    font-weight:700;
+  }
+  .md-ai-status.active{display:block;}
+  .md-ai-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  .md-ai-card{
+    border:1px solid rgba(31,61,46,.10);
+    background:rgba(255,255,255,.70);
+    border-radius:28px;
+    box-shadow:0 16px 44px rgba(31,61,46,.07),inset 0 1px 0 rgba(255,255,255,.86);
+    overflow:hidden;
+  }
+  .md-ai-card.full{grid-column:1/-1;}
+  .md-ai-card-head{
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+    align-items:flex-start;
+    padding:20px 22px 14px;
+    border-bottom:1px solid rgba(21,20,15,.07);
+  }
+  .md-ai-card h3{
+    margin:0;
+    color:#1F3D2E;
+    font:900 10px var(--sans);
+    letter-spacing:.18em;
+    text-transform:uppercase;
+  }
+  .md-ai-confidence{
+    display:inline-flex;
+    align-items:center;
+    border-radius:999px;
+    min-height:26px;
+    padding:0 10px;
+    background:#EAF0E8;
+    color:#1F3D2E;
+    font:900 9px var(--sans);
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .md-ai-card-body{padding:18px 22px 22px;}
+  .md-ai-list{display:grid;gap:10px;}
+  .md-ai-line{
+    display:grid;
+    gap:4px;
+    padding:12px;
+    border-radius:16px;
+    background:rgba(251,248,240,.70);
+    border:1px solid rgba(31,61,46,.07);
+  }
+  .md-ai-line strong{font-size:13px;color:#15140F;line-height:1.25;}
+  .md-ai-line span,.md-ai-line small{font-size:12px;color:rgba(21,20,15,.58);line-height:1.4;}
+  .md-ai-swatches{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;}
+  .md-ai-swatch{overflow:hidden;border-radius:18px;border:1px solid rgba(21,20,15,.10);background:#fff;min-height:150px;display:grid;grid-template-rows:76px 1fr;}
+  .md-ai-swatch-chip{height:76px;border-bottom:1px solid rgba(21,20,15,.08);}
+  .md-ai-swatch div:last-child{padding:12px;display:grid;gap:5px;}
+  .md-ai-swatch b{font:900 9px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:#1F3D2E;line-height:1.2;}
+  .md-ai-swatch code{font:900 11px ui-monospace,monospace;color:#15140F;}
+  .md-ai-copy-grid{display:grid;gap:12px;}
+  .md-ai-copy-card{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:stretch;border:1px solid rgba(31,61,46,.08);background:rgba(251,248,240,.70);border-radius:20px;padding:12px;}
+  .md-ai-copy-card b{display:block;font:900 8px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:rgba(21,20,15,.46);margin-bottom:6px;}
+  .md-ai-copy-card p{margin:0;font-size:13px;line-height:1.42;color:rgba(21,20,15,.70);}
+  .md-ai-copy-card .suggested p{color:#15140F;font-weight:650;}
+  .md-ai-empty{padding:36px;text-align:center;color:rgba(21,20,15,.52);font-size:13px;border:1px dashed rgba(31,61,46,.18);border-radius:22px;background:rgba(255,255,255,.42);}
+  .md-ai-error{background:#fff3ef!important;color:#7f2d22!important;border-color:rgba(156,60,60,.18)!important;}
+  @media(max-width:900px){.md-ai-grid{grid-template-columns:1fr}.md-ai-copy-card{grid-template-columns:1fr}.md-ai-swatches{grid-template-columns:repeat(2,minmax(0,1fr))}.md-ai-panel{max-height:94vh}.md-ai-head{padding:22px}.md-ai-body{padding:18px}.md-ai-backdrop{padding:12px}}
+</style>
+
+<div class="md-ai-backdrop" id="mdAiBackdrop" aria-hidden="true">
+  <section class="md-ai-panel" role="dialog" aria-modal="true" aria-labelledby="mdAiTitle">
+    <header class="md-ai-head">
+      <div>
+        <div class="md-ai-kicker">Moving Day Analysis</div>
+        <h2 class="md-ai-title" id="mdAiTitle">Brand restoration recommendations.</h2>
+        <p class="md-ai-sub">The AI reviews uploads, current copy, palette, and slot assignments. Nothing changes until you approve a specific recommendation.</p>
+      </div>
+      <button class="md-ai-close" type="button" id="mdAiClose" aria-label="Close analysis">×</button>
+    </header>
+    <div class="md-ai-body">
+      <div class="md-ai-runbar">
+        <p><strong>Controlled delivery:</strong> analysis comes back as review cards. Apply palette, placements, copy, or preflight fixes separately.</p>
+        <div class="md-ai-action-row">
+          <button class="md-ai-button" type="button" id="mdAiRunBtn">Run Analysis</button>
+          <button class="md-ai-button secondary" type="button" id="mdAiApplySafeBtn" disabled>Apply Safe Suggestions</button>
+        </div>
+      </div>
+      <div class="md-ai-status" id="mdAiStatus"></div>
+      <div id="mdAiResults" class="md-ai-empty">Upload assets, then run analysis. Recommendations will appear here as clean approval cards.</div>
+    </div>
+  </section>
+</div>
+
+<script id="md-ai-analysis-script">
+(function(){
+  let mdAiLastAnalysis = null;
+  const SLOT_LABELS = {
+    heroLogo:'Hero logo', primaryLogo:'Primary logo', iconMark:'Icon / mark', iconVariant:'Icon variant', profileImage:'Profile image', websiteHeader:'Website header', businessCard:'Business card', socialPost:'Social post'
+  };
+  function getEl(id){ return document.getElementById(id); }
+  function openAiPanel(autoRun=false){
+    const panel=getEl('mdAiBackdrop'); if(!panel) return;
+    panel.classList.add('active'); panel.setAttribute('aria-hidden','false');
+    if(autoRun && (!mdAiLastAnalysis)) setTimeout(runBrandAnalysis, 150);
+  }
+  function closeAiPanel(){ const panel=getEl('mdAiBackdrop'); if(panel){ panel.classList.remove('active'); panel.setAttribute('aria-hidden','true'); } }
+  function aiStatus(msg, error=false){ const el=getEl('mdAiStatus'); if(!el) return; el.textContent=msg; el.classList.add('active'); el.classList.toggle('md-ai-error', !!error); }
+  function setRunLoading(loading){ const btn=getEl('mdAiRunBtn'); if(btn){ btn.disabled=loading; btn.textContent=loading?'Analyzing…':'Run Analysis'; } }
+  async function buildAiPayload(){
+    const assets = (window.state?.assets || state.assets || []).slice(0, 12);
+    const mappedAssets=[];
+    for(const a of assets){
+      const item={ id:a.id, name:a.name, type:a.type, ext:a.ext, assignedSlot: findSlotForAsset(a.id), dataUrl:null };
+      if(isAiImage(a)) item.dataUrl = await shrinkDataUrl(a.data, 900, .74);
+      mappedAssets.push(item);
+    }
+    return {
+      currentFields: {...state.fields},
+      currentColors: [...state.colors],
+      slots: {...state.slots},
+      availableSlots: (typeof slotDefs!=='undefined'?slotDefs:[]).map(s=>({key:s.key,label:s.label,requirements:s.req})),
+      assets: mappedAssets,
+      previewText: collectPreviewText()
+    };
+  }
+  function findSlotForAsset(assetId){
+    const entries=Object.entries(state.slots||{}).find(([,v])=>v===assetId);
+    return entries?entries[0]:null;
+  }
+  function isAiImage(a){ return a && a.data && /^data:image\/(png|jpeg|jpg|webp|gif|svg\+xml)/i.test(a.data); }
+  function shrinkDataUrl(dataUrl, max=900, quality=.74){
+    return new Promise(resolve=>{
+      if(!dataUrl || dataUrl.length < 700000 || dataUrl.startsWith('data:image/svg+xml')) return resolve(dataUrl);
+      const img=new Image();
+      img.onload=()=>{
+        try{
+          const scale=Math.min(1, max/Math.max(img.width,img.height));
+          const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(img.width*scale)); c.height=Math.max(1,Math.round(img.height*scale));
+          const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,c.width,c.height);
+          resolve(c.toDataURL('image/jpeg', quality));
+        }catch(err){ resolve(dataUrl); }
+      };
+      img.onerror=()=>resolve(dataUrl);
+      img.src=dataUrl;
+    });
+  }
+  function collectPreviewText(){
+    return Array.from(document.querySelectorAll('#guidePreview [contenteditable], #guidePreview .section-title, #guidePreview .section-copy, #guidePreview .guide-title, #guidePreview .guide-tagline'))
+      .map((el,i)=>({index:i, tag:el.tagName, text:(el.textContent||'').trim().slice(0,240)}))
+      .filter(x=>x.text);
+  }
+  async function postAnalysis(payload){
+    const endpoints=['/api/analyze-brand','/.netlify/functions/analyze-brand'];
+    let lastError;
+    for(const url of endpoints){
+      try{
+        const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        const text=await res.text();
+        let json; try{ json=JSON.parse(text); }catch(_){ json={error:text}; }
+        if(res.ok && json.analysis) return json.analysis;
+        lastError = new Error(json.error || json.message || `${url} returned ${res.status}`);
+      }catch(err){ lastError=err; }
+    }
+    throw lastError || new Error('No analysis endpoint responded.');
+  }
+  async function runBrandAnalysis(){
+    if(!state.assets.length){ aiStatus('Upload at least one brand asset before running analysis.', true); return; }
+    try{
+      setRunLoading(true);
+      aiStatus('Reviewing assets, colors, copy, and slot assignments…');
+      const payload=await buildAiPayload();
+      const analysis=await postAnalysis(payload);
+      mdAiLastAnalysis=analysis;
+      renderAiResults(analysis);
+      getEl('mdAiApplySafeBtn').disabled=false;
+      aiStatus('Analysis ready. Review and apply only what you want.');
+    }catch(err){
+      console.error(err);
+      aiStatus(`Analysis failed: ${err.message || err}. Check your backend function and OPENAI_API_KEY.`, true);
+    }finally{ setRunLoading(false); }
+  }
+  function renderAiResults(a){
+    const root=getEl('mdAiResults'); if(!root) return;
+    root.className='md-ai-grid';
+    const brand=a.brand||{};
+    const palette=Array.isArray(a.palette)?a.palette:[];
+    const assignments=Array.isArray(a.assetAssignments)?a.assetAssignments:[];
+    const copy=Array.isArray(a.copySuggestions)?a.copySuggestions:[];
+    const preflight=Array.isArray(a.preflight)?a.preflight:[];
+    root.innerHTML=`
+      <article class="md-ai-card">
+        <div class="md-ai-card-head"><h3>Brand Identity</h3><span class="md-ai-confidence">${pct(brand.confidence)} confidence</span></div>
+        <div class="md-ai-card-body md-ai-list">
+          <div class="md-ai-line"><strong>${esc(brand.name||state.fields.clientName||'Detected brand')}</strong><span>${esc(brand.industry||'Industry not detected')}</span><small>${esc((brand.tone||[]).join(' · ')||'Tone pending')}</small></div>
+          <button class="md-ai-button secondary" type="button" data-ai-apply="brand">Apply brand details</button>
+        </div>
+      </article>
+      <article class="md-ai-card">
+        <div class="md-ai-card-head"><h3>Asset Placement</h3><span class="md-ai-confidence">${assignments.length} suggestions</span></div>
+        <div class="md-ai-card-body md-ai-list">
+          ${assignments.length?assignments.map(x=>`<div class="md-ai-line"><strong>${esc(SLOT_LABELS[x.slot]||x.slot)} → ${esc(assetName(x.fileId))}</strong><span>${esc(x.reason||'Recommended placement')}</span><small>${pct(x.confidence)} confidence</small></div>`).join(''):'<div class="md-ai-line"><strong>No placement suggestions yet.</strong><span>Upload more image assets for better classification.</span></div>'}
+          <button class="md-ai-button secondary" type="button" data-ai-apply="placements" ${assignments.length?'':'disabled'}>Apply placements</button>
+        </div>
+      </article>
+      <article class="md-ai-card full">
+        <div class="md-ai-card-head"><h3>Color System</h3><span class="md-ai-confidence">${palette.length} colors</span></div>
+        <div class="md-ai-card-body">
+          <div class="md-ai-swatches">${palette.slice(0,5).map(c=>`<div class="md-ai-swatch"><div class="md-ai-swatch-chip" style="background:${esc(c.hex)}"></div><div><b>${esc(c.name||'Color')}</b><code>${esc(c.hex||'')}</code><small>${esc(c.usage||'Suggested brand use')}</small></div></div>`).join('')}</div>
+          <div class="md-ai-action-row" style="margin-top:14px"><button class="md-ai-button secondary" type="button" data-ai-apply="palette" ${palette.length?'':'disabled'}>Apply palette</button></div>
+        </div>
+      </article>
+      <article class="md-ai-card full">
+        <div class="md-ai-card-head"><h3>Copy Suggestions</h3><span class="md-ai-confidence">Review before applying</span></div>
+        <div class="md-ai-card-body md-ai-copy-grid">
+          ${copy.length?copy.map((x,i)=>`<div class="md-ai-copy-card"><div><b>Current</b><p>${esc(x.current||'')}</p></div><div class="suggested"><b>Suggested</b><p>${esc(x.suggested||'')}</p></div><button class="md-ai-button secondary" type="button" data-ai-copy="${i}">Apply</button></div>`).join(''):'<div class="md-ai-empty">No copy recommendations returned.</div>'}
+        </div>
+      </article>
+      <article class="md-ai-card full">
+        <div class="md-ai-card-head"><h3>Preflight Issues</h3><span class="md-ai-confidence">${preflight.length} checks</span></div>
+        <div class="md-ai-card-body md-ai-list">
+          ${preflight.length?preflight.map(x=>`<div class="md-ai-line"><strong>${esc((x.severity||'note').toUpperCase())}: ${esc(x.issue||'Issue')}</strong><span>${esc(x.suggestedFix||'Review manually before publishing.')}</span></div>`).join(''):'<div class="md-ai-line"><strong>No major issues found.</strong><span>Still review exported files before sending to clients.</span></div>'}
+        </div>
+      </article>`;
+  }
+  function applyBrand(){ const b=mdAiLastAnalysis?.brand||{}; if(b.name) state.fields.clientName=b.name; if(b.industry) state.fields.category=b.industry; if(b.tagline) state.fields.tagline=b.tagline; syncFieldInputs(); renderAll(); status('AI brand details applied.'); }
+  function applyPalette(){ const p=mdAiLastAnalysis?.palette||[]; if(!p.length) return; state.colors=p.slice(0,5).map(c=>normalizeHex(c.hex||'#1F3D2E')); while(state.colors.length<5) state.colors.push('#F1ECDF'); renderAll(); status('AI palette applied.'); }
+  function applyPlacements(){ const arr=mdAiLastAnalysis?.assetAssignments||[]; arr.forEach(x=>{ if(x.slot && x.fileId && state.assets.some(a=>a.id===x.fileId)) state.slots[x.slot]=x.fileId; }); populateSelects(); renderAll(); status('AI asset placements applied.'); }
+  function applyCopy(i){ const item=(mdAiLastAnalysis?.copySuggestions||[])[i]; if(!item) return; let done=false; const current=(item.current||'').trim(); const suggested=(item.suggested||'').trim(); if(!suggested) return; if(current){
+      const candidates=Array.from(document.querySelectorAll('#guidePreview [contenteditable], #guidePreview .editable, #guidePreview .section-title, #guidePreview .section-copy'));
+      const match=candidates.find(el=>(el.textContent||'').trim()===current) || candidates.find(el=>(el.textContent||'').trim().includes(current));
+      if(match){ match.textContent=suggested; done=true; }
+    }
+    if(!done && item.target && state.fields[item.target]!==undefined){ state.fields[item.target]=suggested; syncFieldInputs(); done=true; }
+    renderAll(false); status(done?'AI copy suggestion applied.':'Could not find the exact text in the preview. Try applying manually.'); }
+  function applySafe(){ applyBrand(); applyPalette(); applyPlacements(); }
+  function syncFieldInputs(){ Object.entries(state.fields).forEach(([k,v])=>{ const el=document.querySelector(`[data-field="${k}"]`); if(el) el.value=v||''; }); }
+  function assetName(id){ return (state.assets.find(a=>a.id===id)||{}).name || id || 'Unassigned file'; }
+  function pct(v){ const n=Number(v); return Number.isFinite(n)?Math.round(n*100)+'%':'—'; }
+  function esc(s){ return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+  document.addEventListener('click',e=>{
+    if(e.target?.id==='analyzeBrandBtn'){ openAiPanel(true); }
+    if(e.target?.id==='mdAiClose' || e.target?.id==='mdAiBackdrop'){ closeAiPanel(); }
+    if(e.target?.id==='mdAiRunBtn'){ runBrandAnalysis(); }
+    if(e.target?.id==='mdAiApplySafeBtn'){ applySafe(); }
+    const apply=e.target?.dataset?.aiApply;
+    if(apply==='brand') applyBrand();
+    if(apply==='palette') applyPalette();
+    if(apply==='placements') applyPlacements();
+    if(e.target?.dataset?.aiCopy) applyCopy(Number(e.target.dataset.aiCopy));
+  });
+})();
+</script>
+
+</body></html>`;
     w.document.open(); w.document.write(html); w.document.close(); w.focus();
   }
   function wire(){
@@ -3467,6 +4230,387 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wireUnlock);else wireUnlock();
   window.unlockPreviewGuide=unlockPreviewGuide;
+})();
+</script>
+
+
+
+<!-- Moving Day AI Analysis Layer · v13 -->
+<style id="md-ai-analysis-style">
+  .ai-btn{
+    position:relative!important;
+    overflow:hidden!important;
+    border-color:rgba(196,217,203,.32)!important;
+    background:linear-gradient(135deg,rgba(196,217,203,.18),rgba(241,236,223,.06))!important;
+    color:var(--cream)!important;
+  }
+  .ai-btn:before{
+    content:"";
+    position:absolute;
+    inset:-1px;
+    background:linear-gradient(90deg,transparent,rgba(196,217,203,.34),transparent);
+    transform:translateX(-110%);
+    animation:mdAiSweep 3.8s ease-in-out infinite;
+    pointer-events:none;
+  }
+  @keyframes mdAiSweep{0%,64%{transform:translateX(-110%)}100%{transform:translateX(110%)}}
+  .md-ai-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(7,17,12,.62);
+    backdrop-filter:blur(12px);
+    z-index:1000;
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:28px;
+  }
+  .md-ai-backdrop.active{display:flex;}
+  .md-ai-panel{
+    width:min(1120px,100%);
+    max-height:90vh;
+    overflow:hidden;
+    border-radius:36px;
+    background:linear-gradient(145deg,#F7F3EA,#E9E1D2);
+    color:#15140F;
+    border:1px solid rgba(255,255,255,.68);
+    box-shadow:0 42px 140px rgba(0,0,0,.38),inset 0 1px 0 rgba(255,255,255,.82);
+    display:grid;
+    grid-template-rows:auto minmax(0,1fr);
+  }
+  .md-ai-head{
+    display:flex;
+    align-items:flex-start;
+    justify-content:space-between;
+    gap:24px;
+    padding:26px 30px 22px;
+    border-bottom:1px solid rgba(31,61,46,.10);
+    background:radial-gradient(circle at 90% 0%,rgba(196,217,203,.30),transparent 34%),rgba(255,255,255,.38);
+  }
+  .md-ai-kicker{
+    font:900 10px var(--sans);
+    letter-spacing:.18em;
+    text-transform:uppercase;
+    color:#244834;
+    margin-bottom:8px;
+  }
+  .md-ai-title{
+    font-family:var(--display);
+    font-size:clamp(34px,4vw,54px);
+    font-weight:400;
+    letter-spacing:-.04em;
+    line-height:.95;
+    margin:0;
+  }
+  .md-ai-sub{
+    color:rgba(21,20,15,.60);
+    max-width:680px;
+    font-size:14px;
+    line-height:1.55;
+    margin-top:10px;
+  }
+  .md-ai-close{
+    width:42px;
+    height:42px;
+    border:1px solid rgba(31,61,46,.12);
+    background:#fff;
+    color:#1F3D2E;
+    border-radius:999px;
+    font-weight:900;
+  }
+  .md-ai-body{
+    overflow:auto;
+    padding:24px 30px 30px;
+  }
+  .md-ai-runbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+    padding:14px;
+    border:1px solid rgba(31,61,46,.09);
+    border-radius:22px;
+    background:rgba(255,255,255,.54);
+  }
+  .md-ai-runbar p{margin:0;color:rgba(21,20,15,.58);font-size:13px;max-width:720px;line-height:1.45;}
+  .md-ai-action-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .md-ai-button{
+    border:1px solid rgba(31,61,46,.12);
+    background:#1F3D2E;
+    color:#F1ECDF;
+    border-radius:999px;
+    padding:11px 14px;
+    font:900 9px var(--sans);
+    letter-spacing:.13em;
+    text-transform:uppercase;
+  }
+  .md-ai-button.secondary{background:#fff;color:#1F3D2E;}
+  .md-ai-button.ghost{background:rgba(31,61,46,.06);color:#1F3D2E;}
+  .md-ai-button:disabled{opacity:.48;cursor:not-allowed;}
+  .md-ai-status{
+    display:none;
+    margin:0 0 18px;
+    padding:14px 16px;
+    border-radius:18px;
+    border:1px solid rgba(31,61,46,.10);
+    background:rgba(31,61,46,.06);
+    color:#244834;
+    font-size:13px;
+    font-weight:700;
+  }
+  .md-ai-status.active{display:block;}
+  .md-ai-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+  }
+  .md-ai-card{
+    border:1px solid rgba(31,61,46,.10);
+    background:rgba(255,255,255,.70);
+    border-radius:28px;
+    box-shadow:0 16px 44px rgba(31,61,46,.07),inset 0 1px 0 rgba(255,255,255,.86);
+    overflow:hidden;
+  }
+  .md-ai-card.full{grid-column:1/-1;}
+  .md-ai-card-head{
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+    align-items:flex-start;
+    padding:20px 22px 14px;
+    border-bottom:1px solid rgba(21,20,15,.07);
+  }
+  .md-ai-card h3{
+    margin:0;
+    color:#1F3D2E;
+    font:900 10px var(--sans);
+    letter-spacing:.18em;
+    text-transform:uppercase;
+  }
+  .md-ai-confidence{
+    display:inline-flex;
+    align-items:center;
+    border-radius:999px;
+    min-height:26px;
+    padding:0 10px;
+    background:#EAF0E8;
+    color:#1F3D2E;
+    font:900 9px var(--sans);
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    white-space:nowrap;
+  }
+  .md-ai-card-body{padding:18px 22px 22px;}
+  .md-ai-list{display:grid;gap:10px;}
+  .md-ai-line{
+    display:grid;
+    gap:4px;
+    padding:12px;
+    border-radius:16px;
+    background:rgba(251,248,240,.70);
+    border:1px solid rgba(31,61,46,.07);
+  }
+  .md-ai-line strong{font-size:13px;color:#15140F;line-height:1.25;}
+  .md-ai-line span,.md-ai-line small{font-size:12px;color:rgba(21,20,15,.58);line-height:1.4;}
+  .md-ai-swatches{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;}
+  .md-ai-swatch{overflow:hidden;border-radius:18px;border:1px solid rgba(21,20,15,.10);background:#fff;min-height:150px;display:grid;grid-template-rows:76px 1fr;}
+  .md-ai-swatch-chip{height:76px;border-bottom:1px solid rgba(21,20,15,.08);}
+  .md-ai-swatch div:last-child{padding:12px;display:grid;gap:5px;}
+  .md-ai-swatch b{font:900 9px var(--sans);letter-spacing:.12em;text-transform:uppercase;color:#1F3D2E;line-height:1.2;}
+  .md-ai-swatch code{font:900 11px ui-monospace,monospace;color:#15140F;}
+  .md-ai-copy-grid{display:grid;gap:12px;}
+  .md-ai-copy-card{display:grid;grid-template-columns:1fr 1fr auto;gap:12px;align-items:stretch;border:1px solid rgba(31,61,46,.08);background:rgba(251,248,240,.70);border-radius:20px;padding:12px;}
+  .md-ai-copy-card b{display:block;font:900 8px var(--sans);letter-spacing:.14em;text-transform:uppercase;color:rgba(21,20,15,.46);margin-bottom:6px;}
+  .md-ai-copy-card p{margin:0;font-size:13px;line-height:1.42;color:rgba(21,20,15,.70);}
+  .md-ai-copy-card .suggested p{color:#15140F;font-weight:650;}
+  .md-ai-empty{padding:36px;text-align:center;color:rgba(21,20,15,.52);font-size:13px;border:1px dashed rgba(31,61,46,.18);border-radius:22px;background:rgba(255,255,255,.42);}
+  .md-ai-error{background:#fff3ef!important;color:#7f2d22!important;border-color:rgba(156,60,60,.18)!important;}
+  @media(max-width:900px){.md-ai-grid{grid-template-columns:1fr}.md-ai-copy-card{grid-template-columns:1fr}.md-ai-swatches{grid-template-columns:repeat(2,minmax(0,1fr))}.md-ai-panel{max-height:94vh}.md-ai-head{padding:22px}.md-ai-body{padding:18px}.md-ai-backdrop{padding:12px}}
+</style>
+
+<div class="md-ai-backdrop" id="mdAiBackdrop" aria-hidden="true">
+  <section class="md-ai-panel" role="dialog" aria-modal="true" aria-labelledby="mdAiTitle">
+    <header class="md-ai-head">
+      <div>
+        <div class="md-ai-kicker">Moving Day Analysis</div>
+        <h2 class="md-ai-title" id="mdAiTitle">Brand restoration recommendations.</h2>
+        <p class="md-ai-sub">The AI reviews uploads, current copy, palette, and slot assignments. Nothing changes until you approve a specific recommendation.</p>
+      </div>
+      <button class="md-ai-close" type="button" id="mdAiClose" aria-label="Close analysis">×</button>
+    </header>
+    <div class="md-ai-body">
+      <div class="md-ai-runbar">
+        <p><strong>Controlled delivery:</strong> analysis comes back as review cards. Apply palette, placements, copy, or preflight fixes separately.</p>
+        <div class="md-ai-action-row">
+          <button class="md-ai-button" type="button" id="mdAiRunBtn">Run Analysis</button>
+          <button class="md-ai-button secondary" type="button" id="mdAiApplySafeBtn" disabled>Apply Safe Suggestions</button>
+        </div>
+      </div>
+      <div class="md-ai-status" id="mdAiStatus"></div>
+      <div id="mdAiResults" class="md-ai-empty">Upload assets, then run analysis. Recommendations will appear here as clean approval cards.</div>
+    </div>
+  </section>
+</div>
+
+<script id="md-ai-analysis-script">
+(function(){
+  let mdAiLastAnalysis = null;
+  const SLOT_LABELS = {
+    heroLogo:'Hero logo', primaryLogo:'Primary logo', iconMark:'Icon / mark', iconVariant:'Icon variant', profileImage:'Profile image', websiteHeader:'Website header', businessCard:'Business card', socialPost:'Social post'
+  };
+  function getEl(id){ return document.getElementById(id); }
+  function openAiPanel(autoRun=false){
+    const panel=getEl('mdAiBackdrop'); if(!panel) return;
+    panel.classList.add('active'); panel.setAttribute('aria-hidden','false');
+    if(autoRun && (!mdAiLastAnalysis)) setTimeout(runBrandAnalysis, 150);
+  }
+  function closeAiPanel(){ const panel=getEl('mdAiBackdrop'); if(panel){ panel.classList.remove('active'); panel.setAttribute('aria-hidden','true'); } }
+  function aiStatus(msg, error=false){ const el=getEl('mdAiStatus'); if(!el) return; el.textContent=msg; el.classList.add('active'); el.classList.toggle('md-ai-error', !!error); }
+  function setRunLoading(loading){ const btn=getEl('mdAiRunBtn'); if(btn){ btn.disabled=loading; btn.textContent=loading?'Analyzing…':'Run Analysis'; } }
+  async function buildAiPayload(){
+    const assets = (window.state?.assets || state.assets || []).slice(0, 12);
+    const mappedAssets=[];
+    for(const a of assets){
+      const item={ id:a.id, name:a.name, type:a.type, ext:a.ext, assignedSlot: findSlotForAsset(a.id), dataUrl:null };
+      if(isAiImage(a)) item.dataUrl = await shrinkDataUrl(a.data, 900, .74);
+      mappedAssets.push(item);
+    }
+    return {
+      currentFields: {...state.fields},
+      currentColors: [...state.colors],
+      slots: {...state.slots},
+      availableSlots: (typeof slotDefs!=='undefined'?slotDefs:[]).map(s=>({key:s.key,label:s.label,requirements:s.req})),
+      assets: mappedAssets,
+      previewText: collectPreviewText()
+    };
+  }
+  function findSlotForAsset(assetId){
+    const entries=Object.entries(state.slots||{}).find(([,v])=>v===assetId);
+    return entries?entries[0]:null;
+  }
+  function isAiImage(a){ return a && a.data && /^data:image\/(png|jpeg|jpg|webp|gif|svg\+xml)/i.test(a.data); }
+  function shrinkDataUrl(dataUrl, max=900, quality=.74){
+    return new Promise(resolve=>{
+      if(!dataUrl || dataUrl.length < 700000 || dataUrl.startsWith('data:image/svg+xml')) return resolve(dataUrl);
+      const img=new Image();
+      img.onload=()=>{
+        try{
+          const scale=Math.min(1, max/Math.max(img.width,img.height));
+          const c=document.createElement('canvas'); c.width=Math.max(1,Math.round(img.width*scale)); c.height=Math.max(1,Math.round(img.height*scale));
+          const ctx=c.getContext('2d'); ctx.drawImage(img,0,0,c.width,c.height);
+          resolve(c.toDataURL('image/jpeg', quality));
+        }catch(err){ resolve(dataUrl); }
+      };
+      img.onerror=()=>resolve(dataUrl);
+      img.src=dataUrl;
+    });
+  }
+  function collectPreviewText(){
+    return Array.from(document.querySelectorAll('#guidePreview [contenteditable], #guidePreview .section-title, #guidePreview .section-copy, #guidePreview .guide-title, #guidePreview .guide-tagline'))
+      .map((el,i)=>({index:i, tag:el.tagName, text:(el.textContent||'').trim().slice(0,240)}))
+      .filter(x=>x.text);
+  }
+  async function postAnalysis(payload){
+    const endpoints=['/api/analyze-brand','/.netlify/functions/analyze-brand'];
+    let lastError;
+    for(const url of endpoints){
+      try{
+        const res=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});
+        const text=await res.text();
+        let json; try{ json=JSON.parse(text); }catch(_){ json={error:text}; }
+        if(res.ok && json.analysis) return json.analysis;
+        lastError = new Error(json.error || json.message || `${url} returned ${res.status}`);
+      }catch(err){ lastError=err; }
+    }
+    throw lastError || new Error('No analysis endpoint responded.');
+  }
+  async function runBrandAnalysis(){
+    if(!state.assets.length){ aiStatus('Upload at least one brand asset before running analysis.', true); return; }
+    try{
+      setRunLoading(true);
+      aiStatus('Reviewing assets, colors, copy, and slot assignments…');
+      const payload=await buildAiPayload();
+      const analysis=await postAnalysis(payload);
+      mdAiLastAnalysis=analysis;
+      renderAiResults(analysis);
+      getEl('mdAiApplySafeBtn').disabled=false;
+      aiStatus('Analysis ready. Review and apply only what you want.');
+    }catch(err){
+      console.error(err);
+      aiStatus(`Analysis failed: ${err.message || err}. Check your backend function and OPENAI_API_KEY.`, true);
+    }finally{ setRunLoading(false); }
+  }
+  function renderAiResults(a){
+    const root=getEl('mdAiResults'); if(!root) return;
+    root.className='md-ai-grid';
+    const brand=a.brand||{};
+    const palette=Array.isArray(a.palette)?a.palette:[];
+    const assignments=Array.isArray(a.assetAssignments)?a.assetAssignments:[];
+    const copy=Array.isArray(a.copySuggestions)?a.copySuggestions:[];
+    const preflight=Array.isArray(a.preflight)?a.preflight:[];
+    root.innerHTML=`
+      <article class="md-ai-card">
+        <div class="md-ai-card-head"><h3>Brand Identity</h3><span class="md-ai-confidence">${pct(brand.confidence)} confidence</span></div>
+        <div class="md-ai-card-body md-ai-list">
+          <div class="md-ai-line"><strong>${esc(brand.name||state.fields.clientName||'Detected brand')}</strong><span>${esc(brand.industry||'Industry not detected')}</span><small>${esc((brand.tone||[]).join(' · ')||'Tone pending')}</small></div>
+          <button class="md-ai-button secondary" type="button" data-ai-apply="brand">Apply brand details</button>
+        </div>
+      </article>
+      <article class="md-ai-card">
+        <div class="md-ai-card-head"><h3>Asset Placement</h3><span class="md-ai-confidence">${assignments.length} suggestions</span></div>
+        <div class="md-ai-card-body md-ai-list">
+          ${assignments.length?assignments.map(x=>`<div class="md-ai-line"><strong>${esc(SLOT_LABELS[x.slot]||x.slot)} → ${esc(assetName(x.fileId))}</strong><span>${esc(x.reason||'Recommended placement')}</span><small>${pct(x.confidence)} confidence</small></div>`).join(''):'<div class="md-ai-line"><strong>No placement suggestions yet.</strong><span>Upload more image assets for better classification.</span></div>'}
+          <button class="md-ai-button secondary" type="button" data-ai-apply="placements" ${assignments.length?'':'disabled'}>Apply placements</button>
+        </div>
+      </article>
+      <article class="md-ai-card full">
+        <div class="md-ai-card-head"><h3>Color System</h3><span class="md-ai-confidence">${palette.length} colors</span></div>
+        <div class="md-ai-card-body">
+          <div class="md-ai-swatches">${palette.slice(0,5).map(c=>`<div class="md-ai-swatch"><div class="md-ai-swatch-chip" style="background:${esc(c.hex)}"></div><div><b>${esc(c.name||'Color')}</b><code>${esc(c.hex||'')}</code><small>${esc(c.usage||'Suggested brand use')}</small></div></div>`).join('')}</div>
+          <div class="md-ai-action-row" style="margin-top:14px"><button class="md-ai-button secondary" type="button" data-ai-apply="palette" ${palette.length?'':'disabled'}>Apply palette</button></div>
+        </div>
+      </article>
+      <article class="md-ai-card full">
+        <div class="md-ai-card-head"><h3>Copy Suggestions</h3><span class="md-ai-confidence">Review before applying</span></div>
+        <div class="md-ai-card-body md-ai-copy-grid">
+          ${copy.length?copy.map((x,i)=>`<div class="md-ai-copy-card"><div><b>Current</b><p>${esc(x.current||'')}</p></div><div class="suggested"><b>Suggested</b><p>${esc(x.suggested||'')}</p></div><button class="md-ai-button secondary" type="button" data-ai-copy="${i}">Apply</button></div>`).join(''):'<div class="md-ai-empty">No copy recommendations returned.</div>'}
+        </div>
+      </article>
+      <article class="md-ai-card full">
+        <div class="md-ai-card-head"><h3>Preflight Issues</h3><span class="md-ai-confidence">${preflight.length} checks</span></div>
+        <div class="md-ai-card-body md-ai-list">
+          ${preflight.length?preflight.map(x=>`<div class="md-ai-line"><strong>${esc((x.severity||'note').toUpperCase())}: ${esc(x.issue||'Issue')}</strong><span>${esc(x.suggestedFix||'Review manually before publishing.')}</span></div>`).join(''):'<div class="md-ai-line"><strong>No major issues found.</strong><span>Still review exported files before sending to clients.</span></div>'}
+        </div>
+      </article>`;
+  }
+  function applyBrand(){ const b=mdAiLastAnalysis?.brand||{}; if(b.name) state.fields.clientName=b.name; if(b.industry) state.fields.category=b.industry; if(b.tagline) state.fields.tagline=b.tagline; syncFieldInputs(); renderAll(); status('AI brand details applied.'); }
+  function applyPalette(){ const p=mdAiLastAnalysis?.palette||[]; if(!p.length) return; state.colors=p.slice(0,5).map(c=>normalizeHex(c.hex||'#1F3D2E')); while(state.colors.length<5) state.colors.push('#F1ECDF'); renderAll(); status('AI palette applied.'); }
+  function applyPlacements(){ const arr=mdAiLastAnalysis?.assetAssignments||[]; arr.forEach(x=>{ if(x.slot && x.fileId && state.assets.some(a=>a.id===x.fileId)) state.slots[x.slot]=x.fileId; }); populateSelects(); renderAll(); status('AI asset placements applied.'); }
+  function applyCopy(i){ const item=(mdAiLastAnalysis?.copySuggestions||[])[i]; if(!item) return; let done=false; const current=(item.current||'').trim(); const suggested=(item.suggested||'').trim(); if(!suggested) return; if(current){
+      const candidates=Array.from(document.querySelectorAll('#guidePreview [contenteditable], #guidePreview .editable, #guidePreview .section-title, #guidePreview .section-copy'));
+      const match=candidates.find(el=>(el.textContent||'').trim()===current) || candidates.find(el=>(el.textContent||'').trim().includes(current));
+      if(match){ match.textContent=suggested; done=true; }
+    }
+    if(!done && item.target && state.fields[item.target]!==undefined){ state.fields[item.target]=suggested; syncFieldInputs(); done=true; }
+    renderAll(false); status(done?'AI copy suggestion applied.':'Could not find the exact text in the preview. Try applying manually.'); }
+  function applySafe(){ applyBrand(); applyPalette(); applyPlacements(); }
+  function syncFieldInputs(){ Object.entries(state.fields).forEach(([k,v])=>{ const el=document.querySelector(`[data-field="${k}"]`); if(el) el.value=v||''; }); }
+  function assetName(id){ return (state.assets.find(a=>a.id===id)||{}).name || id || 'Unassigned file'; }
+  function pct(v){ const n=Number(v); return Number.isFinite(n)?Math.round(n*100)+'%':'—'; }
+  function esc(s){ return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m])); }
+  document.addEventListener('click',e=>{
+    if(e.target?.id==='analyzeBrandBtn'){ openAiPanel(true); }
+    if(e.target?.id==='mdAiClose' || e.target?.id==='mdAiBackdrop'){ closeAiPanel(); }
+    if(e.target?.id==='mdAiRunBtn'){ runBrandAnalysis(); }
+    if(e.target?.id==='mdAiApplySafeBtn'){ applySafe(); }
+    const apply=e.target?.dataset?.aiApply;
+    if(apply==='brand') applyBrand();
+    if(apply==='palette') applyPalette();
+    if(apply==='placements') applyPlacements();
+    if(e.target?.dataset?.aiCopy) applyCopy(Number(e.target.dataset.aiCopy));
+  });
 })();
 </script>
 
