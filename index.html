@@ -818,164 +818,6 @@ a { color: inherit; text-decoration: none; }
   flex-shrink: 0;
 }
 
-/* ── GUIDE LIBRARY ── */
-.guide-library-section {
-  background: var(--cream);
-  color: var(--ink);
-  padding: 84px 34px;
-  border-top: 1px solid rgba(21,20,15,.12);
-  position: relative;
-  z-index: 1;
-}
-
-.guide-library-wrap { max-width: 1180px; margin: 0 auto; }
-
-.guide-library-head {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 24px;
-  margin-bottom: 28px;
-}
-
-.guide-library-kicker {
-  font: 700 11px var(--sans);
-  text-transform: uppercase;
-  letter-spacing: .18em;
-  color: var(--forest);
-  margin-bottom: 12px;
-}
-
-.guide-library-head h2 {
-  font-family: var(--display);
-  font-size: clamp(34px, 5vw, 62px);
-  line-height: .95;
-  font-weight: 400;
-  letter-spacing: -.03em;
-  max-width: 720px;
-  margin: 0;
-}
-
-.guide-library-action {
-  border: 1px solid rgba(31,61,46,.18);
-  background: var(--forest);
-  color: var(--cream);
-  border-radius: 999px;
-  padding: 12px 16px;
-  font: 800 10px var(--sans);
-  letter-spacing: .12em;
-  text-transform: uppercase;
-  white-space: nowrap;
-  cursor: pointer;
-  transition: .15s;
-}
-
-.guide-library-action:hover { background: var(--moss); }
-
-.guide-library-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-}
-
-.guide-library-card {
-  background: var(--paper);
-  border: 1px solid rgba(21,20,15,.12);
-  border-radius: 28px;
-  overflow: hidden;
-  text-decoration: none;
-  color: inherit;
-  min-height: 400px;
-  display: flex;
-  flex-direction: column;
-  transition: transform .18s, border-color .18s, box-shadow .18s;
-}
-
-.guide-library-card:hover {
-  transform: translateY(-3px);
-  border-color: rgba(31,61,46,.35);
-  box-shadow: 0 24px 70px rgba(21,20,15,.10);
-}
-
-.guide-library-thumb {
-  height: 220px;
-  background:
-    radial-gradient(circle at 80% 10%, rgba(196,217,203,.8), transparent 36%),
-    linear-gradient(135deg, #1F3D2E, #14291F);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: rgba(241,236,223,.82);
-  font-family: var(--display);
-  font-size: 54px;
-  letter-spacing: -.04em;
-  overflow: hidden;
-}
-
-.guide-library-thumb img { width: 100%; height: 100%; object-fit: cover; }
-
-.guide-library-body {
-  padding: 22px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  flex: 1;
-}
-
-.guide-library-meta {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: center;
-}
-
-.guide-library-category {
-  font: 800 9px var(--sans);
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  color: rgba(21,20,15,.48);
-}
-
-.guide-library-status {
-  font: 800 9px var(--sans);
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  color: var(--forest);
-  background: rgba(31,61,46,.08);
-  border: 1px solid rgba(31,61,46,.10);
-  border-radius: 999px;
-  padding: 5px 8px;
-}
-
-.guide-library-title {
-  font-family: var(--display);
-  font-size: 36px;
-  line-height: .96;
-  letter-spacing: -.03em;
-  font-weight: 400;
-}
-
-.guide-library-desc {
-  color: rgba(21,20,15,.58);
-  font-size: 12px;
-  line-height: 1.55;
-  flex: 1;
-}
-
-.guide-library-link {
-  margin-top: 6px;
-  color: var(--forest);
-  font: 800 10px var(--sans);
-  text-transform: uppercase;
-  letter-spacing: .12em;
-}
-
-.guide-library-loading {
-  grid-column: 1 / -1;
-  color: rgba(21,20,15,.45);
-  font-size: 14px;
-  padding: 32px 0;
-}
 
 /* ── PUBLISH TOAST ── */
 .publish-toast {
@@ -1273,22 +1115,6 @@ a { color: inherit; text-decoration: none; }
 
   </div><!-- /builder-shell -->
 </div><!-- /builder-app -->
-
-<!-- GUIDE LIBRARY -->
-<section class="guide-library-section" id="guideLibrary">
-  <div class="guide-library-wrap">
-    <div class="guide-library-head">
-      <div>
-        <p class="guide-library-kicker">Published guides</p>
-        <h2>Client brand systems built in Moving Day Studio.</h2>
-      </div>
-      <button class="guide-library-action" onclick="scrollToBuilder()">New guide ↑</button>
-    </div>
-    <div class="guide-library-grid" id="guideLibraryGrid">
-      <div class="guide-library-loading">Loading guides...</div>
-    </div>
-  </div>
-</section>
 
 <script>
 (function () {
@@ -1777,7 +1603,6 @@ a { color: inherit; text-decoration: none; }
         publishedAt: Date.now()
       });
       localStorage.setItem('mdGuide_index', JSON.stringify(index));
-      loadGuideLibrary();
     } catch (e) {}
   }
 
@@ -1839,60 +1664,6 @@ a { color: inherit; text-decoration: none; }
     }
   };
 
-  /* ─────────────────────────────────────────
-     GUIDE LIBRARY
-  ───────────────────────────────────────── */
-  async function loadGuideLibrary() {
-    const grid = $('#guideLibraryGrid');
-    if (!grid) return;
-
-    const guides = [];
-
-    // 1. Locally published guides from localStorage
-    try {
-      const localIndex = JSON.parse(localStorage.getItem('mdGuide_index') || '[]');
-      guides.push(...localIndex);
-    } catch (e) {}
-
-    // 2. Static guides from /clients/index.json
-    try {
-      const res = await fetch('/clients/index.json');
-      if (res.ok) {
-        const staticGuides = await res.json();
-        // Merge, avoiding duplicates by slug
-        const existingSlugs = new Set(guides.map(g => g.slug));
-        staticGuides.forEach(g => { if (!existingSlugs.has(g.slug)) guides.push(g); });
-      }
-    } catch (e) {}
-
-    if (!guides.length) {
-      grid.innerHTML = '<div class="guide-library-loading">No guides published yet. Fill in client details above and click Publish.</div>';
-      return;
-    }
-
-    grid.innerHTML = guides.map(guide => {
-      const name = guide.name || 'Untitled';
-      const initials = name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
-      const thumb = guide.thumbnail
-        ? `<img src="${guide.thumbnail}" alt="${name}">`
-        : `<span>${initials}</span>`;
-      const url = guide.url || `/guide.html?slug=${guide.slug}`;
-
-      return `
-        <a class="guide-library-card" href="${url}" target="_blank">
-          <div class="guide-library-thumb">${thumb}</div>
-          <div class="guide-library-body">
-            <div class="guide-library-meta">
-              <span class="guide-library-category">${guide.category || 'Brand Identity'}</span>
-              <span class="guide-library-status">${guide.status || 'Published'}</span>
-            </div>
-            <h3 class="guide-library-title">${name}</h3>
-            <p class="guide-library-desc">${guide.description || 'A polished Moving Day Studio brand guide.'}</p>
-            <span class="guide-library-link">View guide →</span>
-          </div>
-        </a>`;
-    }).join('');
-  }
 
   window.scrollToBuilder = function () {
     document.querySelector('.builder-app')?.scrollIntoView({ behavior: 'smooth' });
@@ -1911,7 +1682,6 @@ a { color: inherit; text-decoration: none; }
       status('Previous session restored. Make changes and click Publish to update the guide.');
     }
     wireFields();
-    loadGuideLibrary();
   }
 
   init();
