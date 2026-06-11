@@ -2621,15 +2621,77 @@ footer{
 }
 
 
-/* ── PALETTE CONTROL LABELS: SHOW WHAT EACH CLIENT COLOR AFFECTS ── */
-.palette-card .studio-card-head .card-note{max-width:360px!important;}
-.builder-colors{align-items:stretch!important;}
-.color-edit{display:flex!important;flex-direction:column!important;gap:8px!important;}
-.color-edit input[type=color]{order:1!important;}
-.color-label{order:2!important;font:900 9px/1.15 var(--sans)!important;letter-spacing:.14em!important;text-transform:uppercase!important;color:#244834!important;margin-top:2px!important;}
-.color-areas{order:3!important;font:700 10px/1.35 var(--sans)!important;color:rgba(21,20,15,.50)!important;min-height:40px!important;}
-.color-edit input[type=text]{order:4!important;margin-top:0!important;}
-@media(max-width:720px){.color-areas{min-height:auto!important;}}
+/* ── PALETTE CONTROL LABELS: CLEAN COMPACT CONTROL SYSTEM ── */
+.palette-card .studio-card-head{
+  align-items:flex-start!important;
+  border-bottom:1px solid rgba(31,61,46,.08)!important;
+  padding-bottom:14px!important;
+}
+.palette-card .studio-card-head .card-note{
+  max-width:440px!important;
+  font-size:11px!important;
+  line-height:1.45!important;
+  color:rgba(21,20,15,.45)!important;
+}
+.builder-colors{
+  display:grid!important;
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:10px!important;
+  align-items:stretch!important;
+}
+.color-edit{
+  min-height:0!important;
+  display:grid!important;
+  grid-template-rows:auto auto auto auto!important;
+  gap:8px!important;
+  padding:10px!important;
+  border-radius:18px!important;
+  background:rgba(251,248,240,.58)!important;
+  border:1px solid rgba(31,61,46,.10)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.75)!important;
+}
+.color-edit input[type=color]{
+  order:1!important;
+  height:52px!important;
+  width:100%!important;
+  border-radius:12px!important;
+  padding:0!important;
+  background:transparent!important;
+  border:1px solid rgba(21,20,15,.10)!important;
+  overflow:hidden!important;
+  cursor:pointer!important;
+}
+.color-label{
+  order:2!important;
+  min-height:24px!important;
+  font:900 9px/1.22 var(--sans)!important;
+  letter-spacing:.14em!important;
+  text-transform:uppercase!important;
+  color:#244834!important;
+}
+.color-areas{
+  order:3!important;
+  min-height:34px!important;
+  font:700 10px/1.35 var(--sans)!important;
+  color:rgba(21,20,15,.46)!important;
+}
+.color-edit input[type=text]{
+  order:4!important;
+  height:32px!important;
+  margin-top:2px!important;
+  border-radius:999px!important;
+  background:#F1ECDF!important;
+  border:1px solid rgba(31,61,46,.10)!important;
+  text-align:center!important;
+  font:900 10px/1 var(--sans)!important;
+  letter-spacing:.05em!important;
+  color:#15140F!important;
+}
+@media(max-width:900px){
+  .builder-colors{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  .color-areas{min-height:auto!important;}
+}
+@media(max-width:520px){.builder-colors{grid-template-columns:1fr!important;}}
 
 </style>
 </head>
@@ -2771,7 +2833,7 @@ footer{
         </article>
 
         <article class="studio-card palette-card">
-          <div class="studio-card-head"><h3>Brand palette</h3><span class="card-note">Each color is labeled by where it appears in the final guide</span></div>
+          <div class="studio-card-head"><h3>Brand palette</h3><span class="card-note">Controls the client guide only. Moving Day dashboard colors stay locked.</span></div>
           <div class="builder-colors" id="builderColors"></div>
         </article>
       </div>
@@ -3163,11 +3225,11 @@ footer{
     const details=$('#colourDetails'); if(details){details.innerHTML=state.colors.map((hex,i)=>`<div class="colour-detail"><div class="colour-dot" style="background:${hex}"></div><div class="colour-detail-name">Color ${i+1}</div><div class="colour-detail-values">${hex}<br>${hexToRgb(hex)}<br>${hexToCmyk(hex)}</div></div>`).join('')}
     const b=$('#builderColors'); if(b && !b.dataset.ready){
       const paletteRoles=[
-        {label:'01 Primary accent',areas:'Section accents · logo card · profile'},
-        {label:'02 Secondary support',areas:'Support color · palette depth'},
-        {label:'03 Soft accent',areas:'Hero type · social mockup'},
-        {label:'04 Light base',areas:'Cards · web mockup · logo tile'},
-        {label:'05 Deep base',areas:'Hero · footer · print mockup'}
+        {label:'01 Primary',areas:'Accents · profile · logo card'},
+        {label:'02 Support',areas:'Secondary fields · palette depth'},
+        {label:'03 Soft accent',areas:'Hero type · social tile'},
+        {label:'04 Light base',areas:'Cards · web · logo tile'},
+        {label:'05 Deep base',areas:'Hero · footer · print'}
       ];
       b.dataset.ready='1'; b.innerHTML=state.colors.map((hex,i)=>`<div class="color-edit"><input type="color" data-color="${i}" value="${hex}"><div class="color-label">${paletteRoles[i].label}</div><div class="color-areas">${paletteRoles[i].areas}</div><input type="text" data-hex="${i}" value="${hex}"></div>`).join('');
       $$('[data-color]').forEach(inp=>inp.addEventListener('input',e=>{const i=+e.target.dataset.color;state.colors[i]=e.target.value.toUpperCase();$(`[data-hex="${i}"]`).value=state.colors[i];renderColors();saveBuilderState();}));
