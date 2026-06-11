@@ -4908,5 +4908,257 @@ function applyClientBackgroundsToCards(){
   init();
 })();
 </script>
+  <section class="guide-library-section" id="guideLibrary">
+  <div class="guide-library-wrap">
+    <div class="guide-library-head">
+      <div>
+        <p class="guide-library-kicker">Featured Guides</p>
+        <h2>Recent brand systems built in Moving Day Studio.</h2>
+      </div>
+      <a class="guide-library-action" href="#builder">Create New Guide</a>
+    </div>
+
+    <div class="guide-library-grid" id="guideLibraryGrid">
+      <div class="guide-library-loading">Loading featured guides...</div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .guide-library-section {
+    background: #F1ECDF;
+    color: #15140F;
+    padding: 84px 24px;
+    border-top: 1px solid rgba(21,20,15,.12);
+  }
+
+  .guide-library-wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  .guide-library-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 28px;
+  }
+
+  .guide-library-kicker {
+    font: 700 11px var(--sans, Arial, sans-serif);
+    text-transform: uppercase;
+    letter-spacing: .18em;
+    color: #1F3D2E;
+    margin-bottom: 12px;
+  }
+
+  .guide-library-head h2 {
+    font-family: var(--display, Georgia, serif);
+    font-size: clamp(34px, 5vw, 62px);
+    line-height: .95;
+    font-weight: 400;
+    letter-spacing: -.03em;
+    max-width: 720px;
+    margin: 0;
+  }
+
+  .guide-library-action {
+    border: 1px solid rgba(31,61,46,.18);
+    background: #1F3D2E;
+    color: #F1ECDF;
+    text-decoration: none;
+    border-radius: 999px;
+    padding: 12px 16px;
+    font: 800 10px var(--sans, Arial, sans-serif);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .guide-library-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .guide-library-card {
+    background: #FBF8F0;
+    border: 1px solid rgba(21,20,15,.12);
+    border-radius: 28px;
+    overflow: hidden;
+    text-decoration: none;
+    color: inherit;
+    min-height: 420px;
+    display: flex;
+    flex-direction: column;
+    transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+  }
+
+  .guide-library-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(31,61,46,.35);
+    box-shadow: 0 24px 70px rgba(21,20,15,.10);
+  }
+
+  .guide-library-thumb {
+    height: 230px;
+    background:
+      radial-gradient(circle at 80% 10%, rgba(196,217,203,.8), transparent 36%),
+      linear-gradient(135deg, #1F3D2E, #14291F);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(241,236,223,.82);
+    font-family: var(--display, Georgia, serif);
+    font-size: 54px;
+    letter-spacing: -.04em;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .guide-library-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .guide-library-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    flex: 1;
+  }
+
+  .guide-library-meta {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .guide-library-category,
+  .guide-library-status {
+    font: 800 9px var(--sans, Arial, sans-serif);
+    letter-spacing: .13em;
+    text-transform: uppercase;
+  }
+
+  .guide-library-category {
+    color: rgba(21,20,15,.48);
+  }
+
+  .guide-library-status {
+    color: #1F3D2E;
+    background: rgba(31,61,46,.08);
+    border: 1px solid rgba(31,61,46,.10);
+    border-radius: 999px;
+    padding: 5px 8px;
+  }
+
+  .guide-library-title {
+    font-family: var(--display, Georgia, serif);
+    font-size: 38px;
+    line-height: .96;
+    letter-spacing: -.03em;
+    font-weight: 400;
+  }
+
+  .guide-library-desc {
+    color: rgba(21,20,15,.62);
+    font-size: 13px;
+    line-height: 1.55;
+    flex: 1;
+  }
+
+  .guide-library-link {
+    margin-top: 8px;
+    color: #1F3D2E;
+    font: 800 10px var(--sans, Arial, sans-serif);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+  }
+
+  .guide-library-loading {
+    grid-column: 1 / -1;
+    color: rgba(21,20,15,.55);
+    font-size: 14px;
+  }
+
+  @media (max-width: 900px) {
+    .guide-library-head {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .guide-library-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .guide-library-card {
+      min-height: auto;
+    }
+  }
+</style>
+
+<script>
+  async function loadGuideLibrary() {
+    const grid = document.getElementById("guideLibraryGrid");
+    if (!grid) return;
+
+    try {
+      const response = await fetch("/clients/index.json");
+
+      if (!response.ok) {
+        grid.innerHTML = '<div class="guide-library-loading">No featured guides found yet.</div>';
+        return;
+      }
+
+      const guides = await response.json();
+
+      if (!Array.isArray(guides) || guides.length === 0) {
+        grid.innerHTML = '<div class="guide-library-loading">No featured guides found yet.</div>';
+        return;
+      }
+
+      grid.innerHTML = guides.map((guide) => {
+        const name = guide.name || "Untitled Guide";
+        const initials = name
+          .split(" ")
+          .map(word => word[0])
+          .join("")
+          .slice(0, 2)
+          .toUpperCase();
+
+        const thumbnail = guide.thumbnail
+          ? `<img src="${guide.thumbnail}" alt="${name} thumbnail">`
+          : `<span>${initials}</span>`;
+
+        return `
+          <a class="guide-library-card" href="${guide.url || `/guide.html?client=${guide.slug}`}">
+            <div class="guide-library-thumb">
+              ${thumbnail}
+            </div>
+            <div class="guide-library-body">
+              <div class="guide-library-meta">
+                <span class="guide-library-category">${guide.category || "Brand Identity"}</span>
+                <span class="guide-library-status">${guide.status || "Example"}</span>
+              </div>
+              <h3 class="guide-library-title">${name}</h3>
+              <p class="guide-library-desc">${guide.description || "A polished Moving Day Studio brand guide."}</p>
+              <span class="guide-library-link">View Guide →</span>
+            </div>
+          </a>
+        `;
+      }).join("");
+    } catch (error) {
+      console.error("Guide library failed:", error);
+      grid.innerHTML = '<div class="guide-library-loading">Could not load featured guides.</div>';
+    }
+  }
+
+  loadGuideLibrary();
+</script>
 </body>
 </html>
