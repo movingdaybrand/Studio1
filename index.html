@@ -1395,6 +1395,158 @@ body{
     .preview-toolbar-inner{align-items:flex-start!important;flex-direction:column!important;}
     .preview-brand-wrap{flex-wrap:wrap!important;}
   }
+
+
+/* ─────────────────────────────────────────────
+   PATCH · NAV CENTERING + LIVE PREVIEW EDITING + ASSET PACKAGE
+───────────────────────────────────────────── */
+.studio-nav{
+  justify-content:center!important;
+  gap:22px!important;
+  min-height:58px!important;
+  padding:10px 18px!important;
+}
+.studio-nav .md-branded-wordmark{
+  flex:0 0 auto!important;
+  gap:10px!important;
+  padding:4px 8px 4px 5px!important;
+}
+.studio-nav .md-brand-icon{
+  width:30px!important;
+  height:30px!important;
+  border-radius:11px!important;
+  padding:5px!important;
+}
+.studio-nav .md-brand-logo{
+  width:132px!important;
+}
+.studio-nav .md-brand-studio{
+  font-size:8px!important;
+  letter-spacing:.145em!important;
+  margin-left:0!important;
+  align-self:center!important;
+}
+.studio-nav #navClientLabel{
+  position:relative!important;
+  margin:0!important;
+  transform:none!important;
+  justify-self:auto!important;
+  text-align:center!important;
+  padding:10px 15px!important;
+  letter-spacing:.18em!important;
+  color:rgba(241,236,223,.72)!important;
+  background:rgba(241,236,223,.06)!important;
+}
+.hero-brand-lockup{
+  gap:10px!important;
+  margin-bottom:24px!important;
+}
+.hero-brand-icon{
+  width:36px!important;
+  height:36px!important;
+  border-radius:13px!important;
+  padding:7px!important;
+}
+.hero-brand-logo{
+  width:162px!important;
+  height:auto!important;
+}
+.hero-brand-line{
+  font-size:8px!important;
+  letter-spacing:.155em!important;
+  padding-left:2px!important;
+}
+.builder-mode [data-guide-edit],
+.builder-mode [data-edit-preview]{
+  border-radius:8px!important;
+}
+.builder-mode [data-guide-edit]:hover,
+.builder-mode [data-edit-preview]:hover{
+  box-shadow:0 0 0 1px rgba(31,61,46,.18)!important;
+  background:rgba(31,61,46,.055)!important;
+}
+.builder-mode .guide-hero [data-guide-edit]:hover,
+.builder-mode .guide-hero [data-edit-preview]:hover{
+  background:rgba(241,236,223,.13)!important;
+  box-shadow:0 0 0 1px rgba(241,236,223,.20)!important;
+}
+[data-preview-slot]{
+  cursor:pointer;
+}
+.builder-mode [data-preview-slot]::after{
+  content:"Click to upload";
+  position:absolute;
+  top:14px;
+  right:14px;
+  z-index:8;
+  opacity:0;
+  transform:translateY(-2px);
+  transition:.16s ease;
+  pointer-events:none;
+  border-radius:999px;
+  padding:7px 10px;
+  background:rgba(251,248,240,.92);
+  color:#1F3D2E;
+  border:1px solid rgba(31,61,46,.12);
+  font:900 8px/1 var(--sans);
+  letter-spacing:.13em;
+  text-transform:uppercase;
+  box-shadow:0 10px 22px rgba(21,20,15,.08);
+}
+.builder-mode [data-preview-slot]:hover::after{
+  opacity:1;
+  transform:translateY(0);
+}
+.builder-mode .guide-hero[data-preview-slot]::after{
+  top:26px;
+  right:36px;
+}
+.asset-package-section{
+  background:var(--paper)!important;
+  padding:78px 0!important;
+  border-bottom:1px solid rgba(21,20,15,.12)!important;
+}
+.asset-package-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:12px;
+  margin-top:28px;
+}
+.asset-package-card{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  min-width:0;
+  padding:16px 18px;
+  border:1px solid rgba(31,61,46,.10);
+  border-radius:18px;
+  background:#fff;
+  color:var(--ink);
+  text-decoration:none;
+  box-shadow:0 12px 30px rgba(31,61,46,.055);
+}
+.asset-package-card span{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-weight:800;
+  font-size:12px;
+}
+.asset-package-card b{
+  flex:0 0 auto;
+  font:900 9px var(--sans);
+  letter-spacing:.14em;
+  text-transform:uppercase;
+  color:var(--c1);
+}
+@media(max-width:820px){
+  .studio-nav{justify-content:flex-start!important;align-items:flex-start!important;flex-direction:column!important;border-radius:24px!important;}
+  .studio-nav #navClientLabel{text-align:left!important;}
+  .asset-package-grid{grid-template-columns:1fr!important;}
+}
+
 </style>
 
 </head>
@@ -1850,12 +2002,12 @@ body{
         </div>
         <div class="studio-nav-meta" id="previewModeText">Brand Restoration Platform</div>
       </div>
-      <div class="preview-actions"><span class="locked-badge">Published / locked</span><button class="builder-btn" id="backToEditorBtn">Back to editor</button><button class="builder-btn publish" id="lockFromPreviewBtn">Publish / Lock</button><button class="builder-btn primary" id="downloadHtmlBtn">Download HTML</button></div>
+      <div class="preview-actions"><span class="locked-badge">Published / locked</span><button class="builder-btn" id="backToEditorBtn">Back to editor</button><button class="builder-btn publish" id="lockFromPreviewBtn">Publish / Lock</button><button class="builder-btn" id="downloadAssetsBtn">Download Asset Package</button><button class="builder-btn primary" id="downloadHtmlBtn">Download HTML</button></div>
     </div>
   </div>
 
   <main id="guidePreview">
-    <section class="guide-hero">
+    <section class="guide-hero" data-preview-slot="heroLogo">
       <div class="guide-wrap">
         <img id="pvHeroLogo" class="guide-logo" alt="Hero logo">
         <div class="guide-eyebrow">Brand Identity Guide · <span id="pvDate" class="editable" contenteditable="true" data-edit-preview="date">Month Year</span></div>
@@ -1865,11 +2017,11 @@ body{
       </div>
     </section>
 
-    <section class="guide-section"><div class="guide-wrap"><div class="section-label">01 · Logo System</div><h2 class="section-title">Approved marks for consistent use.</h2><p class="section-copy">Use these logo versions across web, print, social, and internal brand applications.</p><div class="logo-grid"><div class="logo-cell"><div id="pvPrimaryLogoWrap" class="missing">Primary Logo</div><span class="logo-cell-label">Primary Logo</span></div><div class="logo-cell dark"><div id="pvIconMarkWrap" class="missing">Icon Mark</div><span class="logo-cell-label">Icon Mark</span></div><div class="logo-cell brand"><div id="pvIconVariantWrap" class="missing">Brand Variant</div><span class="logo-cell-label">Brand Variant</span></div></div></div></section>
-    <section class="guide-section"><div class="guide-wrap"><div class="section-label">02 · Color Palette</div><h2 class="section-title">A palette built for recognition and clarity.</h2><div class="palette-row" id="pvPalette"></div></div></section>
-    <section class="guide-section"><div class="guide-wrap"><div class="section-label">03 · Typography</div><h2 class="section-title">Type that keeps the system sharp.</h2><div class="type-grid"><div class="type-card-preview"><div class="section-label">Display</div><div class="type-sample-display" id="pvDisplaySample">Brand Headline</div><p id="pvDisplayName">Instrument Serif</p></div><div class="type-card-preview"><div class="section-label">Body</div><div class="type-sample-body" id="pvBodySample">Clean, readable copy for captions, pages, notes, and digital interfaces.</div><p id="pvBodyName">Geist</p></div></div></div></section>
-    <section class="guide-section"><div class="guide-wrap"><div class="section-label">04 · In Use</div><h2 class="section-title">How it looks in the real world.</h2><div class="mockup-grid"><div class="mockup profile"><div id="pvProfileImageWrap" class="missing">Profile Image</div><span class="mockup-label">Profile</span></div><div class="mockup digital"><div id="pvWebsiteHeaderWrap" class="missing">Digital Mockup</div><span class="mockup-label">Digital</span></div><div class="mockup print"><div id="pvBusinessCardWrap" class="missing">Print Mockup</div><span class="mockup-label">Print</span></div><div class="mockup social"><div id="pvSocialPostWrap" class="missing">Social Post</div><span class="mockup-label">Social</span></div></div></div></section>
-    <section class="guide-section"><div class="guide-wrap"><div class="section-label">05 · Usage</div><h2 class="section-title">Simple rules for keeping the brand intact.</h2><div class="usage-grid"><div class="usage-card do"><div class="usage-tag">Do</div><ul><li>Use approved logo files only</li><li>Keep clear space around all marks</li><li>Use the approved palette consistently</li><li>Use typography as defined in this guide</li></ul></div><div class="usage-card dont"><div class="usage-tag">Don't</div><ul><li>Stretch, skew, or distort logos</li><li>Use low contrast placements</li><li>Add unapproved effects or shadows</li><li>Mix in unrelated fonts or colors</li></ul></div></div></div></section>
+    <section class="guide-section"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="logoLabel">01 · Logo System</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="logoTitle">Approved marks for consistent use.</h2><p class="section-copy editable" contenteditable="true" data-guide-edit="logoCopy">Use these logo versions across web, print, social, and internal brand applications.</p><div class="logo-grid"><div class="logo-cell" data-preview-slot="primaryLogo"><div id="pvPrimaryLogoWrap" class="missing">Primary Logo</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="primaryLogoLabel">Primary Logo</span></div><div class="logo-cell dark" data-preview-slot="iconMark"><div id="pvIconMarkWrap" class="missing">Icon Mark</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="iconMarkLabel">Icon Mark</span></div><div class="logo-cell brand" data-preview-slot="iconVariant"><div id="pvIconVariantWrap" class="missing">Brand Variant</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="iconVariantLabel">Brand Variant</span></div></div></div></section>
+    <section class="guide-section"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="paletteLabel">02 · Color Palette</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="paletteTitle">A palette built for recognition and clarity.</h2><div class="palette-row" id="pvPalette"></div></div></section>
+    <section class="guide-section"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="typeLabel">03 · Typography</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="typeTitle">Type that keeps the system sharp.</h2><div class="type-grid"><div class="type-card-preview"><div class="section-label editable" contenteditable="true" data-guide-edit="displayLabel">Display</div><div class="type-sample-display editable" id="pvDisplaySample" contenteditable="true" data-guide-edit="displaySample">Brand Headline</div><p id="pvDisplayName" class="editable" contenteditable="true" data-guide-edit="displayName">Instrument Serif</p></div><div class="type-card-preview"><div class="section-label editable" contenteditable="true" data-guide-edit="bodyLabel">Body</div><div class="type-sample-body editable" id="pvBodySample" contenteditable="true" data-guide-edit="bodySample">Clean, readable copy for captions, pages, notes, and digital interfaces.</div><p id="pvBodyName" class="editable" contenteditable="true" data-guide-edit="bodyName">Geist</p></div></div></div></section>
+    <section class="guide-section"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="useLabel">04 · In Use</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="useTitle">How it looks in the real world.</h2><div class="mockup-grid"><div class="mockup profile" data-preview-slot="profileImage"><div id="pvProfileImageWrap" class="missing">Profile Image</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="profileLabel">Profile</span></div><div class="mockup digital" data-preview-slot="websiteHeader"><div id="pvWebsiteHeaderWrap" class="missing">Digital Mockup</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="digitalLabel">Digital</span></div><div class="mockup print" data-preview-slot="businessCard"><div id="pvBusinessCardWrap" class="missing">Print Mockup</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="printLabel">Print</span></div><div class="mockup social" data-preview-slot="socialPost"><div id="pvSocialPostWrap" class="missing">Social Post</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="socialLabel">Social</span></div></div></div></section>
+    <section class="guide-section"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="usageLabel">05 · Usage</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="usageTitle">Simple rules for keeping the brand intact.</h2><div class="usage-grid"><div class="usage-card do"><div class="usage-tag">Do</div><ul><li class="editable" contenteditable="true" data-guide-edit="usageRule">Use approved logo files only</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Keep clear space around all marks</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Use the approved palette consistently</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Use typography as defined in this guide</li></ul></div><div class="usage-card dont"><div class="usage-tag">Don't</div><ul><li class="editable" contenteditable="true" data-guide-edit="usageRule">Stretch, skew, or distort logos</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Use low contrast placements</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Add unapproved effects or shadows</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Mix in unrelated fonts or colors</li></ul></div></div></div></section>
     <footer class="guide-footer"><div class="guide-footer-inner"><span class="guide-footer-brand"><span class="guide-footer-icon">
 <svg class="md-icon-svg" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1366 292.11">
   <defs>
@@ -1933,6 +2085,7 @@ body{
     {key:'heroLogo',label:'Hero Logo',req:'SVG or transparent PNG · 1600×500 px',initials:'HL'},
     {key:'primaryLogo',label:'Primary Logo',req:'SVG or transparent PNG · 1600×600 px',initials:'PL'},
     {key:'iconMark',label:'Icon Mark',req:'SVG or transparent PNG · 1024×1024 px',initials:'IM'},
+    {key:'iconVariant',label:'Brand Variant',req:'SVG or transparent PNG · alternate colorway',initials:'BV'},
     {key:'profileImage',label:'Profile Image',req:'PNG/JPG · 1080×1080 px',initials:'PI'},
     {key:'websiteHeader',label:'Digital Mockup',req:'PNG/JPG/WebP · 1920×1080 px',initials:'DM'},
     {key:'businessCard',label:'Print Mockup',req:'PNG/JPG/PDF preview · 1600×1200 px or 11×8.5 @ 300dpi',initials:'PM'},
@@ -1987,7 +2140,7 @@ body{
   }
   function wire(){
     $$('[data-field]').forEach(inp=>inp.addEventListener('input',e=>{state.fields[e.target.dataset.field]=e.target.value;state.published=false;renderAll()}));
-    $('#previewBtn').addEventListener('click',showPreview); $('#backToEditorBtn').addEventListener('click',backToEditor); $('#publishBtn').addEventListener('click',lockGuide); $('#lockFromPreviewBtn').addEventListener('click',lockGuide); $('#downloadHtmlBtn').addEventListener('click',downloadLockedHtml);
+    $('#previewBtn').addEventListener('click',showPreview); $('#backToEditorBtn').addEventListener('click',backToEditor); $('#publishBtn').addEventListener('click',lockGuide); $('#lockFromPreviewBtn').addEventListener('click',lockGuide); $('#downloadHtmlBtn').addEventListener('click',downloadLockedHtml); $('#downloadAssetsBtn')?.addEventListener('click',downloadAssetPackage);
     $('#uploadFilesBtn').addEventListener('click',()=>$('#assetInput').click()); $('#chooseFilesBtn').addEventListener('click',()=>$('#assetInput').click()); $('#assetInput').addEventListener('change',async e=>{await addFiles(e.target.files);e.target.value=''});
     const uz=$('#uploadZone'); ['dragenter','dragover'].forEach(ev=>uz.addEventListener(ev,e=>{e.preventDefault();uz.style.borderColor='rgba(31,61,46,.4)'})); ['dragleave','drop'].forEach(ev=>uz.addEventListener(ev,e=>{e.preventDefault();uz.style.borderColor='rgba(31,61,46,.18)'})); uz.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
     document.addEventListener('change',async e=>{
@@ -2020,9 +2173,31 @@ body{
         e.target.value='';
       }
     });
-    document.addEventListener('input',e=>{if(e.target.matches('[data-color]')){const i=+e.target.dataset.color;state.colors[i]=e.target.value.toUpperCase();$(`[data-hex="${i}"]`).value=state.colors[i];state.published=false;renderAll()} if(e.target.matches('[data-hex]')){const i=+e.target.dataset.hex;const v=normalizeHex(e.target.value);state.colors[i]=v;$(`[data-color="${i}"]`).value=v;e.target.value=v;state.published=false;renderAll()} if(e.target.matches('[data-edit-preview]')&&!state.published){const k=e.target.dataset.editPreview;state.fields[k]=e.target.innerText.trim();const field=$(`[data-field="${k}"]`); if(field) field.value=state.fields[k];renderAll(false)}});
+    document.addEventListener('input',e=>{if(e.target.matches('[data-color]')){const i=+e.target.dataset.color;state.colors[i]=e.target.value.toUpperCase();$(`[data-hex="${i}"]`).value=state.colors[i];state.published=false;renderAll()} if(e.target.matches('[data-hex]')){const i=+e.target.dataset.hex;const v=normalizeHex(e.target.value);state.colors[i]=v;$(`[data-color="${i}"]`).value=v;e.target.value=v;state.published=false;renderAll()} if(e.target.matches('[data-edit-preview]')&&!state.published){const k=e.target.dataset.editPreview;state.fields[k]=e.target.innerText.trim();const field=$(`[data-field="${k}"]`); if(field) field.value=state.fields[k];renderAll(false)} if(e.target.matches('[data-guide-edit]')&&!state.published){state.published=false;status('Preview text updated. Changes will be included in the downloaded guide.')}});
     $('#displayFontUpload').addEventListener('change',e=>uploadFont('display',e.target.files[0])); $('#bodyFontUpload').addEventListener('change',e=>uploadFont('body',e.target.files[0]));
     $('#resetBtn').addEventListener('click',()=>{if(confirm('Reset all builder data and uploaded assets?')) location.reload()});
+    document.addEventListener('click',e=>{
+      if(state.published) return;
+      const slotEl=e.target.closest('[data-preview-slot]');
+      if(!slotEl) return;
+      if(e.target.closest('[contenteditable],button,a,input,select,textarea')) return;
+      const key=slotEl.dataset.previewSlot;
+      const input=document.createElement('input');
+      input.type='file';
+      input.accept='image/*,.svg,.pdf';
+      input.onchange=async()=>{
+        const file=input.files&&input.files[0];
+        if(!file) return;
+        const a=await makeAsset(file);
+        state.assets.push(a);
+        state.slots[key]=a.id;
+        populateSelects();
+        renderAll();
+        const label=slotDefs.find(s=>s.key===key)?.label||'Guide slot';
+        ensureLivePreview(`${file.name} placed in ${label}.`);
+      };
+      input.click();
+    });
   }
   async function makeAsset(file){const ext=fileExt(file.name);const raw=await readFile(file);return {id:'a'+Date.now()+Math.random().toString(16).slice(2),name:file.name,type:file.type||({svg:'image/svg+xml',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif'}[ext]||'application/octet-stream'),ext,data:normalizeDataUrl(raw,ext)}}
   async function addFiles(files){for(const file of Array.from(files||[])){state.assets.push(await makeAsset(file))} if(!state.fields.assetCount) state.fields.assetCount=`${state.assets.length} file${state.assets.length!==1?'s':''}`;populateSelects();renderAll();status(`${state.assets.length} file(s) loaded. Assign them to guide slots below.`)}
@@ -2063,7 +2238,7 @@ body{
   }
 
   function renderAll(updateEditable=true){
-    const f=state.fields; $('#readinessClient').textContent=f.clientName||'Client Name'; $('#navClientLabel').textContent=`Internal builder · ${f.clientName&&f.clientName!=='Client Name'?f.clientName:'No client loaded'}`;
+    const f=state.fields; $('#readinessClient').textContent=f.clientName||'Client Name'; $('#navClientLabel').textContent='Brand Restoration Platform';
     if(updateEditable){$('#pvClientName').textContent=f.clientName||'Client Name';$('#pvTagline').textContent=f.tagline||'A sharper brand, delivered in seven days.';$('#pvDate').textContent=f.date||'Month Year';$('#pvCategory').textContent=f.category||'Category';$('#pvSprint').textContent=f.sprint||'Brand Identity Guide';$('#pvAssetCount').textContent=f.assetCount||`${state.assets.length||'—'} files`;}
     $('#pvFooterName').textContent=`${f.clientName||'Client Name'} · Brand Identity Guide`; document.documentElement.style.setProperty('--preview-display',`"${f.displayFont||'Instrument Serif'}", var(--display)`);document.documentElement.style.setProperty('--preview-body',`"${f.bodyFont||'Geist'}", var(--sans)`);$('#pvDisplayName').textContent=f.displayFont||'Instrument Serif';$('#pvBodyName').textContent=f.bodyFont||'Geist';
     state.colors.forEach((c,i)=>document.documentElement.style.setProperty(`--c${i+1}`,c)); $('#pvPalette').innerHTML=state.colors.map((c,i)=>`<div class="swatch" style="background:${c};color:${textColor(c)}"><span>${c}</span></div>`).join('');
@@ -2097,7 +2272,7 @@ body{
       shell.classList.remove('locked');
       const mode=$('#previewModeText');
       if(mode) mode.textContent='Builder preview · live updating';
-      $$('[data-edit-preview]').forEach(el=>el.setAttribute('contenteditable','true'));
+      $$('[data-edit-preview],[data-guide-edit]').forEach(el=>el.setAttribute('contenteditable','true'));
       if(scroll) shell.scrollIntoView({behavior:'smooth',block:'start'});
     }
     renderAll();
@@ -2105,8 +2280,43 @@ body{
   }
   function showPreview(){ensureLivePreview('Live preview is open. Changes in the editor update the guide instantly.',true);}
   function backToEditor(){$('#builderApp').scrollIntoView({behavior:'smooth',block:'start'})}
-  function lockGuide(){state.published=true;renderAll();$('#previewShell').classList.add('active','locked');$('#previewShell').classList.remove('builder-mode');$$('[data-edit-preview]').forEach(el=>el.setAttribute('contenteditable','false'));$('#previewModeText').textContent='Published guide · editing locked';$('#previewShell').scrollIntoView({behavior:'smooth',block:'start'});status('Guide is locked. Use Download HTML to save a static client-ready version.');}
-  function cloneForDownload(){const clone=document.documentElement.cloneNode(true);clone.querySelector('#builderApp')?.remove();const toolbar=clone.querySelector('.preview-toolbar'); if(toolbar) toolbar.remove();clone.querySelector('#previewShell')?.classList.add('active','locked');clone.querySelector('#previewShell')?.classList.remove('builder-mode');clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));return '<!DOCTYPE html>\n'+clone.outerHTML}
+  function lockGuide(){state.published=true;renderAll();$('#previewShell').classList.add('active','locked');$('#previewShell').classList.remove('builder-mode');$$('[data-edit-preview],[data-guide-edit]').forEach(el=>el.setAttribute('contenteditable','false'));$('#previewModeText').textContent='Published guide · editing locked';$('#previewShell').scrollIntoView({behavior:'smooth',block:'start'});status('Guide is locked. Use Download HTML to save a static client-ready version.');}
+  function packageItems(){
+    const items=state.assets.map(a=>({name:a.name||'asset',ext:a.ext||fileExt(a.name),data:a.data,type:a.type||'application/octet-stream'}));
+    if(state.fontData.display)items.push({name:state.fontData.display.name||'display-font',ext:fileExt(state.fontData.display.name),data:state.fontData.display.data,type:'font'});
+    if(state.fontData.body)items.push({name:state.fontData.body.name||'body-font',ext:fileExt(state.fontData.body.name),data:state.fontData.body.data,type:'font'});
+    return items;
+  }
+  function assetPackageSectionHtml(){
+    const items=packageItems();
+    if(!items.length)return '';
+    return `<section class="asset-package-section"><div class="guide-wrap"><div class="section-label">06 · Source Asset Package</div><h2 class="section-title">Uploaded files included for download.</h2><p class="section-copy">Every file uploaded during the sprint is embedded here so the client can save the source assets from the final guide.</p><div class="asset-package-grid">${items.map(item=>`<a class="asset-package-card" href="${item.data}" download="${escapeHtml(item.name)}"><span>${escapeHtml(item.name)}</span><b>${escapeHtml(item.ext||'file')}</b></a>`).join('')}</div></div></section>`;
+  }
+  function injectAssetPackage(clone){
+    const guide=clone.querySelector('#guidePreview');
+    if(!guide)return;
+    const existing=guide.querySelector('.asset-package-section');
+    if(existing)existing.remove();
+    const html=assetPackageSectionHtml();
+    if(!html)return;
+    const wrap=clone.createElement('div');
+    wrap.innerHTML=html;
+    const section=wrap.firstElementChild;
+    const footer=guide.querySelector('.guide-footer');
+    if(footer)guide.insertBefore(section,footer);else guide.appendChild(section);
+  }
+  function downloadAssetPackage(){
+    const items=packageItems();
+    if(!items.length){alert('No uploaded files to package yet.');return;}
+    const title=`${state.fields.clientName||'Client'} · Uploaded Asset Package`;
+    const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${escapeHtml(title)}</title><style>body{margin:0;background:#F1ECDF;color:#15140F;font-family:Arial,sans-serif;padding:42px}h1{font-family:Georgia,serif;font-size:48px;font-weight:400;letter-spacing:-.04em}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:28px}.card{display:flex;justify-content:space-between;gap:16px;padding:16px 18px;border:1px solid rgba(31,61,46,.14);border-radius:18px;background:#fff;color:#15140F;text-decoration:none}.card span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}.card b{text-transform:uppercase;color:#1F3D2E;font-size:11px}</style></head><body><h1>${escapeHtml(title)}</h1><p>All files uploaded into the Moving Day builder are embedded below for client download.</p><div class="grid">${items.map(item=>`<a class="card" href="${item.data}" download="${escapeHtml(item.name)}"><span>${escapeHtml(item.name)}</span><b>${escapeHtml(item.ext||'file')}</b></a>`).join('')}</div></body></html>`;
+    const blob=new Blob([html],{type:'text/html'});
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);
+    a.download=safeName(state.fields.clientName||'client')+'-asset-package.html';
+    document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+  }
+  function cloneForDownload(){const clone=document.documentElement.cloneNode(true);injectAssetPackage(clone);clone.querySelector('#builderApp')?.remove();const toolbar=clone.querySelector('.preview-toolbar'); if(toolbar) toolbar.remove();clone.querySelector('#previewShell')?.classList.add('active','locked');clone.querySelector('#previewShell')?.classList.remove('builder-mode');clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));clone.querySelectorAll('[data-preview-slot]').forEach(el=>el.removeAttribute('data-preview-slot'));return '<!DOCTYPE html>\n'+clone.outerHTML}
   function downloadLockedHtml(){const name=safeName(state.fields.clientName||'brand-guide')+'.html';const blob=new Blob([cloneForDownload()],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
   init();
 })();
