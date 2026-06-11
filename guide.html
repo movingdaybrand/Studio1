@@ -4908,5 +4908,84 @@ function applyClientBackgroundsToCards(){
   init();
 })();
 </script>
+  <script>
+  async function loadClientGuide() {
+    const params = new URLSearchParams(window.location.search);
+    const clientSlug = params.get("client") || "demo-client";
+
+    try {
+      const response = await fetch(`/clients/${clientSlug}/guide.json`);
+
+      if (!response.ok) {
+        console.error(`Could not load client guide: ${clientSlug}`);
+        return;
+      }
+
+      const guide = await response.json();
+
+      document.title = `${guide.clientName || "Client"} · Brand Identity Guide`;
+
+      const clientNameEls = document.querySelectorAll("[data-client-name]");
+      clientNameEls.forEach(el => {
+        el.textContent = guide.clientName || "Client Name";
+      });
+
+      const categoryEls = document.querySelectorAll("[data-category]");
+      categoryEls.forEach(el => {
+        el.textContent = guide.category || "Brand Identity";
+      });
+
+      const dateEls = document.querySelectorAll("[data-date]");
+      dateEls.forEach(el => {
+        el.textContent = guide.date || "June 2026";
+      });
+
+      const taglineEls = document.querySelectorAll("[data-tagline]");
+      taglineEls.forEach(el => {
+        el.textContent = guide.tagline || "A clean, flexible brand system built for everyday use.";
+      });
+
+      if (guide.colors) {
+        const root = document.documentElement;
+
+        if (guide.colors.primary) root.style.setProperty("--guide", guide.colors.primary);
+        if (guide.colors.secondary) root.style.setProperty("--forest", guide.colors.secondary);
+        if (guide.colors.deepBase) root.style.setProperty("--forest-deep", guide.colors.deepBase);
+        if (guide.colors.softAccent) root.style.setProperty("--moss", guide.colors.softAccent);
+        if (guide.colors.lightBase) root.style.setProperty("--sage", guide.colors.lightBase);
+      }
+
+      if (guide.logos) {
+        Object.entries(guide.logos).forEach(([key, value]) => {
+          if (!value) return;
+
+          const imageEls = document.querySelectorAll(`[data-image="${key}"]`);
+          imageEls.forEach(img => {
+            img.src = value;
+            img.alt = `${guide.clientName || "Client"} ${key}`;
+          });
+        });
+      }
+
+      if (guide.mockups) {
+        Object.entries(guide.mockups).forEach(([key, value]) => {
+          if (!value) return;
+
+          const imageEls = document.querySelectorAll(`[data-image="${key}"]`);
+          imageEls.forEach(img => {
+            img.src = value;
+            img.alt = `${guide.clientName || "Client"} ${key}`;
+          });
+        });
+      }
+
+      console.log("Loaded guide:", guide);
+    } catch (error) {
+      console.error("Guide loading failed:", error);
+    }
+  }
+
+  loadClientGuide();
+</script>
 </body>
 </html>
