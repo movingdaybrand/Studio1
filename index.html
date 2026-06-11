@@ -819,6 +819,114 @@ a { color: inherit; text-decoration: none; }
 }
 
 
+
+/* ── GUIDE SLOT ASSIGNMENT ── */
+.slot-assignment-panel {
+  margin-top: 16px;
+  border: 1px solid rgba(31,61,46,.10);
+  border-radius: 18px;
+  background: rgba(251,248,240,.64);
+  padding: 16px;
+}
+
+.slot-assignment-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 12px;
+}
+
+.slot-assignment-head h4 {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  color: #244834;
+  font-weight: 900;
+  margin: 0 0 4px;
+}
+
+.slot-assignment-head p {
+  font-size: 11px;
+  line-height: 1.45;
+  color: rgba(21,20,15,.50);
+  max-width: 460px;
+}
+
+.slot-assignment-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.slot-assignment-row {
+  display: grid;
+  grid-template-columns: minmax(130px,.74fr) minmax(170px,1fr);
+  gap: 10px;
+  align-items: stretch;
+  padding: 10px;
+  border: 1px solid rgba(31,61,46,.08);
+  border-radius: 14px;
+  background: rgba(255,255,255,.66);
+}
+
+.slot-assignment-meta strong {
+  display: block;
+  font-size: 12px;
+  color: #244834;
+  line-height: 1.25;
+  margin-bottom: 4px;
+}
+
+.slot-assignment-meta span {
+  display: block;
+  font-size: 10.5px;
+  line-height: 1.42;
+  color: rgba(21,20,15,.52);
+}
+
+.slot-assignment-control {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.slot-assignment-control select {
+  width: 100%;
+  min-height: 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(31,61,46,.12);
+  background: #F7F4EC;
+  color: #15140F;
+  padding: 9px 11px;
+  font: 700 12px var(--sans);
+  outline: none;
+}
+
+.slot-assignment-control select:focus {
+  border-color: rgba(31,61,46,.30);
+}
+
+.slot-assignment-format {
+  font: 800 8.5px var(--sans);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(31,61,46,.72);
+}
+
+.slot-assignment-empty {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(31,61,46,.055);
+  color: rgba(21,20,15,.54);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+@media (max-width: 720px) {
+  .slot-assignment-row { grid-template-columns: 1fr; }
+  .slot-assignment-head { flex-direction: column; }
+}
+
 /* ── PUBLISH TOAST ── */
 .publish-toast {
   position: fixed;
@@ -1057,6 +1165,18 @@ a { color: inherit; text-decoration: none; }
             <h4>Uploaded files</h4>
             <div id="uploadedFileItems"></div>
           </div>
+
+          <div class="slot-assignment-panel" id="slotAssignmentPanel">
+            <div class="slot-assignment-head">
+              <div>
+                <h4>Guide slot assignments</h4>
+                <p>Upload assets first, then choose which file should fill each section in the client-facing guide.</p>
+              </div>
+            </div>
+            <div class="slot-assignment-grid" id="slotAssignmentGrid">
+              <div class="slot-assignment-empty">No uploaded files yet. Add assets above to assign logos, mockups, and social files.</div>
+            </div>
+          </div>
         </article>
 
         <!-- TYPOGRAPHY -->
@@ -1162,6 +1282,51 @@ a { color: inherit; text-decoration: none; }
     socialPost:    'Social Post'
   };
 
+  const SLOT_REQUIREMENTS = [
+    {
+      slot: 'heroLogo',
+      label: 'Hero Logo',
+      formats: 'SVG or transparent PNG',
+      size: 'Recommended 1600×500 px · horizontal wordmark'
+    },
+    {
+      slot: 'primaryLogo',
+      label: 'Primary Logo',
+      formats: 'SVG preferred · PNG acceptable',
+      size: 'Recommended 2000×1200 px · transparent background'
+    },
+    {
+      slot: 'iconMark',
+      label: 'Icon Mark',
+      formats: 'SVG or transparent PNG',
+      size: 'Recommended 1024×1024 px · square mark'
+    },
+    {
+      slot: 'profileImage',
+      label: 'Profile Image',
+      formats: 'PNG or JPG',
+      size: 'Recommended 1080×1080 px · square avatar'
+    },
+    {
+      slot: 'websiteHeader',
+      label: 'Digital Mockup',
+      formats: 'PNG, JPG, or WebP',
+      size: 'Recommended 1920×1080 px · website/social preview'
+    },
+    {
+      slot: 'businessCard',
+      label: 'Print Mockup',
+      formats: 'PNG, JPG, or PDF preview',
+      size: 'Recommended 1600×1200 px or 11×8.5 in @ 300dpi'
+    },
+    {
+      slot: 'socialPost',
+      label: 'Social Post',
+      formats: 'PNG or JPG',
+      size: 'Recommended 1080×1080 or 1080×1350 px'
+    }
+  ];
+
   /* ─────────────────────────────────────────
      HELPERS
   ───────────────────────────────────────── */
@@ -1185,6 +1350,26 @@ a { color: inherit; text-decoration: none; }
       r.onerror = reject;
       r.readAsDataURL(file);
     });
+  }
+
+
+  function assetKey(asset) {
+    return [asset?.name || 'asset', asset?.size || 0, String(asset?.data || '').slice(0, 36)].join('::');
+  }
+
+  function getAssetLibrary() {
+    const map = new Map();
+    state.extraFiles.forEach(asset => {
+      if (asset?.data) map.set(assetKey(asset), asset);
+    });
+    Object.values(state.assets).forEach(asset => {
+      if (asset?.data) map.set(assetKey(asset), asset);
+    });
+    return Array.from(map.values());
+  }
+
+  function findAssetByKey(key) {
+    return getAssetLibrary().find(asset => assetKey(asset) === key) || null;
   }
 
   function normalizeHex(v) {
@@ -1353,6 +1538,7 @@ a { color: inherit; text-decoration: none; }
     state.fields.assetCount = `${total} file${total !== 1 ? 's' : ''}`;
     renderFields();
     renderFileList();
+    renderSlotSelectors();
     save();
     status(`${state.extraFiles.length} file(s) in asset library. Open Preview to assign them to guide slots.`);
   }
@@ -1378,6 +1564,67 @@ a { color: inherit; text-decoration: none; }
         <span class="file-item-name">${f.name}</span>
         <span class="file-item-slot">${f.slot}</span>
       </div>`).join('');
+  }
+
+
+  function renderSlotSelectors() {
+    const grid = $('#slotAssignmentGrid');
+    if (!grid) return;
+
+    const library = getAssetLibrary();
+
+    if (!library.length) {
+      grid.innerHTML = '<div class="slot-assignment-empty">No uploaded files yet. Add assets above to assign logos, mockups, and social files.</div>';
+      return;
+    }
+
+    const options = library.map(asset => {
+      const key = assetKey(asset);
+      const type = asset.ext ? asset.ext.toUpperCase() : 'FILE';
+      return `<option value="${key}">${asset.name} · ${type}</option>`;
+    }).join('');
+
+    grid.innerHTML = SLOT_REQUIREMENTS.map(req => {
+      const assigned = state.assets[req.slot];
+      const assignedKey = assigned ? assetKey(assigned) : '';
+      return `
+        <div class="slot-assignment-row">
+          <div class="slot-assignment-meta">
+            <strong>${req.label}</strong>
+            <span>${req.size}</span>
+          </div>
+          <div class="slot-assignment-control">
+            <select data-slot-select="${req.slot}">
+              <option value="">Select uploaded file…</option>
+              ${options}
+            </select>
+            <span class="slot-assignment-format">${req.formats}</span>
+          </div>
+        </div>`;
+    }).join('');
+
+    $$('[data-slot-select]').forEach(select => {
+      const slot = select.dataset.slotSelect;
+      const assigned = state.assets[slot];
+      if (assigned) select.value = assetKey(assigned);
+
+      select.addEventListener('change', e => {
+        const picked = findAssetByKey(e.target.value);
+        if (picked) {
+          state.assets[slot] = picked;
+        } else {
+          delete state.assets[slot];
+        }
+
+        const total = Object.keys(state.assets).length + state.extraFiles.length;
+        state.fields.assetCount = total ? `${total} file${total !== 1 ? 's' : ''}` : '';
+        renderFields();
+        renderFileList();
+        save();
+        state.published = false;
+        status(picked ? `${SLOT_LABELS[slot] || slot} assigned to ${picked.name}.` : `${SLOT_LABELS[slot] || slot} cleared.`);
+      });
+    });
   }
 
   /* ─────────────────────────────────────────
@@ -1676,9 +1923,11 @@ a { color: inherit; text-decoration: none; }
     const restored = load();
     renderFields();
     buildColorGrid();
+    renderSlotSelectors();
     if (restored) {
       syncColorInputs();
       renderFileList();
+      renderSlotSelectors();
       status('Previous session restored. Make changes and click Publish to update the guide.');
     }
     wireFields();
