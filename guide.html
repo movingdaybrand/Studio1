@@ -4909,79 +4909,193 @@ function applyClientBackgroundsToCards(){
 })();
 </script>
   <script>
+  /*
+    Moving Day Studio client renderer
+    This makes /guide.html?client=demo-client load:
+    /clients/demo-client/guide.json
+  */
   async function loadClientGuide() {
     const params = new URLSearchParams(window.location.search);
     const clientSlug = params.get("client") || "demo-client";
 
-    try {
-      const response = await fetch(`/clients/${clientSlug}/guide.json`);
+    const defaultGuide = {
+      clientName: "Client Name",
+      category: "Brand Identity",
+      date: "June 2026",
+      sprint: "Brand Identity Guide",
+      delivered: "7 days",
+      tagline: "A clean, flexible brand system built for everyday use.",
+      colors: {
+        primary: "#1F3D2E",
+        secondary: "#2D5642",
+        softAccent: "#C4D9CB",
+        lightBase: "#F1ECDF",
+        deepBase: "#15140F"
+      },
+      fonts: {
+        display: "Instrument Serif",
+        body: "Geist"
+      },
+      logos: {},
+      mockups: {}
+    };
 
-      if (!response.ok) {
-        console.error(`Could not load client guide: ${clientSlug}`);
-        return;
+    const setText = (key, value) => {
+      document.querySelectorAll(`[data-out="${key}"], [data-guide="${key}"]`).forEach(el => {
+        el.textContent = value || "";
+      });
+    };
+
+    const toRgb = hex => {
+      const clean = String(hex || "").replace("#", "").trim();
+      if (clean.length !== 6) return "";
+      const r = parseInt(clean.slice(0, 2), 16);
+      const g = parseInt(clean.slice(2, 4), 16);
+      const b = parseInt(clean.slice(4, 6), 16);
+      return `${r}, ${g}, ${b}`;
+    };
+
+    const placeAsset = (slotName, src, label) => {
+      if (!src) return;
+      document.querySelectorAll(`[data-slot="${slotName}"]`).forEach(slot => {
+        slot.innerHTML = "";
+
+        const download = document.createElement("a");
+        download.className = "quick-download";
+        download.href = src;
+        download.download = "";
+        download.textContent = "Download";
+
+        const img = document.createElement("img");
+        img.className = "asset-img";
+        img.src = src;
+        img.alt = label || "Brand asset";
+
+        slot.appendChild(download);
+        slot.appendChild(img);
+      });
+    };
+
+    const applyColors = colors => {
+      const root = document.documentElement;
+      const palette = [
+        colors.primary,
+        colors.secondary,
+        colors.softAccent,
+        colors.lightBase,
+        colors.deepBase
+      ].filter(Boolean);
+
+      if (colors.primary) {
+        root.style.setProperty("--guide", colors.primary);
+        root.style.setProperty("--c1", colors.primary);
+      }
+      if (colors.secondary) {
+        root.style.setProperty("--forest", colors.secondary);
+        root.style.setProperty("--moss", colors.secondary);
+        root.style.setProperty("--c2", colors.secondary);
+      }
+      if (colors.softAccent) {
+        root.style.setProperty("--sage", colors.softAccent);
+        root.style.setProperty("--c3", colors.softAccent);
+      }
+      if (colors.lightBase) {
+        root.style.setProperty("--cream", colors.lightBase);
+        root.style.setProperty("--c4", colors.lightBase);
+      }
+      if (colors.deepBase) {
+        root.style.setProperty("--forest-deep", colors.deepBase);
+        root.style.setProperty("--ink", colors.deepBase);
+        root.style.setProperty("--c5", colors.deepBase);
       }
 
-      const guide = await response.json();
+      document.querySelectorAll(".palette-row .swatch").forEach((swatch, index) => {
+        if (palette[index]) {
+          swatch.style.background = palette[index];
+          swatch.dataset.label = palette[index].toUpperCase();
+        }
+      });
+
+      document.querySelectorAll(".colour-detail").forEach((detail, index) => {
+        if (!palette[index]) return;
+        const hex = palette[index].toUpperCase();
+        const dot = detail.querySelector(".colour-dot");
+        const name = detail.querySelector(".colour-detail-name");
+        const values = detail.querySelector(".colour-detail-values");
+
+        if (dot) dot.style.background = hex;
+        if (name) name.textContent = ["Primary", "Secondary", "Soft Accent", "Light Base", "Deep Base"][index] || `Color ${index + 1}`;
+        if (values) values.innerHTML = `${hex}<br>RGB ${toRgb(hex)}<br>CMYK reference`;
+      });
+    };
+
+    try {
+      const response = await fetch(`/clients/${clientSlug}/guide.json`, { cache: "no-store" });
+
+      if (!response.ok) {
+        throw new Error(`Could not load /clients/${clientSlug}/guide.json`);
+      }
+
+      const guide = { ...defaultGuide, ...(await response.json()) };
+      guide.colors = { ...defaultGuide.colors, ...(guide.colors || {}) };
+      guide.fonts = { ...defaultGuide.fonts, ...(guide.fonts || {}) };
+      guide.logos = guide.logos || {};
+      guide.mockups = guide.mockups || {};
+
+      // Hide the internal builder on the public client guide page.
+      document.querySelector("#builderApp")?.remove();
+      document.querySelectorAll("[data-builder-only]").forEach(el => el.remove());
 
       document.title = `${guide.clientName || "Client"} · Brand Identity Guide`;
 
-      const clientNameEls = document.querySelectorAll("[data-client-name]");
-      clientNameEls.forEach(el => {
-        el.textContent = guide.clientName || "Client Name";
-      });
+      setText("clientName", guide.clientName);
+      setText("category", guide.category);
+      setText("date", guide.date);
+      setText("sprint", guide.sprint);
+      setText("delivered", guide.delivered);
+      setText("tagline", guide.tagline);
+      setText("displayFont", guide.fonts.display);
+      setText("bodyFont", guide.fonts.body);
 
-      const categoryEls = document.querySelectorAll("[data-category]");
-      categoryEls.forEach(el => {
-        el.textContent = guide.category || "Brand Identity";
-      });
+      const assetCount = [
+        ...Object.values(guide.logos || {}),
+        ...Object.values(guide.mockups || {})
+      ].filter(Boolean).length;
+      setText("assetCount", `${assetCount} files`);
 
-      const dateEls = document.querySelectorAll("[data-date]");
-      dateEls.forEach(el => {
-        el.textContent = guide.date || "June 2026";
-      });
-
-      const taglineEls = document.querySelectorAll("[data-tagline]");
-      taglineEls.forEach(el => {
-        el.textContent = guide.tagline || "A clean, flexible brand system built for everyday use.";
-      });
-
-      if (guide.colors) {
-        const root = document.documentElement;
-
-        if (guide.colors.primary) root.style.setProperty("--guide", guide.colors.primary);
-        if (guide.colors.secondary) root.style.setProperty("--forest", guide.colors.secondary);
-        if (guide.colors.deepBase) root.style.setProperty("--forest-deep", guide.colors.deepBase);
-        if (guide.colors.softAccent) root.style.setProperty("--moss", guide.colors.softAccent);
-        if (guide.colors.lightBase) root.style.setProperty("--sage", guide.colors.lightBase);
+      if (guide.fonts.display) {
+        document.documentElement.style.setProperty("--display", `"${guide.fonts.display}", "Instrument Serif", serif`);
+      }
+      if (guide.fonts.body) {
+        document.documentElement.style.setProperty("--sans", `"${guide.fonts.body}", "Geist", sans-serif`);
       }
 
-      if (guide.logos) {
-        Object.entries(guide.logos).forEach(([key, value]) => {
-          if (!value) return;
+      applyColors(guide.colors);
 
-          const imageEls = document.querySelectorAll(`[data-image="${key}"]`);
-          imageEls.forEach(img => {
-            img.src = value;
-            img.alt = `${guide.clientName || "Client"} ${key}`;
-          });
-        });
-      }
+      placeAsset("heroLogo", guide.logos.heroLogo, `${guide.clientName} hero logo`);
+      placeAsset("primaryLogo", guide.logos.primaryLogo, `${guide.clientName} primary logo`);
+      placeAsset("iconMark", guide.logos.iconMark, `${guide.clientName} icon mark`);
+      placeAsset("iconVariant", guide.logos.brandVariant, `${guide.clientName} brand variant`);
 
-      if (guide.mockups) {
-        Object.entries(guide.mockups).forEach(([key, value]) => {
-          if (!value) return;
+      placeAsset("profileImage", guide.mockups.profile, `${guide.clientName} profile mockup`);
+      placeAsset("websiteHeader", guide.mockups.digital, `${guide.clientName} digital mockup`);
+      placeAsset("businessCard", guide.mockups.print, `${guide.clientName} print mockup`);
+      placeAsset("socialPost", guide.mockups.social, `${guide.clientName} social mockup`);
 
-          const imageEls = document.querySelectorAll(`[data-image="${key}"]`);
-          imageEls.forEach(img => {
-            img.src = value;
-            img.alt = `${guide.clientName || "Client"} ${key}`;
-          });
-        });
-      }
-
-      console.log("Loaded guide:", guide);
+      console.log("Loaded Moving Day client guide:", clientSlug, guide);
     } catch (error) {
       console.error("Guide loading failed:", error);
+      document.querySelector("#builderApp")?.remove();
+
+      const heroName = document.querySelector(".hero-name");
+      if (heroName) {
+        heroName.innerHTML = `Guide not found<br><em>${clientSlug}</em>`;
+      }
+
+      const tagline = document.querySelector(".hero-tagline");
+      if (tagline) {
+        tagline.textContent = "Check that this client folder exists and includes a valid guide.json file.";
+      }
     }
   }
 
