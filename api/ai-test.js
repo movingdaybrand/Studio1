@@ -6,6 +6,7 @@ export default function handler(req, res) {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
   <title>Moving Day AI Visual Review</title>
 
   <style>
@@ -18,15 +19,15 @@ export default function handler(req, res) {
       --sage: #C4D9CB;
       --ink: #15140F;
       --muted: #6B6558;
-      --clay: #5B3D35;
       --rule: rgba(21, 20, 15, .12);
       --shadow: 0 30px 90px rgba(0,0,0,.24);
       --display: Georgia, "Times New Roman", serif;
       --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -41,11 +42,24 @@ export default function handler(req, res) {
       -webkit-font-smoothing: antialiased;
     }
 
-    button, input { font: inherit; }
-    button { cursor: pointer; }
-    img { max-width: 100%; display: block; }
+    button,
+    input {
+      font: inherit;
+    }
 
-    .wrap { max-width: 1180px; margin: 0 auto; }
+    button {
+      cursor: pointer;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
 
     .topbar {
       position: sticky;
@@ -251,7 +265,9 @@ export default function handler(req, res) {
       white-space: nowrap;
     }
 
-    .button-primary:hover { transform: translateY(-1px); }
+    .button-primary:hover {
+      transform: translateY(-1px);
+    }
 
     .button-primary:disabled {
       opacity: .5;
@@ -308,7 +324,9 @@ export default function handler(req, res) {
       line-height: 1.4;
     }
 
-    .section-body { padding: 20px; }
+    .section-body {
+      padding: 20px;
+    }
 
     .small {
       color: var(--muted) !important;
@@ -347,12 +365,6 @@ export default function handler(req, res) {
       text-transform: uppercase;
     }
 
-    .analysis-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-    }
-
     .visual-board {
       display: grid;
       grid-template-columns: 1.35fr .8fr;
@@ -379,16 +391,12 @@ export default function handler(req, res) {
       text-transform: uppercase;
       font-weight: 900;
       opacity: .58;
-      position: relative;
-      z-index: 2;
     }
 
     .stage-logo {
       display: grid;
       place-items: center;
       min-height: 210px;
-      position: relative;
-      z-index: 2;
     }
 
     .stage-logo img {
@@ -404,8 +412,6 @@ export default function handler(req, res) {
       line-height: .95;
       letter-spacing: -.04em;
       max-width: 540px;
-      position: relative;
-      z-index: 2;
     }
 
     .visual-side {
@@ -426,7 +432,9 @@ export default function handler(req, res) {
       position: relative;
     }
 
-    .mini-visual.dark { background: var(--ink); }
+    .mini-visual.dark {
+      background: var(--ink);
+    }
 
     .mini-visual img {
       max-width: 80%;
@@ -445,7 +453,9 @@ export default function handler(req, res) {
       color: rgba(21,20,15,.46);
     }
 
-    .mini-visual.dark span { color: rgba(241,236,223,.58); }
+    .mini-visual.dark span {
+      color: rgba(241,236,223,.58);
+    }
 
     .application-grid {
       display: grid;
@@ -466,9 +476,17 @@ export default function handler(req, res) {
       background: var(--paper);
     }
 
-    .application-card.profile { background: var(--forest); }
-    .application-card.print { background: #F6F2E8; }
-    .application-card.dark { background: var(--ink); }
+    .application-card.profile {
+      background: var(--forest);
+    }
+
+    .application-card.print {
+      background: #F6F2E8;
+    }
+
+    .application-card.dark {
+      background: var(--ink);
+    }
 
     .application-card.social {
       background:
@@ -496,7 +514,9 @@ export default function handler(req, res) {
     }
 
     .application-card.profile label,
-    .application-card.dark label { color: rgba(241,236,223,.58); }
+    .application-card.dark label {
+      color: rgba(241,236,223,.58);
+    }
 
     .swatches {
       display: grid;
@@ -514,7 +534,9 @@ export default function handler(req, res) {
       border-right: 1px solid rgba(21,20,15,.08);
     }
 
-    .swatch:last-child { border-right: 0; }
+    .swatch:last-child {
+      border-right: 0;
+    }
 
     .swatch span {
       position: absolute;
@@ -528,7 +550,36 @@ export default function handler(req, res) {
       letter-spacing: .04em;
     }
 
-    .swatch.is-dark span { color: var(--cream); }
+    .swatch.is-dark span {
+      color: var(--cream);
+    }
+
+    .detected-color-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 14px;
+    }
+
+    .detected-color-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border: 1px solid rgba(21,20,15,.1);
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: #FBF8F0;
+      font-size: 11px;
+      font-weight: 900;
+      color: var(--ink);
+    }
+
+    .detected-color-pill i {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(21,20,15,.15);
+    }
 
     .type-grid {
       display: grid;
@@ -602,7 +653,9 @@ export default function handler(req, res) {
       overflow: hidden;
     }
 
-    .asset-thumb.dark { background: var(--ink); }
+    .asset-thumb.dark {
+      background: var(--ink);
+    }
 
     .asset-thumb img {
       max-height: 100%;
@@ -636,7 +689,9 @@ export default function handler(req, res) {
       margin-bottom: 10px;
     }
 
-    .download-card strong { color: var(--ink); }
+    .download-card strong {
+      color: var(--ink);
+    }
 
     .download-layout {
       display: grid;
@@ -715,10 +770,14 @@ export default function handler(req, res) {
       border-color: rgba(156,60,60,.24);
     }
 
-    .error .section-head h3 { color: #9C3C3C; }
+    .error .section-head h3 {
+      color: #9C3C3C;
+    }
 
     @media (max-width: 980px) {
-      body { padding: 18px; }
+      body {
+        padding: 18px;
+      }
 
       .hero,
       .panel {
@@ -726,7 +785,6 @@ export default function handler(req, res) {
         border-radius: 24px;
       }
 
-      .analysis-grid,
       .visual-board,
       .type-grid,
       .download-layout {
@@ -779,7 +837,7 @@ export default function handler(req, res) {
     <section class="panel">
       <div class="upload">
         <strong>Upload brand files</strong>
-        <p class="small">Try logos, screenshots, PNGs, JPGs, or SVGs. The review below will turn the response into visuals, applications, colors, type, file groups, and production notes.</p>
+        <p class="small">This version extracts colors directly in the browser first, then sends those detected colors to the AI backend.</p>
 
         <div class="file-row">
           <input id="files" type="file" multiple accept=".png,.jpg,.jpeg,.webp,.svg" />
@@ -795,10 +853,13 @@ export default function handler(req, res) {
     const filesInput = document.getElementById("files");
     const analyzeBtn = document.getElementById("analyzeBtn");
     const results = document.getElementById("results");
+
     let uploadedAssets = [];
+    let browserDetectedColors = [];
 
     filesInput.addEventListener("change", async function () {
       const files = Array.from(filesInput.files || []);
+
       uploadedAssets = await Promise.all(files.map(async function (file, index) {
         return {
           id: "asset_" + (index + 1),
@@ -807,6 +868,24 @@ export default function handler(req, res) {
           dataUrl: await fileToDataUrl(file)
         };
       }));
+
+      browserDetectedColors = await extractLocalColorsFromAssets(uploadedAssets);
+
+      if (browserDetectedColors.length) {
+        results.innerHTML =
+          '<section class="section-card">' +
+            '<div class="section-head">' +
+              '<div>' +
+                '<h3>Browser Color Scan</h3>' +
+                '<p>These are colors detected directly from your uploaded image pixels before AI review.</p>' +
+              '</div>' +
+              '<span class="chip">' + browserDetectedColors.length + ' colors</span>' +
+            '</div>' +
+            '<div class="section-body">' +
+              renderDetectedColorPills(browserDetectedColors) +
+            '</div>' +
+          '</section>';
+      }
     });
 
     analyzeBtn.addEventListener("click", async function () {
@@ -833,10 +912,15 @@ export default function handler(req, res) {
           }));
         }
 
+        browserDetectedColors = await extractLocalColorsFromAssets(uploadedAssets);
+
         const response = await fetch("/api/analyze-brand-files", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ assets: uploadedAssets })
+          body: JSON.stringify({
+            assets: uploadedAssets,
+            detectedColors: browserDetectedColors
+          })
         });
 
         if (!response.ok) {
@@ -864,23 +948,137 @@ export default function handler(req, res) {
     function fileToDataUrl(file) {
       return new Promise(function (resolve, reject) {
         const reader = new FileReader();
-        reader.onload = function () { resolve(reader.result); };
+        reader.onload = function () {
+          resolve(reader.result);
+        };
         reader.onerror = reject;
         reader.readAsDataURL(file);
       });
     }
 
+    async function extractLocalColorsFromAssets(assets) {
+      const colors = [];
+
+      for (const asset of assets) {
+        if (!asset.type || !asset.type.startsWith("image/")) continue;
+
+        try {
+          const imageColors = await extractColorsFromDataUrl(asset.dataUrl);
+          colors.push.apply(colors, imageColors);
+        } catch (error) {
+          console.warn("Color extraction failed for", asset.name, error);
+        }
+      }
+
+      return dedupeColors(colors).slice(0, 10);
+    }
+
+    function extractColorsFromDataUrl(dataUrl) {
+      return new Promise(function (resolve, reject) {
+        const img = new Image();
+
+        img.onload = function () {
+          const canvas = document.createElement("canvas");
+          const ctx = canvas.getContext("2d", { willReadFrequently: true });
+
+          const size = 160;
+          canvas.width = size;
+          canvas.height = size;
+
+          ctx.clearRect(0, 0, size, size);
+          ctx.drawImage(img, 0, 0, size, size);
+
+          const data = ctx.getImageData(0, 0, size, size).data;
+          const buckets = {};
+
+          for (let i = 0; i < data.length; i += 16) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const a = data[i + 3];
+
+            if (a < 120) continue;
+
+            const saturation = getSaturation(r, g, b);
+            const brightness = (r + g + b) / 3;
+
+            if (brightness < 8 || brightness > 248) continue;
+
+            const rq = Math.round(r / 18) * 18;
+            const gq = Math.round(g / 18) * 18;
+            const bq = Math.round(b / 18) * 18;
+
+            const key = clampColor(rq) + "," + clampColor(gq) + "," + clampColor(bq);
+
+            const score = 1 + saturation * 2 + (brightness > 30 && brightness < 225 ? 1 : 0);
+
+            buckets[key] = (buckets[key] || 0) + score;
+          }
+
+          const sorted = Object.entries(buckets)
+            .sort(function (a, b) {
+              return b[1] - a[1];
+            })
+            .slice(0, 14)
+            .map(function (entry) {
+              const parts = entry[0].split(",").map(Number);
+              return rgbToHex(parts[0], parts[1], parts[2]);
+            });
+
+          resolve(sorted);
+        };
+
+        img.onerror = reject;
+        img.src = dataUrl;
+      });
+    }
+
+    function getSaturation(r, g, b) {
+      const max = Math.max(r, g, b) / 255;
+      const min = Math.min(r, g, b) / 255;
+      if (max === 0) return 0;
+      return (max - min) / max;
+    }
+
+    function clampColor(value) {
+      return Math.max(0, Math.min(255, value));
+    }
+
+    function rgbToHex(r, g, b) {
+      return "#" + [r, g, b].map(function (value) {
+        const hex = clampColor(value).toString(16);
+        return hex.length === 1 ? "0" + hex : hex;
+      }).join("").toUpperCase();
+    }
+
+    function dedupeColors(colors) {
+      const seen = new Set();
+      const output = [];
+
+      colors.forEach(function (color) {
+        const normalized = String(color || "").toUpperCase();
+        if (!normalized || seen.has(normalized)) return;
+        seen.add(normalized);
+        output.push(normalized);
+      });
+
+      return output;
+    }
+
     function renderResults(data) {
       const guide = data.guide || {};
       const selectedAssets = data.selectedAssets || {};
-      const colors = normalizeColors(data.colors || data.palette || []);
+      const aiColors = normalizeColors(data.colors || data.palette || []);
+      const colors = buildFinalPalette(aiColors, browserDetectedColors);
       const typography = data.typography || {};
       const usage = data.usage || {};
       const downloadCards = data.downloadCards || [];
       const assetReport = data.assetReport || [];
 
       const selectedAssetRows = Object.entries(selectedAssets)
-        .filter(function (entry) { return entry[1]; })
+        .filter(function (entry) {
+          return entry[1];
+        })
         .map(function (entry) {
           return {
             slot: entry[0],
@@ -899,7 +1097,7 @@ export default function handler(req, res) {
         renderIdentitySection(guide, assetReport) +
         renderVisualSystemSection(guide, heroAsset, primaryAsset, iconAsset) +
         renderApplicationsSection(profileAsset, primaryAsset, iconAsset, websiteAsset) +
-        renderColorSection(colors) +
+        renderColorSection(colors, browserDetectedColors, aiColors) +
         renderTypeSection(typography, guide) +
         renderSelectedAssetsSection(selectedAssetRows) +
         renderUsageSection(usage) +
@@ -909,6 +1107,50 @@ export default function handler(req, res) {
           '<summary>Show Developer JSON</summary>' +
           '<pre>' + escapeHtml(JSON.stringify(data, null, 2)) + '</pre>' +
         '</details>';
+    }
+
+    function buildFinalPalette(aiColors, detectedColors) {
+      const output = [];
+
+      aiColors.forEach(function (color) {
+        const hex = normalizeHex(color.hex || color.value || color);
+        if (!hex) return;
+
+        output.push({
+          name: color.name || "AI Color",
+          hex: hex,
+          usage: color.usage || "AI suggested brand color"
+        });
+      });
+
+      detectedColors.forEach(function (hex, index) {
+        const normalized = normalizeHex(hex);
+        if (!normalized) return;
+
+        const alreadyExists = output.some(function (color) {
+          return color.hex.toUpperCase() === normalized.toUpperCase();
+        });
+
+        if (!alreadyExists) {
+          output.push({
+            name: "Detected " + (index + 1),
+            hex: normalized,
+            usage: "Browser-detected color from uploaded assets"
+          });
+        }
+      });
+
+      if (!output.length) {
+        return [
+          { name: "Ink", hex: "#15140F", usage: "Text and dark backgrounds" },
+          { name: "Paper", hex: "#F1ECDF", usage: "Guide background" },
+          { name: "Forest", hex: "#1F3D2E", usage: "Primary Moving Day support" },
+          { name: "Sage", hex: "#C4D9CB", usage: "Soft accent" },
+          { name: "Clay", hex: "#5B3D35", usage: "Warm supporting tone" }
+        ];
+      }
+
+      return output.slice(0, 8);
     }
 
     function renderIdentitySection(guide, assetReport) {
@@ -927,7 +1169,7 @@ export default function handler(req, res) {
             '<p class="small">' + escapeHtml(guide.description || "") + '</p>' +
             '<div class="chip-row">' +
               '<span class="chip">Assets: ' + escapeHtml(guide.assetCount || assetReport.length || 0) + '</span>' +
-              '<span class="chip">Source: AI Analysis</span>' +
+              '<span class="chip">Source: AI + Browser Scan</span>' +
             '</div>' +
           '</div>' +
         '</section>'
@@ -951,11 +1193,13 @@ export default function handler(req, res) {
                 '<div class="stage-logo">' + assetImg(heroAsset, "Hero logo") + '</div>' +
                 '<div class="stage-title">' + escapeHtml(guide.clientName || "Brand Identity") + '<br>Visual System</div>' +
               '</div>' +
+
               '<div class="visual-side">' +
                 '<div class="mini-visual">' +
                   assetImg(primaryAsset, "Primary logo") +
                   '<span>Primary Mark</span>' +
                 '</div>' +
+
                 '<div class="mini-visual dark">' +
                   assetImg(iconAsset, "Icon mark") +
                   '<span>Icon / Small Use</span>' +
@@ -988,29 +1232,23 @@ export default function handler(req, res) {
       );
     }
 
-    function renderColorSection(colors) {
-      const finalColors = colors.length ? colors : [
-        { name: "Ink", hex: "#15140F" },
-        { name: "Paper", hex: "#F1ECDF" },
-        { name: "Forest", hex: "#1F3D2E" },
-        { name: "Sage", hex: "#C4D9CB" },
-        { name: "Clay", hex: "#5B3D35" }
-      ];
-
+    function renderColorSection(colors, detectedColors, aiColors) {
       return (
         '<section class="section-card">' +
           '<div class="section-head">' +
             '<div>' +
               '<h3>Color System</h3>' +
-              '<p>Detected or proposed colors organized for guide use.</p>' +
+              '<p>AI palette combined with browser-detected colors from the uploaded files.</p>' +
             '</div>' +
+            '<span class="chip">' + colors.length + ' colors</span>' +
           '</div>' +
           '<div class="section-body">' +
             '<div class="swatches">' +
-              finalColors.slice(0, 5).map(function (color) {
-                const hex = color.hex || color.value || color;
+              colors.slice(0, 5).map(function (color) {
+                const hex = normalizeHex(color.hex || color.value || color);
                 const name = color.name || "Color";
                 const isDark = isDarkColor(hex);
+
                 return (
                   '<div class="swatch ' + (isDark ? "is-dark" : "") + '" style="background:' + escapeHtml(hex) + '">' +
                     '<span>' + escapeHtml(name) + '<br>' + escapeHtml(hex) + '</span>' +
@@ -1018,9 +1256,34 @@ export default function handler(req, res) {
                 );
               }).join("") +
             '</div>' +
+
+            '<div class="detected-color-row">' +
+              renderDetectedColorPills(detectedColors) +
+            '</div>' +
+
+            '<p class="small" style="margin-top:14px;"><strong>AI colors:</strong> ' +
+              escapeHtml(aiColors.map(function (color) {
+                return color.hex || color.value || color;
+              }).join(", ") || "None returned") +
+            '</p>' +
           '</div>' +
         '</section>'
       );
+    }
+
+    function renderDetectedColorPills(colors) {
+      if (!colors || !colors.length) {
+        return '<p class="small">No browser colors detected yet.</p>';
+      }
+
+      return colors.map(function (hex) {
+        return (
+          '<span class="detected-color-pill">' +
+            '<i style="background:' + escapeHtml(hex) + '"></i>' +
+            escapeHtml(hex) +
+          '</span>'
+        );
+      }).join("");
     }
 
     function renderTypeSection(typography, guide) {
@@ -1039,6 +1302,7 @@ export default function handler(req, res) {
                 '<div class="type-display">' + escapeHtml(guide.clientName || "Brand System") + '</div>' +
                 '<p class="small"><strong>Detected:</strong> ' + escapeHtml(typography.displayFont || "Unknown / not provided") + '</p>' +
               '</div>' +
+
               '<div class="type-card">' +
                 '<small>Body / UI</small>' +
                 '<div class="type-body">Clear usage notes, download labels, file descriptions, and practical brand guidance.</div>' +
@@ -1095,18 +1359,21 @@ export default function handler(req, res) {
               '<p>Starter rules for protecting the identity system.</p>' +
             '</div>' +
           '</div>' +
-          '<div class="section-body analysis-grid">' +
-            '<div>' +
-              '<h4>Do</h4>' +
-              ((usage.do || []).length ? (usage.do || []).map(function (item) {
-                return '<p class="small">✓ ' + escapeHtml(item) + '</p>';
-              }).join("") : '<p class="small">No usage guidance returned.</p>') +
-            '</div>' +
-            '<div>' +
-              '<h4>Don’t</h4>' +
-              ((usage.dont || []).length ? (usage.dont || []).map(function (item) {
-                return '<p class="small">✕ ' + escapeHtml(item) + '</p>';
-              }).join("") : '<p class="small">No restrictions returned.</p>') +
+          '<div class="section-body">' +
+            '<div class="type-grid">' +
+              '<div class="type-card">' +
+                '<small>Do</small>' +
+                ((usage.do || []).length ? (usage.do || []).map(function (item) {
+                  return '<p class="small">✓ ' + escapeHtml(item) + '</p>';
+                }).join("") : '<p class="small">No usage guidance returned.</p>') +
+              '</div>' +
+
+              '<div class="type-card">' +
+                '<small>Don’t</small>' +
+                ((usage.dont || []).length ? (usage.dont || []).map(function (item) {
+                  return '<p class="small">✕ ' + escapeHtml(item) + '</p>';
+                }).join("") : '<p class="small">No restrictions returned.</p>') +
+              '</div>' +
             '</div>' +
           '</div>' +
         '</section>'
@@ -1143,6 +1410,7 @@ export default function handler(req, res) {
                   : '<p class="small">No download cards returned.</p>'
               ) +
             '</div>' +
+
             '<div class="download-cta">' +
               '<div>' +
                 '<strong>Production package preview</strong>' +
@@ -1164,12 +1432,14 @@ export default function handler(req, res) {
               '<p>File-by-file analysis with role, placement, and quality notes.</p>' +
             '</div>' +
           '</div>' +
+
           '<div class="section-body">' +
             '<div class="asset-grid">' +
               (
                 assetReport.length
                   ? assetReport.map(function (asset) {
                       const matched = findAsset(asset.name);
+
                       return (
                         '<div class="asset-card">' +
                           '<div class="asset-thumb">' + assetImg(matched, asset.name || "Asset") + '</div>' +
@@ -1193,8 +1463,13 @@ export default function handler(req, res) {
       return (colors || [])
         .map(function (color) {
           if (typeof color === "string") {
-            return { name: "Color", hex: color };
+            return {
+              name: "AI Color",
+              hex: color,
+              usage: "AI suggested color"
+            };
           }
+
           return color;
         })
         .filter(function (color) {
@@ -1202,12 +1477,28 @@ export default function handler(req, res) {
         });
     }
 
+    function normalizeHex(value) {
+      const raw = String(value || "").trim();
+
+      if (/^#[0-9A-Fa-f]{6}$/.test(raw)) {
+        return raw.toUpperCase();
+      }
+
+      if (/^[0-9A-Fa-f]{6}$/.test(raw)) {
+        return ("#" + raw).toUpperCase();
+      }
+
+      return "";
+    }
+
     function pickAsset() {
       const names = Array.from(arguments);
+
       for (const name of names) {
         const asset = findAsset(name);
         if (asset) return asset;
       }
+
       return null;
     }
 
@@ -1219,7 +1510,9 @@ export default function handler(req, res) {
 
     function findAsset(name) {
       if (!name) return null;
+
       const normalized = normalizeName(name);
+
       return uploadedAssets.find(function (asset) {
         return normalizeName(asset.name) === normalized;
       }) || uploadedAssets.find(function (asset) {
@@ -1230,13 +1523,17 @@ export default function handler(req, res) {
     }
 
     function normalizeName(value) {
-      return String(value || "").toLowerCase().replace(/\s+/g, " ").trim();
+      return String(value || "")
+        .toLowerCase()
+        .replace(/\s+/g, " ")
+        .trim();
     }
 
     function assetImg(asset, alt) {
       if (!asset || !asset.dataUrl) {
         return '<span class="small">' + escapeHtml(alt || "No preview") + '</span>';
       }
+
       return '<img src="' + asset.dataUrl + '" alt="' + escapeHtml(alt || asset.name) + '">';
     }
 
@@ -1247,16 +1544,22 @@ export default function handler(req, res) {
     function prettyLabel(value) {
       return String(value || "")
         .replace(/([A-Z])/g, " $1")
-        .replace(/^./, function (char) { return char.toUpperCase(); });
+        .replace(/^./, function (char) {
+          return char.toUpperCase();
+        });
     }
 
     function isDarkColor(hex) {
       const clean = String(hex || "").replace("#", "");
+
       if (clean.length !== 6) return false;
+
       const r = parseInt(clean.substring(0, 2), 16);
       const g = parseInt(clean.substring(2, 4), 16);
       const b = parseInt(clean.substring(4, 6), 16);
+
       const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
+
       return luminance < 140;
     }
 
