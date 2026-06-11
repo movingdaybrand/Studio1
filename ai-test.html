@@ -197,7 +197,7 @@
       try {
         const assets = await Promise.all(files.map(fileToDataUrl));
 
-        const response = await fetch("/api/analyze-brand", {
+     const response = await fetch("/api/analyze-brand-files", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
