@@ -927,6 +927,88 @@ a { color: inherit; text-decoration: none; }
   .slot-assignment-head { flex-direction: column; }
 }
 
+
+
+/* ── SLOT THUMBNAILS + LIVE PREVIEW ── */
+.slot-assignment-row {
+  grid-template-columns: 74px minmax(0,1fr) minmax(220px,.9fr) !important;
+  align-items: center !important;
+}
+.slot-thumb {
+  width: 58px;
+  height: 58px;
+  border-radius: 14px;
+  border: 1px solid rgba(31,61,46,.10);
+  background: linear-gradient(135deg, rgba(31,61,46,.08), rgba(196,217,203,.18));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: #244834;
+  font: 800 10px var(--sans);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+.slot-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 6px;
+}
+.slot-thumb.cover img { object-fit: cover; padding: 0; }
+.live-preview-shell {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: #07110c;
+  display: none;
+  flex-direction: column;
+}
+.live-preview-shell.active { display: flex; }
+.live-preview-bar {
+  height: 64px;
+  padding: 0 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  background: rgba(7,17,12,.96);
+  border-bottom: 1px solid rgba(241,236,223,.12);
+  color: var(--cream);
+}
+.live-preview-title {
+  font: 800 10px var(--sans);
+  text-transform: uppercase;
+  letter-spacing: .16em;
+  color: rgba(241,236,223,.62);
+}
+.live-preview-title strong {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--display);
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: -.02em;
+  color: var(--cream);
+  font-weight: 400;
+  text-transform: none;
+}
+.live-preview-actions { display:flex; gap:10px; align-items:center; }
+.live-preview-note { color: rgba(241,236,223,.48); font-size: 11px; }
+.live-preview-frame {
+  width: 100%;
+  height: calc(100vh - 64px);
+  border: 0;
+  background: #F1ECDF;
+}
+body.preview-open { overflow:hidden; }
+@media(max-width:720px){
+  .slot-assignment-row{grid-template-columns:1fr!important;}
+  .slot-thumb{width:100%;height:90px;}
+  .live-preview-note{display:none;}
+}
+
 /* ── PUBLISH TOAST ── */
 .publish-toast {
   position: fixed;
@@ -1236,6 +1318,23 @@ a { color: inherit; text-decoration: none; }
   </div><!-- /builder-shell -->
 </div><!-- /builder-app -->
 
+<!-- LIVE BUILDER PREVIEW -->
+<div class="live-preview-shell" id="livePreviewShell" aria-hidden="true">
+  <div class="live-preview-bar">
+    <div class="live-preview-title">
+      Live editable preview
+      <strong id="livePreviewClientName">Client Name</strong>
+    </div>
+    <div class="live-preview-actions">
+      <span class="live-preview-note">Edits here are draft-only. Publish locks the guide.</span>
+      <button class="builder-btn ghost" type="button" onclick="closeLivePreview()">Back to editor</button>
+      <button class="builder-btn publish" type="button" onclick="publishGuide()">Publish Guide</button>
+    </div>
+  </div>
+  <iframe class="live-preview-frame" id="livePreviewFrame" title="Live brand guide preview"></iframe>
+</div>
+
+
 <script>
 (function () {
   /* ─────────────────────────────────────────
@@ -1396,8 +1495,6 @@ a { color: inherit; text-decoration: none; }
         localStorage.setItem(STORAGE_KEY, JSON.stringify({
           fields: state.fields,
           colors: state.colors,
-          assets: state.assets,
-          extraFiles: state.extraFiles,
           published: state.published,
           savedAt: Date.now()
         }));
@@ -1414,8 +1511,7 @@ a { color: inherit; text-decoration: none; }
       const d = JSON.parse(raw);
       if (d.fields)      state.fields      = { ...state.fields, ...d.fields };
       if (d.colors?.length) state.colors   = d.colors;
-      if (d.assets)      state.assets      = d.assets;
-      if (d.extraFiles)  state.extraFiles  = d.extraFiles;
+      // Uploaded files stay in memory only so browser storage does not fill up.
       if (d.published)   state.published   = d.published;
       return true;
     } catch (e) {
@@ -1474,6 +1570,7 @@ a { color: inherit; text-decoration: none; }
       state.colors[i] = e.target.value.toUpperCase();
       $(`[data-hex="${i}"]`).value = state.colors[i];
       save();
+      sendLivePreviewUpdate();
     }));
 
     $$('[data-hex]').forEach(inp => inp.addEventListener('change', e => {
@@ -1483,6 +1580,7 @@ a { color: inherit; text-decoration: none; }
       $(`[data-color="${i}"]`).value = v;
       e.target.value = v;
       save();
+      sendLivePreviewUpdate();
     }));
   }
 
@@ -1540,6 +1638,7 @@ a { color: inherit; text-decoration: none; }
     renderFileList();
     renderSlotSelectors();
     save();
+    sendLivePreviewUpdate();
     status(`${state.extraFiles.length} file(s) in asset library. Open Preview to assign them to guide slots.`);
   }
 
@@ -1587,8 +1686,14 @@ a { color: inherit; text-decoration: none; }
     grid.innerHTML = SLOT_REQUIREMENTS.map(req => {
       const assigned = state.assets[req.slot];
       const assignedKey = assigned ? assetKey(assigned) : '';
+      const isCover = ['profileImage','websiteHeader','businessCard','socialPost'].includes(req.slot);
+      const thumb = assigned && String(assigned.type || '').startsWith('image/')
+        ? `<img src="${assigned.data}" alt="${req.label} thumbnail">`
+        : `<span>${req.label.split(' ').map(w => w[0]).join('').slice(0,2)}</span>`;
+
       return `
         <div class="slot-assignment-row">
+          <div class="slot-thumb ${isCover ? 'cover' : ''}">${thumb}</div>
           <div class="slot-assignment-meta">
             <strong>${req.label}</strong>
             <span>${req.size}</span>
@@ -1620,8 +1725,10 @@ a { color: inherit; text-decoration: none; }
         state.fields.assetCount = total ? `${total} file${total !== 1 ? 's' : ''}` : '';
         renderFields();
         renderFileList();
+        renderSlotSelectors();
         save();
         state.published = false;
+        sendLivePreviewUpdate();
         status(picked ? `${SLOT_LABELS[slot] || slot} assigned to ${picked.name}.` : `${SLOT_LABELS[slot] || slot} cleared.`);
       });
     });
@@ -1760,20 +1867,80 @@ a { color: inherit; text-decoration: none; }
   /* ─────────────────────────────────────────
      PREVIEW — opens guide.html with state injected
   ───────────────────────────────────────── */
-  window.openPreview = function () {
+  function guideDataForPreview() {
     const data = buildGuideData();
-    const slug = data.slug;
-    // Write to localStorage under a preview key that guide.html will pick up
-    try {
-      localStorage.setItem(`mdGuide_preview_${slug}`, JSON.stringify(data));
-      localStorage.setItem('mdGuide_latest_preview', slug);
-    } catch (e) {
-      status('Could not write preview data — browser storage may be full.');
+    data.clientName = data.name;
+    data.assetCount = data.assets;
+    data.fonts = { display: data.displayFont, body: data.bodyFont };
+    data.colorsObject = {
+      primary: state.colors[0],
+      secondary: state.colors[1],
+      softAccent: state.colors[2],
+      lightBase: state.colors[3],
+      deepBase: state.colors[4]
+    };
+    return data;
+  }
+
+  function sendLivePreviewUpdate() {
+    const frame = $('#livePreviewFrame');
+    const shell = $('#livePreviewShell');
+    if (!frame || !frame.contentWindow || !shell?.classList.contains('active')) return;
+    const data = guideDataForPreview();
+    frame.contentWindow.postMessage({ type: 'MD_GUIDE_PREVIEW_UPDATE', guide: data }, window.location.origin);
+    const name = $('#livePreviewClientName');
+    if (name) name.textContent = data.name || 'Client Name';
+  }
+
+  window.closeLivePreview = function () {
+    const shell = $('#livePreviewShell');
+    if (shell) {
+      shell.classList.remove('active');
+      shell.setAttribute('aria-hidden', 'true');
+    }
+    document.body.classList.remove('preview-open');
+  };
+
+  window.openPreview = function () {
+    const data = guideDataForPreview();
+    const slug = data.slug || safeName(data.name);
+    const shell = $('#livePreviewShell');
+    const frame = $('#livePreviewFrame');
+    if (!shell || !frame) {
+      status('Live preview shell is missing.');
       return;
     }
-    window.open(`/guide.html?slug=${slug}&preview=1`, '_blank');
-    status(`Preview opened for ${data.name}. Assign assets to slots in the guide, then publish.`);
+
+    shell.classList.add('active');
+    shell.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('preview-open');
+
+    const previewUrl = `/guide.html?builder=1&preview=1&slug=${encodeURIComponent(slug)}`;
+    if (!frame.src || !frame.src.includes('/guide.html')) {
+      frame.src = previewUrl;
+      frame.onload = () => setTimeout(sendLivePreviewUpdate, 150);
+    } else {
+      sendLivePreviewUpdate();
+    }
+
+    status(`Live preview opened for ${data.name}. Use Back to editor when finished. Publish locks the final guide.`);
   };
+
+  window.addEventListener('message', event => {
+    if (event.origin !== window.location.origin) return;
+    const msg = event.data || {};
+    if (msg.type === 'MD_GUIDE_FIELD_UPDATE' && msg.key) {
+      const key = msg.key === 'assetCount' ? 'assetCount' : msg.key;
+      if (Object.prototype.hasOwnProperty.call(state.fields, key)) {
+        state.fields[key] = msg.value;
+        renderFields();
+        save();
+      }
+    }
+    if (msg.type === 'MD_GUIDE_BACK_TO_EDITOR') {
+      closeLivePreview();
+    }
+  });
 
   /* ─────────────────────────────────────────
      PUBLISH — saves to localStorage + shows toast with link
