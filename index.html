@@ -15,6 +15,7 @@
       --forest-deep: #0c2a22;
       --moss: #8d9b72;
       --sage: #d9dec8;
+      --logo-mint: #bfd3c5;
       --line: rgba(18, 60, 49, 0.16);
       --shadow: 0 24px 80px rgba(12, 42, 34, 0.16);
       --radius: 28px;
@@ -27,7 +28,7 @@
     body {
       margin: 0;
       background:
-        radial-gradient(circle at top left, rgba(141, 155, 114, 0.22), transparent 34%),
+        radial-gradient(circle at top left, rgba(141, 155, 114, 0.2), transparent 34%),
         linear-gradient(135deg, #f7f1e7 0%, #ece3d4 100%);
       color: var(--ink);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -42,7 +43,7 @@
     }
 
     .panel {
-      background: rgba(255, 250, 241, 0.82);
+      background: rgba(255, 250, 241, 0.86);
       border: 1px solid var(--line);
       border-radius: var(--radius);
       box-shadow: var(--shadow);
@@ -64,16 +65,16 @@
     }
 
     .brand-mark {
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      background: var(--cream);
-      color: var(--forest);
-      display: grid;
-      place-items: center;
-      font-weight: 900;
-      letter-spacing: -0.08em;
-      margin-bottom: 18px;
+      width: 245px;
+      height: auto;
+      margin-bottom: 22px;
+    }
+
+    .brand-mark img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
     }
 
     .builder-header h1 {
@@ -106,7 +107,7 @@
     label {
       display: block;
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 850;
       letter-spacing: 0.04em;
       text-transform: uppercase;
       margin-bottom: 7px;
@@ -179,7 +180,7 @@
 
     .asset-card {
       display: grid;
-      grid-template-columns: 54px 1fr;
+      grid-template-columns: 54px 1fr auto;
       gap: 12px;
       align-items: center;
       border: 1px solid var(--line);
@@ -204,6 +205,10 @@
       object-fit: contain;
     }
 
+    .asset-meta {
+      min-width: 0;
+    }
+
     .asset-meta strong {
       display: block;
       font-size: 13px;
@@ -217,6 +222,17 @@
       font-size: 11px;
       color: var(--muted);
       margin-top: 2px;
+    }
+
+    .asset-delete {
+      width: 30px;
+      height: 30px;
+      border-radius: 999px;
+      border: 0;
+      background: rgba(18, 60, 49, 0.08);
+      color: var(--forest);
+      cursor: pointer;
+      font-weight: 900;
     }
 
     .slot-control {
@@ -261,6 +277,7 @@
       letter-spacing: -0.02em;
       cursor: pointer;
       transition: 0.2s ease;
+      font-family: inherit;
     }
 
     .primary {
@@ -278,9 +295,67 @@
       transform: translateY(-1px);
     }
 
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     .preview-wrap {
       overflow: auto;
       padding: 0;
+    }
+
+    .preview-toolbar {
+      position: sticky;
+      top: 20px;
+      z-index: 30;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 18px;
+      padding: 14px;
+      border-radius: 22px;
+      background: rgba(255, 250, 241, 0.9);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 50px rgba(12, 42, 34, 0.12);
+      backdrop-filter: blur(18px);
+    }
+
+    .preview-toolbar button,
+    .preview-toolbar .toolbar-label {
+      border: 0;
+      border-radius: 999px;
+      padding: 11px 14px;
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: -0.01em;
+      cursor: pointer;
+      background: rgba(18, 60, 49, 0.09);
+      color: var(--forest);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0;
+      text-transform: none;
+    }
+
+    .preview-toolbar button.active {
+      background: var(--forest);
+      color: var(--cream);
+    }
+
+    .preview-toolbar input[type="color"] {
+      width: 38px;
+      height: 32px;
+      padding: 3px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .preview-toolbar input[type="file"] {
+      display: none;
     }
 
     .guide {
@@ -296,13 +371,16 @@
     .guide-hero {
       min-height: 560px;
       background:
-        linear-gradient(135deg, rgba(12, 42, 34, 0.92), rgba(18, 60, 49, 0.84)),
+        linear-gradient(135deg, rgba(12, 42, 34, 0.94), rgba(18, 60, 49, 0.86)),
         radial-gradient(circle at top right, rgba(141, 155, 114, 0.38), transparent 40%);
       color: var(--cream);
       padding: 44px;
       display: grid;
       grid-template-rows: auto 1fr auto;
       gap: 48px;
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
     }
 
     .guide-nav {
@@ -310,27 +388,21 @@
       justify-content: space-between;
       align-items: center;
       gap: 24px;
+      min-height: 62px;
     }
 
-    .guide-wordmark {
+    .guide-logo-wrap {
+      width: min(390px, 48vw);
+      height: auto;
       display: flex;
       align-items: center;
-      gap: 12px;
-      font-weight: 950;
-      letter-spacing: -0.05em;
-      font-size: 18px;
     }
 
-    .mini-mark {
-      width: 36px;
-      height: 36px;
-      border-radius: 12px;
-      background: var(--cream);
-      color: var(--forest);
-      display: grid;
-      place-items: center;
-      font-weight: 950;
-      letter-spacing: -0.08em;
+    .guide-logo {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
     }
 
     .guide-nav a {
@@ -340,6 +412,7 @@
       font-weight: 800;
       letter-spacing: 0.06em;
       text-transform: uppercase;
+      white-space: nowrap;
     }
 
     .hero-grid {
@@ -354,7 +427,7 @@
       font-weight: 900;
       letter-spacing: 0.14em;
       text-transform: uppercase;
-      color: var(--sage);
+      color: var(--logo-mint);
       margin-bottom: 18px;
     }
 
@@ -420,6 +493,7 @@
     .guide-section {
       padding: 58px 44px;
       border-bottom: 1px solid var(--line);
+      background: transparent;
     }
 
     .section-kicker {
@@ -574,6 +648,54 @@
       margin-top: 22px;
     }
 
+    .editable-guide [contenteditable="true"] {
+      outline: 1.5px dashed rgba(18, 60, 49, 0.3);
+      outline-offset: 5px;
+      border-radius: 8px;
+      cursor: text;
+    }
+
+    .editable-guide [contenteditable="true"]:focus {
+      outline: 2px solid var(--moss);
+      background: rgba(255, 255, 255, 0.36);
+    }
+
+    .editable-guide .guide-hero [contenteditable="true"]:focus {
+      background: rgba(244, 239, 230, 0.14);
+    }
+
+    .editable-bg {
+      position: relative;
+    }
+
+    .editable-guide .editable-bg:hover::before {
+      opacity: 1;
+    }
+
+    .editable-guide .editable-bg::before {
+      content: "background editable";
+      position: absolute;
+      right: 16px;
+      top: 16px;
+      z-index: 10;
+      padding: 7px 10px;
+      border-radius: 999px;
+      background: rgba(255, 250, 241, 0.92);
+      color: var(--forest);
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      pointer-events: none;
+      opacity: 0;
+      transition: 0.2s ease;
+    }
+
+    .published .editable-guide [contenteditable="true"],
+    .published [contenteditable="true"] {
+      outline: none !important;
+    }
+
     @media (max-width: 1100px) {
       .app {
         grid-template-columns: 1fr;
@@ -591,6 +713,10 @@
       .color-row {
         grid-template-columns: 1fr;
       }
+
+      .guide-logo-wrap {
+        width: min(300px, 68vw);
+      }
     }
   </style>
 </head>
@@ -599,9 +725,12 @@
   <main class="app">
     <aside class="panel builder">
       <div class="builder-header">
-        <div class="brand-mark">MD</div>
+        <div class="brand-mark">
+          <img src="assets/moving-day-logo.png" alt="Moving Day">
+        </div>
+
         <h1>Brand Guide Builder</h1>
-        <p>Upload logo files, assign them to guide sections, edit colors, and watch the customer-facing guide update live.</p>
+        <p>Upload files, place assets, edit colors, polish the live preview, and lock the guide when it is ready to publish.</p>
       </div>
 
       <div class="builder-section">
@@ -653,7 +782,7 @@
         <h2>Upload Files</h2>
 
         <label class="upload-box" for="fileInput">
-          <strong>Upload logos, mockups, PNGs, SVGs, JPGs</strong>
+          <strong>Upload logos, mockups, textures, PNGs, SVGs, JPGs</strong>
           <span>Files appear below and can be assigned to each guide slot.</span>
         </label>
 
@@ -664,7 +793,6 @@
 
       <div class="builder-section">
         <h2>Guide Slot Assignment</h2>
-
         <div id="slotControls"></div>
       </div>
 
@@ -675,22 +803,45 @@
     </aside>
 
     <section class="preview-wrap">
-      <article id="guide" class="guide">
-        <header class="guide-hero">
+      <div class="preview-toolbar">
+        <button id="previewEditBtn" class="active" onclick="togglePreviewEdit()">Preview Edit Mode On</button>
+        <button id="publishBtn" onclick="publishGuide()">Publish / Lock Guide</button>
+
+        <label class="toolbar-label">
+          Guide BG
+          <input id="guideBgPicker" type="color" value="#fffaf1">
+        </label>
+
+        <label class="toolbar-label">
+          Hero BG
+          <input id="heroBgPicker" type="color" value="#123c31">
+        </label>
+
+        <label class="toolbar-label" for="heroBgUpload">
+          Upload Hero Texture
+        </label>
+
+        <input id="heroBgUpload" type="file" accept=".png,.jpg,.jpeg,.webp,.gif,.svg">
+
+        <button onclick="removeHeroBackground()">Remove Hero Image</button>
+        <button onclick="downloadPublishedGuide()">Download Guide Only</button>
+      </div>
+
+      <article id="guide" class="guide editable-guide">
+        <header class="guide-hero editable-bg" data-bg-name="Hero">
           <nav class="guide-nav">
-            <div class="guide-wordmark">
-              <div class="mini-mark">MD</div>
-              <span>Moving Day</span>
+            <div class="guide-logo-wrap">
+              <img class="guide-logo" src="assets/moving-day-logo.png" alt="Moving Day">
             </div>
 
-            <a href="#">Download PDF</a>
+            <a href="#" contenteditable="true">Download PDF</a>
           </nav>
 
           <div class="hero-grid">
             <div>
-              <div class="eyebrow">Brand Identity Guide</div>
-              <h1 id="previewTitle">Invisible Challenge</h1>
-              <p id="previewStatement" class="hero-copy">
+              <div class="eyebrow" contenteditable="true">Brand Identity Guide</div>
+              <h1 id="previewTitle" contenteditable="true">Invisible Challenge</h1>
+              <p id="previewStatement" class="hero-copy" contenteditable="true">
                 A restored visual system built to feel calm, credible, and ready for real-world use.
               </p>
             </div>
@@ -701,51 +852,57 @@
           </div>
 
           <div class="guide-meta">
-            <div class="pill">Logo System</div>
-            <div class="pill">Color Palette</div>
-            <div class="pill">Typography</div>
-            <div class="pill">Real-World Applications</div>
+            <div class="pill" contenteditable="true">Logo System</div>
+            <div class="pill" contenteditable="true">Color Palette</div>
+            <div class="pill" contenteditable="true">Typography</div>
+            <div class="pill" contenteditable="true">Real-World Applications</div>
           </div>
         </header>
 
-        <section class="guide-section">
-          <div class="section-kicker">01 — Logo System</div>
-          <h2>Flexible marks for every use case.</h2>
-          <p>The logo system includes primary, secondary, icon, and supporting variations so the brand can stay consistent across web, print, social, and internal documents.</p>
+        <section class="guide-section editable-bg" data-bg-name="Logo Section">
+          <div class="section-kicker" contenteditable="true">01 — Logo System</div>
+          <h2 contenteditable="true">Flexible marks for every use case.</h2>
+          <p contenteditable="true">
+            The logo system includes primary, secondary, icon, and supporting variations so the brand can stay consistent across web, print, social, and internal documents.
+          </p>
 
           <div class="logo-grid">
             <div id="slotPrimary" class="guide-slot empty">
-              <div class="slot-label">Primary</div>
+              <div class="slot-label" contenteditable="true">Primary</div>
             </div>
 
             <div id="slotSecondary" class="guide-slot empty">
-              <div class="slot-label">Secondary</div>
+              <div class="slot-label" contenteditable="true">Secondary</div>
             </div>
 
             <div id="slotIcon" class="guide-slot empty">
-              <div class="slot-label">Icon</div>
+              <div class="slot-label" contenteditable="true">Icon</div>
             </div>
           </div>
         </section>
 
-        <section class="guide-section">
-          <div class="section-kicker">02 — Color Palette</div>
-          <h2>A focused palette with strong contrast.</h2>
-          <p>These colors are used to create hierarchy, legibility, and a cohesive visual experience across brand applications.</p>
+        <section class="guide-section editable-bg" data-bg-name="Color Section">
+          <div class="section-kicker" contenteditable="true">02 — Color Palette</div>
+          <h2 contenteditable="true">A focused palette with strong contrast.</h2>
+          <p contenteditable="true">
+            These colors are used to create hierarchy, legibility, and a cohesive visual experience across brand applications.
+          </p>
 
           <div class="color-row">
-            <div id="swatchForest" class="color-card">Primary</div>
-            <div id="swatchDeep" class="color-card">Deep</div>
-            <div id="swatchMoss" class="color-card">Accent</div>
-            <div id="swatchSage" class="color-card" style="color: var(--forest);">Soft</div>
-            <div class="color-card" style="background:#fffaf1;color:var(--forest);">Paper</div>
+            <div id="swatchForest" class="color-card" contenteditable="true">Primary</div>
+            <div id="swatchDeep" class="color-card" contenteditable="true">Deep</div>
+            <div id="swatchMoss" class="color-card" contenteditable="true">Accent</div>
+            <div id="swatchSage" class="color-card" style="color: var(--forest);" contenteditable="true">Soft</div>
+            <div class="color-card" style="background:#fffaf1;color:var(--forest);" contenteditable="true">Paper</div>
           </div>
         </section>
 
-        <section class="guide-section">
-          <div class="section-kicker">03 — In Use</div>
-          <h2>How it looks in the real world.</h2>
-          <p>Use these square application spaces for social posts, profile graphics, apparel mockups, packaging previews, or other branded visuals.</p>
+        <section class="guide-section editable-bg" data-bg-name="Use Section">
+          <div class="section-kicker" contenteditable="true">03 — In Use</div>
+          <h2 contenteditable="true">How it looks in the real world.</h2>
+          <p contenteditable="true">
+            Use these square application spaces for social posts, profile graphics, apparel mockups, packaging previews, or other branded visuals.
+          </p>
 
           <div class="use-grid">
             <div id="slotUse1" class="use-card"></div>
@@ -755,32 +912,34 @@
           </div>
         </section>
 
-        <section class="guide-section">
-          <div class="section-kicker">04 — Final Deliverables</div>
-          <h2>Organized files ready to share.</h2>
-          <p>The final brand folder should include production-ready files in SVG, PNG, PDF, and web-ready formats.</p>
+        <section class="guide-section editable-bg" data-bg-name="Deliverables Section">
+          <div class="section-kicker" contenteditable="true">04 — Final Deliverables</div>
+          <h2 contenteditable="true">Organized files ready to share.</h2>
+          <p contenteditable="true">
+            The final brand folder should include production-ready files in SVG, PNG, PDF, and web-ready formats.
+          </p>
 
           <div class="download-grid">
             <div class="download-card">
               <div>
-                <strong>Logo Files</strong>
-                <span>Primary, secondary, icon, black, white, and full-color logo exports.</span>
+                <strong contenteditable="true">Logo Files</strong>
+                <span contenteditable="true">Primary, secondary, icon, black, white, and full-color logo exports.</span>
               </div>
               <button>Download</button>
             </div>
 
             <div class="download-card">
               <div>
-                <strong>Brand Guide</strong>
-                <span>A shareable HTML guide for clients, teams, vendors, and partners.</span>
+                <strong contenteditable="true">Brand Guide</strong>
+                <span contenteditable="true">A shareable HTML guide for clients, teams, vendors, and partners.</span>
               </div>
               <button>Download</button>
             </div>
 
             <div class="download-card">
               <div>
-                <strong>Usage Kit</strong>
-                <span>Application graphics, profile assets, social previews, and launch-ready visuals.</span>
+                <strong contenteditable="true">Usage Kit</strong>
+                <span contenteditable="true">Application graphics, profile assets, social previews, and launch-ready visuals.</span>
               </div>
               <button>Download</button>
             </div>
@@ -805,6 +964,7 @@
     ];
 
     const slotAssignments = {};
+
     const slotBackgrounds = {
       slotPrimary: "#d9dec8",
       slotSecondary: "#f4efe6",
@@ -815,9 +975,18 @@
       slotUse4: "#0c2a22"
     };
 
+    let previewEditMode = true;
+    let guidePublished = false;
+
     const fileInput = document.getElementById("fileInput");
     const assetList = document.getElementById("assetList");
     const slotControls = document.getElementById("slotControls");
+    const guide = document.getElementById("guide");
+    const previewEditBtn = document.getElementById("previewEditBtn");
+    const publishBtn = document.getElementById("publishBtn");
+    const guideBgPicker = document.getElementById("guideBgPicker");
+    const heroBgPicker = document.getElementById("heroBgPicker");
+    const heroBgUpload = document.getElementById("heroBgUpload");
 
     fileInput.addEventListener("change", handleFiles);
 
@@ -829,6 +998,25 @@
     document.getElementById("colorDeep").addEventListener("input", updateColors);
     document.getElementById("colorMoss").addEventListener("input", updateColors);
     document.getElementById("colorSage").addEventListener("input", updateColors);
+
+    guideBgPicker.addEventListener("input", e => {
+      guide.style.background = e.target.value;
+    });
+
+    heroBgPicker.addEventListener("input", e => {
+      const hero = document.querySelector(".guide-hero");
+
+      if (hero.dataset.heroImage === "true") {
+        hero.style.backgroundImage = `
+          linear-gradient(${hexToRgba(e.target.value, 0.72)}, ${hexToRgba(e.target.value, 0.72)}),
+          var(--hero-bg-image)
+        `;
+      } else {
+        hero.style.background = e.target.value;
+      }
+    });
+
+    heroBgUpload.addEventListener("change", handleHeroBackgroundUpload);
 
     function handleFiles(event) {
       const files = Array.from(event.target.files);
@@ -850,6 +1038,8 @@
 
         reader.readAsDataURL(file);
       });
+
+      fileInput.value = "";
     }
 
     function renderAssets() {
@@ -867,10 +1057,25 @@
             <strong>${asset.name}</strong>
             <span>${asset.type || "Uploaded file"}</span>
           </div>
+          <button class="asset-delete" onclick="deleteAsset('${asset.id}')">×</button>
         `;
 
         assetList.appendChild(card);
       });
+    }
+
+    function deleteAsset(assetId) {
+      const index = assets.findIndex(asset => asset.id === assetId);
+      if (index > -1) assets.splice(index, 1);
+
+      Object.keys(slotAssignments).forEach(slotKey => {
+        if (slotAssignments[slotKey] === assetId) {
+          delete slotAssignments[slotKey];
+        }
+      });
+
+      renderAssets();
+      renderSlotControls();
     }
 
     function renderSlotControls() {
@@ -934,10 +1139,12 @@
         } else if (slotKey.includes("Use")) {
           el.innerHTML = "";
         } else {
-          const label = el.querySelector(".slot-label")?.outerHTML || "";
+          const label = el.querySelector(".slot-label")?.outerHTML || `<div class="slot-label" contenteditable="true">Logo</div>`;
           el.classList.add("empty");
           el.innerHTML = label;
         }
+
+        enablePreviewEditing(previewEditMode);
         return;
       }
 
@@ -951,9 +1158,11 @@
         return;
       }
 
-      const label = el.querySelector(".slot-label")?.outerHTML || "";
+      const label = el.querySelector(".slot-label")?.outerHTML || `<div class="slot-label" contenteditable="true">Logo</div>`;
       el.classList.remove("empty");
       el.innerHTML = `${label}<img src="${asset.src}" alt="${asset.name}">`;
+
+      enablePreviewEditing(previewEditMode);
     }
 
     function updateSlotBackground(slotKey) {
@@ -993,27 +1202,180 @@
       document.getElementById("swatchSage").style.background = sage;
     }
 
+    function togglePreviewEdit() {
+      if (guidePublished) {
+        alert("This guide is locked after publishing.");
+        return;
+      }
+
+      previewEditMode = !previewEditMode;
+      enablePreviewEditing(previewEditMode);
+
+      previewEditBtn.classList.toggle("active", previewEditMode);
+      previewEditBtn.textContent = previewEditMode ? "Preview Edit Mode On" : "Preview Edit Mode Off";
+    }
+
+    function enablePreviewEditing(enabled) {
+      guide.classList.toggle("editable-guide", enabled && !guidePublished);
+
+      const editableItems = guide.querySelectorAll(
+        "h1, h2, h3, p, .section-kicker, .pill, .download-card strong, .download-card span, .eyebrow, .slot-label, .guide-nav a"
+      );
+
+      editableItems.forEach(item => {
+        item.setAttribute("contenteditable", enabled && !guidePublished ? "true" : "false");
+      });
+    }
+
+    function publishGuide() {
+      guidePublished = true;
+      previewEditMode = false;
+
+      enablePreviewEditing(false);
+
+      document.body.classList.add("published");
+      guide.classList.remove("editable-guide");
+
+      previewEditBtn.classList.remove("active");
+      previewEditBtn.textContent = "Guide Locked";
+
+      publishBtn.textContent = "Published";
+      publishBtn.disabled = true;
+
+      alert("Guide published and locked. You can now download the guide.");
+    }
+
+    function handleHeroBackgroundUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+
+      reader.onload = e => {
+        const hero = document.querySelector(".guide-hero");
+        const overlayColor = heroBgPicker.value || "#123c31";
+
+        hero.dataset.heroImage = "true";
+        hero.style.setProperty("--hero-bg-image", `url('${e.target.result}')`);
+
+        hero.style.backgroundImage = `
+          linear-gradient(${hexToRgba(overlayColor, 0.72)}, ${hexToRgba(overlayColor, 0.72)}),
+          url('${e.target.result}')
+        `;
+
+        hero.style.backgroundSize = "cover";
+        hero.style.backgroundPosition = "center";
+        hero.style.backgroundRepeat = "no-repeat";
+      };
+
+      reader.readAsDataURL(file);
+      heroBgUpload.value = "";
+    }
+
+    function removeHeroBackground() {
+      const hero = document.querySelector(".guide-hero");
+      delete hero.dataset.heroImage;
+      hero.style.removeProperty("--hero-bg-image");
+      hero.style.backgroundImage = "none";
+      hero.style.backgroundColor = heroBgPicker.value || "var(--forest)";
+    }
+
     function resetGuide() {
+      if (!confirm("Reset uploaded files and slot assignments?")) return;
+
+      assets.length = 0;
       Object.keys(slotAssignments).forEach(key => delete slotAssignments[key]);
+
+      renderAssets();
       renderSlotControls();
+      removeHeroBackground();
     }
 
     function downloadHTML() {
-      const html = "<!DOCTYPE html>\\n" + document.documentElement.outerHTML;
-      const blob = new Blob([html], { type: "text/html" });
+      const html = "<!DOCTYPE html>\n" + document.documentElement.outerHTML;
+      downloadFile(html, "moving-day-builder.html");
+    }
+
+    function downloadPublishedGuide() {
+      const clonedGuide = guide.cloneNode(true);
+
+      clonedGuide.classList.remove("editable-guide");
+
+      clonedGuide.querySelectorAll("[contenteditable]").forEach(el => {
+        el.removeAttribute("contenteditable");
+      });
+
+      const css = Array.from(document.querySelectorAll("style"))
+        .map(style => style.innerHTML)
+        .join("\n");
+
+      const title = document.title || "Published Brand Guide";
+
+      const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${title}</title>
+  <style>
+    ${css}
+
+    body {
+      margin: 0;
+      padding: 28px;
+      background: #f4efe6;
+    }
+
+    .app,
+    .builder,
+    .preview-toolbar {
+      display: none !important;
+    }
+
+    .guide {
+      display: block;
+      margin: 0 auto;
+    }
+
+    .editable-bg::before {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+  ${clonedGuide.outerHTML}
+</body>
+</html>`;
+
+      downloadFile(html, "published-brand-guide.html");
+    }
+
+    function downloadFile(content, filename) {
+      const blob = new Blob([content], { type: "text/html" });
       const url = URL.createObjectURL(blob);
 
       const a = document.createElement("a");
       a.href = url;
-      a.download = "moving-day-brand-guide.html";
+      a.download = filename;
       a.click();
 
       URL.revokeObjectURL(url);
     }
 
+    function hexToRgba(hex, alpha = 1) {
+      const clean = hex.replace("#", "");
+      const r = parseInt(clean.substring(0, 2), 16);
+      const g = parseInt(clean.substring(2, 4), 16);
+      const b = parseInt(clean.substring(4, 6), 16);
+
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    }
+
     renderSlotControls();
     updateText();
     updateColors();
+    enablePreviewEditing(true);
   </script>
 </body>
 </html>
