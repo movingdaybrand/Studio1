@@ -17,4 +17,8 @@
     "ai"
   ],
   "license": "UNLICENSED"
+}{
+  "scripts": {
+    "build": "rm -rf dist && mkdir -p dist && cp index.html dist/index.html && cp guide.html dist/guide.html && cp -R clients dist/clients && cp -R shared dist/shared || true"
+  }
 }
