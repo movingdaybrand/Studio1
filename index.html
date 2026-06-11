@@ -1167,6 +1167,158 @@ body{
   .asset-package-card{break-inside:avoid;page-break-inside:avoid;}
 }
 
+
+
+/* ─────────────────────────────────────────────
+   SECTION WALLPAPERS · OPTIONAL FULL-WIDTH BACKGROUNDS
+   Adds per-section imagery with opacity + glow overlay.
+───────────────────────────────────────────── */
+.guide-hero,
+.guide-section,
+.asset-package-section{
+  position:relative!important;
+  isolation:isolate!important;
+  overflow:hidden!important;
+}
+.guide-hero > .guide-wrap,
+.guide-section > .guide-wrap,
+.asset-package-section > .guide-wrap{
+  position:relative!important;
+  z-index:2!important;
+}
+.has-section-bg::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:0;
+  pointer-events:none;
+  background-image:var(--section-bg-image);
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  opacity:var(--section-bg-opacity,.35);
+  filter:saturate(1.06) contrast(.96);
+  transform:scale(1.01);
+}
+.has-section-bg::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:1;
+  pointer-events:none;
+  background:var(--section-bg-effect, radial-gradient(circle at 82% 10%,rgba(196,217,203,.32),transparent 38%), linear-gradient(180deg,rgba(241,236,223,.72),rgba(241,236,223,.88)));
+}
+.has-section-bg.bg-effect-forest::after{
+  background:radial-gradient(circle at 82% 4%,rgba(196,217,203,.22),transparent 40%),linear-gradient(135deg,rgba(20,41,31,.78),rgba(31,61,46,.68))!important;
+}
+.has-section-bg.bg-effect-cream::after{
+  background:radial-gradient(circle at 78% 0%,rgba(196,217,203,.34),transparent 42%),linear-gradient(180deg,rgba(241,236,223,.72),rgba(241,236,223,.92))!important;
+}
+.has-section-bg.bg-effect-glow::after{
+  background:radial-gradient(circle at 78% 10%,rgba(196,217,203,.52),transparent 42%),radial-gradient(circle at 12% 88%,rgba(31,61,46,.12),transparent 34%),linear-gradient(180deg,rgba(241,236,223,.64),rgba(241,236,223,.88))!important;
+}
+.has-section-bg.bg-effect-none::after{
+  background:transparent!important;
+}
+.guide-hero.has-section-bg::after{
+  background:var(--section-bg-effect, radial-gradient(circle at 78% 5%,rgba(196,217,203,.22),transparent 42%), linear-gradient(135deg,rgba(20,41,31,.76),rgba(31,61,46,.70)))!important;
+}
+.style-bubble .bubble-panel{
+  min-width:310px!important;
+  gap:10px!important;
+}
+.bubble-field{
+  display:grid!important;
+  gap:7px!important;
+  padding:10px!important;
+  border:1px solid rgba(31,61,46,.08)!important;
+  background:rgba(255,255,255,.42)!important;
+  border-radius:16px!important;
+}
+.bubble-field label,
+.bubble-field .bubble-label{
+  margin:0!important;
+  font:900 8px/1 var(--sans)!important;
+  letter-spacing:.15em!important;
+  text-transform:uppercase!important;
+  color:rgba(31,61,46,.58)!important;
+}
+.bubble-field select,
+.bubble-field input[type="range"]{
+  width:100%!important;
+}
+.bubble-field select{
+  height:38px!important;
+  min-height:38px!important;
+  border-radius:13px!important;
+  border:1px solid rgba(31,61,46,.12)!important;
+  background:#FBF8F0!important;
+  color:#1F3D2E!important;
+  padding:0 12px!important;
+  font:800 11px var(--sans)!important;
+}
+.bubble-file-button{
+  min-height:40px!important;
+  border-radius:14px!important;
+  border:1px solid rgba(31,61,46,.12)!important;
+  background:#1F3D2E!important;
+  color:#F1ECDF!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font:900 9px var(--sans)!important;
+  letter-spacing:.14em!important;
+  text-transform:uppercase!important;
+  cursor:pointer!important;
+}
+.bubble-file-button input{display:none!important;}
+.opacity-readout{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:center!important;
+  gap:12px!important;
+  color:#1F3D2E!important;
+  font:900 10px var(--sans)!important;
+  letter-spacing:.12em!important;
+  text-transform:uppercase!important;
+}
+.section-bg-hint{
+  padding:0 10px 4px!important;
+  color:rgba(21,20,15,.48)!important;
+  font-size:11px!important;
+  line-height:1.35!important;
+}
+@media print{
+  .has-section-bg::before{opacity:var(--section-bg-opacity,.28)!important;}
+}
+
+
+
+/* ─────────────────────────────────────────────
+   OPTIONAL MOVING DAY PUTT LAB
+   Hidden by default; opens from sticky menu only.
+───────────────────────────────────────────── */
+.putt-lab-section{display:none;background:linear-gradient(180deg,#EDE7D8 0%,#DDE7D8 100%);padding:84px 0;border-bottom:1px solid rgba(21,20,15,.12);position:relative;overflow:hidden;}
+.putt-lab-section.active{display:block;}
+.putt-lab-section::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 18% 4%,rgba(196,217,203,.42),transparent 28%),radial-gradient(circle at 82% 12%,rgba(31,61,46,.14),transparent 34%);pointer-events:none;}
+.putt-lab-section .guide-wrap{position:relative;z-index:1;}
+.putt-lab-head{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end;margin-bottom:28px;}
+.putt-lab-kicker{font:900 11px var(--sans);letter-spacing:.18em;text-transform:uppercase;color:var(--c1);margin-bottom:14px;}
+.putt-lab-title{font-family:var(--display);font-size:clamp(38px,5.4vw,70px);line-height:.95;font-weight:400;letter-spacing:-.035em;color:#15140F;margin:0;}
+.putt-lab-copy{max-width:680px;color:rgba(21,20,15,.62);margin-top:16px;font-size:15px;line-height:1.6;}
+.putt-lab-controls{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;}
+.putt-lab-btn{border:1px solid rgba(31,61,46,.16);background:#1F3D2E;color:#F1ECDF;border-radius:999px;min-height:42px;padding:0 16px;font:900 10px var(--sans);letter-spacing:.13em;text-transform:uppercase;cursor:pointer;}
+.putt-lab-btn.secondary{background:rgba(31,61,46,.08);color:#1F3D2E;}
+.putt-game-shell{background:rgba(251,248,240,.82);border:1px solid rgba(31,61,46,.14);border-radius:34px;padding:18px;box-shadow:0 28px 90px rgba(31,61,46,.14),inset 0 1px 0 rgba(255,255,255,.85);}
+.putt-scorebar{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;padding:4px 6px 14px;color:#1F3D2E;}
+.putt-scorebar strong{font:900 10px var(--sans);letter-spacing:.16em;text-transform:uppercase;}
+.putt-scorebar span{font:800 12px var(--sans);color:rgba(31,61,46,.64);}
+.putt-canvas-wrap{position:relative;border-radius:26px;overflow:hidden;background:#16412d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.10),inset 0 30px 90px rgba(255,255,255,.08);}
+#puttCanvas{display:block;width:100%;height:auto;min-height:420px;touch-action:none;cursor:crosshair;background:#16412d;}
+.putt-hint{position:absolute;left:18px;bottom:18px;right:18px;display:flex;align-items:center;justify-content:space-between;gap:14px;pointer-events:none;color:rgba(241,236,223,.78);font:900 10px var(--sans);letter-spacing:.13em;text-transform:uppercase;}
+.putt-hint i{font-style:normal;opacity:.7;}
+.putt-lab-section:not(.active) + .guide-footer{border-top:0;}
+@media(max-width:780px){.putt-lab-head{grid-template-columns:1fr}.putt-lab-controls{justify-content:flex-start}.putt-game-shell{padding:12px;border-radius:24px}#puttCanvas{min-height:360px}.putt-hint{position:static;background:#1F3D2E;padding:12px 14px;border-radius:0;display:block}}
 </style>
 
 <style id="md-text-only-legibility-patch">
@@ -2392,7 +2544,62 @@ body{
         <span class="platform-pill" id="previewModeText">Brand Restoration Platform</span>
         <span class="locked-badge">Published / locked</span>
       </div>
-      <div class="preview-actions">
+      <div class="preview-actions simplified-preview-actions">
+        <button class="putt-icon-btn" id="openPuttWindowBtn" type="button" title="Open Putt Lab" aria-label="Open Putt Lab">
+          <svg class="putt-pro-icon" viewBox="0 0 48 48" aria-hidden="true">
+            <circle class="ppi-ring" cx="24" cy="24" r="21"/>
+            <path class="ppi-green" d="M12 31c5.5-6.7 13.7-10.1 24.7-10.2"/>
+            <path class="ppi-pin" d="M31.5 13v17"/>
+            <path class="ppi-flag" d="M31.5 13h8.2l-2.6 3.1 2.6 3.1h-8.2z"/>
+            <circle class="ppi-cup" cx="31.5" cy="31" r="3.2"/>
+            <circle class="ppi-ball" cx="16" cy="32.5" r="2.4"/>
+          </svg>
+        </button>
+        <button class="nav-chip-btn" id="backToEditorBtnTop" type="button">Editor</button>
+        <button class="nav-chip-btn nav-chip-publish" id="lockFromPreviewBtnTop" type="button">Publish</button>
+        <button class="nav-chip-btn nav-chip-unlock" id="unlockPreviewBtnTop" type="button">Unlock</button>
+        <details class="action-bubble style-bubble">
+          <summary>Style</summary>
+          <div class="bubble-panel">
+            <div class="bubble-field">
+              <span class="bubble-label">Section</span>
+              <select id="sectionBgSelect">
+                <option value="hero">Hero</option>
+                <option value="logo">01 · Logo System</option>
+                <option value="palette">02 · Color Palette</option>
+                <option value="type">03 · Typography</option>
+                <option value="use">04 · In Use</option>
+                <option value="usage">05 · Usage</option>
+                <option value="files">06 · Files</option>
+                <option value="putt">Putt Lab</option>
+              </select>
+            </div>
+            <label class="bubble-file-button">Upload wallpaper<input id="sectionBgUpload" type="file" accept="image/*,.svg"></label>
+            <div class="bubble-field">
+              <div class="opacity-readout"><span>Image opacity</span><span id="sectionBgOpacityValue">35%</span></div>
+              <input id="sectionBgOpacity" type="range" min="0" max="80" value="35">
+            </div>
+            <div class="bubble-field">
+              <span class="bubble-label">Overlay / glow</span>
+              <select id="sectionBgEffect">
+                <option value="glow">Soft glow</option>
+                <option value="cream">Cream wash</option>
+                <option value="forest">Forest overlay</option>
+                <option value="none">Image only</option>
+              </select>
+            </div>
+            <button class="bubble-item" id="removeSectionBgBtn">Remove wallpaper</button>
+            <p class="section-bg-hint">Adds a full-width background to the selected guide section without affecting logo or mockup placements.</p>
+          </div>
+        </details>
+        <details class="action-bubble fun-bubble">
+          <summary>Putt Lab</summary>
+          <div class="bubble-panel">
+            <button class="bubble-item publish" id="togglePuttLabBtn">Open Putt Lab</button>
+            <button class="bubble-item" id="resetPuttLabBtn">Reset Round</button>
+            <p class="section-bg-hint">Optional hidden mini-game. It stays out of the guide until you open it.</p>
+          </div>
+        </details>
         <details class="action-bubble">
           <summary>Guide</summary>
           <div class="bubble-panel">
@@ -2413,7 +2620,7 @@ body{
   </div>
 
   <main id="guidePreview">
-    <section class="guide-hero" data-preview-slot="heroLogo">
+    <section class="guide-hero" data-section-bg="hero" data-preview-slot="heroLogo">
       <div class="guide-wrap">
         <img id="pvHeroLogo" class="guide-logo" alt="Hero logo">
         <div class="guide-eyebrow">Brand Identity Guide · <span id="pvDate" class="editable" contenteditable="true" data-edit-preview="date">Month Year</span></div>
@@ -2423,11 +2630,33 @@ body{
       </div>
     </section>
 
-    <section class="guide-section"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="logoLabel">01 · Logo System</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="logoTitle">Approved marks for consistent use.</h2><p class="section-copy editable" contenteditable="true" data-guide-edit="logoCopy">Use these logo versions across web, print, social, and internal brand applications.</p><div class="logo-grid"><div class="logo-cell" data-preview-slot="primaryLogo"><div id="pvPrimaryLogoWrap" class="missing">Primary Logo</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="primaryLogoLabel">Primary Logo</span></div><div class="logo-cell dark" data-preview-slot="iconMark"><div id="pvIconMarkWrap" class="missing">Icon Mark</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="iconMarkLabel">Icon Mark</span></div><div class="logo-cell brand" data-preview-slot="iconVariant"><div id="pvIconVariantWrap" class="missing">Brand Variant</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="iconVariantLabel">Brand Variant</span></div></div></div></section>
-    <section class="guide-section"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="paletteLabel">02 · Color Palette</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="paletteTitle">A palette built for recognition and clarity.</h2><div class="palette-row" id="pvPalette"></div></div></section>
-    <section class="guide-section"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="typeLabel">03 · Typography</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="typeTitle">Type that keeps the system sharp.</h2><div class="type-grid"><div class="type-card-preview"><div class="section-label editable" contenteditable="true" data-guide-edit="displayLabel">Display</div><div class="type-sample-display editable" id="pvDisplaySample" contenteditable="true" data-guide-edit="displaySample">Brand Headline</div><p id="pvDisplayName" class="editable" contenteditable="true" data-guide-edit="displayName">Instrument Serif</p></div><div class="type-card-preview"><div class="section-label editable" contenteditable="true" data-guide-edit="bodyLabel">Body</div><div class="type-sample-body editable" id="pvBodySample" contenteditable="true" data-guide-edit="bodySample">Clean, readable copy for captions, pages, notes, and digital interfaces.</div><p id="pvBodyName" class="editable" contenteditable="true" data-guide-edit="bodyName">Geist</p></div></div></div></section>
-    <section class="guide-section"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="useLabel">04 · In Use</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="useTitle">How it looks in the real world.</h2><div class="mockup-grid"><div class="mockup profile" data-preview-slot="profileImage"><div id="pvProfileImageWrap" class="missing">Profile Image</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="profileLabel">Profile</span></div><div class="mockup digital" data-preview-slot="websiteHeader"><div id="pvWebsiteHeaderWrap" class="missing">Digital Mockup</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="digitalLabel">Digital</span></div><div class="mockup print" data-preview-slot="businessCard"><div id="pvBusinessCardWrap" class="missing">Print Mockup</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="printLabel">Print</span></div><div class="mockup social" data-preview-slot="socialPost"><div id="pvSocialPostWrap" class="missing">Social Post</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="socialLabel">Social</span></div></div></div></section>
-    <section class="guide-section"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="usageLabel">05 · Usage</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="usageTitle">Simple rules for keeping the brand intact.</h2><div class="usage-grid"><div class="usage-card do"><div class="usage-tag">Do</div><ul><li class="editable" contenteditable="true" data-guide-edit="usageRule">Use approved logo files only</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Keep clear space around all marks</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Use the approved palette consistently</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Use typography as defined in this guide</li></ul></div><div class="usage-card dont"><div class="usage-tag">Don't</div><ul><li class="editable" contenteditable="true" data-guide-edit="usageRule">Stretch, skew, or distort logos</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Use low contrast placements</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Add unapproved effects or shadows</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Mix in unrelated fonts or colors</li></ul></div></div></div></section>
+    <section class="guide-section" data-section-bg="logo"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="logoLabel">01 · Logo System</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="logoTitle">Approved marks for consistent use.</h2><p class="section-copy editable" contenteditable="true" data-guide-edit="logoCopy">Use these logo versions across web, print, social, and internal brand applications.</p><div class="logo-grid"><div class="logo-cell" data-preview-slot="primaryLogo"><div id="pvPrimaryLogoWrap" class="missing">Primary Logo</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="primaryLogoLabel">Primary Logo</span></div><div class="logo-cell dark" data-preview-slot="iconMark"><div id="pvIconMarkWrap" class="missing">Icon Mark</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="iconMarkLabel">Icon Mark</span></div><div class="logo-cell brand" data-preview-slot="iconVariant"><div id="pvIconVariantWrap" class="missing">Brand Variant</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="iconVariantLabel">Brand Variant</span></div></div></div></section>
+    <section class="guide-section" data-section-bg="palette"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="paletteLabel">02 · Color Palette</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="paletteTitle">A palette built for recognition and clarity.</h2><div class="palette-row" id="pvPalette"></div></div></section>
+    <section class="guide-section" data-section-bg="type"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="typeLabel">03 · Typography</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="typeTitle">Type that keeps the system sharp.</h2><div class="type-grid"><div class="type-card-preview"><div class="section-label editable" contenteditable="true" data-guide-edit="displayLabel">Display</div><div class="type-sample-display editable" id="pvDisplaySample" contenteditable="true" data-guide-edit="displaySample">Brand Headline</div><p id="pvDisplayName" class="editable" contenteditable="true" data-guide-edit="displayName">Instrument Serif</p></div><div class="type-card-preview"><div class="section-label editable" contenteditable="true" data-guide-edit="bodyLabel">Body</div><div class="type-sample-body editable" id="pvBodySample" contenteditable="true" data-guide-edit="bodySample">Clean, readable copy for captions, pages, notes, and digital interfaces.</div><p id="pvBodyName" class="editable" contenteditable="true" data-guide-edit="bodyName">Geist</p></div></div></div></section>
+    <section class="guide-section" data-section-bg="use"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="useLabel">04 · In Use</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="useTitle">How it looks in the real world.</h2><div class="mockup-grid"><div class="mockup profile" data-preview-slot="profileImage"><div id="pvProfileImageWrap" class="missing">Profile Image</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="profileLabel">Profile</span></div><div class="mockup digital" data-preview-slot="websiteHeader"><div id="pvWebsiteHeaderWrap" class="missing">Digital Mockup</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="digitalLabel">Digital</span></div><div class="mockup print" data-preview-slot="businessCard"><div id="pvBusinessCardWrap" class="missing">Print Mockup</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="printLabel">Print</span></div><div class="mockup social" data-preview-slot="socialPost"><div id="pvSocialPostWrap" class="missing">Social Post</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="socialLabel">Social</span></div></div></div></section>
+    <section class="guide-section" data-section-bg="usage"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="usageLabel">05 · Usage</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="usageTitle">Simple rules for keeping the brand intact.</h2><div class="usage-grid"><div class="usage-card do"><div class="usage-tag">Do</div><ul><li class="editable" contenteditable="true" data-guide-edit="usageRule">Use approved logo files only</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Keep clear space around all marks</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Use the approved palette consistently</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Use typography as defined in this guide</li></ul></div><div class="usage-card dont"><div class="usage-tag">Don't</div><ul><li class="editable" contenteditable="true" data-guide-edit="usageRule">Stretch, skew, or distort logos</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Use low contrast placements</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Add unapproved effects or shadows</li><li class="editable" contenteditable="true" data-guide-edit="usageRule">Mix in unrelated fonts or colors</li></ul></div></div></div></section>
+    <section class="putt-lab-section" id="puttLabSection" data-section-bg="putt">
+      <div class="guide-wrap">
+        <div class="putt-lab-head">
+          <div>
+            <div class="putt-lab-kicker editable" contenteditable="true" data-guide-edit="puttLabel">Moving Day Putt Lab</div>
+            <h2 class="putt-lab-title editable" contenteditable="true" data-guide-edit="puttTitle">Take five. Sink the putt.</h2>
+            <p class="putt-lab-copy editable" contenteditable="true" data-guide-edit="puttCopy">A hidden, just-for-fun brand handoff detail. Use your mouse or finger like a putter: pull back from the ball and release toward the hole.</p>
+          </div>
+          <div class="putt-lab-controls">
+            <button class="putt-lab-btn" id="puttStartBtn" type="button">Start round</button>
+            <button class="putt-lab-btn secondary" id="puttResetBtn" type="button">Reset</button>
+          </div>
+        </div>
+        <div class="putt-game-shell">
+          <div class="putt-scorebar"><strong id="puttStatus">Ready on the green</strong><span id="puttScore">Strokes 0 · Best —</span></div>
+          <div class="putt-canvas-wrap">
+            <canvas id="puttCanvas" width="1100" height="620" aria-label="Moving Day putting mini game"></canvas>
+            <div class="putt-hint"><span>Pull back from the ball, then release</span><i>Mouse / touch enabled</i></div>
+          </div>
+        </div>
+      </div>
+    </section>
     <footer class="guide-footer"><div class="guide-footer-inner"><span class="guide-footer-brand"><span class="guide-footer-icon">
 <svg class="md-icon-svg" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1366 292.11">
   <defs>
@@ -2486,7 +2715,7 @@ body{
 
 <script>
 (function(){
-  const state={fields:{clientName:'Client Name',category:'Category',slug:'',date:'Month Year',sprint:'Brand Identity Guide',assetCount:'',tagline:'',displayFont:'Instrument Serif',bodyFont:'Geist'},colors:['#1F3D2E','#2D5642','#C4D9CB','#F1ECDF','#15140F'],assets:[],slots:{heroLogo:null,primaryLogo:null,iconMark:null,iconVariant:null,profileImage:null,websiteHeader:null,businessCard:null,socialPost:null},slotBgs:{heroLogo:'c1',primaryLogo:'c4',iconMark:'c1',iconVariant:'c5',profileImage:'c1',websiteHeader:'c4',businessCard:'c5',socialPost:'c3'},fontData:{display:null,body:null},published:false};
+  const state={fields:{clientName:'Client Name',category:'Category',slug:'',date:'Month Year',sprint:'Brand Identity Guide',assetCount:'',tagline:'',displayFont:'Instrument Serif',bodyFont:'Geist'},colors:['#1F3D2E','#2D5642','#C4D9CB','#F1ECDF','#15140F'],assets:[],slots:{heroLogo:null,primaryLogo:null,iconMark:null,iconVariant:null,profileImage:null,websiteHeader:null,businessCard:null,socialPost:null},slotBgs:{heroLogo:'c1',primaryLogo:'c4',iconMark:'c1',iconVariant:'c5',profileImage:'c1',websiteHeader:'c4',businessCard:'c5',socialPost:'c3'},fontData:{display:null,body:null},sectionBgs:{hero:null,logo:null,palette:null,type:null,use:null,usage:null,files:null,putt:null},selectedSectionBg:'palette',published:false};
   const slotDefs=[
     {key:'heroLogo',label:'Hero Logo',req:'SVG or transparent PNG · 1600×500 px',initials:'HL'},
     {key:'primaryLogo',label:'Primary Logo',req:'SVG or transparent PNG · 1600×600 px',initials:'PL'},
@@ -2515,6 +2744,53 @@ body{
   function slotFgFromBgKey(bgKey){return bgKey==='transparent'?'#15140F':textColor(colorFromBgKey(bgKey))}
   function bgOptions(current){return Object.entries(SLOT_BG_LABELS).map(([value,label])=>`<option value="${value}" ${current===value?'selected':''}>${label}</option>`).join('')}
   function applyBgToElement(el,bgKey){if(!el)return;const bg=colorFromBgKey(bgKey);const fg=slotFgFromBgKey(bgKey);el.style.background=bgKey==='transparent'?'linear-gradient(45deg,rgba(21,20,15,.05) 25%,transparent 25%,transparent 75%,rgba(21,20,15,.05) 75%),linear-gradient(45deg,rgba(21,20,15,.05) 25%,transparent 25%,transparent 75%,rgba(21,20,15,.05) 75%)':'linear-gradient(180deg,rgba(255,255,255,.10),rgba(0,0,0,.035)), '+bg;el.style.backgroundSize=bgKey==='transparent'?'18px 18px,18px 18px':'auto';el.style.backgroundPosition=bgKey==='transparent'?'0 0,9px 9px':'initial';el.style.color=fg;el.querySelectorAll('.logo-cell-label,.mockup-label,.missing').forEach(child=>{child.style.color=fg;child.style.opacity=child.classList.contains('missing')?'.70':'.50'});}
+
+  const SECTION_BG_LABELS={hero:'Hero',logo:'01 · Logo System',palette:'02 · Color Palette',type:'03 · Typography',use:'04 · In Use',usage:'05 · Usage',files:'06 · Files',putt:'Putt Lab'};
+  function sectionBgDefaults(key){return {assetId:null,opacity:.35,effect:key==='hero'?'forest':'glow'};}
+  function sectionBg(key){return Object.assign(sectionBgDefaults(key),state.sectionBgs[key]||{});}
+  function sectionBgEffectClass(effect){return 'bg-effect-'+(effect||'glow');}
+  function syncSectionBgControls(){
+    const key=state.selectedSectionBg||'palette';
+    const cfg=sectionBg(key);
+    const sel=$('#sectionBgSelect'); if(sel) sel.value=key;
+    const opacity=$('#sectionBgOpacity'); if(opacity) opacity.value=Math.round((cfg.opacity??.35)*100);
+    const opv=$('#sectionBgOpacityValue'); if(opv) opv.textContent=Math.round((cfg.opacity??.35)*100)+'%';
+    const eff=$('#sectionBgEffect'); if(eff) eff.value=cfg.effect||'glow';
+  }
+  function applySectionBgToElement(el,key){
+    if(!el)return;
+    const cfg=sectionBg(key);
+    const asset=assetById(cfg.assetId);
+    ['bg-effect-glow','bg-effect-cream','bg-effect-forest','bg-effect-none'].forEach(c=>el.classList.remove(c));
+    if(asset&&isImage(asset)){
+      el.classList.add('has-section-bg',sectionBgEffectClass(cfg.effect));
+      el.style.setProperty('--section-bg-image',`url('${asset.data}')`);
+      el.style.setProperty('--section-bg-opacity',String(cfg.opacity??.35));
+    }else{
+      el.classList.remove('has-section-bg');
+      el.style.removeProperty('--section-bg-image');
+      el.style.removeProperty('--section-bg-opacity');
+    }
+  }
+  function applySectionBackgrounds(root=document){
+    Object.keys(SECTION_BG_LABELS).forEach(key=>{
+      const el=root.querySelector(`[data-section-bg="${key}"]`);
+      applySectionBgToElement(el,key);
+    });
+    syncSectionBgControls();
+  }
+  async function uploadSectionWallpaper(file){
+    if(!file)return;
+    const key=state.selectedSectionBg||'palette';
+    const a=await makeAsset(file);
+    state.assets.push(a);
+    state.sectionBgs[key]=Object.assign(sectionBg(key),{assetId:a.id});
+    state.published=false;
+    populateSelects();
+    renderAll();
+    ensureLivePreview(`${file.name} added as ${SECTION_BG_LABELS[key]} background.`);
+  }
+
 
 
   function init(){buildColors();buildSlots();wire();renderAll();}
@@ -2546,7 +2822,7 @@ body{
   }
   function wire(){
     $$('[data-field]').forEach(inp=>inp.addEventListener('input',e=>{state.fields[e.target.dataset.field]=e.target.value;state.published=false;renderAll()}));
-    $('#previewBtn').addEventListener('click',showPreview); $('#backToEditorBtn').addEventListener('click',backToEditor); $('#publishBtn').addEventListener('click',lockGuide); $('#lockFromPreviewBtn').addEventListener('click',lockGuide); $('#downloadHtmlBtn').addEventListener('click',downloadLockedHtml); $('#downloadAssetsBtn')?.addEventListener('click',downloadAssetPackage); $('#generatePdfBtn')?.addEventListener('click',generatePdf);
+    $('#previewBtn').addEventListener('click',showPreview); $('#backToEditorBtn').addEventListener('click',backToEditor); $('#publishBtn').addEventListener('click',lockGuide); $('#lockFromPreviewBtn').addEventListener('click',lockGuide); $('#downloadHtmlBtn').addEventListener('click',downloadLockedHtml); $('#downloadAssetsBtn')?.addEventListener('click',downloadAssetPackage); $('#generatePdfBtn')?.addEventListener('click',generatePdf); $('#togglePuttLabBtn')?.addEventListener('click',togglePuttLab); $('#resetPuttLabBtn')?.addEventListener('click',resetPuttLab); $('#puttStartBtn')?.addEventListener('click',()=>{openPuttLab();resetPuttLab();}); $('#puttResetBtn')?.addEventListener('click',resetPuttLab);
     $('#uploadFilesBtn').addEventListener('click',()=>$('#assetInput').click()); $('#chooseFilesBtn').addEventListener('click',()=>$('#assetInput').click()); $('#assetInput').addEventListener('change',async e=>{await addFiles(e.target.files);e.target.value=''});
     const uz=$('#uploadZone'); ['dragenter','dragover'].forEach(ev=>uz.addEventListener(ev,e=>{e.preventDefault();uz.style.borderColor='rgba(31,61,46,.4)'})); ['dragleave','drop'].forEach(ev=>uz.addEventListener(ev,e=>{e.preventDefault();uz.style.borderColor='rgba(31,61,46,.18)'})); uz.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
     document.addEventListener('change',async e=>{
@@ -2658,7 +2934,7 @@ body{
     });
     const hero=assetById(state.slots.heroLogo);const heroImg=$('#pvHeroLogo');if(isImage(hero)){heroImg.src=hero.data;heroImg.classList.add('visible')}else{heroImg.removeAttribute('src');heroImg.classList.remove('visible')}
     applySlotBackgrounds();
-    setImgWrap('#pvPrimaryLogoWrap',assetById(state.slots.primaryLogo),'Primary Logo');setImgWrap('#pvIconMarkWrap',assetById(state.slots.iconMark),'Icon Mark');setImgWrap('#pvIconVariantWrap',assetById(state.slots.iconVariant),'Brand Variant');setImgWrap('#pvProfileImageWrap',assetById(state.slots.profileImage),'Profile Image');setImgWrap('#pvWebsiteHeaderWrap',assetById(state.slots.websiteHeader),'Digital Mockup');setImgWrap('#pvBusinessCardWrap',assetById(state.slots.businessCard),'Print Mockup');setImgWrap('#pvSocialPostWrap',assetById(state.slots.socialPost),'Social Post');forceGuideSlotPlacement();injectAssetPackage(document);
+    setImgWrap('#pvPrimaryLogoWrap',assetById(state.slots.primaryLogo),'Primary Logo');setImgWrap('#pvIconMarkWrap',assetById(state.slots.iconMark),'Icon Mark');setImgWrap('#pvIconVariantWrap',assetById(state.slots.iconVariant),'Brand Variant');setImgWrap('#pvProfileImageWrap',assetById(state.slots.profileImage),'Profile Image');setImgWrap('#pvWebsiteHeaderWrap',assetById(state.slots.websiteHeader),'Digital Mockup');setImgWrap('#pvBusinessCardWrap',assetById(state.slots.businessCard),'Print Mockup');setImgWrap('#pvSocialPostWrap',assetById(state.slots.socialPost),'Social Post');forceGuideSlotPlacement();injectAssetPackage(document);applySectionBackgrounds(document);
     renderAssetList();populateSelects();updateProgress();
   }
   function applySlotBackgrounds(){
@@ -2688,10 +2964,15 @@ body{
   function backToEditor(){$('#builderApp').scrollIntoView({behavior:'smooth',block:'start'})}
   function lockGuide(){state.published=true;renderAll();$('#previewShell').classList.add('active','locked');$('#previewShell').classList.remove('builder-mode');$$('[data-edit-preview],[data-guide-edit]').forEach(el=>el.setAttribute('contenteditable','false'));$('#previewModeText').textContent='Published guide · editing locked';$('#previewShell').scrollIntoView({behavior:'smooth',block:'start'});status('Guide is locked. Use Download HTML to save a static client-ready version.');}
   function packageItems(){
-    const items=state.assets.map(a=>({id:a.id,name:a.name||'asset',ext:a.ext||fileExt(a.name),data:a.data,type:a.type||'application/octet-stream',slot:assignedSlotForAsset(a.id)}));
+    const items=state.assets.map(a=>({id:a.id,name:a.name||'asset',ext:a.ext||fileExt(a.name),data:a.data,type:a.type||'application/octet-stream',slot:assignedSlotForAsset(a.id),wallpaper:assignedWallpaperForAsset(a.id)}));
     if(state.fontData.display)items.push({id:'display-font',name:state.fontData.display.name||'display-font',ext:fileExt(state.fontData.display.name),data:state.fontData.display.data,type:'font/display',slot:null});
     if(state.fontData.body)items.push({id:'body-font',name:state.fontData.body.name||'body-font',ext:fileExt(state.fontData.body.name),data:state.fontData.body.data,type:'font/body',slot:null});
     return items;
+  }
+  function assignedWallpaperForAsset(assetId){
+    const entry=Object.entries(state.sectionBgs||{}).find(([key,cfg])=>cfg&&cfg.assetId===assetId);
+    if(!entry)return null;
+    return {key:entry[0],label:SECTION_BG_LABELS[entry[0]]||'Section Background'};
   }
   function assignedSlotForAsset(assetId){
     const entry=Object.entries(state.slots).find(([key,id])=>id===assetId);
@@ -2702,12 +2983,14 @@ body{
   function smartAssetTitle(item,index){
     const assigned=item.slot;
     if(assigned)return assigned.label;
+    if(item.wallpaper)return item.wallpaper.label+' Wallpaper';
     if(String(item.type||'').startsWith('font')||['otf','ttf','woff','woff2'].includes(String(item.ext||'').toLowerCase()))return index===0?'Display / Body Typeface':'Font File';
     const ext=String(item.ext||'file').toUpperCase();
     if(ext==='PDF')return 'Reference PDF';
     return item.name||'Uploaded Asset';
   }
   function smartAssetUse(item){
+    if(item.wallpaper)return `Full-width background image used behind the ${item.wallpaper.label} section.`;
     if(item.slot){
       const map={
         heroLogo:'Use at the top of the guide, presentations, and client-facing share pages.',
@@ -2741,7 +3024,7 @@ body{
       const use=smartAssetUse(item);
       const ext=escapeHtml(String(item.ext||'file').toUpperCase());
       const fileName=escapeHtml(item.name||`${title}.${item.ext||'file'}`);
-      const source=item.slot?`Assigned: ${item.slot.label}`:'Uploaded file';
+      const source=item.slot?`Assigned: ${item.slot.label}`:(item.wallpaper?`Wallpaper: ${item.wallpaper.label}`:'Uploaded file');
       return `<a class="asset-package-card" href="${item.data}" download="${fileName}" title="Download ${fileName}">
         ${assetThumbHtml(item,index)}
         <div class="asset-package-body">
@@ -2763,7 +3046,7 @@ body{
     if(!items.length)return '';
     const packageHtml=packagePageHtml(items);
     const packageHref='data:text/html;charset=utf-8,'+encodeURIComponent(packageHtml);
-    return `<section class="asset-package-section"><div class="guide-wrap">
+    return `<section class="asset-package-section" data-section-bg="files"><div class="guide-wrap">
       <div class="asset-package-head">
         <div class="asset-package-intro">
           <div class="section-label">06 · Files</div>
@@ -2801,6 +3084,146 @@ body{
     document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   }
 
+
+  /* Optional hidden golf mini-game. Self-contained so it does not affect the guide builder. */
+  const puttGame={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:150,y:420,vx:0,vy:0,r:12},hole:{x:930,y:170,r:22},drag:{x:0,y:0},last:0};
+  function openPuttLab(){
+    const sec=$('#puttLabSection');
+    if(!sec)return;
+    sec.classList.add('active');
+    $('#togglePuttLabBtn')&&( $('#togglePuttLabBtn').textContent='Hide Putt Lab' );
+    initPuttLab();
+    setTimeout(()=>{resizePuttCanvas();drawPutt();sec.scrollIntoView({behavior:'smooth',block:'start'});},60);
+  }
+  function closePuttLab(){
+    const sec=$('#puttLabSection');
+    if(!sec)return;
+    sec.classList.remove('active');
+    $('#togglePuttLabBtn')&&( $('#togglePuttLabBtn').textContent='Open Putt Lab' );
+  }
+  function togglePuttLab(){
+    const sec=$('#puttLabSection');
+    if(!sec)return;
+    sec.classList.contains('active')?closePuttLab():openPuttLab();
+  }
+  function initPuttLab(){
+    if(puttGame.ready)return;
+    const canvas=$('#puttCanvas');
+    if(!canvas)return;
+    const pointerPos=e=>{const rect=canvas.getBoundingClientRect();return {x:(e.clientX-rect.left)*(canvas.width/rect.width),y:(e.clientY-rect.top)*(canvas.height/rect.height)}};
+    canvas.addEventListener('pointerdown',e=>{
+      e.preventDefault();
+      const p=pointerPos(e),b=puttGame.ball;
+      const d=Math.hypot(p.x-b.x,p.y-b.y);
+      if(d<78 && Math.hypot(b.vx,b.vy)<.25){
+        puttGame.dragging=true;puttGame.drag=p;canvas.setPointerCapture(e.pointerId);
+        $('#puttStatus')&&( $('#puttStatus').textContent='Line it up · release to putt' );
+      }
+    });
+    canvas.addEventListener('pointermove',e=>{if(!puttGame.dragging)return;e.preventDefault();puttGame.drag=pointerPos(e);drawPutt();});
+    canvas.addEventListener('pointerup',e=>{
+      if(!puttGame.dragging)return;
+      e.preventDefault();
+      const p=pointerPos(e),b=puttGame.ball;
+      const dx=b.x-p.x,dy=b.y-p.y;
+      const power=Math.min(32,Math.hypot(dx,dy)/7.5);
+      const a=Math.atan2(dy,dx);
+      b.vx=Math.cos(a)*power; b.vy=Math.sin(a)*power;
+      puttGame.strokes++; updatePuttScore();
+      puttGame.dragging=false; puttGame.active=true;
+      $('#puttStatus')&&( $('#puttStatus').textContent='Rolling...' );
+      requestAnimationFrame(stepPutt);
+    });
+    window.addEventListener('resize',()=>{resizePuttCanvas();drawPutt();});
+    resizePuttCanvas();
+    puttGame.ready=true;
+    resetPuttLab(false);
+  }
+  function resizePuttCanvas(){
+    const canvas=$('#puttCanvas');if(!canvas)return;
+    const wrap=canvas.parentElement;const width=Math.max(620,Math.min(1100,wrap.clientWidth||1100));
+    const ratio=620/1100;canvas.width=Math.round(width);canvas.height=Math.round(width*ratio);
+    const margin=canvas.width*.12;
+    puttGame.hole.x=canvas.width-margin*1.05;puttGame.hole.y=canvas.height*.27;
+    if(!puttGame.active&&!puttGame.dragging){puttGame.ball.x=margin;puttGame.ball.y=canvas.height*.68;}
+  }
+  function resetPuttLab(scroll=true){
+    initPuttLab();
+    const canvas=$('#puttCanvas'); if(!canvas)return;
+    puttGame.active=false;puttGame.dragging=false;puttGame.strokes=0;
+    puttGame.ball={x:canvas.width*.12,y:canvas.height*.68,vx:0,vy:0,r:Math.max(9,canvas.width*.011)};
+    puttGame.hole={x:canvas.width*.88,y:canvas.height*.27,r:Math.max(17,canvas.width*.020)};
+    $('#puttStatus')&&( $('#puttStatus').textContent='Ready on the green' );
+    updatePuttScore();drawPutt();
+    if(scroll)$('#puttLabSection')?.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function updatePuttScore(){
+    const best=puttGame.best?puttGame.best:'—';
+    $('#puttScore')&&( $('#puttScore').textContent=`Strokes ${puttGame.strokes} · Best ${best}` );
+  }
+  function stepPutt(t){
+    const canvas=$('#puttCanvas');if(!canvas||!puttGame.active)return;
+    const b=puttGame.ball,h=puttGame.hole;
+    b.x+=b.vx;b.y+=b.vy;
+    b.vx*=.982;b.vy*=.982;
+    // subtle green break toward the cup
+    b.vx+=(h.x-b.x)*.000035; b.vy+=(h.y-b.y)*.000018;
+    const r=b.r;
+    if(b.x<r){b.x=r;b.vx=Math.abs(b.vx)*.42;}
+    if(b.x>canvas.width-r){b.x=canvas.width-r;b.vx=-Math.abs(b.vx)*.42;}
+    if(b.y<r){b.y=r;b.vy=Math.abs(b.vy)*.42;}
+    if(b.y>canvas.height-r){b.y=canvas.height-r;b.vy=-Math.abs(b.vy)*.42;}
+    const dist=Math.hypot(b.x-h.x,b.y-h.y);
+    const speed=Math.hypot(b.vx,b.vy);
+    if(dist<h.r*.78 && speed<7.4){
+      b.x+=(h.x-b.x)*.22;b.y+=(h.y-b.y)*.22;b.vx*=.72;b.vy*=.72;
+      if(dist<4||speed<.18){
+        puttGame.active=false;b.x=h.x;b.y=h.y;b.vx=0;b.vy=0;
+        if(!puttGame.best||puttGame.strokes<puttGame.best)puttGame.best=puttGame.strokes;
+        $('#puttStatus')&&( $('#puttStatus').textContent=puttGame.strokes===1?'Birdie energy. One putt.':'Nice putt. Moving Day.' );
+        updatePuttScore();drawPutt(true);return;
+      }
+    }
+    if(speed<.08){puttGame.active=false;b.vx=0;b.vy=0;$('#puttStatus')&&( $('#puttStatus').textContent='Stopped short. Try again.' );}
+    drawPutt();
+    if(puttGame.active)requestAnimationFrame(stepPutt);
+  }
+  function drawPutt(made=false){
+    const canvas=$('#puttCanvas');if(!canvas)return;
+    const ctx=canvas.getContext('2d'),w=canvas.width,h=canvas.height;
+    ctx.clearRect(0,0,w,h);
+    // realistic-ish green base
+    const bg=ctx.createLinearGradient(0,0,w,h);bg.addColorStop(0,'#285f3e');bg.addColorStop(.48,'#1d4f33');bg.addColorStop(1,'#103320');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);
+    // mowing lines
+    for(let i=-w;i<w*2;i+=42){ctx.fillStyle=(Math.floor(i/42)%2)?'rgba(255,255,255,.035)':'rgba(0,0,0,.035)';ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i+190,0);ctx.lineTo(i+w*.42,h);ctx.lineTo(i+w*.42-190,h);ctx.closePath();ctx.fill();}
+    // grain
+    for(let i=0;i<280;i++){const x=(i*83)%w,y=(i*137)%h;ctx.fillStyle='rgba(241,236,223,.045)';ctx.fillRect(x,y,1.2,1.2);}
+    // fairway glow/path
+    const path=ctx.createRadialGradient(w*.52,h*.45,30,w*.52,h*.45,w*.48);path.addColorStop(0,'rgba(196,217,203,.18)');path.addColorStop(1,'rgba(196,217,203,0)');ctx.fillStyle=path;ctx.fillRect(0,0,w,h);
+    const hole=puttGame.hole;
+    // cup shadow/lip
+    ctx.beginPath();ctx.ellipse(hole.x+2,hole.y+5,hole.r*1.18,hole.r*.82,0,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.34)';ctx.fill();
+    ctx.beginPath();ctx.arc(hole.x,hole.y,hole.r,0,Math.PI*2);ctx.fillStyle='#050806';ctx.fill();
+    ctx.beginPath();ctx.arc(hole.x-4,hole.y-5,hole.r*.72,0,Math.PI*2);ctx.strokeStyle='rgba(241,236,223,.26)';ctx.lineWidth=Math.max(2,w*.003);ctx.stroke();
+    // tiny flag pin
+    ctx.strokeStyle='rgba(241,236,223,.72)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(hole.x,hole.y-hole.r*4.2);ctx.lineTo(hole.x,hole.y-hole.r*.75);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(hole.x,hole.y-hole.r*4.2);ctx.lineTo(hole.x+hole.r*1.7,hole.y-hole.r*3.45);ctx.lineTo(hole.x,hole.y-hole.r*2.8);ctx.closePath();ctx.fillStyle='#C4D9CB';ctx.fill();
+    const b=puttGame.ball;
+    if(puttGame.dragging){
+      const dx=b.x-puttGame.drag.x,dy=b.y-puttGame.drag.y;const len=Math.hypot(dx,dy);const ux=dx/(len||1),uy=dy/(len||1);
+      // aim line
+      ctx.setLineDash([8,9]);ctx.strokeStyle='rgba(241,236,223,.58)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x+ux*Math.min(260,len*1.5),b.y+uy*Math.min(260,len*1.5));ctx.stroke();ctx.setLineDash([]);
+      // club shaft/head behind ball
+      ctx.strokeStyle='rgba(13,18,14,.78)';ctx.lineWidth=Math.max(5,w*.006);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(puttGame.drag.x,puttGame.drag.y);ctx.lineTo(puttGame.drag.x-uy*44,puttGame.drag.y+ux*44);ctx.stroke();
+      ctx.strokeStyle='rgba(241,236,223,.60)';ctx.lineWidth=Math.max(3,w*.004);ctx.beginPath();ctx.moveTo(puttGame.drag.x-uy*28,puttGame.drag.y+ux*28);ctx.lineTo(puttGame.drag.x+uy*28,puttGame.drag.y-ux*28);ctx.stroke();
+    }
+    // ball shadow and ball
+    ctx.beginPath();ctx.ellipse(b.x+5,b.y+7,b.r*1.05,b.r*.55,0,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.24)';ctx.fill();
+    const ball=ctx.createRadialGradient(b.x-b.r*.35,b.y-b.r*.45,1,b.x,b.y,b.r*1.25);ball.addColorStop(0,'#ffffff');ball.addColorStop(.55,'#EDECE4');ball.addColorStop(1,'#b8b8ae');ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fillStyle=ball;ctx.fill();
+    ctx.beginPath();ctx.arc(b.x-b.r*.34,b.y-b.r*.38,b.r*.22,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.88)';ctx.fill();
+    if(made){ctx.fillStyle='rgba(241,236,223,.88)';ctx.font=`900 ${Math.max(18,w*.026)}px Geist, Arial`;ctx.letterSpacing='2px';ctx.textAlign='center';ctx.fillText('MADE IT',w/2,h*.16);}
+  }
+
   function prepareLiveGuideForExport(){
     const guide=$('#guidePreview');
     if(!guide)return;
@@ -2813,6 +3236,7 @@ body{
     const section=wrap.firstElementChild;
     const footer=guide.querySelector('.guide-footer');
     if(footer)guide.insertBefore(section,footer);else guide.appendChild(section);
+    applySectionBackgrounds(document);
   }
   function generatePdf(){
     prepareLiveGuideForExport();
@@ -2824,10 +3248,227 @@ body{
     setTimeout(()=>window.print(),250);
   }
 
-  function cloneForDownload(){const clone=document.documentElement.cloneNode(true);injectAssetPackage(clone);clone.querySelector('#builderApp')?.remove();const toolbar=clone.querySelector('.preview-toolbar'); if(toolbar) toolbar.remove();clone.querySelector('#previewShell')?.classList.add('active','locked');clone.querySelector('#previewShell')?.classList.remove('builder-mode');clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));clone.querySelectorAll('[data-preview-slot]').forEach(el=>el.removeAttribute('data-preview-slot'));return '<!DOCTYPE html>\n'+clone.outerHTML}
+  function cloneForDownload(){const clone=document.documentElement.cloneNode(true);injectAssetPackage(clone);applySectionBackgrounds(clone);clone.querySelector('#builderApp')?.remove();const toolbar=clone.querySelector('.preview-toolbar'); if(toolbar) toolbar.remove();clone.querySelector('#previewShell')?.classList.add('active','locked');clone.querySelector('#previewShell')?.classList.remove('builder-mode');clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));clone.querySelectorAll('[data-preview-slot]').forEach(el=>el.removeAttribute('data-preview-slot'));return '<!DOCTYPE html>\n'+clone.outerHTML}
   function downloadLockedHtml(){const name=safeName(state.fields.clientName||'brand-guide')+'.html';const blob=new Blob([cloneForDownload()],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
   init();
 })();
 </script>
+
+
+<style id="md-v9-simplified-menu-putt-window-patch">
+/* V9 · simplified sticky command bar + standalone Putt Lab */
+.preview-toolbar{
+  background:rgba(241,236,223,.88)!important;
+  border-bottom:1px solid rgba(31,61,46,.095)!important;
+  box-shadow:0 10px 30px rgba(21,20,15,.055)!important;
+}
+.preview-toolbar-inner{
+  max-width:1260px!important;
+  min-height:70px!important;
+  padding:12px 30px!important;
+  display:grid!important;
+  grid-template-columns:minmax(240px,1fr) auto minmax(320px,1fr)!important;
+  align-items:center!important;
+  gap:16px!important;
+}
+.preview-brand{
+  padding:5px 8px!important;
+  background:transparent!important;
+  border-color:transparent!important;
+}
+.preview-brand-icon{width:27px!important;height:27px!important;border-radius:8px!important;opacity:.88!important;}
+.preview-brand-logo{width:106px!important;opacity:.88!important;}
+.preview-brand-studio{font-size:8px!important;letter-spacing:.18em!important;color:rgba(31,61,46,.56)!important;}
+.preview-nav-center{gap:8px!important;}
+.platform-pill{
+  min-height:34px!important;
+  padding:0 16px!important;
+  background:rgba(31,61,46,.045)!important;
+  border-color:rgba(31,61,46,.09)!important;
+  font-size:9px!important;
+  letter-spacing:.17em!important;
+}
+.locked-badge{min-height:34px!important;font-size:9px!important;}
+.simplified-preview-actions{
+  justify-self:end!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-end!important;
+  gap:8px!important;
+  flex-wrap:nowrap!important;
+}
+.simplified-preview-actions .style-bubble,
+.simplified-preview-actions .fun-bubble,
+.simplified-preview-actions > details.action-bubble:not(.export-bubble){
+  display:none!important;
+}
+.nav-chip-btn,
+.putt-icon-btn{
+  border:1px solid rgba(31,61,46,.11)!important;
+  background:rgba(251,248,240,.74)!important;
+  color:#1F3D2E!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72),0 8px 20px rgba(31,61,46,.045)!important;
+  transition:transform .18s ease, background .18s ease, border-color .18s ease!important;
+}
+.nav-chip-btn:hover,
+.putt-icon-btn:hover{transform:translateY(-1px)!important;background:#fff!important;border-color:rgba(31,61,46,.18)!important;}
+.nav-chip-btn{
+  min-height:38px!important;
+  border-radius:999px!important;
+  padding:0 15px!important;
+  font:900 9px/1 var(--sans)!important;
+  letter-spacing:.15em!important;
+  text-transform:uppercase!important;
+}
+.nav-chip-publish{background:rgba(196,217,203,.44)!important;border-color:rgba(31,61,46,.10)!important;}
+.putt-icon-btn{
+  width:40px!important;
+  height:40px!important;
+  border-radius:999px!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  font-size:16px!important;
+  line-height:1!important;
+}
+.putt-icon-btn span{transform:translateY(-1px);display:block;}
+.export-bubble summary{
+  min-height:38px!important;
+  padding:0 15px!important;
+  background:#1F3D2E!important;
+  color:#F1ECDF!important;
+  border-color:#1F3D2E!important;
+  font-size:9px!important;
+  letter-spacing:.15em!important;
+  box-shadow:0 10px 24px rgba(31,61,46,.10)!important;
+}
+.export-bubble summary::after{font-size:12px!important;opacity:.72!important;}
+.export-bubble .bubble-panel{border-radius:18px!important;min-width:205px!important;}
+.locked #lockFromPreviewBtnTop{display:none!important;}
+.locked #backToEditorBtnTop{display:none!important;}
+#puttLabSection{display:none!important;}
+@media(max-width:900px){
+  .preview-toolbar-inner{grid-template-columns:1fr!important;align-items:start!important;gap:10px!important;}
+  .preview-nav-center{justify-self:start!important;}
+  .simplified-preview-actions{justify-self:start!important;flex-wrap:wrap!important;}
+}
+</style>
+
+<script id="md-v9-putt-window-script">
+(function(){
+  function esc(s){return String(s||'').replace(/[&<>]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;'}[c]});}
+  function openMovingDayPuttLabWindow(){
+    const w = window.open('', 'movingDayPuttLab', 'width=1120,height=780,resizable=yes,scrollbars=yes');
+    if(!w){ alert('Pop-up blocked. Please allow pop-ups for this page to open Putt Lab.'); return; }
+    const client = document.querySelector('#pvClientName')?.textContent?.trim() || 'Brand Guide';
+    const html = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Moving Day Putt Lab · ${esc(client)}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#F1ECDF;--paper:#FBF8F0;--forest:#1F3D2E;--deep:#07110C;--sage:#C4D9CB;--ink:#15140F;--sans:'Geist',system-ui,sans-serif;--display:'Instrument Serif',serif}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 16% -8%,rgba(196,217,203,.22),transparent 31%),linear-gradient(145deg,#06100b 0%,#10241a 52%,#06100b 100%);font-family:var(--sans);color:var(--cream);padding:28px}.lab-shell{max-width:1180px;margin:0 auto}.lab-nav{height:66px;border:1px solid rgba(241,236,223,.12);background:rgba(6,16,11,.58);backdrop-filter:blur(18px);border-radius:999px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 18px 0 20px;margin-bottom:34px;box-shadow:0 18px 48px rgba(0,0,0,.18)}.brand{display:flex;align-items:center;gap:12px;color:var(--sage);font:900 12px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase}.brand-mark{width:34px;height:34px;border-radius:12px;background:rgba(196,217,203,.13);display:grid;place-items:center}.brand-mark:before{content:'M';font-family:var(--display);font-size:24px;color:var(--sage)}.lab-pill{border:1px solid rgba(241,236,223,.13);border-radius:999px;padding:10px 14px;color:rgba(241,236,223,.70);font:900 10px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase}.hero{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:28px;align-items:end;margin-bottom:22px}.kicker{font:900 11px var(--sans);letter-spacing:.20em;text-transform:uppercase;color:var(--sage);margin-bottom:14px}.hero h1{font-family:var(--display);font-size:clamp(48px,6vw,86px);font-weight:400;line-height:.92;letter-spacing:-.04em;margin:0}.hero p{color:rgba(241,236,223,.70);max-width:640px;font-size:15px;line-height:1.65;margin:18px 0 0}.stat-card{border:1px solid rgba(241,236,223,.12);background:rgba(251,248,240,.065);border-radius:28px;padding:22px}.stat-card span{display:block;font:900 9px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:rgba(241,236,223,.46);margin-bottom:10px}.stat-card strong{font-family:var(--display);font-size:34px;font-weight:400}.game-card{background:linear-gradient(145deg,#F7F3EA 0%,#E9E1D2 100%);color:var(--ink);border-radius:34px;padding:18px;border:1px solid rgba(255,255,255,.55);box-shadow:0 34px 90px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.72)}.scorebar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:4px 8px 16px;color:var(--forest)}.scorebar strong{font:900 10px var(--sans);letter-spacing:.16em;text-transform:uppercase}.scorebar span{font:800 12px var(--sans);color:rgba(31,61,46,.64)}.controls{display:flex;gap:8px}.btn{height:38px;border:1px solid rgba(31,61,46,.13);background:#1F3D2E;color:#F1ECDF;border-radius:999px;padding:0 14px;font:900 9px var(--sans);letter-spacing:.13em;text-transform:uppercase;cursor:pointer}.btn.secondary{background:rgba(31,61,46,.08);color:#1F3D2E}.green-wrap{position:relative;border-radius:26px;overflow:hidden;background:#16412d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 40px 100px rgba(255,255,255,.06)}#puttCanvas{display:block;width:100%;height:auto;min-height:500px;touch-action:none;cursor:crosshair;background:#16412d}.hint{position:absolute;left:18px;right:18px;bottom:18px;display:flex;justify-content:space-between;gap:12px;color:rgba(241,236,223,.78);font:900 10px var(--sans);letter-spacing:.13em;text-transform:uppercase;pointer-events:none}.direction-pill{position:absolute;top:18px;left:50%;transform:translateX(-50%);padding:8px 12px;border-radius:999px;background:rgba(7,17,12,.42);color:rgba(241,236,223,.8);font:900 9px var(--sans);letter-spacing:.14em;text-transform:uppercase;pointer-events:none}@media(max-width:800px){body{padding:16px}.lab-nav{border-radius:24px;height:auto;padding:14px;align-items:flex-start;flex-direction:column}.hero{grid-template-columns:1fr}.stat-card{display:none}.scorebar{align-items:flex-start;flex-direction:column}.hint{position:static;background:#1F3D2E;padding:12px 14px;display:block}.direction-pill{display:none}#puttCanvas{min-height:420px}}</style></head>
+<body><div class="lab-shell"><nav class="lab-nav"><div class="brand"><span class="brand-mark"></span><span>Moving Day · Putt Lab</span></div><div class="lab-pill">Brand Restoration Platform</div></nav><section class="hero"><div><div class="kicker">Mouse / touch mini-game</div><h1>Put it forward.</h1><p>Pull back from the ball like a putter, then release toward the cup. The ball starts at the bottom of the green and rolls forward toward the hole.</p></div><div class="stat-card"><span>Current guide</span><strong>${esc(client)}</strong></div></section><section class="game-card"><div class="scorebar"><div><strong id="status">Ready on the green</strong><span id="score">Strokes 0 · Best —</span></div><div class="controls"><button class="btn" id="startBtn">Start Round</button><button class="btn secondary" id="resetBtn">Reset</button></div></div><div class="green-wrap"><div class="direction-pill">Putting direction ↑</div><canvas id="puttCanvas" width="1100" height="650"></canvas><div class="hint"><span>Pull back behind the ball, release forward</span><i>Putting bottom → top</i></div></div></section></div>
+<script>
+const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:0,y:0,vx:0,vy:0,r:12},hole:{x:0,y:0,r:22},drag:{x:0,y:0}};const canvas=document.getElementById('puttCanvas'),ctx=canvas.getContext('2d');function pos(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*(canvas.width/r.width),y:(e.clientY-r.top)*(canvas.height/r.height)}}function resize(){const r=canvas.getBoundingClientRect();canvas.width=Math.max(780,Math.floor(r.width*devicePixelRatio));canvas.height=Math.max(540,Math.floor((r.width*.60)*devicePixelRatio));reset(false)}function reset(update=true){game.active=false;game.dragging=false;game.strokes=0;game.ball={x:canvas.width*.50,y:canvas.height*.82,vx:0,vy:0,r:Math.max(10,canvas.width*.012)};game.hole={x:canvas.width*.50,y:canvas.height*.18,r:Math.max(18,canvas.width*.021)};statusText('Ready on the green');score();draw();}function statusText(t){document.getElementById('status').textContent=t}function score(){document.getElementById('score').textContent='Strokes '+game.strokes+' · Best '+(game.best||'—')}canvas.addEventListener('pointerdown',e=>{e.preventDefault();const p=pos(e),b=game.ball;if(Math.hypot(p.x-b.x,p.y-b.y)<b.r*3.2&&!game.active){game.dragging=true;game.drag=p;canvas.setPointerCapture(e.pointerId);statusText('Line it up · release to putt');draw();}});canvas.addEventListener('pointermove',e=>{if(!game.dragging)return;e.preventDefault();game.drag=pos(e);draw();});canvas.addEventListener('pointerup',e=>{if(!game.dragging)return;e.preventDefault();const p=pos(e),b=game.ball;let dx=b.x-p.x,dy=b.y-p.y;const power=Math.min(28,Math.hypot(dx,dy)*.08);const len=Math.hypot(dx,dy)||1;b.vx=(dx/len)*power;b.vy=(dy/len)*power;game.strokes++;game.dragging=false;game.active=true;score();statusText('Rolling forward...');requestAnimationFrame(step);});function step(){if(!game.active)return;const b=game.ball,h=game.hole;b.x+=b.vx;b.y+=b.vy;b.vx*=.982;b.vy*=.982;const m=b.r+8;if(b.x<m||b.x>canvas.width-m){b.vx*=-.68;b.x=Math.max(m,Math.min(canvas.width-m,b.x))}if(b.y<m||b.y>canvas.height-m){b.vy*=-.68;b.y=Math.max(m,Math.min(canvas.height-m,b.y))}const d=Math.hypot(b.x-h.x,b.y-h.y),speed=Math.hypot(b.vx,b.vy);if(d<h.r*.86&&speed<8.2){game.active=false;b.x=h.x;b.y=h.y;b.vx=0;b.vy=0;if(!game.best||game.strokes<game.best)game.best=game.strokes;statusText(game.strokes===1?'One-putt energy.':'Nice putt. Moving Day.');score();draw(true);return}if(speed<.12){game.active=false;b.vx=0;b.vy=0;statusText('Stopped short. Pull back and putt forward.')}draw();if(game.active)requestAnimationFrame(step)}function draw(made=false){const w=canvas.width,h=canvas.height;const bg=ctx.createLinearGradient(0,h,0,0);bg.addColorStop(0,'#123a27');bg.addColorStop(.44,'#1d5738');bg.addColorStop(1,'#2c7048');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);for(let y=-80;y<h+80;y+=58){ctx.fillStyle=(Math.floor(y/58)%2)?'rgba(255,255,255,.034)':'rgba(0,0,0,.035)';ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y-120);ctx.lineTo(w,y-64);ctx.lineTo(0,y+56);ctx.closePath();ctx.fill()}const lane=ctx.createRadialGradient(w*.5,h*.52,10,w*.5,h*.52,w*.42);lane.addColorStop(0,'rgba(196,217,203,.22)');lane.addColorStop(1,'rgba(196,217,203,0)');ctx.fillStyle=lane;ctx.fillRect(0,0,w,h);for(let i=0;i<260;i++){ctx.fillStyle='rgba(241,236,223,.04)';ctx.fillRect((i*97)%w,(i*149)%h,1.2,1.2)}const hole=game.hole;ctx.beginPath();ctx.ellipse(hole.x+2,hole.y+5,hole.r*1.18,hole.r*.82,0,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.34)';ctx.fill();ctx.beginPath();ctx.arc(hole.x,hole.y,hole.r,0,Math.PI*2);ctx.fillStyle='#050806';ctx.fill();ctx.strokeStyle='rgba(241,236,223,.72)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(hole.x,hole.y-hole.r*4.2);ctx.lineTo(hole.x,hole.y-hole.r*.75);ctx.stroke();ctx.beginPath();ctx.moveTo(hole.x,hole.y-hole.r*4.2);ctx.lineTo(hole.x+hole.r*1.7,hole.y-hole.r*3.45);ctx.lineTo(hole.x,hole.y-hole.r*2.8);ctx.closePath();ctx.fillStyle='#C4D9CB';ctx.fill();const b=game.ball;if(game.dragging){const dx=b.x-game.drag.x,dy=b.y-game.drag.y,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;ctx.setLineDash([9,9]);ctx.strokeStyle='rgba(241,236,223,.60)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x+ux*Math.min(300,len*1.55),b.y+uy*Math.min(300,len*1.55));ctx.stroke();ctx.setLineDash([]);ctx.strokeStyle='rgba(13,18,14,.78)';ctx.lineWidth=Math.max(6,w*.006);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(game.drag.x,game.drag.y);ctx.lineTo(game.drag.x-uy*52,game.drag.y+ux*52);ctx.stroke();ctx.strokeStyle='rgba(241,236,223,.60)';ctx.lineWidth=Math.max(3,w*.004);ctx.beginPath();ctx.moveTo(game.drag.x-uy*32,game.drag.y+ux*32);ctx.lineTo(game.drag.x+uy*32,game.drag.y-ux*32);ctx.stroke()}ctx.beginPath();ctx.ellipse(b.x+5,b.y+8,b.r*1.08,b.r*.56,0,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.24)';ctx.fill();const ball=ctx.createRadialGradient(b.x-b.r*.35,b.y-b.r*.45,1,b.x,b.y,b.r*1.25);ball.addColorStop(0,'#ffffff');ball.addColorStop(.55,'#EDECE4');ball.addColorStop(1,'#b8b8ae');ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fillStyle=ball;ctx.fill();ctx.beginPath();ctx.arc(b.x-b.r*.34,b.y-b.r*.38,b.r*.22,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.88)';ctx.fill();if(made){ctx.fillStyle='rgba(241,236,223,.92)';ctx.font='900 '+Math.max(20,w*.032)+'px Geist, Arial';ctx.textAlign='center';ctx.fillText('MADE IT',w/2,h*.50)}}document.getElementById('startBtn').onclick=()=>reset();document.getElementById('resetBtn').onclick=()=>reset();window.addEventListener('resize',resize);resize();
+<\/script></body></html>`;
+    w.document.open(); w.document.write(html); w.document.close(); w.focus();
+  }
+  function wire(){
+    document.querySelector('#openPuttWindowBtn')?.addEventListener('click', openMovingDayPuttLabWindow);
+    document.querySelector('#backToEditorBtnTop')?.addEventListener('click', function(){ document.querySelector('#backToEditorBtn')?.click(); });
+    document.querySelector('#lockFromPreviewBtnTop')?.addEventListener('click', function(){ document.querySelector('#lockFromPreviewBtn')?.click(); });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', wire); else wire();
+  window.openMovingDayPuttLabWindow=openMovingDayPuttLabWindow;
+})();
+</script>
+
+
+<style id="md-v10-pro-putt-unlock-patch">
+/* V10 · professional Putt Lab icon + unlock state */
+.putt-icon-btn{
+  width:42px!important;
+  height:42px!important;
+  border-radius:999px!important;
+  padding:0!important;
+  display:grid!important;
+  place-items:center!important;
+  background:linear-gradient(145deg,rgba(31,61,46,.10),rgba(251,248,240,.82))!important;
+  border:1px solid rgba(31,61,46,.13)!important;
+  color:#1F3D2E!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.82),0 10px 24px rgba(31,61,46,.055)!important;
+}
+.putt-icon-btn:hover{
+  background:#1F3D2E!important;
+  color:#F1ECDF!important;
+  border-color:#1F3D2E!important;
+  transform:translateY(-1px)!important;
+}
+.putt-pro-icon{width:25px;height:25px;display:block;overflow:visible;}
+.putt-pro-icon .ppi-ring{fill:none;stroke:currentColor;stroke-width:2;opacity:.22;}
+.putt-pro-icon .ppi-green{fill:none;stroke:currentColor;stroke-width:3.2;stroke-linecap:round;opacity:.84;}
+.putt-pro-icon .ppi-pin{fill:none;stroke:currentColor;stroke-width:2.3;stroke-linecap:round;opacity:.92;}
+.putt-pro-icon .ppi-flag{fill:currentColor;opacity:.92;}
+.putt-pro-icon .ppi-cup{fill:none;stroke:currentColor;stroke-width:2;opacity:.56;}
+.putt-pro-icon .ppi-ball{fill:currentColor;opacity:.98;}
+.nav-chip-unlock{
+  display:none!important;
+  min-height:38px!important;
+  border-radius:999px!important;
+  padding:0 15px!important;
+  font:900 9px/1 var(--sans)!important;
+  letter-spacing:.15em!important;
+  text-transform:uppercase!important;
+  background:#1F3D2E!important;
+  border-color:#1F3D2E!important;
+  color:#F1ECDF!important;
+  box-shadow:0 10px 24px rgba(31,61,46,.10)!important;
+}
+.locked #unlockPreviewBtnTop{display:inline-flex!important;align-items:center!important;justify-content:center!important;}
+.locked #openPuttWindowBtn{display:grid!important;}
+.locked .export-bubble{display:block!important;}
+.locked #previewModeText{letter-spacing:.17em!important;}
+@media(max-width:900px){.nav-chip-unlock{min-height:36px!important;}}
+</style>
+
+<script id="md-v10-unlock-preview-script">
+(function(){
+  function setUnlockedVisualState(){
+    var shell=document.querySelector('#previewShell');
+    if(!shell)return;
+    shell.classList.add('active','builder-mode');
+    shell.classList.remove('locked');
+    document.querySelectorAll('[data-edit-preview],[data-guide-edit]').forEach(function(el){el.setAttribute('contenteditable','true');});
+    var mode=document.querySelector('#previewModeText');
+    if(mode) mode.textContent='Brand Restoration Platform';
+    var status=document.querySelector('#statusText');
+    if(status) status.textContent='Editing unlocked. You can publish again when ready.';
+  }
+  function unlockPreviewGuide(){
+    var previewBtn=document.querySelector('#previewBtn');
+    if(previewBtn){
+      previewBtn.click();
+      setTimeout(setUnlockedVisualState,80);
+      setTimeout(setUnlockedVisualState,220);
+    }else{
+      setUnlockedVisualState();
+    }
+  }
+  function wireUnlock(){
+    var btn=document.querySelector('#unlockPreviewBtnTop');
+    if(btn && !btn.dataset.unlockWired){
+      btn.dataset.unlockWired='true';
+      btn.addEventListener('click',unlockPreviewGuide);
+    }
+    var putt=document.querySelector('#openPuttWindowBtn');
+    if(putt){
+      putt.setAttribute('title','Open Putt Lab');
+      putt.setAttribute('aria-label','Open Putt Lab');
+    }
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wireUnlock);else wireUnlock();
+  window.unlockPreviewGuide=unlockPreviewGuide;
+})();
+</script>
+
 </body>
 </html>
