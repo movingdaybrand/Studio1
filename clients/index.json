@@ -1,11 +1,22 @@
 [
   {
-    "name": "Demo Client",
-    "slug": "demo-client",
-    "category": "Brand Identity",
-    "status": "Example",
-    "description": "A sample client guide showing how Moving Day Studio organizes logos, colors, typography, mockups, and downloads into one polished brand system.",
+    "name": "Messier IHS",
+    "slug": "messier-ihs",
+    "category": "Education / Camp",
+    "status": "Featured",
+    "description": "A polished brand identity guide example for organizing camp visuals, logo usage, colors, typography, and client-ready brand assets.",
     "thumbnail": "",
-    "url": "/guide.html?client=demo-client"
+    "url": "/clients/messier-ihs.html",
+    "type": "static"
+  },
+  {
+    "name": "Invisible Challenge",
+    "slug": "invisible-challenge",
+    "category": "Mental Health Advocacy",
+    "status": "Featured",
+    "description": "A complete identity guide example built around clarity, care, momentum, and a polished system for everyday brand use.",
+    "thumbnail": "",
+    "url": "/clients/invisible-challenge.html",
+    "type": "static"
   }
 ]
