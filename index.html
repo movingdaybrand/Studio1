@@ -1149,6 +1149,24 @@ body{
   object-fit:contain!important;
 }
 
+
+
+/* ── PDF EXPORT OPTION ── */
+.pdf-print-hint{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:rgba(31,61,46,.52);font-weight:900;}
+@media print{
+  @page{margin:0;size:auto;}
+  html,body{margin:0!important;padding:0!important;background:#F1ECDF!important;color:#15140F!important;-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
+  #builderApp,.preview-toolbar,.builder-app,.studio-nav,.console,.studio-hero{display:none!important;}
+  #previewShell{display:block!important;min-height:auto!important;background:#F1ECDF!important;padding:0!important;}
+  #guidePreview{display:block!important;width:100%!important;max-width:none!important;margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;overflow:visible!important;}
+  .guide-hero,.guide-section,.asset-package-section,.guide-footer{break-inside:avoid;page-break-inside:avoid;}
+  .guide-wrap,.guide-footer-inner{max-width:none!important;width:100%!important;padding-left:42px!important;padding-right:42px!important;}
+  .editable,[contenteditable]{outline:none!important;box-shadow:none!important;background:transparent!important;}
+  a{color:inherit!important;text-decoration:none!important;}
+  .asset-package-action{display:none!important;}
+  .asset-package-card{break-inside:avoid;page-break-inside:avoid;}
+}
+
 </style>
 
 <style id="md-text-only-legibility-patch">
@@ -2002,7 +2020,7 @@ body{
         </div>
         <div class="studio-nav-meta" id="previewModeText">Brand Restoration Platform</div>
       </div>
-      <div class="preview-actions"><span class="locked-badge">Published / locked</span><button class="builder-btn" id="backToEditorBtn">Back to editor</button><button class="builder-btn publish" id="lockFromPreviewBtn">Publish / Lock</button><button class="builder-btn" id="downloadAssetsBtn">Download Asset Package</button><button class="builder-btn primary" id="downloadHtmlBtn">Download HTML</button></div>
+      <div class="preview-actions"><span class="locked-badge">Published / locked</span><button class="builder-btn" id="backToEditorBtn">Back to editor</button><button class="builder-btn publish" id="lockFromPreviewBtn">Publish / Lock</button><button class="builder-btn" id="downloadAssetsBtn">Download Asset Package</button><button class="builder-btn" id="generatePdfBtn">Generate PDF</button><button class="builder-btn primary" id="downloadHtmlBtn">Download HTML</button></div>
     </div>
   </div>
 
@@ -2140,7 +2158,7 @@ body{
   }
   function wire(){
     $$('[data-field]').forEach(inp=>inp.addEventListener('input',e=>{state.fields[e.target.dataset.field]=e.target.value;state.published=false;renderAll()}));
-    $('#previewBtn').addEventListener('click',showPreview); $('#backToEditorBtn').addEventListener('click',backToEditor); $('#publishBtn').addEventListener('click',lockGuide); $('#lockFromPreviewBtn').addEventListener('click',lockGuide); $('#downloadHtmlBtn').addEventListener('click',downloadLockedHtml); $('#downloadAssetsBtn')?.addEventListener('click',downloadAssetPackage);
+    $('#previewBtn').addEventListener('click',showPreview); $('#backToEditorBtn').addEventListener('click',backToEditor); $('#publishBtn').addEventListener('click',lockGuide); $('#lockFromPreviewBtn').addEventListener('click',lockGuide); $('#downloadHtmlBtn').addEventListener('click',downloadLockedHtml); $('#downloadAssetsBtn')?.addEventListener('click',downloadAssetPackage); $('#generatePdfBtn')?.addEventListener('click',generatePdf);
     $('#uploadFilesBtn').addEventListener('click',()=>$('#assetInput').click()); $('#chooseFilesBtn').addEventListener('click',()=>$('#assetInput').click()); $('#assetInput').addEventListener('change',async e=>{await addFiles(e.target.files);e.target.value=''});
     const uz=$('#uploadZone'); ['dragenter','dragover'].forEach(ev=>uz.addEventListener(ev,e=>{e.preventDefault();uz.style.borderColor='rgba(31,61,46,.4)'})); ['dragleave','drop'].forEach(ev=>uz.addEventListener(ev,e=>{e.preventDefault();uz.style.borderColor='rgba(31,61,46,.18)'})); uz.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
     document.addEventListener('change',async e=>{
@@ -2252,7 +2270,7 @@ body{
     });
     const hero=assetById(state.slots.heroLogo);const heroImg=$('#pvHeroLogo');if(isImage(hero)){heroImg.src=hero.data;heroImg.classList.add('visible')}else{heroImg.removeAttribute('src');heroImg.classList.remove('visible')}
     applySlotBackgrounds();
-    setImgWrap('#pvPrimaryLogoWrap',assetById(state.slots.primaryLogo),'Primary Logo');setImgWrap('#pvIconMarkWrap',assetById(state.slots.iconMark),'Icon Mark');setImgWrap('#pvIconVariantWrap',assetById(state.slots.iconVariant),'Brand Variant');setImgWrap('#pvProfileImageWrap',assetById(state.slots.profileImage),'Profile Image');setImgWrap('#pvWebsiteHeaderWrap',assetById(state.slots.websiteHeader),'Digital Mockup');setImgWrap('#pvBusinessCardWrap',assetById(state.slots.businessCard),'Print Mockup');setImgWrap('#pvSocialPostWrap',assetById(state.slots.socialPost),'Social Post');forceGuideSlotPlacement();
+    setImgWrap('#pvPrimaryLogoWrap',assetById(state.slots.primaryLogo),'Primary Logo');setImgWrap('#pvIconMarkWrap',assetById(state.slots.iconMark),'Icon Mark');setImgWrap('#pvIconVariantWrap',assetById(state.slots.iconVariant),'Brand Variant');setImgWrap('#pvProfileImageWrap',assetById(state.slots.profileImage),'Profile Image');setImgWrap('#pvWebsiteHeaderWrap',assetById(state.slots.websiteHeader),'Digital Mockup');setImgWrap('#pvBusinessCardWrap',assetById(state.slots.businessCard),'Print Mockup');setImgWrap('#pvSocialPostWrap',assetById(state.slots.socialPost),'Social Post');forceGuideSlotPlacement();injectAssetPackage(document);
     renderAssetList();populateSelects();updateProgress();
   }
   function applySlotBackgrounds(){
@@ -2282,15 +2300,93 @@ body{
   function backToEditor(){$('#builderApp').scrollIntoView({behavior:'smooth',block:'start'})}
   function lockGuide(){state.published=true;renderAll();$('#previewShell').classList.add('active','locked');$('#previewShell').classList.remove('builder-mode');$$('[data-edit-preview],[data-guide-edit]').forEach(el=>el.setAttribute('contenteditable','false'));$('#previewModeText').textContent='Published guide · editing locked';$('#previewShell').scrollIntoView({behavior:'smooth',block:'start'});status('Guide is locked. Use Download HTML to save a static client-ready version.');}
   function packageItems(){
-    const items=state.assets.map(a=>({name:a.name||'asset',ext:a.ext||fileExt(a.name),data:a.data,type:a.type||'application/octet-stream'}));
-    if(state.fontData.display)items.push({name:state.fontData.display.name||'display-font',ext:fileExt(state.fontData.display.name),data:state.fontData.display.data,type:'font'});
-    if(state.fontData.body)items.push({name:state.fontData.body.name||'body-font',ext:fileExt(state.fontData.body.name),data:state.fontData.body.data,type:'font'});
+    const items=state.assets.map(a=>({id:a.id,name:a.name||'asset',ext:a.ext||fileExt(a.name),data:a.data,type:a.type||'application/octet-stream',slot:assignedSlotForAsset(a.id)}));
+    if(state.fontData.display)items.push({id:'display-font',name:state.fontData.display.name||'display-font',ext:fileExt(state.fontData.display.name),data:state.fontData.display.data,type:'font/display',slot:null});
+    if(state.fontData.body)items.push({id:'body-font',name:state.fontData.body.name||'body-font',ext:fileExt(state.fontData.body.name),data:state.fontData.body.data,type:'font/body',slot:null});
     return items;
+  }
+  function assignedSlotForAsset(assetId){
+    const entry=Object.entries(state.slots).find(([key,id])=>id===assetId);
+    if(!entry)return null;
+    const def=slotDefs.find(s=>s.key===entry[0]);
+    return def?{key:def.key,label:def.label,req:def.req}:null;
+  }
+  function smartAssetTitle(item,index){
+    const assigned=item.slot;
+    if(assigned)return assigned.label;
+    if(String(item.type||'').startsWith('font')||['otf','ttf','woff','woff2'].includes(String(item.ext||'').toLowerCase()))return index===0?'Display / Body Typeface':'Font File';
+    const ext=String(item.ext||'file').toUpperCase();
+    if(ext==='PDF')return 'Reference PDF';
+    return item.name||'Uploaded Asset';
+  }
+  function smartAssetUse(item){
+    if(item.slot){
+      const map={
+        heroLogo:'Use at the top of the guide, presentations, and client-facing share pages.',
+        primaryLogo:'Best for websites, proposals, invoices, decks, and any layout with enough horizontal space.',
+        iconMark:'Use for avatars, favicons, app icons, social profiles, and small placements.',
+        iconVariant:'Use as an alternate mark when the primary logo needs more contrast or a tighter layout.',
+        profileImage:'Ready for social profile images, account avatars, and circular crops.',
+        websiteHeader:'Use as a digital preview, homepage header reference, or web mockup.',
+        businessCard:'Use for printed pieces, cards, stationery, and vendor reference.',
+        socialPost:'Use for launch graphics, Instagram posts, announcements, and brand moments.'
+      };
+      return map[item.slot.key]||`Use for ${item.slot.req||'brand applications'}.`;
+    }
+    const ext=String(item.ext||'').toLowerCase();
+    if(['svg','eps','ai'].includes(ext))return 'Vector source file. Best for scaling, printing, signage, and vendor handoff.';
+    if(['png','webp'].includes(ext))return 'Transparent or web-ready image. Best for websites, decks, and quick digital use.';
+    if(['jpg','jpeg'].includes(ext))return 'Flat image file. Best for mockups, social posts, and reference previews.';
+    if(ext==='pdf')return 'Reference document. Best for sharing with vendors, printers, and partners.';
+    if(['otf','ttf','woff','woff2'].includes(ext))return 'Typeface file uploaded for preview only. Confirm licensing before sharing or redistributing.';
+    return 'Uploaded source file included from the brand sprint.';
+  }
+  function assetThumbHtml(item,index){
+    const dark=index%3===1?' dark':'';
+    if(isImage(item))return `<div class="asset-package-thumb${dark}"><img src="${item.data}" alt="${escapeHtml(item.name)}"></div>`;
+    const ext=escapeHtml(String(item.ext||'file').slice(0,5).toUpperCase());
+    return `<div class="asset-package-thumb"><span class="asset-package-file-icon">${ext}</span></div>`;
+  }
+  function assetPackageCardsHtml(items){
+    return items.map((item,index)=>{
+      const title=smartAssetTitle(item,index);
+      const use=smartAssetUse(item);
+      const ext=escapeHtml(String(item.ext||'file').toUpperCase());
+      const fileName=escapeHtml(item.name||`${title}.${item.ext||'file'}`);
+      const source=item.slot?`Assigned: ${item.slot.label}`:'Uploaded file';
+      return `<a class="asset-package-card" href="${item.data}" download="${fileName}" title="Download ${fileName}">
+        ${assetThumbHtml(item,index)}
+        <div class="asset-package-body">
+          <div class="asset-package-meta"><span class="asset-package-chip">${ext}</span><span class="asset-package-chip">${escapeHtml(source)}</span></div>
+          <h3>${escapeHtml(title)}</h3>
+          <p>${escapeHtml(use)}</p>
+          <div class="asset-package-download"><span>Download file</span><span>${ext}</span></div>
+        </div>
+      </a>`;
+    }).join('');
+  }
+  function packagePageHtml(items){
+    const title=`${state.fields.clientName||'Client'} · Downloadable Brand Assets`;
+    const cards=assetPackageCardsHtml(items);
+    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${escapeHtml(title)}</title><style>body{margin:0;background:#F1ECDF;color:#15140F;font-family:Arial,sans-serif;padding:42px}h1{font-family:Georgia,serif;font-size:clamp(40px,7vw,72px);line-height:.95;font-weight:400;letter-spacing:-.05em;max-width:780px}p{max-width:680px;color:rgba(21,20,15,.62);font-size:16px;line-height:1.55}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:30px}.asset-package-card{display:grid;grid-template-rows:160px auto;overflow:hidden;border:1px solid rgba(31,61,46,.13);border-radius:24px;background:#fff;color:#15140F;text-decoration:none;box-shadow:0 18px 48px rgba(31,61,46,.08)}.asset-package-thumb{height:160px;display:grid;place-items:center;padding:22px;background:linear-gradient(135deg,#F8F4EA,#EDE6D8);border-bottom:1px solid rgba(21,20,15,.08)}.asset-package-thumb.dark{background:linear-gradient(135deg,#1F3D2E,#14291F)}.asset-package-thumb img{max-width:100%;max-height:112px;object-fit:contain}.asset-package-file-icon{width:70px;height:70px;border-radius:22px;display:grid;place-items:center;background:#1F3D2E;color:#F1ECDF;font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase}.asset-package-body{display:grid;gap:12px;padding:20px}.asset-package-meta{display:flex;flex-wrap:wrap;gap:8px}.asset-package-chip{display:inline-flex;align-items:center;min-height:25px;padding:0 9px;border-radius:999px;border:1px solid rgba(31,61,46,.13);background:#F5F0E6;color:#1F3D2E;font-weight:900;font-size:8px;letter-spacing:.13em;text-transform:uppercase}.asset-package-card h3{margin:0;font-size:16px;line-height:1.15}.asset-package-card p{margin:0;font-size:13px;line-height:1.45}.asset-package-download{display:flex;justify-content:space-between;gap:12px;padding-top:10px;border-top:1px solid rgba(21,20,15,.07);color:#1F3D2E;font-weight:900;font-size:9px;letter-spacing:.13em;text-transform:uppercase}</style></head><body><h1>${escapeHtml(title)}</h1><p>Each file is embedded directly in this page. Click any card to download that specific asset. Use vector files for vendors and print, PNG/JPG files for quick digital use, and PDFs for reference.</p><div class="grid">${cards}</div></body></html>`;
   }
   function assetPackageSectionHtml(){
     const items=packageItems();
     if(!items.length)return '';
-    return `<section class="asset-package-section"><div class="guide-wrap"><div class="section-label">06 · Source Asset Package</div><h2 class="section-title">Uploaded files included for download.</h2><p class="section-copy">Every file uploaded during the sprint is embedded here so the client can save the source assets from the final guide.</p><div class="asset-package-grid">${items.map(item=>`<a class="asset-package-card" href="${item.data}" download="${escapeHtml(item.name)}"><span>${escapeHtml(item.name)}</span><b>${escapeHtml(item.ext||'file')}</b></a>`).join('')}</div></div></section>`;
+    const packageHtml=packagePageHtml(items);
+    const packageHref='data:text/html;charset=utf-8,'+encodeURIComponent(packageHtml);
+    return `<section class="asset-package-section"><div class="guide-wrap">
+      <div class="asset-package-head">
+        <div class="asset-package-intro">
+          <div class="section-label">06 · Files</div>
+          <h2 class="section-title">Everything you need, ready to use.</h2>
+          <p class="section-copy">Each uploaded asset is previewed below with a plain-English note on when to use it. Click any card to download that file, or save the asset index as a simple handoff page.</p>
+        </div>
+        <a class="asset-package-action" href="${packageHref}" download="${safeName(state.fields.clientName||'client')}-asset-package.html">Download asset index</a>
+      </div>
+      <div class="asset-package-grid">${assetPackageCardsHtml(items)}</div>
+      <div class="asset-package-note"><strong>Quick guide:</strong> SVG files are best for scaling and vendors. PNG files are best for transparent web use. JPG files are best for mockups and previews. PDF files are best for reference and sharing.</div>
+    </div></section>`;
   }
   function injectAssetPackage(clone){
     const guide=clone.querySelector('#guidePreview');
@@ -2299,7 +2395,8 @@ body{
     if(existing)existing.remove();
     const html=assetPackageSectionHtml();
     if(!html)return;
-    const wrap=clone.createElement('div');
+    const doc=clone.createElement?clone:(clone.ownerDocument||document);
+    const wrap=doc.createElement('div');
     wrap.innerHTML=html;
     const section=wrap.firstElementChild;
     const footer=guide.querySelector('.guide-footer');
@@ -2308,14 +2405,37 @@ body{
   function downloadAssetPackage(){
     const items=packageItems();
     if(!items.length){alert('No uploaded files to package yet.');return;}
-    const title=`${state.fields.clientName||'Client'} · Uploaded Asset Package`;
-    const html=`<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${escapeHtml(title)}</title><style>body{margin:0;background:#F1ECDF;color:#15140F;font-family:Arial,sans-serif;padding:42px}h1{font-family:Georgia,serif;font-size:48px;font-weight:400;letter-spacing:-.04em}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;margin-top:28px}.card{display:flex;justify-content:space-between;gap:16px;padding:16px 18px;border:1px solid rgba(31,61,46,.14);border-radius:18px;background:#fff;color:#15140F;text-decoration:none}.card span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}.card b{text-transform:uppercase;color:#1F3D2E;font-size:11px}</style></head><body><h1>${escapeHtml(title)}</h1><p>All files uploaded into the Moving Day builder are embedded below for client download.</p><div class="grid">${items.map(item=>`<a class="card" href="${item.data}" download="${escapeHtml(item.name)}"><span>${escapeHtml(item.name)}</span><b>${escapeHtml(item.ext||'file')}</b></a>`).join('')}</div></body></html>`;
+    const html=packagePageHtml(items);
     const blob=new Blob([html],{type:'text/html'});
     const a=document.createElement('a');
     a.href=URL.createObjectURL(blob);
     a.download=safeName(state.fields.clientName||'client')+'-asset-package.html';
     document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
   }
+
+  function prepareLiveGuideForExport(){
+    const guide=$('#guidePreview');
+    if(!guide)return;
+    const existing=guide.querySelector('.asset-package-section');
+    if(existing)return;
+    const html=assetPackageSectionHtml();
+    if(!html)return;
+    const wrap=document.createElement('div');
+    wrap.innerHTML=html;
+    const section=wrap.firstElementChild;
+    const footer=guide.querySelector('.guide-footer');
+    if(footer)guide.insertBefore(section,footer);else guide.appendChild(section);
+  }
+  function generatePdf(){
+    prepareLiveGuideForExport();
+    $('#previewShell')?.classList.add('active');
+    $('#previewShell')?.classList.add('locked');
+    $('#previewShell')?.classList.remove('builder-mode');
+    document.querySelectorAll('[contenteditable]').forEach(el=>el.setAttribute('contenteditable','false'));
+    status('PDF preview opened. In the print dialog, choose Save as PDF.');
+    setTimeout(()=>window.print(),250);
+  }
+
   function cloneForDownload(){const clone=document.documentElement.cloneNode(true);injectAssetPackage(clone);clone.querySelector('#builderApp')?.remove();const toolbar=clone.querySelector('.preview-toolbar'); if(toolbar) toolbar.remove();clone.querySelector('#previewShell')?.classList.add('active','locked');clone.querySelector('#previewShell')?.classList.remove('builder-mode');clone.querySelectorAll('[contenteditable]').forEach(el=>el.removeAttribute('contenteditable'));clone.querySelectorAll('[data-preview-slot]').forEach(el=>el.removeAttribute('data-preview-slot'));return '<!DOCTYPE html>\n'+clone.outerHTML}
   function downloadLockedHtml(){const name=safeName(state.fields.clientName||'brand-guide')+'.html';const blob=new Blob([cloneForDownload()],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
   init();
