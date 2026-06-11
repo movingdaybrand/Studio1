@@ -7,6 +7,7 @@ export default function handler(req, res) {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Moving Day AI Test</title>
+
   <style>
     :root {
       --cream: #F1ECDF;
@@ -16,13 +17,18 @@ export default function handler(req, res) {
       --sage: #C4D9CB;
       --ink: #15140F;
       --muted: #6B6558;
-      --rule: rgba(21,20,15,.12);
+      --rule: rgba(21, 20, 15, .12);
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top right, rgba(196,217,203,.28), transparent 30%),
+      background:
+        radial-gradient(circle at top right, rgba(196,217,203,.28), transparent 30%),
         linear-gradient(145deg, #07110c, #10241a);
       color: var(--cream);
       min-height: 100vh;
@@ -30,7 +36,7 @@ export default function handler(req, res) {
     }
 
     .wrap {
-      max-width: 1100px;
+      max-width: 1180px;
       margin: 0 auto;
     }
 
@@ -40,6 +46,16 @@ export default function handler(req, res) {
       padding: 44px;
       background: rgba(251,248,240,.06);
       margin-bottom: 24px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.18);
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--sage);
+      margin-bottom: 14px;
     }
 
     h1 {
@@ -53,7 +69,7 @@ export default function handler(req, res) {
 
     p {
       color: rgba(241,236,223,.72);
-      max-width: 640px;
+      max-width: 720px;
     }
 
     .panel {
@@ -62,6 +78,7 @@ export default function handler(req, res) {
       border-radius: 28px;
       padding: 26px;
       box-shadow: 0 24px 70px rgba(0,0,0,.22);
+      margin-bottom: 24px;
     }
 
     .upload {
@@ -70,6 +87,12 @@ export default function handler(req, res) {
       padding: 24px;
       background: #F6F2E8;
       margin-bottom: 18px;
+    }
+
+    .upload strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--forest);
     }
 
     input {
@@ -83,13 +106,19 @@ export default function handler(req, res) {
       padding: 13px 18px;
       background: var(--forest);
       color: var(--cream);
-      font-weight: 800;
+      font-weight: 900;
       cursor: pointer;
+      letter-spacing: -.01em;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
     }
 
     button:disabled {
       opacity: .5;
       cursor: not-allowed;
+      transform: none;
     }
 
     .results {
@@ -102,21 +131,55 @@ export default function handler(req, res) {
       border: 1px solid var(--rule);
       border-radius: 20px;
       background: white;
-      padding: 18px;
+      padding: 20px;
+      overflow: hidden;
     }
 
     .card h3 {
-      margin: 0 0 8px;
+      margin: 0 0 12px;
       font-size: 12px;
       letter-spacing: .16em;
       text-transform: uppercase;
       color: var(--forest);
     }
 
+    .card p {
+      color: var(--ink);
+    }
+
     .small {
-      color: var(--muted);
+      color: var(--muted) !important;
       font-size: 13px;
       line-height: 1.5;
+      max-width: 900px;
+    }
+
+    .big-name {
+      font-family: Georgia, serif;
+      font-size: 30px;
+      line-height: 1;
+      letter-spacing: -.04em;
+      color: var(--ink);
+      margin: 2px 0 12px;
+    }
+
+    .chip-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(31,61,46,.14);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 11px;
+      font-weight: 800;
+      color: var(--forest);
+      background: #F6F2E8;
     }
 
     .swatches {
@@ -127,7 +190,7 @@ export default function handler(req, res) {
     }
 
     .swatch {
-      width: 120px;
+      width: 132px;
       border-radius: 14px;
       overflow: hidden;
       border: 1px solid var(--rule);
@@ -136,14 +199,57 @@ export default function handler(req, res) {
 
     .swatch i {
       display: block;
-      height: 60px;
+      height: 70px;
     }
 
     .swatch span {
       display: block;
-      padding: 8px;
+      padding: 9px;
       font-size: 11px;
-      font-weight: 800;
+      font-weight: 900;
+      line-height: 1.35;
+    }
+
+    .asset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 12px;
+    }
+
+    .asset-card {
+      border: 1px solid rgba(21,20,15,.1);
+      background: #FBF8F0;
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .asset-card strong {
+      display: block;
+      color: var(--forest);
+      margin-bottom: 6px;
+    }
+
+    .quality {
+      display: inline-flex;
+      margin-top: 8px;
+      border-radius: 999px;
+      padding: 5px 8px;
+      background: var(--forest);
+      color: var(--cream);
+      font-size: 10px;
+      font-weight: 900;
+    }
+
+    .download-card {
+      border: 1px solid rgba(21,20,15,.1);
+      background: #FBF8F0;
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 10px;
+    }
+
+    .download-card strong {
+      color: var(--ink);
     }
 
     pre {
@@ -155,6 +261,28 @@ export default function handler(req, res) {
       padding: 16px;
       font-size: 12px;
       overflow: auto;
+      max-height: 620px;
+    }
+
+    .error {
+      background: #fff3ef;
+      border-color: rgba(156,60,60,.24);
+    }
+
+    .error h3 {
+      color: #9C3C3C;
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding: 18px;
+      }
+
+      .hero,
+      .panel {
+        padding: 24px;
+        border-radius: 22px;
+      }
     }
   </style>
 </head>
@@ -162,6 +290,7 @@ export default function handler(req, res) {
 <body>
   <main class="wrap">
     <section class="hero">
+      <div class="eyebrow">Moving Day Studio · AI Test</div>
       <h1>AI Brand Analysis Test</h1>
       <p>This page is separate from your real builder. Test the AI response here first. Nothing touches your main guide.</p>
     </section>
@@ -220,7 +349,7 @@ export default function handler(req, res) {
         renderResults(data);
       } catch (error) {
         results.innerHTML = \`
-          <div class="card">
+          <div class="card error">
             <h3>Error</h3>
             <p class="small">\${escapeHtml(error.message)}</p>
           </div>
@@ -241,59 +370,103 @@ export default function handler(req, res) {
     }
 
     function renderResults(data) {
-      const palette = data.palette || [];
-      const assignments = data.assetAssignments || [];
-      const copy = data.copySuggestions || {};
-      const preflight = data.preflight || [];
+      const guide = data.guide || {};
+      const selectedAssets = data.selectedAssets || {};
+      const colors = data.colors || data.palette || [];
+      const typography = data.typography || {};
+      const usage = data.usage || {};
+      const downloadCards = data.downloadCards || [];
+      const assetReport = data.assetReport || [];
+
+      const selectedAssetRows = Object.entries(selectedAssets)
+        .filter(([key, value]) => value)
+        .map(([key, value]) => ({
+          slot: key,
+          file: value
+        }));
 
       results.innerHTML = \`
         <div class="card">
           <h3>Brand Identity</h3>
-          <p><strong>\${escapeHtml(data.brand?.name || "Unknown brand")}</strong></p>
-          <p class="small">Industry: \${escapeHtml(data.brand?.industry || "Not detected")}</p>
-          <p class="small">Tone: \${(data.brand?.tone || []).map(escapeHtml).join(", ")}</p>
+          <div class="big-name">\${escapeHtml(guide.clientName || "Unknown brand")}</div>
+          <p class="small"><strong>Category:</strong> \${escapeHtml(guide.category || "Not detected")}</p>
+          <p class="small">\${escapeHtml(guide.description || "")}</p>
+          <div class="chip-row">
+            <span class="chip">Assets: \${escapeHtml(guide.assetCount || assetReport.length || 0)}</span>
+            <span class="chip">Source: AI Analysis</span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Selected Assets</h3>
+          <div class="asset-grid">
+            \${selectedAssetRows.map(item => \`
+              <div class="asset-card">
+                <strong>\${escapeHtml(prettyLabel(item.slot))}</strong>
+                <p class="small">\${escapeHtml(item.file)}</p>
+              </div>
+            \`).join("") || \`<p class="small">No selected assets returned.</p>\`}
+          </div>
         </div>
 
         <div class="card">
           <h3>Palette</h3>
           <div class="swatches">
-            \${palette.map(color => \`
-              <div class="swatch">
-                <i style="background:\${escapeHtml(color.hex)}"></i>
-                <span>\${escapeHtml(color.name)}<br>\${escapeHtml(color.hex)}</span>
-              </div>
-            \`).join("")}
+            \${colors.map(color => {
+              const hex = color.hex || color.value || color;
+              const name = color.name || "Color";
+              return \`
+                <div class="swatch">
+                  <i style="background:\${escapeHtml(hex)}"></i>
+                  <span>\${escapeHtml(name)}<br>\${escapeHtml(hex)}</span>
+                </div>
+              \`;
+            }).join("") || \`<p class="small">No colors returned.</p>\`}
           </div>
         </div>
 
         <div class="card">
-          <h3>Asset Placement</h3>
-          \${assignments.map(item => \`
-            <p class="small">
-              <strong>\${escapeHtml(item.slot)}</strong> → \${escapeHtml(item.fileId)}
-              <br>\${escapeHtml(item.reason || "")}
-            </p>
-          \`).join("") || \`<p class="small">No placement recommendations returned.</p>\`}
+          <h3>Typography</h3>
+          <p class="small"><strong>Display:</strong> \${escapeHtml(typography.displayFont || "Not detected")}</p>
+          <p class="small"><strong>Body:</strong> \${escapeHtml(typography.bodyFont || "Not detected")}</p>
         </div>
 
         <div class="card">
-          <h3>Copy Suggestions</h3>
-          \${Object.entries(copy).map(([key, value]) => \`
-            <p class="small">
-              <strong>\${escapeHtml(key)}</strong><br>
-              \${escapeHtml(value.suggested || "")}
-            </p>
-          \`).join("") || \`<p class="small">No copy suggestions returned.</p>\`}
+          <h3>Usage Guidance</h3>
+          <p class="small"><strong>Do</strong></p>
+          \${(usage.do || []).map(item => \`<p class="small">✓ \${escapeHtml(item)}</p>\`).join("") || \`<p class="small">No usage guidance returned.</p>\`}
+
+          <p class="small" style="margin-top:12px;"><strong>Don’t</strong></p>
+          \${(usage.dont || []).map(item => \`<p class="small">✕ \${escapeHtml(item)}</p>\`).join("") || \`<p class="small">No restrictions returned.</p>\`}
         </div>
 
         <div class="card">
-          <h3>Preflight</h3>
-          \${preflight.map(item => \`
-            <p class="small">
-              <strong>\${escapeHtml(item.severity || "note")}</strong>: \${escapeHtml(item.issue || "")}
-              <br>\${escapeHtml(item.suggestedFix || "")}
-            </p>
-          \`).join("") || \`<p class="small">No issues found.</p>\`}
+          <h3>Download Cards</h3>
+          \${downloadCards.map(card => \`
+            <div class="download-card">
+              <strong>\${escapeHtml(card.title || "Download Card")}</strong>
+              <p class="small">\${escapeHtml(card.description || "")}</p>
+              <div class="chip-row">
+                \${(card.formats || []).map(format => \`<span class="chip">\${escapeHtml(format)}</span>\`).join("")}
+              </div>
+              <p class="small"><strong>Files:</strong> \${(card.files || []).map(escapeHtml).join(", ")}</p>
+            </div>
+          \`).join("") || \`<p class="small">No download cards returned.</p>\`}
+        </div>
+
+        <div class="card">
+          <h3>Asset Report</h3>
+          <div class="asset-grid">
+            \${assetReport.map(asset => \`
+              <div class="asset-card">
+                <strong>\${escapeHtml(asset.name || "Asset")}</strong>
+                <p class="small"><strong>Role:</strong> \${escapeHtml(asset.assetRole || "Unknown")}</p>
+                <p class="small"><strong>Placement:</strong> \${escapeHtml(asset.placement || "Not assigned")}</p>
+                <p class="small">\${escapeHtml(asset.reason || "")}</p>
+                <span class="quality">Quality \${escapeHtml(asset.qualityScore || "N/A")} / 10</span>
+              </div>
+            \`).join("") || \`<p class="small">No asset report returned.</p>\`}
+          </div>
         </div>
 
         <div class="card">
@@ -301,6 +474,12 @@ export default function handler(req, res) {
           <pre>\${escapeHtml(JSON.stringify(data, null, 2))}</pre>
         </div>
       \`;
+    }
+
+    function prettyLabel(value) {
+      return String(value || "")
+        .replace(/([A-Z])/g, " $1")
+        .replace(/^./, char => char.toUpperCase());
     }
 
     function escapeHtml(value) {
