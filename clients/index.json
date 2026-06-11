@@ -1,0 +1,11 @@
+[
+  {
+    "name": "Demo Client",
+    "slug": "demo-client",
+    "category": "Brand Identity",
+    "status": "Example",
+    "description": "A sample client guide showing how Moving Day Studio organizes logos, colors, typography, mockups, and downloads into one polished brand system.",
+    "thumbnail": "",
+    "url": "/guide.html?client=demo-client"
+  }
+]
