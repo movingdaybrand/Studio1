@@ -665,6 +665,378 @@ body{background:#06100b;}
 }
 @media(max-width:520px){.md-brand-logo{width:118px}.preview-brand-logo{width:118px}.hero-brand-logo{width:132px}}
 
+
+
+/* ─────────────────────────────────────────────
+   MOVINGDAYBRAND.COM STYLE PASS
+   Cleaner cream/dark rhythm, wider spacing, flatter editorial SaaS feel
+───────────────────────────────────────────── */
+body{
+  background:var(--cream)!important;
+  color:var(--ink)!important;
+}
+.builder-app{
+  min-height:auto!important;
+  background:
+    radial-gradient(circle at 86% 4%,rgba(196,217,203,.20),transparent 28%),
+    linear-gradient(180deg,#07110c 0%,#0d1e16 100%)!important;
+  border-bottom:1px solid rgba(241,236,223,.10)!important;
+  overflow:visible!important;
+}
+.builder-app:before{
+  opacity:.08!important;
+  background-size:92px 92px!important;
+  mask-image:linear-gradient(to bottom,black 0%,rgba(0,0,0,.55) 52%,transparent 100%)!important;
+}
+.builder-shell{
+  max-width:1220px!important;
+  padding:32px 34px 74px!important;
+}
+.studio-nav{
+  position:sticky!important;
+  top:18px!important;
+  z-index:40!important;
+  margin-bottom:42px!important;
+  padding:10px 12px 10px 18px!important;
+  border:1px solid rgba(241,236,223,.14)!important;
+  border-radius:999px!important;
+  background:rgba(7,17,12,.62)!important;
+  backdrop-filter:blur(18px)!important;
+  box-shadow:0 18px 48px rgba(0,0,0,.18)!important;
+}
+.md-brand-logo{width:152px!important;height:auto!important;display:block!important;}
+.studio-nav-meta{
+  color:rgba(241,236,223,.56)!important;
+  letter-spacing:.18em!important;
+}
+.builder-btn{
+  min-height:42px!important;
+  padding:0 18px!important;
+  border-radius:999px!important;
+  font-weight:900!important;
+  letter-spacing:.12em!important;
+  box-shadow:none!important;
+}
+.builder-btn.primary{
+  background:var(--cream)!important;
+  color:var(--forest)!important;
+  border-color:var(--cream)!important;
+}
+.builder-btn.publish{
+  background:var(--sage)!important;
+  color:var(--forest)!important;
+  border-color:var(--sage)!important;
+}
+.builder-btn.danger{
+  color:rgba(241,236,223,.66)!important;
+  border-color:rgba(241,236,223,.16)!important;
+}
+.studio-hero{
+  grid-template-columns:minmax(0,1fr) 340px!important;
+  gap:48px!important;
+  padding:0 0 62px!important;
+  margin:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  border-radius:0!important;
+  align-items:end!important;
+}
+.hero-brand-lockup{
+  margin-bottom:30px!important;
+  gap:16px!important;
+}
+.hero-brand-logo{width:190px!important;opacity:.96!important;}
+.hero-brand-line{
+  color:rgba(241,236,223,.55)!important;
+  font:900 10px var(--sans)!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+}
+.kicker{
+  display:inline-flex!important;
+  align-items:center!important;
+  gap:10px!important;
+  color:var(--sage)!important;
+  font-size:11px!important;
+  letter-spacing:.20em!important;
+  margin-bottom:18px!important;
+}
+.kicker:before{
+  content:"";
+  width:7px;
+  height:7px;
+  border-radius:999px;
+  background:var(--sage);
+  box-shadow:0 0 0 6px rgba(196,217,203,.10);
+}
+.studio-hero h1{
+  max-width:850px!important;
+  font-size:clamp(58px,7.7vw,118px)!important;
+  line-height:.86!important;
+  letter-spacing:-.06em!important;
+  margin-bottom:22px!important;
+}
+.studio-hero h1 em{
+  color:var(--sage)!important;
+}
+.builder-copy{
+  max-width:650px!important;
+  color:rgba(241,236,223,.72)!important;
+  font-size:17px!important;
+  line-height:1.72!important;
+}
+.studio-action-row{
+  margin-top:34px!important;
+  gap:12px!important;
+}
+.builder-status{
+  max-width:650px!important;
+  margin-top:18px!important;
+  color:rgba(241,236,223,.48)!important;
+}
+.readiness{
+  min-height:330px!important;
+  padding:26px!important;
+  border-radius:28px!important;
+  background:rgba(251,248,240,.055)!important;
+  border:1px solid rgba(241,236,223,.13)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 24px 70px rgba(0,0,0,.22)!important;
+}
+.readiness strong{
+  font-size:38px!important;
+  letter-spacing:-.035em!important;
+}
+.steps div{
+  padding:15px 0!important;
+}
+.console{
+  max-width:1220px!important;
+  margin:0 auto!important;
+  padding:34px!important;
+  border-radius:38px!important;
+  background:linear-gradient(180deg,#F7F3EA 0%,#EEE8DA 100%)!important;
+  border:1px solid rgba(255,255,255,.76)!important;
+  box-shadow:0 32px 80px rgba(0,0,0,.20),inset 0 1px 0 rgba(255,255,255,.78)!important;
+}
+.console-top{
+  padding-bottom:26px!important;
+  margin-bottom:28px!important;
+  border-bottom:1px solid rgba(31,61,46,.10)!important;
+}
+.console-title,
+.card h3,
+.slot-topline h4,
+.color b,
+.typography-card h3,
+.palette-card h3{
+  color:var(--forest)!important;
+  letter-spacing:.22em!important;
+}
+.console-sub{
+  color:rgba(21,20,15,.58)!important;
+  font-size:14px!important;
+  line-height:1.65!important;
+}
+.console-pill{
+  background:rgba(31,61,46,.07)!important;
+  border-color:rgba(31,61,46,.12)!important;
+  color:var(--forest)!important;
+}
+.workflow-strip{
+  border:1px solid rgba(31,61,46,.10)!important;
+  background:rgba(251,248,240,.66)!important;
+  border-radius:26px!important;
+  padding:8px!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.78)!important;
+}
+.workflow-step{
+  border-radius:20px!important;
+  border-color:transparent!important;
+  background:transparent!important;
+}
+.workflow-step.active{
+  background:var(--forest)!important;
+  color:var(--cream)!important;
+  box-shadow:0 14px 34px rgba(31,61,46,.18)!important;
+}
+.workflow-step.active small{color:rgba(241,236,223,.58)!important;}
+.grid{
+  gap:22px!important;
+}
+.card,
+.typography-card,
+.palette-card{
+  background:rgba(251,248,240,.82)!important;
+  border:1px solid rgba(31,61,46,.10)!important;
+  box-shadow:0 16px 44px rgba(31,61,46,.055),inset 0 1px 0 rgba(255,255,255,.82)!important;
+  border-radius:30px!important;
+  padding:28px!important;
+}
+.card-head{
+  margin-bottom:22px!important;
+}
+.note,
+.typography-card .note,
+.palette-card .note{
+  color:rgba(21,20,15,.48)!important;
+}
+.field input,
+.field textarea,
+.field select,
+.typography-card .field input[data-field="displayFont"],
+.typography-card .field input[data-field="bodyFont"]{
+  background:#F4F0E6!important;
+  border:1px solid rgba(31,61,46,.12)!important;
+  border-radius:18px!important;
+  min-height:52px!important;
+  padding:14px 16px!important;
+}
+.field textarea{min-height:110px!important;}
+.upload-zone{
+  min-height:218px!important;
+  border-radius:26px!important;
+  padding:28px!important;
+  background:
+    radial-gradient(circle at 92% 4%,rgba(196,217,203,.24),transparent 28%),
+    linear-gradient(135deg,rgba(255,255,255,.88),rgba(241,236,223,.70))!important;
+  border:1.5px dashed rgba(31,61,46,.22)!important;
+}
+.upload-zone strong{
+  color:var(--forest)!important;
+  font-size:12px!important;
+  letter-spacing:.16em!important;
+}
+.upload-zone p{
+  max-width:440px!important;
+  font-size:13px!important;
+  line-height:1.65!important;
+}
+#slotGrid.slot-grid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:20px!important;
+}
+.slot-card{
+  min-height:380px!important;
+  border-radius:30px!important;
+  background:#FBF8F0!important;
+  box-shadow:0 18px 52px rgba(31,61,46,.075),inset 0 1px 0 rgba(255,255,255,.80)!important;
+}
+.slot-topline{
+  padding:20px 22px 12px!important;
+}
+.slot-topline span{
+  color:rgba(31,61,46,.28)!important;
+  font-size:30px!important;
+}
+.slot-thumb{
+  margin:0 22px 16px!important;
+  height:150px!important;
+  border-radius:22px!important;
+  background:radial-gradient(circle at 78% 6%,rgba(196,217,203,.34),transparent 32%),linear-gradient(135deg,#1F3D2E,#14291F)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08)!important;
+}
+.slot-thumb img{
+  padding:20px!important;
+  object-fit:contain!important;
+}
+.slot-spec,
+.slot-actions,
+.slot-bg-control{
+  margin-left:22px!important;
+  margin-right:22px!important;
+}
+.slot-spec small{
+  font-size:12px!important;
+  line-height:1.55!important;
+}
+.slot-card select,
+.slot-bg-control select{
+  height:46px!important;
+  border-radius:16px!important;
+  background:#F4F0E6!important;
+  border-color:rgba(31,61,46,.12)!important;
+}
+.slot-file-btn{
+  height:44px!important;
+  border-radius:999px!important;
+}
+.palette-card{
+  overflow:hidden!important;
+}
+#colorGrid.colors{
+  grid-template-columns:repeat(5,minmax(0,1fr))!important;
+  gap:14px!important;
+}
+.color{
+  min-width:0!important;
+  overflow:hidden!important;
+  border-radius:26px!important;
+  padding:0!important;
+  gap:0!important;
+  background:#FBF8F0!important;
+  border:1px solid rgba(31,61,46,.11)!important;
+  box-shadow:0 16px 44px rgba(31,61,46,.055)!important;
+}
+.color input[type="color"]{
+  width:100%!important;
+  height:150px!important;
+  border:0!important;
+  border-radius:0!important;
+  padding:0!important;
+  cursor:pointer!important;
+}
+.color b{
+  display:block!important;
+  padding:18px 16px 4px!important;
+  font-size:11px!important;
+  line-height:1.15!important;
+  white-space:nowrap!important;
+}
+.color span{
+  display:block!important;
+  min-height:44px!important;
+  padding:0 16px 14px!important;
+  color:rgba(21,20,15,.54)!important;
+  font-size:13px!important;
+}
+.color input[type="text"]{
+  width:calc(100% - 28px)!important;
+  margin:0 14px 14px!important;
+  border-radius:16px!important;
+  background:#F4F0E6!important;
+  border:1px solid rgba(31,61,46,.11)!important;
+  height:42px!important;
+  text-align:center!important;
+}
+.preview-shell{
+  background:var(--cream)!important;
+}
+.preview-toolbar{
+  background:rgba(241,236,223,.92)!important;
+}
+#guidePreview{
+  border-radius:0!important;
+  max-width:none!important;
+  margin:0!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+@media(max-width:1120px){
+  .studio-nav{top:0!important;border-radius:24px!important;align-items:flex-start!important;flex-direction:column!important;}
+  .studio-hero{grid-template-columns:1fr!important;padding-bottom:42px!important;}
+  #slotGrid.slot-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  #colorGrid.colors{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+  .console{padding:24px!important;border-radius:30px!important;}
+}
+@media(max-width:720px){
+  .builder-shell{padding:18px 16px 46px!important;}
+  .studio-hero h1{font-size:clamp(48px,14vw,76px)!important;}
+  #slotGrid.slot-grid,#colorGrid.colors{grid-template-columns:1fr!important;}
+  .card,.typography-card,.palette-card{padding:20px!important;border-radius:24px!important;}
+  .color input[type="color"]{height:120px!important;}
+}
+
 </style>
 </head>
 <body>
@@ -920,9 +1292,9 @@ body{background:#06100b;}
 </svg></span>
           <span class="hero-brand-line">Brand restoration platform</span>
         </div>
-        <div class="kicker">Brand guide operating system</div>
-        <h1>It's Moving Day<br>for your <em>brand.</em></h1>
-        <p class="builder-copy">Fill in client details, set the palette, upload assets, assign them to guide slots, and preview the full brand guide live on this same page. Publishing locks the guide view.</p>
+        <div class="kicker">The Brand Cleanup Sprint · Seven days · One price</div>
+        <h1>It’s Moving Day<br>for your <em>business.</em></h1>
+        <p class="builder-copy">A seven-day sprint workspace for cleaning up a client’s visual identity, organizing their files, and delivering a polished brand guide they can actually use.</p>
         <div class="studio-action-row">
           <button class="builder-btn primary" id="previewBtn">Preview Guide</button>
           <button class="builder-btn" id="uploadFilesBtn">Upload Assets</button>
@@ -939,7 +1311,7 @@ body{background:#06100b;}
     </section>
 
     <section class="console" id="editorPanel">
-      <div class="console-top"><div><div class="console-title">Guide Control Center</div><p class="console-sub">This editor controls the live guide preview below. Direct edits in the preview sync back to these fields until the guide is published.</p></div><div class="console-pill">Same-page live preview</div></div>
+      <div class="console-top"><div><div class="console-title">Sprint Control Center</div><p class="console-sub">Move from messy files to a cleaner, client-ready brand system. Details, assets, colors, typography, and preview all stay connected.</p></div><div class="console-pill">Live sprint workspace</div></div>
       <div class="workflow-strip" aria-label="Builder workflow">
         <div class="workflow-step active"><b>01</b><span>Details</span><small>Name, category, story</small></div>
         <div class="workflow-step"><b>02</b><span>Assets</span><small>Upload and assign files</small></div>
