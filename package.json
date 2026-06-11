@@ -1,24 +1,6 @@
 {
-  "name": "moving-day-studio",
-  "version": "1.1.0",
-  "private": true,
-  "description": "Moving Day Studio static brand guide builder with local smart sort and optional AI analysis.",
   "scripts": {
-    "build": "mkdir -p dist && cp index.html dist/index.html",
-    "dev": "python3 -m http.server 3000",
-    "start": "python3 -m http.server 3000"
+    "build": "mkdir -p dist && cp index.html dist/index.html && cp guide.html dist/guide.html && cp -R clients dist/clients 2>/dev/null || true && cp -R shared dist/shared 2>/dev/null || true"
   },
-  "keywords": [
-    "moving-day",
-    "brand-guide",
-    "static",
-    "netlify",
-    "vercel",
-    "ai"
-  ],
-  "license": "UNLICENSED"
-}{
-  "scripts": {
-    "build": "rm -rf dist && mkdir -p dist && cp index.html dist/index.html && cp guide.html dist/guide.html && cp -R clients dist/clients && cp -R shared dist/shared || true"
-  }
+  "dependencies": {}
 }
