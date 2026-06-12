@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Moving Day AI Test</title>
+
+  <!-- ZIP EXPORT -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    :root {
+      --cream: #F1ECDF;
+      --paper: #FBF8F0;
+      --forest: #1F3D2E;
+      --forest-deep: #14291F;
+      --sage: #C4D9CB;
+      --ink: #15140F;
+      --muted: #6B6558;
+      --rule: rgba(21, 20, 15, .12);
+      --red: #FC5A5C;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top right, rgba(196,217,203,.28), transparent 30%),
+        linear-gradient(145deg, #07110c, #10241a);
+      color: var(--cream);
+      min-height: 100vh;
+      padding: 32px;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+    }
+
+    .hero {
+      border: 1px solid rgba(241,236,223,.14);
+      border-radius: 32px;
+      padding: 44px;
+      background: rgba(251,248,240,.06);
+      margin-bottom: 24px;
+    }
+
+    h1 {
+      font-family: Georgia, serif;
+      font-size: clamp(48px, 7vw, 86px);
+      line-height: .92;
+      font-weight: 400;
+      letter-spacing: -.05em;
+      margin: 0 0 16px;
+    }
+
+    p {
+      color: rgba(241,236,223,.72);
+      max-width: 720px;
+    }
+
+    .panel {
+      background: var(--paper);
+      color: var(--ink);
+      border-radius: 28px;
+      padding: 26px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.22);
+      margin-bottom: 22px;
+    }
+
+    .panel-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--rule);
+      padding-bottom: 18px;
+      margin-bottom: 18px;
+    }
+
+    .eyebrow {
+      margin: 0 0 5px;
+      color: var(--forest);
+      font-size: 11px;
+      font-weight: 950;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+    }
+
+    .section-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .upload {
+      border: 1px dashed rgba(31,61,46,.28);
+      border-radius: 22px;
+      padding: 24px;
+      background: #F6F2E8;
+      margin-bottom: 18px;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    input,
+    select {
+      width: 100%;
+      margin-top: 8px;
+      border: 1px solid rgba(21,20,15,.14);
+      border-radius: 14px;
+      background: #fffdf6;
+      color: var(--ink);
+      padding: 12px;
+      font: inherit;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 850;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 13px 18px;
+      background: var(--forest);
+      color: var(--cream);
+      font-weight: 900;
+      cursor: pointer;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      font-size: 11px;
+    }
+
+    button:disabled {
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    .ghost-btn {
+      background: #fffdf6;
+      color: var(--forest);
+      border: 1px solid rgba(31,61,46,.18);
+    }
+
+    .danger-btn {
+      background: #241d19;
+      color: #fffdf6;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .results {
+      display: grid;
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .card {
+      border: 1px solid var(--rule);
+      border-radius: 20px;
+      background: white;
+      padding: 18px;
+    }
+
+    .card h3 {
+      margin: 0 0 8px;
+      font-size: 12px;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--forest);
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .swatches {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .swatch {
+      width: 132px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid var(--rule);
+      background: #fff;
+    }
+
+    .swatch i {
+      display: block;
+      height: 60px;
+    }
+
+    .swatch span {
+      display: block;
+      padding: 8px;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    pre {
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #10241a;
+      color: var(--cream);
+      border-radius: 16px;
+      padding: 16px;
+      font-size: 12px;
+      overflow: auto;
+    }
+
+    /* BRAND FILE ORGANIZER */
+
+    .asset-organizer-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .asset-card {
+      background: #f7f3e9;
+      border: 1px solid rgba(23, 24, 20, 0.14);
+      border-radius: 18px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .asset-card.is-ignored {
+      opacity: 0.42;
+    }
+
+    .asset-preview {
+      height: 118px;
+      border-radius: 12px;
+      background:
+        linear-gradient(45deg, #eee 25%, transparent 25%),
+        linear-gradient(-45deg, #eee 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #eee 75%),
+        linear-gradient(-45deg, transparent 75%, #eee 75%);
+      background-size: 18px 18px;
+      background-position: 0 0, 0 9px, 9px -9px, -9px 0px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .asset-preview img {
+      max-width: 84%;
+      max-height: 84%;
+      object-fit: contain;
+    }
+
+    .asset-meta h4 {
+      margin: 0;
+      font-size: 14px;
+      letter-spacing: -0.02em;
+    }
+
+    .asset-meta p {
+      margin: 4px 0 0;
+      font-size: 11px;
+      color: var(--muted);
+      word-break: break-word;
+    }
+
+    .asset-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: auto;
+    }
+
+    .asset-actions button,
+    .pill-btn {
+      border: 1px solid rgba(23, 24, 20, 0.16);
+      background: #fffdf6;
+      color: var(--forest);
+      border-radius: 999px;
+      padding: 8px 11px;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+
+    .pill-btn.primary {
+      background: #172017;
+      color: #fffdf6;
+    }
+
+    .pill-btn.warn {
+      background: #e9ded0;
+      color: #241d19;
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.42);
+      z-index: 999;
+      display: grid;
+      place-items: center;
+      padding: 18px;
+    }
+
+    .modal-backdrop[hidden] {
+      display: none;
+    }
+
+    .asset-modal {
+      width: min(580px, calc(100vw - 32px));
+      background: #fffdf6;
+      color: var(--ink);
+      border-radius: 24px;
+      border: 1px solid rgba(23, 24, 20, 0.18);
+      padding: 22px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.22);
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .modal-head h3 {
+      margin: 0;
+      font-family: Georgia, serif;
+      font-size: 28px;
+      letter-spacing: -.04em;
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      border: 1px solid rgba(23, 24, 20, 0.16);
+      background: #f7f3e9;
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 22px;
+      line-height: 1;
+      padding: 0;
+    }
+
+    .field-label {
+      display: block;
+      margin: 14px 0 6px;
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+
+    .recolor-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .color-chip-btn {
+      border-radius: 999px;
+      border: 1px solid rgba(23, 24, 20, 0.16);
+      padding: 8px 12px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+      font-weight: 900;
+      font-size: 11px;
+    }
+
+    .modal-actions {
+      margin-top: 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 960px) {
+      .asset-organizer-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .input-row {
+        grid-template-columns: 1fr;
+      }
+
+      .panel-head {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 560px) {
+      body {
+        padding: 16px;
+      }
+
+      .hero,
+      .panel {
+        padding: 22px;
+      }
+
+      .asset-organizer-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <h1>AI Brand Analysis Test</h1>
+      <p>This page is separate from your real builder. Test the AI response, asset recoloring, file renaming, and final package export here first. Nothing touches your main guide.</p>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">AI REVIEW LAB</p>
+          <p class="section-note">Upload files, analyze the brand system, then organize the final assets into a clean package.</p>
+        </div>
+      </div>
+
+      <div class="upload">
+        <strong>Upload brand files</strong>
+        <p class="small">Try logos, screenshots, PNGs, JPGs, WEBPs, or SVGs. Transparent PNGs and SVGs work best for recoloring.</p>
+
+        <div class="input-row">
+          <div>
+            <label for="brandName">Brand name</label>
+            <input id="brandName" type="text" placeholder="Example: Eye Candy" />
+          </div>
+
+          <div>
+            <label for="files">Brand files</label>
+            <input id="files" type="file" multiple accept=".png,.jpg,.jpeg,.webp,.svg" />
+          </div>
+        </div>
+      </div>
+
+      <div class="button-row">
+        <button id="analyzeBtn">Analyze Brand</button>
+        <button class="ghost-btn" id="applyAiAssignmentsBtn" disabled>Apply AI Placements</button>
+      </div>
+
+      <div id="status" class="status"></div>
+      <div id="results" class="results"></div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <div>
+          <p class="eyebrow">BRAND FILE ORGANIZER</p>
+          <p class="section-note">Review, recolor, rename, ignore, and package the strongest detected assets.</p>
+        </div>
+
+        <div class="button-row" style="margin-top:0;">
+          <button class="ghost-btn" id="addDefaultVariantsBtn">Create Black / White / Primary Variants</button>
+          <button id="buildPackageBtn">Build Final ZIP</button>
+        </div>
+      </div>
+
+      <div id="assetOrganizerGrid" class="asset-organizer-grid"></div>
+    </section>
+  </main>
+
+  <div class="modal-backdrop" id="assetEditModal" hidden>
+    <div class="asset-modal">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">EDIT ASSET</p>
+          <h3 id="modalAssetTitle">Primary Logo</h3>
+        </div>
+        <button class="icon-btn" id="closeAssetModal">×</button>
+      </div>
+
+      <label class="field-label">Final file name</label>
+      <input id="assetRenameInput" type="text" />
+
+      <label class="field-label">Asset role</label>
+      <select id="assetRoleInput">
+        <option value="PrimaryLogo">Primary Logo</option>
+        <option value="SecondaryLogo">Secondary Logo</option>
+        <option value="IconMark">Icon Mark</option>
+        <option value="WebsiteHeader">Website Header</option>
+        <option value="SocialAvatar">Social Avatar</option>
+        <option value="BusinessCard">Business Card</option>
+        <option value="PrintAsset">Print Asset</option>
+        <option value="ExtraAsset">Extra Asset</option>
+      </select>
+
+      <label class="field-label">Create recolored variant</label>
+      <div class="recolor-row">
+        <button class="color-chip-btn" data-color="#000000" data-color-name="Black">Black</button>
+        <button class="color-chip-btn" data-color="#ffffff" data-color-name="White">White</button>
+        <button class="color-chip-btn" id="primaryColorBtn" data-color="#FC5A5C" data-color-name="Primary">Primary</button>
+        <input id="customColorInput" type="color" value="#FC5A5C" />
+        <button class="color-chip-btn" id="customColorBtn">Custom</button>
+      </div>
+
+      <div class="modal-actions">
+        <button class="pill-btn" id="downloadAssetBtn">Download Asset</button>
+        <button class="pill-btn primary" id="saveAssetChangesBtn">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const filesInput = document.getElementById("files");
+    const brandNameInput = document.getElementById("brandName");
+    const analyzeBtn = document.getElementById("analyzeBtn");
+    const applyAiAssignmentsBtn = document.getElementById("applyAiAssignmentsBtn");
+    const results = document.getElementById("results");
+    const statusEl = document.getElementById("status");
+
+    let lastAiData = null;
+    let uploadedFiles = [];
+    let organizerAssets = [];
+    let activeAssetId = null;
+
+    const BrandPackage = (() => {
+      function cleanName(value = "") {
+        return String(value || "Brand")
+          .replace(/\.[^/.]+$/, "")
+          .replace(/[^a-zA-Z0-9]+/g, "_")
+          .replace(/^_+|_+$/g, "") || "Brand";
+      }
+
+      function titleCaseFromRole(role = "") {
+        return String(role)
+          .replace(/([A-Z])/g, " $1")
+          .replace(/^./, s => s.toUpperCase())
+          .trim();
+      }
+
+      function guessRole(fileName = "") {
+        const name = fileName.toLowerCase();
+
+        if (name.includes("favicon")) return "IconMark";
+        if (name.includes("icon") || name.includes("mark") || name.includes("symbol")) return "IconMark";
+        if (name.includes("secondary") || name.includes("alternate") || name.includes("alt")) return "SecondaryLogo";
+        if (name.includes("header") || name.includes("hero")) return "WebsiteHeader";
+        if (name.includes("social") || name.includes("avatar") || name.includes("profile")) return "SocialAvatar";
+        if (name.includes("card")) return "BusinessCard";
+        if (name.includes("print")) return "PrintAsset";
+
+        return "PrimaryLogo";
+      }
+
+      function folderForRole(role) {
+        const map = {
+          PrimaryLogo: "01_Logos/Primary",
+          SecondaryLogo: "01_Logos/Secondary",
+          IconMark: "01_Logos/Icon",
+          WebsiteHeader: "04_Social_Assets",
+          SocialAvatar: "04_Social_Assets",
+          BusinessCard: "04_Social_Assets",
+          PrintAsset: "04_Social_Assets",
+          ExtraAsset: "06_Extra_Assets"
+        };
+
+        return map[role] || "06_Extra_Assets";
+      }
+
+      function labelForRole(role) {
+        const map = {
+          PrimaryLogo: "Primary Logo",
+          SecondaryLogo: "Secondary Logo",
+          IconMark: "Icon Mark",
+          WebsiteHeader: "Website Header",
+          SocialAvatar: "Social Avatar",
+          BusinessCard: "Business Card",
+          PrintAsset: "Print Asset",
+          ExtraAsset: "Extra Asset"
+        };
+
+        return map[role] || titleCaseFromRole(role);
+      }
+
+      function extensionFromFileName(fileName = "") {
+        return fileName.includes(".")
+          ? fileName.split(".").pop().toLowerCase()
+          : "png";
+      }
+
+      function finalFileName({ brandName, role, colorName = "Original", extension = "png" }) {
+        return `${cleanName(brandName)}_${role}_${cleanName(colorName)}.${extension}`;
+      }
+
+      function makeAssetRecord(file, index, brandName = "Brand") {
+        const role = guessRole(file.name);
+        const extension = extensionFromFileName(file.name);
+        const uploadId = `asset_${index + 1}`;
+
+        return {
+          id: crypto.randomUUID(),
+          uploadId,
+          originalName: file.name,
+          file,
+          url: URL.createObjectURL(file),
+          brandName: cleanName(brandName),
+          role,
+          label: labelForRole(role),
+          extension,
+          folder: folderForRole(role),
+          colorName: "Original",
+          finalName: finalFileName({
+            brandName,
+            role,
+            colorName: "Original",
+            extension
+          }),
+          ignored: false,
+          isVariant: false
+        };
+      }
+
+      function blobToDataUrl(blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      async function recolorImage(asset, hexColor, colorName = "Custom") {
+        const img = new Image();
+        img.crossOrigin = "anonymous";
+        img.src = asset.url;
+
+        await new Promise((resolve, reject) => {
+          img.onload = resolve;
+          img.onerror = reject;
+        });
+
+        const canvas = document.createElement("canvas");
+        canvas.width = img.naturalWidth || 1200;
+        canvas.height = img.naturalHeight || 1200;
+
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+
+        const r = parseInt(hexColor.slice(1, 3), 16);
+        const g = parseInt(hexColor.slice(3, 5), 16);
+        const b = parseInt(hexColor.slice(5, 7), 16);
+
+        for (let i = 0; i < data.length; i += 4) {
+          const alpha = data[i + 3];
+
+          if (alpha > 12) {
+            data[i] = r;
+            data[i + 1] = g;
+            data[i + 2] = b;
+          }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+
+        const blob = await new Promise((resolve, reject) => {
+          canvas.toBlob(result => {
+            if (result) resolve(result);
+            else reject(new Error("Could not create recolored image."));
+          }, "image/png");
+        });
+
+        return {
+          ...asset,
+          id: crypto.randomUUID(),
+          file: blob,
+          url: URL.createObjectURL(blob),
+          colorName,
+          extension: "png",
+          finalName: finalFileName({
+            brandName: asset.brandName,
+            role: asset.role,
+            colorName,
+            extension: "png"
+          }),
+          isVariant: true,
+          originalName: asset.originalName
+        };
+      }
+
+      function downloadBlob(blob, filename) {
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+      }
+
+      function makeReadme(brandName, assets) {
+        const activeAssets = assets.filter(asset => !asset.ignored);
+
+        return `${brandName} Brand Identity Package
+
+Generated by Moving Day.
+
+Folder contents:
+${activeAssets.map(asset => `- ${asset.folder}/${asset.finalName}`).join("\n")}
+
+Recommended usage:
+- Primary logos: website headers, documents, brand guide covers.
+- Secondary logos: alternate placements and supporting graphics.
+- Icon marks: profile images, favicons, small-use applications.
+- Social assets: profile, social, and digital preview use.
+
+Notes:
+- Files labeled Original are preserved from upload.
+- Files labeled Black, White, Primary, or Custom are generated recolor variants.
+- Review all AI recommendations before client delivery.
+`;
+      }
+
+      function makePaletteText(data) {
+        const palette = data?.palette || [];
+        if (!palette.length) return "No AI palette returned.";
+
+        return palette.map(color => `${color.name || "Color"}: ${color.hex}`).join("\n");
+      }
+
+      function makePaletteCss(data) {
+        const palette = data?.palette || [];
+        if (!palette.length) return ":root {}\n";
+
+        const lines = palette.map((color, index) => {
+          const name = cleanName(color.name || `color_${index + 1}`).toLowerCase();
+          return `  --${name}: ${color.hex};`;
+        });
+
+        return `:root {\n${lines.join("\n")}\n}\n`;
+      }
+
+      return {
+        cleanName,
+        makeAssetRecord,
+        recolorImage,
+        downloadBlob,
+        makeReadme,
+        makePaletteText,
+        makePaletteCss,
+        labelForRole,
+        folderForRole,
+        finalFileName
+      };
+    })();
+
+    filesInput.addEventListener("change", () => {
+      uploadedFiles = Array.from(filesInput.files || []);
+      organizerAssets = uploadedFiles.map((file, index) =>
+        BrandPackage.makeAssetRecord(file, index, getCurrentBrandName())
+      );
+
+      renderAssetOrganizer();
+      statusEl.textContent = uploadedFiles.length
+        ? `${uploadedFiles.length} file(s) loaded into the organizer.`
+        : "";
+    });
+
+    brandNameInput.addEventListener("input", () => {
+      organizerAssets = organizerAssets.map(asset => {
+        const brandName = getCurrentBrandName();
+
+        return {
+          ...asset,
+          brandName: BrandPackage.cleanName(brandName),
+          finalName: BrandPackage.finalFileName({
+            brandName,
+            role: asset.role,
+            colorName: asset.colorName,
+            extension: asset.extension
+          })
+        };
+      });
+
+      renderAssetOrganizer();
+    });
+
+    analyzeBtn.addEventListener("click", async () => {
+      const files = Array.from(filesInput.files || []);
+
+      if (!files.length) {
+        alert("Upload at least one brand file first.");
+        return;
+      }
+
+      analyzeBtn.disabled = true;
+      analyzeBtn.textContent = "Analyzing...";
+      applyAiAssignmentsBtn.disabled = true;
+      statusEl.textContent = "Sending files to AI analyzer...";
+      results.innerHTML = "";
+
+      try {
+        const assets = await Promise.all(files.map(fileToDataUrl));
+
+        const response = await fetch("/api/analyze-brand-files", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            assets: assets.map((asset, index) => ({
+              id: `asset_${index + 1}`,
+              name: files[index].name,
+              type: files[index].type,
+              dataUrl: asset
+            }))
+          })
+        });
+
+        if (!response.ok) {
+          throw new Error(await response.text());
+        }
+
+        const data = await response.json();
+        lastAiData = data;
+
+        if (!brandNameInput.value.trim() && data.brand?.name) {
+          brandNameInput.value = data.brand.name;
+          syncBrandNameToAssets();
+        }
+
+        updatePrimaryColorFromAi(data);
+        renderResults(data);
+
+        applyAiAssignmentsBtn.disabled = false;
+        statusEl.textContent = "AI analysis complete. Review results, then apply placements or package files.";
+      } catch (error) {
+        results.innerHTML = `
+          <div class="card">
+            <h3>Error</h3>
+            <p class="small">${escapeHtml(error.message)}</p>
+          </div>
+        `;
+        statusEl.textContent = "Analyzer failed. Check your API route or backend logs.";
+      } finally {
+        analyzeBtn.disabled = false;
+        analyzeBtn.textContent = "Analyze Brand";
+      }
+    });
+
+    applyAiAssignmentsBtn.addEventListener("click", () => {
+      applyAiAssignments();
+    });
+
+    document.getElementById("buildPackageBtn").addEventListener("click", buildFinalPackage);
+    document.getElementById("addDefaultVariantsBtn").addEventListener("click", createDefaultVariants);
+
+    document.addEventListener("click", async event => {
+      const button = event.target.closest("button");
+      if (!button) return;
+
+      const card = event.target.closest(".asset-card");
+      const action = button.dataset.action;
+
+      if (card && action) {
+        const assetId = card.dataset.assetId;
+
+        if (action === "rename" || action === "recolor" || action === "apply") {
+          openAssetModal(assetId);
+        }
+
+        if (action === "download") {
+          downloadAsset(assetId);
+        }
+
+        if (action === "ignore") {
+          organizerAssets = organizerAssets.map(asset =>
+            asset.id === assetId ? { ...asset, ignored: !asset.ignored } : asset
+          );
+          renderAssetOrganizer();
+        }
+
+        if (action === "delete") {
+          organizerAssets = organizerAssets.filter(asset => asset.id !== assetId);
+          renderAssetOrganizer();
+        }
+      }
+
+      if (button.id === "closeAssetModal") closeAssetModal();
+      if (button.id === "saveAssetChangesBtn") saveAssetChanges();
+
+      if (button.classList.contains("color-chip-btn") && button.dataset.color) {
+        await createRecolorVariant(activeAssetId, button.dataset.color, button.dataset.colorName || "Custom");
+      }
+
+      if (button.id === "customColorBtn") {
+        const color = document.getElementById("customColorInput").value;
+        await createRecolorVariant(activeAssetId, color, color.replace("#", "").toUpperCase());
+      }
+
+      if (button.id === "downloadAssetBtn" && activeAssetId) {
+        downloadAsset(activeAssetId);
+      }
+    });
+
+    function getCurrentBrandName() {
+      return brandNameInput.value.trim() || lastAiData?.brand?.name || "Brand";
+    }
+
+    function syncBrandNameToAssets() {
+      const brandName = getCurrentBrandName();
+
+      organizerAssets = organizerAssets.map(asset => ({
+        ...asset,
+        brandName: BrandPackage.cleanName(brandName),
+        finalName: BrandPackage.finalFileName({
+          brandName,
+          role: asset.role,
+          colorName: asset.colorName,
+          extension: asset.extension
+        })
+      }));
+
+      renderAssetOrganizer();
+    }
+
+    function updatePrimaryColorFromAi(data) {
+      const primary =
+        data?.palette?.find(color => /primary|main|brand/i.test(color.name || ""))?.hex ||
+        data?.palette?.[0]?.hex ||
+        "#FC5A5C";
+
+      document.getElementById("primaryColorBtn").dataset.color = primary;
+      document.getElementById("customColorInput").value = normalizeHex(primary);
+    }
+
+    function normalizeHex(hex) {
+      if (!hex) return "#FC5A5C";
+      if (hex.startsWith("#") && hex.length === 7) return hex;
+      return "#FC5A5C";
+    }
+
+    function fileToDataUrl(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function renderResults(data) {
+      const palette = data.palette || [];
+      const assignments = data.assetAssignments || [];
+      const copy = data.copySuggestions || {};
+      const preflight = data.preflight || [];
+
+      results.innerHTML = `
+        <div class="card">
+          <h3>Brand Identity</h3>
+          <p><strong>${escapeHtml(data.brand?.name || "Unknown brand")}</strong></p>
+          <p class="small">Industry: ${escapeHtml(data.brand?.industry || "Not detected")}</p>
+          <p class="small">Tone: ${(data.brand?.tone || []).map(escapeHtml).join(", ")}</p>
+        </div>
+
+        <div class="card">
+          <h3>Palette</h3>
+          <div class="swatches">
+            ${palette.map(color => `
+              <div class="swatch">
+                <i style="background:${escapeHtml(color.hex)}"></i>
+                <span>${escapeHtml(color.name)}<br>${escapeHtml(color.hex)}</span>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>Asset Placement</h3>
+          ${assignments.map(item => `
+            <p class="small">
+              <strong>${escapeHtml(item.slot)}</strong> → ${escapeHtml(item.fileId)}
+              <br>${escapeHtml(item.reason || "")}
+            </p>
+          `).join("") || `<p class="small">No placement recommendations returned.</p>`}
+        </div>
+
+        <div class="card">
+          <h3>Copy Suggestions</h3>
+          ${Object.entries(copy).map(([key, value]) => `
+            <p class="small">
+              <strong>${escapeHtml(key)}</strong><br>
+              ${escapeHtml(value?.suggested || value || "")}
+            </p>
+          `).join("") || `<p class="small">No copy suggestions returned.</p>`}
+        </div>
+
+        <div class="card">
+          <h3>Preflight</h3>
+          ${preflight.map(item => `
+            <p class="small">
+              <strong>${escapeHtml(item.severity || "note")}</strong>: ${escapeHtml(item.issue || "")}
+              <br>${escapeHtml(item.suggestedFix || "")}
+            </p>
+          `).join("") || `<p class="small">No issues found.</p>`}
+        </div>
+
+        <div class="card">
+          <h3>Raw JSON</h3>
+          <pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre>
+        </div>
+      `;
+    }
+
+    function renderAssetOrganizer() {
+      const grid = document.getElementById("assetOrganizerGrid");
+      if (!grid) return;
+
+      if (!organizerAssets.length) {
+        grid.innerHTML = `
+          <div class="card" style="grid-column:1/-1;">
+            <h3>No Assets Yet</h3>
+            <p class="small">Upload files above and they will appear here for renaming, recoloring, and packaging.</p>
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = "";
+
+      organizerAssets.forEach(asset => {
+        const card = document.createElement("article");
+        card.className = `asset-card ${asset.ignored ? "is-ignored" : ""}`;
+        card.dataset.assetId = asset.id;
+
+        card.innerHTML = `
+          <div class="asset-preview">
+            <img src="${asset.url}" alt="${escapeHtml(asset.label)}">
+          </div>
+
+          <div class="asset-meta">
+            <h4>${escapeHtml(asset.label)} ${asset.isVariant ? "· Variant" : ""}</h4>
+            <p><strong>${escapeHtml(asset.finalName)}</strong></p>
+            <p>${escapeHtml(asset.folder)}</p>
+            <p>Source: ${escapeHtml(asset.originalName)}</p>
+          </div>
+
+          <div class="asset-actions">
+            <button data-action="apply">Edit</button>
+            <button data-action="recolor">Recolor</button>
+            <button data-action="download">Download</button>
+            <button data-action="ignore">${asset.ignored ? "Restore" : "Ignore"}</button>
+            <button data-action="delete">Delete</button>
+          </div>
+        `;
+
+        grid.appendChild(card);
+      });
+    }
+
+    function openAssetModal(assetId) {
+      const asset = organizerAssets.find(item => item.id === assetId);
+      if (!asset) return;
+
+      activeAssetId = assetId;
+
+      document.getElementById("modalAssetTitle").textContent = asset.label;
+      document.getElementById("assetRenameInput").value = asset.finalName;
+      document.getElementById("assetRoleInput").value = asset.role;
+      document.getElementById("assetEditModal").hidden = false;
+    }
+
+    function closeAssetModal() {
+      document.getElementById("assetEditModal").hidden = true;
+      activeAssetId = null;
+    }
+
+    function saveAssetChanges() {
+      if (!activeAssetId) return;
+
+      const renameInput = document.getElementById("assetRenameInput");
+      const roleInput = document.getElementById("assetRoleInput");
+
+      organizerAssets = organizerAssets.map(asset => {
+        if (asset.id !== activeAssetId) return asset;
+
+        return {
+          ...asset,
+          role: roleInput.value,
+          label: BrandPackage.labelForRole(roleInput.value),
+          folder: BrandPackage.folderForRole(roleInput.value),
+          finalName: renameInput.value.trim() || asset.finalName
+        };
+      });
+
+      renderAssetOrganizer();
+      closeAssetModal();
+    }
+
+    async function createRecolorVariant(assetId, hexColor, colorName) {
+      if (!assetId) return;
+
+      const asset = organizerAssets.find(item => item.id === assetId);
+      if (!asset) return;
+
+      try {
+        statusEl.textContent = `Creating ${colorName} variant...`;
+        const recolored = await BrandPackage.recolorImage(asset, hexColor, colorName);
+
+        organizerAssets = [...organizerAssets, recolored];
+        renderAssetOrganizer();
+        closeAssetModal();
+        statusEl.textContent = `${colorName} variant created.`;
+      } catch (error) {
+        alert("This file could not be recolored. Try a transparent PNG, JPG, WEBP, or screenshot. Some SVGs may need to be exported as PNG first.");
+        console.error(error);
+        statusEl.textContent = "Recolor failed.";
+      }
+    }
+
+    async function createDefaultVariants() {
+      const baseAssets = organizerAssets.filter(asset => !asset.ignored && !asset.isVariant);
+
+      if (!baseAssets.length) {
+        alert("No original assets to recolor yet.");
+        return;
+      }
+
+      const primaryColor =
+        document.getElementById("primaryColorBtn").dataset.color ||
+        "#FC5A5C";
+
+      const variants = [
+        { hex: "#000000", name: "Black" },
+        { hex: "#ffffff", name: "White" },
+        { hex: primaryColor, name: "Primary" }
+      ];
+
+      statusEl.textContent = "Creating default color variants...";
+
+      for (const asset of baseAssets) {
+        for (const variant of variants) {
+          try {
+            const recolored = await BrandPackage.recolorImage(asset, variant.hex, variant.name);
+            organizerAssets.push(recolored);
+          } catch (error) {
+            console.warn("Variant failed:", asset.originalName, variant.name, error);
+          }
+        }
+      }
+
+      renderAssetOrganizer();
+      statusEl.textContent = "Default color variants created.";
+    }
+
+    function downloadAsset(assetId) {
+      const asset = organizerAssets.find(item => item.id === assetId);
+      if (!asset) return;
+
+      BrandPackage.downloadBlob(asset.file, asset.finalName);
+    }
+
+    function applyAiAssignments() {
+      if (!lastAiData?.assetAssignments?.length) {
+        alert("No AI asset assignments found.");
+        return;
+      }
+
+      const roleMap = {
+        hero: "PrimaryLogo",
+        lead: "PrimaryLogo",
+        primary: "PrimaryLogo",
+        logo: "PrimaryLogo",
+        secondary: "SecondaryLogo",
+        icon: "IconMark",
+        mark: "IconMark",
+        favicon: "IconMark",
+        profile: "SocialAvatar",
+        social: "SocialAvatar",
+        website: "WebsiteHeader",
+        header: "WebsiteHeader",
+        card: "BusinessCard",
+        print: "PrintAsset"
+      };
+
+      organizerAssets = organizerAssets.map(asset => {
+        const assignment = lastAiData.assetAssignments.find(item => item.fileId === asset.uploadId);
+        if (!assignment) return asset;
+
+        const slot = String(assignment.slot || "").toLowerCase();
+        const matchedKey = Object.keys(roleMap).find(key => slot.includes(key));
+        const role = matchedKey ? roleMap[matchedKey] : asset.role;
+
+        return {
+          ...asset,
+          role,
+          label: BrandPackage.labelForRole(role),
+          folder: BrandPackage.folderForRole(role),
+          finalName: BrandPackage.finalFileName({
+            brandName: getCurrentBrandName(),
+            role,
+            colorName: asset.colorName,
+            extension: asset.extension
+          })
+        };
+      });
+
+      renderAssetOrganizer();
+      statusEl.textContent = "AI placements applied to organizer roles.";
+    }
+
+    async function buildFinalPackage() {
+      const activeAssets = organizerAssets.filter(asset => !asset.ignored);
+
+      if (!activeAssets.length) {
+        alert("No active assets to package yet.");
+        return;
+      }
+
+      if (!window.JSZip) {
+        alert("JSZip did not load. Check your internet connection or CDN script.");
+        return;
+      }
+
+      const brandName = BrandPackage.cleanName(getCurrentBrandName());
+      const zip = new JSZip();
+      const root = zip.folder(`${brandName}_Brand_Identity_Package`);
+
+      for (const asset of activeAssets) {
+        const folder = root.folder(asset.folder);
+        folder.file(asset.finalName, asset.file);
+      }
+
+      root.folder("02_Color_System").file(`${brandName}_Color_Palette.txt`, BrandPackage.makePaletteText(lastAiData));
+      root.folder("02_Color_System").file(`${brandName}_Color_Palette.css`, BrandPackage.makePaletteCss(lastAiData));
+
+      root.folder("03_Typography").file(
+        `${brandName}_Typography_Notes.txt`,
+        makeTypographyNotes(lastAiData)
+      );
+
+      root.folder("05_Brand_Guide").file(
+        `${brandName}_AI_Analysis.json`,
+        JSON.stringify(lastAiData || {}, null, 2)
+      );
+
+      root.file("README.txt", BrandPackage.makeReadme(brandName, activeAssets));
+
+      statusEl.textContent = "Building ZIP package...";
+
+      const blob = await zip.generateAsync({ type: "blob" });
+      BrandPackage.downloadBlob(blob, `${brandName}_Brand_Identity_Package.zip`);
+
+      statusEl.textContent = "ZIP package downloaded.";
+    }
+
+    function makeTypographyNotes(data) {
+      const typography = data?.typography || data?.fonts || data?.type || null;
+
+      if (!typography) {
+        return `Typography notes
+
+No typography recommendation was returned by the AI analyzer.
+
+Recommended next step:
+- Detect display font.
+- Detect body/UI font.
+- Include usage notes for headings, body copy, captions, and labels.
+`;
+      }
+
+      return `Typography notes
+
+${JSON.stringify(typography, null, 2)}
+`;
+    }
+
+    function escapeHtml(value) {
+      return String(value || "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    renderAssetOrganizer();
+  </script>
+</body>
+</html>
