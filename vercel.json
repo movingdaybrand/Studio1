@@ -4,17 +4,10 @@
   "outputDirectory": "dist",
   "installCommand": "npm install",
   "rewrites": [
-    {
-      "source": "/api/analyze-brand-files",
-      "destination": "/api/analyze-brand-files.js"
-    },
-    {
-      "source": "/api/smart-fill",
-      "destination": "/api/smart-fill.js"
-    },
-    {
-      "source": "/api/render-brand-guide",
-      "destination": "/api/render-brand-guide.js"
-    }
+    { "source": "/api/analyze-brand-files", "destination": "/api/analyze-brand-files.js" },
+    { "source": "/api/smart-fill", "destination": "/api/smart-fill.js" },
+    { "source": "/api/render-brand-guide", "destination": "/api/render-brand-guide.js" },
+    { "source": "/ai-test", "destination": "/ai-test.html" },
+    { "source": "/guide", "destination": "/guide.html" }
   ]
 }
