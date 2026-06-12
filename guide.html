@@ -1915,7 +1915,7 @@ body.preview-open { overflow:hidden; }
     shell.setAttribute('aria-hidden', 'false');
     document.body.classList.add('preview-open');
 
-    const previewUrl = `/guide.html?builder=1&preview=1&slug=${encodeURIComponent(slug)}`;
+   const previewUrl = `/client-guide.html?slug=${encodeURIComponent(slug)}`;
     if (!frame.src || !frame.src.includes('/guide.html')) {
       frame.src = previewUrl;
       frame.onload = () => setTimeout(sendLivePreviewUpdate, 150);
