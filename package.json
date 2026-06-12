@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "mkdir -p dist && cp index.html dist/index.html && cp guide.html dist/guide.html && cp -R clients dist/clients 2>/dev/null || true && cp -R shared dist/shared 2>/dev/null || true"
+    "build": "mkdir -p dist && cp index.html dist/index.html && cp guide.html dist/guide.html && cp ai-test.html dist/ai-test.html && cp -R clients dist/clients 2>/dev/null || true && cp -R shared dist/shared 2>/dev/null || true"
   },
   "dependencies": {}
 }
