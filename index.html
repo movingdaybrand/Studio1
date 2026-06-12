@@ -2236,6 +2236,53 @@ body{
 #duplicateRecolorBtn:disabled{opacity:.46;cursor:not-allowed;transform:none!important}
 @media(max-width:760px){.asset-recolor-grid{grid-template-columns:1fr}.asset-recolor-head{display:grid}.asset-recolor-badge{width:max-content}}
 </style>
+
+<style id="sectionToolStyles">
+.section-tool-card{grid-column:1/-1!important;position:relative;overflow:hidden}
+.section-tool-card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 92% 0%,rgba(196,217,203,.22),transparent 34%);pointer-events:none}
+.section-tool-card>*{position:relative;z-index:1}
+.section-tool-shell{display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);gap:18px;align-items:start}
+.section-tool-add{display:grid;gap:12px;background:rgba(251,248,240,.72);border:1px solid rgba(31,61,46,.10);border-radius:20px;padding:16px}
+.section-tool-add label{display:grid;gap:7px;font-size:8px;text-transform:uppercase;letter-spacing:.16em;color:rgba(21,20,15,.48);font-weight:900}
+.section-tool-add select{width:100%;border:1px solid rgba(31,61,46,.12);background:#F8F4EA;color:#15140F;border-radius:14px;min-height:44px;padding:0 12px;font-size:12px;font-weight:800;outline:none}
+.section-tool-add p{font-size:12px;line-height:1.45;color:rgba(21,20,15,.56);margin:0}
+.section-tool-list{display:grid;gap:10px}
+.section-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;background:rgba(255,255,255,.72);border:1px solid rgba(31,61,46,.09);border-radius:18px;padding:12px;box-shadow:0 8px 24px rgba(31,61,46,.045)}
+.section-row.is-hidden{opacity:.58;background:rgba(241,236,223,.62)}
+.section-row-main{display:grid;gap:4px;min-width:0}
+.section-row-title{display:flex;align-items:center;gap:8px;min-width:0;color:#244834;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.section-row-title span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.section-row-index{display:inline-flex;align-items:center;justify-content:center;min-width:27px;height:27px;border-radius:999px;background:rgba(31,61,46,.10);color:#244834;font-size:9px;font-weight:900;letter-spacing:.08em}
+.section-row-sub{font-size:11px;line-height:1.35;color:rgba(21,20,15,.48);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.section-row-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+.section-tool-btn{border:1px solid rgba(31,61,46,.12);background:#F8F4EA;color:#244834;border-radius:999px;min-height:32px;padding:0 10px;font-size:8px;font-weight:900;letter-spacing:.11em;text-transform:uppercase;cursor:pointer;transition:.18s}
+.section-tool-btn:hover{background:#244834;color:#F1ECDF;transform:translateY(-1px)}
+.section-tool-btn.subtle{background:rgba(255,255,255,.64)}
+.section-tool-btn.danger:hover{background:#7E352F;color:#F1ECDF}
+.section-color-input{width:34px;height:34px;border:1px solid rgba(31,61,46,.14);border-radius:999px;background:transparent;overflow:hidden;padding:3px;cursor:pointer}
+.is-section-hidden{display:none!important}
+.guide-section[data-section-tool-id]{transition:background .18s ease,color .18s ease}
+.dynamic-section-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;margin-top:34px}
+.dynamic-card{min-height:220px;background:var(--paper);border:1px solid var(--rule);border-radius:24px;padding:30px;display:grid;align-content:end;gap:12px;position:relative;overflow:hidden}
+.dynamic-card.dark{background:var(--c1);color:var(--c4)}
+.dynamic-card.accent{background:var(--c3)}
+.dynamic-card b{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:inherit;opacity:.62}
+.dynamic-card p{font-size:14px;color:currentColor;opacity:.68;line-height:1.45;margin:0}
+.before-after-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:34px;border:1px solid var(--rule);background:var(--rule)}
+.before-after-card{min-height:300px;background:var(--paper);display:grid;place-items:center;padding:34px;position:relative;text-align:center}
+.before-after-card.after{background:var(--c1);color:var(--c4)}
+.before-after-card strong{font-family:var(--preview-display,var(--display));font-size:clamp(34px,5vw,58px);font-weight:400;letter-spacing:-.04em}
+.before-after-card span{position:absolute;left:20px;bottom:18px;font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;opacity:.48}
+.text-image-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:2px;margin-top:34px}
+.text-image-copy,.text-image-visual{min-height:300px;border:1px solid var(--rule);background:var(--paper);border-radius:26px;padding:34px}
+.text-image-copy{display:grid;align-content:end;gap:18px}
+.text-image-copy h3{font-family:var(--preview-display,var(--display));font-size:clamp(30px,4vw,48px);line-height:1;letter-spacing:-.035em;font-weight:400;color:inherit;margin:0}
+.text-image-copy p{font-size:15px;color:currentColor;opacity:.68;line-height:1.55;margin:0}
+.text-image-visual{display:grid;place-items:center;background:radial-gradient(circle at 80% 10%,rgba(196,217,203,.45),transparent 34%),linear-gradient(135deg,var(--c4),color-mix(in srgb,var(--c3),var(--c4) 70%));color:var(--c1)}
+.text-image-visual span{font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:900;opacity:.55}
+@media(max-width:980px){.section-tool-shell{grid-template-columns:1fr}.section-row{grid-template-columns:1fr}.section-row-actions{justify-content:flex-start}.dynamic-section-grid,.before-after-grid,.text-image-grid{grid-template-columns:1fr}}
+</style>
+
 </head>
 <body>
 <div class="builder-app" id="builderApp">
@@ -2436,6 +2483,62 @@ body{
           <div class="ai-palette-feedback" id="aiPaletteFeedback">Upload client logos or images, then click Extract colors to generate the five-color guide palette locally.</div>
           <div class="colors" id="colorGrid"></div>
         </article>
+
+        <article class="card wide section-tool-card simple-section-tool-card">
+          <div class="card-head">
+            <h3>Guide boxes</h3>
+            <span class="note">Pick a section, add boxes, rename labels. Section controls are tucked away below.</span>
+          </div>
+
+          <div class="simple-section-tool" id="simpleSectionTool">
+            <div class="simple-box-builder">
+              <div class="simple-step-label">01 · Add boxes</div>
+              <label class="simple-field">Section
+                <select id="simpleSectionTarget"></select>
+              </label>
+              <label class="simple-field">New box label
+                <input id="simpleBoxLabel" type="text" value="New Box" maxlength="54" placeholder="Primary Logo">
+              </label>
+              <div class="simple-box-buttons" aria-label="Add box type">
+                <button class="simple-box-btn" type="button" data-simple-add-box="logo-light">Light logo box</button>
+                <button class="simple-box-btn dark" type="button" data-simple-add-box="logo-dark">Dark logo box</button>
+                <button class="simple-box-btn brand" type="button" data-simple-add-box="logo-brand">Brand color box</button>
+                <button class="simple-box-btn" type="button" data-simple-add-box="mockup">Mockup square</button>
+                <button class="simple-box-btn" type="button" data-simple-add-box="text-card">Text card</button>
+                <button class="simple-box-btn" type="button" data-simple-add-box="swatch">Color swatch</button>
+              </div>
+              <p class="simple-help">This adds one card/box inside the selected guide section. Nothing else gets duplicated.</p>
+            </div>
+
+            <div class="simple-box-editor">
+              <div class="simple-step-label">02 · Edit labels</div>
+              <div class="simple-selected-title" id="simpleSelectedTitle">Select a section</div>
+              <div class="simple-box-list" id="simpleBoxList"></div>
+            </div>
+
+            <details class="simple-section-manager">
+              <summary>Manage sections</summary>
+              <div class="simple-manager-inner">
+                <div class="simple-add-section-row">
+                  <label class="simple-field">New section type
+                    <select id="sectionToolAddType">
+                      <option value="logo-grid">Logo grid</option>
+                      <option value="color-palette">Color palette</option>
+                      <option value="typography">Typography</option>
+                      <option value="mockup-grid">Mockup grid</option>
+                      <option value="before-after">Before / after</option>
+                      <option value="text-image">Text + image</option>
+                      <option value="brand-rules">Brand rules</option>
+                    </select>
+                  </label>
+                  <button class="builder-btn primary" type="button" id="addGuideSectionBtn">Add section</button>
+                </div>
+                <div class="section-tool-list simple-section-list" id="sectionToolList"></div>
+              </div>
+            </details>
+          </div>
+        </article>
+
       </div>
     </section>
   </div>
@@ -2686,7 +2789,7 @@ body{
 
 
 
-  function init(){buildColors();ensurePaletteExtractorUi();buildSlots();wire();renderAll();}
+  function init(){buildColors();ensurePaletteExtractorUi();buildSlots();renderSectionTool();wire();renderAll();}
   function buildColors(){const roles=['Primary','Secondary','Accent','Light','Dark'];const areas=['Hero · accents','Support · depth','Highlights','Cards · backgrounds','Footer · print'];$('#colorGrid').innerHTML=state.colors.map((hex,i)=>`<div class="color"><input type="color" data-color="${i}" value="${hex}"><b>${String(i+1).padStart(2,'0')} ${roles[i]}</b><span>${areas[i]}</span><input type="text" data-hex="${i}" value="${hex}" maxlength="7"></div>`).join('')}
   function slotClass(key){
     if(key==='profileImage'||key==='iconMark'||key==='socialPost') return 'is-square';
@@ -2713,6 +2816,141 @@ body{
     }).join('');
     $('#slotGrid').innerHTML=html;
   }
+
+  function managedGuideSections(){
+    return Array.from(document.querySelectorAll('#guidePreview > .guide-section')).filter(el=>!el.classList.contains('putt-lab-section'));
+  }
+  function ensureSectionToolId(el){
+    if(!el.dataset.sectionToolId)el.dataset.sectionToolId='sec-'+Date.now().toString(36)+'-'+Math.random().toString(16).slice(2,7);
+    return el.dataset.sectionToolId;
+  }
+  function sectionByToolId(id){return managedGuideSections().find(el=>el.dataset.sectionToolId===id);}
+  function sectionTitle(el,index){
+    const label=el.querySelector('.section-label')?.textContent?.trim();
+    const title=el.querySelector('.section-title')?.textContent?.trim();
+    return label || title || `Section ${String(index+1).padStart(2,'0')}`;
+  }
+  function sectionSubtitle(el){
+    const title=el.querySelector('.section-title')?.textContent?.trim();
+    const copy=el.querySelector('.section-copy')?.textContent?.trim();
+    return title || copy || 'Custom guide section';
+  }
+  function currentSectionBgValue(el){
+    return normalizeHex(el.dataset.sectionSolidBg || '#F1ECDF');
+  }
+  function renderSectionTool(){
+    const list=$('#sectionToolList');
+    if(!list)return;
+    const sections=managedGuideSections();
+    sections.forEach(ensureSectionToolId);
+    list.innerHTML=sections.map((el,index)=>{
+      const id=ensureSectionToolId(el);
+      const hidden=el.classList.contains('is-section-hidden');
+      const bg=currentSectionBgValue(el);
+      return `<div class="section-row${hidden?' is-hidden':''}" data-section-row="${id}">
+        <div class="section-row-main">
+          <div class="section-row-title"><i class="section-row-index">${String(index+1).padStart(2,'0')}</i><span>${escapeHtml(sectionTitle(el,index))}</span></div>
+          <div class="section-row-sub">${escapeHtml(sectionSubtitle(el))}</div>
+        </div>
+        <div class="section-row-actions">
+          <input class="section-color-input" type="color" value="${bg}" data-section-bg-color="${id}" title="Section background">
+          <button class="section-tool-btn subtle" type="button" data-section-action="up" data-section-id="${id}">Up</button>
+          <button class="section-tool-btn subtle" type="button" data-section-action="down" data-section-id="${id}">Down</button>
+          <button class="section-tool-btn${hidden?'':' subtle'}" type="button" data-section-action="toggle" data-section-id="${id}">${hidden?'Show':'Hide'}</button>
+          <button class="section-tool-btn danger" type="button" data-section-action="delete" data-section-id="${id}">Delete</button>
+        </div>
+      </div>`;
+    }).join('') || '<div class="section-row"><div class="section-row-main"><div class="section-row-title"><span>No guide sections yet</span></div><div class="section-row-sub">Add a section to start building the guide.</div></div></div>';
+  }
+  function nextGuideSectionNumber(){
+    return managedGuideSections().filter(el=>!el.classList.contains('is-section-hidden')).length+1;
+  }
+  function sectionNumberLabel(name){return `${String(nextGuideSectionNumber()).padStart(2,'0')} · ${name}`;}
+  function customSectionHtml(type){
+    const labelMap={
+      'logo-grid':'Logo System','color-palette':'Color Palette','typography':'Typography','mockup-grid':'In Use','before-after':'Before / After','text-image':'Brand Story','brand-rules':'Usage Rules'
+    };
+    const label=sectionNumberLabel(labelMap[type]||'Custom Section');
+    if(type==='logo-grid')return `<section class="guide-section" data-section-type="logo-grid"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="customLabel">${label}</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="customTitle">A flexible logo system for every touchpoint.</h2><p class="section-copy editable" contenteditable="true" data-guide-edit="customCopy">Use this section to show alternate marks, clear space, badges, or special-use versions.</p><div class="logo-grid"><div class="logo-cell"><div class="missing editable" contenteditable="true" data-guide-edit="customLogoCell">Primary Mark</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="customCellLabel">Primary</span></div><div class="logo-cell dark"><div class="missing editable" contenteditable="true" data-guide-edit="customLogoCell">Secondary</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="customCellLabel">Reverse</span></div><div class="logo-cell brand"><div class="missing editable" contenteditable="true" data-guide-edit="customLogoCell">Icon</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="customCellLabel">Icon</span></div></div></div></section>`;
+    if(type==='color-palette')return `<section class="guide-section" data-section-type="color-palette"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="customLabel">${label}</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="customTitle">Color roles that make the system easier to use.</h2><p class="section-copy editable" contenteditable="true" data-guide-edit="customCopy">Use this optional palette section for color roles, accessibility notes, or campaign-specific colors.</p><div class="palette-row"><div class="swatch" style="background:var(--c1);color:#F1ECDF"><span>Primary</span></div><div class="swatch" style="background:var(--c2);color:#F1ECDF"><span>Secondary</span></div><div class="swatch" style="background:var(--c3);color:#15140F"><span>Accent</span></div><div class="swatch" style="background:var(--c4);color:#15140F"><span>Light</span></div><div class="swatch" style="background:var(--c5);color:#F1ECDF"><span>Dark</span></div></div></div></section>`;
+    if(type==='typography')return `<section class="guide-section" data-section-type="typography"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="customLabel">${label}</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="customTitle">A type system with hierarchy and restraint.</h2><div class="type-grid"><div class="type-card-preview"><div class="section-label editable" contenteditable="true" data-guide-edit="customTypeLabel">Headline</div><div class="type-sample-display editable" contenteditable="true" data-guide-edit="customTypeSample">Sharp, memorable, ownable.</div><p class="editable" contenteditable="true" data-guide-edit="customTypeName">Client display font</p></div><div class="type-card-preview"><div class="section-label editable" contenteditable="true" data-guide-edit="customTypeLabel">Support</div><div class="type-sample-body editable" contenteditable="true" data-guide-edit="customTypeSample">Readable supporting copy for captions, pages, decks, and digital UI.</div><p class="editable" contenteditable="true" data-guide-edit="customTypeName">Client body font</p></div></div></div></section>`;
+    if(type==='mockup-grid')return `<section class="guide-section" data-section-type="mockup-grid"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="customLabel">${label}</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="customTitle">How the brand shows up in the real world.</h2><div class="mockup-grid"><div class="mockup profile"><div class="missing editable" contenteditable="true" data-guide-edit="customMockup">Application 01</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="customMockupLabel">Profile</span></div><div class="mockup digital"><div class="missing editable" contenteditable="true" data-guide-edit="customMockup">Application 02</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="customMockupLabel">Digital</span></div><div class="mockup print"><div class="missing editable" contenteditable="true" data-guide-edit="customMockup">Application 03</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="customMockupLabel">Print</span></div><div class="mockup social"><div class="missing editable" contenteditable="true" data-guide-edit="customMockup">Application 04</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="customMockupLabel">Social</span></div></div></div></section>`;
+    if(type==='before-after')return `<section class="guide-section" data-section-type="before-after"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="customLabel">${label}</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="customTitle">From scattered files to a usable brand system.</h2><p class="section-copy editable" contenteditable="true" data-guide-edit="customCopy">Use this section to show the transformation clearly without over-explaining it.</p><div class="before-after-grid"><div class="before-after-card"><strong class="editable" contenteditable="true" data-guide-edit="beforeText">Before</strong><span class="editable" contenteditable="true" data-guide-edit="beforeLabel">Original state</span></div><div class="before-after-card after"><strong class="editable" contenteditable="true" data-guide-edit="afterText">After</strong><span class="editable" contenteditable="true" data-guide-edit="afterLabel">Moving Day cleanup</span></div></div></div></section>`;
+    if(type==='text-image')return `<section class="guide-section" data-section-type="text-image"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="customLabel">${label}</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="customTitle">A concise brand story section.</h2><div class="text-image-grid"><div class="text-image-copy"><h3 class="editable" contenteditable="true" data-guide-edit="customStoryTitle">Clarity, consistency, and confidence.</h3><p class="editable" contenteditable="true" data-guide-edit="customStoryCopy">Use this block for positioning notes, voice, market context, or a short explanation of the visual direction.</p></div><div class="text-image-visual"><span class="editable" contenteditable="true" data-guide-edit="customVisualLabel">Drop visual / brand note</span></div></div></div></section>`;
+    return `<section class="guide-section" data-section-type="brand-rules"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="customLabel">${label}</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="customTitle">Simple rules for using the brand well.</h2><div class="dynamic-section-grid"><div class="dynamic-card"><b class="editable" contenteditable="true" data-guide-edit="customRuleLabel">Do</b><p class="editable" contenteditable="true" data-guide-edit="customRuleCopy">Use approved files, keep spacing consistent, and lean on the core palette.</p></div><div class="dynamic-card dark"><b class="editable" contenteditable="true" data-guide-edit="customRuleLabel">Don’t</b><p class="editable" contenteditable="true" data-guide-edit="customRuleCopy">Do not stretch logos, invent colors, or add effects that weaken recognition.</p></div><div class="dynamic-card accent"><b class="editable" contenteditable="true" data-guide-edit="customRuleLabel">Best use</b><p class="editable" contenteditable="true" data-guide-edit="customRuleCopy">Use this section for quick client-facing notes and rollout guidance.</p></div><div class="dynamic-card"><b class="editable" contenteditable="true" data-guide-edit="customRuleLabel">Reminder</b><p class="editable" contenteditable="true" data-guide-edit="customRuleCopy">Keep the system simple enough for the client to actually follow.</p></div></div></div></section>`;
+  }
+  function addGuideSection(){
+    const type=$('#sectionToolAddType')?.value||'text-image';
+    const template=document.createElement('template');
+    template.innerHTML=customSectionHtml(type).trim();
+    const section=template.content.firstElementChild;
+    ensureSectionToolId(section);
+    const anchor=$('#puttLabSection')||document.querySelector('#guidePreview .guide-footer');
+    if(anchor)anchor.parentNode.insertBefore(section,anchor);else $('#guidePreview')?.appendChild(section);
+    state.published=false;
+    renderSectionTool();
+    ensureLivePreview('New guide section added. Edit the text directly in the preview.');
+  }
+  function duplicateGuideSection(id){
+    const section=sectionByToolId(id);
+    if(!section)return;
+    const clone=section.cloneNode(true);
+    clone.classList.remove('is-section-hidden');
+    clone.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+    clone.removeAttribute('data-section-bg');
+    clone.dataset.sectionType=(section.dataset.sectionType||'duplicate')+'-copy';
+    clone.dataset.sectionToolId='sec-'+Date.now().toString(36)+'-'+Math.random().toString(16).slice(2,7);
+    const label=clone.querySelector('.section-label');
+    if(label && !/copy/i.test(label.textContent)) label.textContent=label.textContent.trim()+' · Copy';
+    section.parentNode.insertBefore(clone,section.nextSibling);
+    state.published=false;
+    renderSectionTool();
+    ensureLivePreview('Guide section duplicated.');
+  }
+  function moveGuideSection(id,direction){
+    const section=sectionByToolId(id);
+    if(!section)return;
+    const sections=managedGuideSections();
+    const index=sections.indexOf(section);
+    if(direction==='up'&&index>0){section.parentNode.insertBefore(section,sections[index-1]);}
+    if(direction==='down'&&index<sections.length-1){section.parentNode.insertBefore(sections[index+1],section);}
+    state.published=false;
+    renderSectionTool();
+    ensureLivePreview('Guide section order updated.');
+  }
+  function toggleGuideSection(id){
+    const section=sectionByToolId(id);
+    if(!section)return;
+    section.classList.toggle('is-section-hidden');
+    state.published=false;
+    renderSectionTool();
+    status(section.classList.contains('is-section-hidden')?'Section hidden from the guide.':'Section shown in the guide.');
+  }
+  function deleteGuideSection(id){
+    const section=sectionByToolId(id);
+    if(!section)return;
+    if(managedGuideSections().length<=1){status('Keep at least one guide section in the preview.');return;}
+    section.remove();
+    state.published=false;
+    renderSectionTool();
+    ensureLivePreview('Guide section deleted.');
+  }
+  function applySectionSolidColor(id,hex){
+    const section=sectionByToolId(id);
+    if(!section)return;
+    hex=normalizeHex(hex);
+    const fg=textColor(hex);
+    section.dataset.sectionSolidBg=hex;
+    section.style.background=hex;
+    section.style.color=fg;
+    section.querySelectorAll('.section-label,.section-title,.section-copy,.type-card-preview p,.dynamic-card p,.text-image-copy p').forEach(el=>{el.style.color=fg;el.style.opacity=el.classList.contains('section-copy')||el.tagName==='P'?'.72':'1';});
+    section.querySelectorAll('.logo-cell,.type-card-preview,.usage-card,.dynamic-card,.text-image-copy,.text-image-visual,.before-after-card').forEach(card=>{
+      if(card.classList.contains('dark')||card.classList.contains('after'))return;
+      card.style.borderColor='rgba(21,20,15,.12)';
+    });
+    state.published=false;
+  }
+
   function wire(){
     $$('[data-field]').forEach(inp=>inp.addEventListener('input',e=>{state.fields[e.target.dataset.field]=e.target.value;state.published=false;renderAll()}));
     $('#previewBtn').addEventListener('click',showPreview); $('#backToEditorBtn').addEventListener('click',backToEditor); $('#publishBtn').addEventListener('click',lockGuide); $('#lockFromPreviewBtn').addEventListener('click',lockGuide); $('#downloadHtmlBtn').addEventListener('click',downloadLockedHtml); $('#downloadAssetsBtn')?.addEventListener('click',downloadAssetPackage); $('#generatePdfBtn')?.addEventListener('click',generatePdf); $('#togglePuttLabBtn')?.addEventListener('click',togglePuttLab); $('#resetPuttLabBtn')?.addEventListener('click',resetPuttLab); $('#puttStartBtn')?.addEventListener('click',()=>{openPuttLab();resetPuttLab();}); $('#puttResetBtn')?.addEventListener('click',resetPuttLab);
@@ -2739,7 +2977,6 @@ body{
         if(file){
           const a=await makeAsset(file);
           state.assets.push(a);
-          syncAssetCount();
           state.slots[key]=a.id;
           populateSelects();
           renderAll();
@@ -2758,6 +2995,25 @@ body{
     $('#recolorMode')?.addEventListener('change',renderRecolorPreview);
     $('#recolorDropWhite')?.addEventListener('change',renderRecolorPreview);
     $('#duplicateRecolorBtn')?.addEventListener('click',duplicateRecoloredAsset);
+    $('#addGuideSectionBtn')?.addEventListener('click',addGuideSection);
+    document.addEventListener('click',e=>{
+      const btn=e.target.closest('[data-section-action]');
+      if(!btn)return;
+      const id=btn.dataset.sectionId;
+      const action=btn.dataset.sectionAction;
+      if(action==='up')moveGuideSection(id,'up');
+      if(action==='down')moveGuideSection(id,'down');
+      if(action==='duplicate')duplicateGuideSection(id);
+      if(action==='toggle')toggleGuideSection(id);
+      if(action==='delete')deleteGuideSection(id);
+    });
+    document.addEventListener('input',e=>{
+      if(e.target.matches('[data-section-bg-color]')){
+        applySectionSolidColor(e.target.dataset.sectionBgColor,e.target.value);
+        renderSectionTool();
+        status('Section background color updated.');
+      }
+    });
     $('#resetBtn').addEventListener('click',()=>{if(confirm('Reset all builder data and uploaded assets?')) location.reload()});
     document.addEventListener('click',e=>{
       const chip=e.target.closest('[data-recolor-chip]');
@@ -3133,7 +3389,7 @@ body{
     const hero=assetById(state.slots.heroLogo);const heroImg=$('#pvHeroLogo');if(isImage(hero)){heroImg.src=hero.data;heroImg.classList.add('visible')}else{heroImg.removeAttribute('src');heroImg.classList.remove('visible')}
     applySlotBackgrounds();
     setImgWrap('#pvPrimaryLogoWrap',assetById(state.slots.primaryLogo),'Primary Logo');setImgWrap('#pvIconMarkWrap',assetById(state.slots.iconMark),'Icon Mark');setImgWrap('#pvIconVariantWrap',assetById(state.slots.iconVariant),'Brand Variant');setImgWrap('#pvProfileImageWrap',assetById(state.slots.profileImage),'Profile Image');setImgWrap('#pvWebsiteHeaderWrap',assetById(state.slots.websiteHeader),'Digital Mockup');setImgWrap('#pvBusinessCardWrap',assetById(state.slots.businessCard),'Print Mockup');setImgWrap('#pvSocialPostWrap',assetById(state.slots.socialPost),'Social Post');forceGuideSlotPlacement();injectAssetPackage(document);applySectionBackgrounds(document);
-    renderAssetList();renderRecolorTool();populateSelects();updateProgress();
+    renderAssetList();renderRecolorTool();populateSelects();renderSectionTool();updateProgress();
   }
   function applySlotBackgrounds(){
     applyBgToElement(document.querySelector('.guide-hero'),slotBgKey('heroLogo'));
@@ -3237,7 +3493,54 @@ body{
   function packagePageHtml(items){
     const title=`${state.fields.clientName||'Client'} · Downloadable Brand Assets`;
     const cards=assetPackageCardsHtml(items);
-    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${escapeHtml(title)}</title><style>:root{--cream:#F1ECDF;--paper:#FBF8F0;--forest:#1F3D2E;--deep:#14291F;--ink:#15140F;--sage:#C4D9CB}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,var(--cream),#E8E0CF);color:var(--ink);font-family:Inter,Arial,sans-serif;padding:42px}.shell{max-width:1160px;margin:0 auto}.eyebrow{font-weight:900;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--forest);margin-bottom:22px}.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end;border-bottom:1px solid rgba(31,61,46,.12);padding-bottom:30px;margin-bottom:30px}h1{font-family:Georgia,serif;font-size:clamp(44px,7vw,78px);line-height:.92;font-weight:400;letter-spacing:-.055em;max-width:820px;margin:0}p{max-width:700px;color:rgba(21,20,15,.62);font-size:16px;line-height:1.58}.index-pill{display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:999px;padding:0 18px;background:var(--forest);color:var(--cream);font-weight:900;font-size:10px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:30px}.asset-package-card{display:grid;grid-template-rows:178px auto;overflow:hidden;border:1px solid rgba(31,61,46,.13);border-radius:28px;background:#fff;color:#15140F;text-decoration:none;box-shadow:0 20px 56px rgba(31,61,46,.09);transition:.18s}.asset-package-card:hover{transform:translateY(-3px);box-shadow:0 28px 72px rgba(31,61,46,.13)}.asset-package-thumb{height:178px;display:grid;place-items:center;padding:26px;background:radial-gradient(circle at 80% 0%,rgba(196,217,203,.42),transparent 42%),linear-gradient(135deg,#F8F4EA,#E8E0CF);border-bottom:1px solid rgba(21,20,15,.08)}.asset-package-thumb.dark{background:radial-gradient(circle at 78% 0%,rgba(196,217,203,.24),transparent 42%),linear-gradient(135deg,#1F3D2E,#14291F)}.asset-package-thumb img{max-width:100%;max-height:124px;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(21,20,15,.14))}.asset-package-file-icon{width:78px;height:78px;border-radius:24px;display:grid;place-items:center;background:#1F3D2E;color:#F1ECDF;font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase}.asset-package-body{display:grid;grid-template-rows:auto auto 1fr auto;gap:12px;padding:20px}.asset-package-meta{display:flex;flex-wrap:wrap;gap:7px}.asset-package-chip{display:inline-flex;align-items:center;min-height:24px;padding:0 9px;border-radius:999px;border:1px solid rgba(31,61,46,.12);background:#F5F0E6;color:#1F3D2E;font-weight:900;font-size:8px;letter-spacing:.12em;text-transform:uppercase}.asset-package-card h3{margin:0;color:#15140F;font-size:17px;line-height:1.15;letter-spacing:-.03em}.asset-package-card p{margin:0;font-size:13px;line-height:1.45}.asset-package-download{display:flex;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid rgba(21,20,15,.08);color:#1F3D2E;font-weight:900;font-size:9px;letter-spacing:.13em;text-transform:uppercase}@media(max-width:720px){body{padding:24px}.hero{grid-template-columns:1fr}.index-pill{width:max-content}}</style></head><body><main class="shell"><div class="eyebrow">Moving Day · Asset Handoff</div><section class="hero"><div><h1>${escapeHtml(title)}</h1><p>Every uploaded file is embedded directly in this handoff page. Click any card to download the asset. Use vector files for vendors and print, PNG files for transparent digital use, JPG files for previews, and PDFs for reference.</p></div><a class="index-pill" href="#files">Asset index</a></section><div class="grid" id="files">${cards}</div></main>
+    return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${escapeHtml(title)}</title><style>:root{--cream:#F1ECDF;--paper:#FBF8F0;--forest:#1F3D2E;--deep:#14291F;--ink:#15140F;--sage:#C4D9CB}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,var(--cream),#E8E0CF);color:var(--ink);font-family:Inter,Arial,sans-serif;padding:42px}.shell{max-width:1160px;margin:0 auto}.eyebrow{font-weight:900;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--forest);margin-bottom:22px}.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end;border-bottom:1px solid rgba(31,61,46,.12);padding-bottom:30px;margin-bottom:30px}h1{font-family:Georgia,serif;font-size:clamp(44px,7vw,78px);line-height:.92;font-weight:400;letter-spacing:-.055em;max-width:820px;margin:0}p{max-width:700px;color:rgba(21,20,15,.62);font-size:16px;line-height:1.58}.index-pill{display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:999px;padding:0 18px;background:var(--forest);color:var(--cream);font-weight:900;font-size:10px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:30px}.asset-package-card{display:grid;grid-template-rows:178px auto;overflow:hidden;border:1px solid rgba(31,61,46,.13);border-radius:28px;background:#fff;color:#15140F;text-decoration:none;box-shadow:0 20px 56px rgba(31,61,46,.09);transition:.18s}.asset-package-card:hover{transform:translateY(-3px);box-shadow:0 28px 72px rgba(31,61,46,.13)}.asset-package-thumb{height:178px;display:grid;place-items:center;padding:26px;background:radial-gradient(circle at 80% 0%,rgba(196,217,203,.42),transparent 42%),linear-gradient(135deg,#F8F4EA,#E8E0CF);border-bottom:1px solid rgba(21,20,15,.08)}.asset-package-thumb.dark{background:radial-gradient(circle at 78% 0%,rgba(196,217,203,.24),transparent 42%),linear-gradient(135deg,#1F3D2E,#14291F)}.asset-package-thumb img{max-width:100%;max-height:124px;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(21,20,15,.14))}.asset-package-file-icon{width:78px;height:78px;border-radius:24px;display:grid;place-items:center;background:#1F3D2E;color:#F1ECDF;font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase}.asset-package-body{display:grid;grid-template-rows:auto auto 1fr auto;gap:12px;padding:20px}.asset-package-meta{display:flex;flex-wrap:wrap;gap:7px}.asset-package-chip{display:inline-flex;align-items:center;min-height:24px;padding:0 9px;border-radius:999px;border:1px solid rgba(31,61,46,.12);background:#F5F0E6;color:#1F3D2E;font-weight:900;font-size:8px;letter-spacing:.12em;text-transform:uppercase}.asset-package-card h3{margin:0;color:#15140F;font-size:17px;line-height:1.15;letter-spacing:-.03em}.asset-package-card p{margin:0;font-size:13px;line-height:1.45}.asset-package-download{display:flex;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid rgba(21,20,15,.08);color:#1F3D2E;font-weight:900;font-size:9px;letter-spacing:.13em;text-transform:uppercase}@media(max-width:720px){body{padding:24px}.hero{grid-template-columns:1fr}.index-pill{width:max-content}}</style>
+<style id="sectionToolStyles">
+.section-tool-card{grid-column:1/-1!important;position:relative;overflow:hidden}
+.section-tool-card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 92% 0%,rgba(196,217,203,.22),transparent 34%);pointer-events:none}
+.section-tool-card>*{position:relative;z-index:1}
+.section-tool-shell{display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);gap:18px;align-items:start}
+.section-tool-add{display:grid;gap:12px;background:rgba(251,248,240,.72);border:1px solid rgba(31,61,46,.10);border-radius:20px;padding:16px}
+.section-tool-add label{display:grid;gap:7px;font-size:8px;text-transform:uppercase;letter-spacing:.16em;color:rgba(21,20,15,.48);font-weight:900}
+.section-tool-add select{width:100%;border:1px solid rgba(31,61,46,.12);background:#F8F4EA;color:#15140F;border-radius:14px;min-height:44px;padding:0 12px;font-size:12px;font-weight:800;outline:none}
+.section-tool-add p{font-size:12px;line-height:1.45;color:rgba(21,20,15,.56);margin:0}
+.section-tool-list{display:grid;gap:10px}
+.section-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;background:rgba(255,255,255,.72);border:1px solid rgba(31,61,46,.09);border-radius:18px;padding:12px;box-shadow:0 8px 24px rgba(31,61,46,.045)}
+.section-row.is-hidden{opacity:.58;background:rgba(241,236,223,.62)}
+.section-row-main{display:grid;gap:4px;min-width:0}
+.section-row-title{display:flex;align-items:center;gap:8px;min-width:0;color:#244834;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.section-row-title span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.section-row-index{display:inline-flex;align-items:center;justify-content:center;min-width:27px;height:27px;border-radius:999px;background:rgba(31,61,46,.10);color:#244834;font-size:9px;font-weight:900;letter-spacing:.08em}
+.section-row-sub{font-size:11px;line-height:1.35;color:rgba(21,20,15,.48);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.section-row-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+.section-tool-btn{border:1px solid rgba(31,61,46,.12);background:#F8F4EA;color:#244834;border-radius:999px;min-height:32px;padding:0 10px;font-size:8px;font-weight:900;letter-spacing:.11em;text-transform:uppercase;cursor:pointer;transition:.18s}
+.section-tool-btn:hover{background:#244834;color:#F1ECDF;transform:translateY(-1px)}
+.section-tool-btn.subtle{background:rgba(255,255,255,.64)}
+.section-tool-btn.danger:hover{background:#7E352F;color:#F1ECDF}
+.section-color-input{width:34px;height:34px;border:1px solid rgba(31,61,46,.14);border-radius:999px;background:transparent;overflow:hidden;padding:3px;cursor:pointer}
+.is-section-hidden{display:none!important}
+.guide-section[data-section-tool-id]{transition:background .18s ease,color .18s ease}
+.dynamic-section-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;margin-top:34px}
+.dynamic-card{min-height:220px;background:var(--paper);border:1px solid var(--rule);border-radius:24px;padding:30px;display:grid;align-content:end;gap:12px;position:relative;overflow:hidden}
+.dynamic-card.dark{background:var(--c1);color:var(--c4)}
+.dynamic-card.accent{background:var(--c3)}
+.dynamic-card b{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:inherit;opacity:.62}
+.dynamic-card p{font-size:14px;color:currentColor;opacity:.68;line-height:1.45;margin:0}
+.before-after-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:34px;border:1px solid var(--rule);background:var(--rule)}
+.before-after-card{min-height:300px;background:var(--paper);display:grid;place-items:center;padding:34px;position:relative;text-align:center}
+.before-after-card.after{background:var(--c1);color:var(--c4)}
+.before-after-card strong{font-family:var(--preview-display,var(--display));font-size:clamp(34px,5vw,58px);font-weight:400;letter-spacing:-.04em}
+.before-after-card span{position:absolute;left:20px;bottom:18px;font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;opacity:.48}
+.text-image-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:2px;margin-top:34px}
+.text-image-copy,.text-image-visual{min-height:300px;border:1px solid var(--rule);background:var(--paper);border-radius:26px;padding:34px}
+.text-image-copy{display:grid;align-content:end;gap:18px}
+.text-image-copy h3{font-family:var(--preview-display,var(--display));font-size:clamp(30px,4vw,48px);line-height:1;letter-spacing:-.035em;font-weight:400;color:inherit;margin:0}
+.text-image-copy p{font-size:15px;color:currentColor;opacity:.68;line-height:1.55;margin:0}
+.text-image-visual{display:grid;place-items:center;background:radial-gradient(circle at 80% 10%,rgba(196,217,203,.45),transparent 34%),linear-gradient(135deg,var(--c4),color-mix(in srgb,var(--c3),var(--c4) 70%));color:var(--c1)}
+.text-image-visual span{font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:900;opacity:.55}
+@media(max-width:980px){.section-tool-shell{grid-template-columns:1fr}.section-row{grid-template-columns:1fr}.section-row-actions{justify-content:flex-start}.dynamic-section-grid,.before-after-grid,.text-image-grid{grid-template-columns:1fr}}
+</style>
+
+</head><body><main class="shell"><div class="eyebrow">Moving Day · Asset Handoff</div><section class="hero"><div><h1>${escapeHtml(title)}</h1><p>Every uploaded file is embedded directly in this handoff page. Click any card to download the asset. Use vector files for vendors and print, PNG files for transparent digital use, JPG files for previews, and PDFs for reference.</p></div><a class="index-pill" href="#files">Asset index</a></section><div class="grid" id="files">${cards}</div></main>
 </body></html>`;
   }
   function assetPackageSectionHtml(){
@@ -3564,13 +3867,195 @@ body{
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Moving Day Putt Lab · ${esc(client)}</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-:root{--cream:#F1ECDF;--paper:#FBF8F0;--forest:#1F3D2E;--deep:#07110C;--sage:#C4D9CB;--ink:#15140F;--sans:'Geist',system-ui,sans-serif;--display:'Instrument Serif',serif}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 16% -8%,rgba(196,217,203,.22),transparent 31%),linear-gradient(145deg,#06100b 0%,#10241a 52%,#06100b 100%);font-family:var(--sans);color:var(--cream);padding:28px}.lab-shell{max-width:1180px;margin:0 auto}.lab-nav{height:66px;border:1px solid rgba(241,236,223,.12);background:rgba(6,16,11,.58);backdrop-filter:blur(18px);border-radius:999px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 18px 0 20px;margin-bottom:34px;box-shadow:0 18px 48px rgba(0,0,0,.18)}.brand{display:flex;align-items:center;gap:12px;color:var(--sage);font:900 12px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase}.brand-mark{width:34px;height:34px;border-radius:12px;background:rgba(196,217,203,.13);display:grid;place-items:center}.brand-mark:before{content:'M';font-family:var(--display);font-size:24px;color:var(--sage)}.lab-pill{border:1px solid rgba(241,236,223,.13);border-radius:999px;padding:10px 14px;color:rgba(241,236,223,.70);font:900 10px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase}.hero{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:28px;align-items:end;margin-bottom:22px}.kicker{font:900 11px var(--sans);letter-spacing:.20em;text-transform:uppercase;color:var(--sage);margin-bottom:14px}.hero h1{font-family:var(--display);font-size:clamp(48px,6vw,86px);font-weight:400;line-height:.92;letter-spacing:-.04em;margin:0}.hero p{color:rgba(241,236,223,.70);max-width:640px;font-size:15px;line-height:1.65;margin:18px 0 0}.stat-card{border:1px solid rgba(241,236,223,.12);background:rgba(251,248,240,.065);border-radius:28px;padding:22px}.stat-card span{display:block;font:900 9px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:rgba(241,236,223,.46);margin-bottom:10px}.stat-card strong{font-family:var(--display);font-size:34px;font-weight:400}.game-card{background:linear-gradient(145deg,#F7F3EA 0%,#E9E1D2 100%);color:var(--ink);border-radius:34px;padding:18px;border:1px solid rgba(255,255,255,.55);box-shadow:0 34px 90px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.72)}.scorebar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:4px 8px 16px;color:var(--forest)}.scorebar strong{font:900 10px var(--sans);letter-spacing:.16em;text-transform:uppercase}.scorebar span{font:800 12px var(--sans);color:rgba(31,61,46,.64)}.controls{display:flex;gap:8px}.btn{height:38px;border:1px solid rgba(31,61,46,.13);background:#1F3D2E;color:#F1ECDF;border-radius:999px;padding:0 14px;font:900 9px var(--sans);letter-spacing:.13em;text-transform:uppercase;cursor:pointer}.btn.secondary{background:rgba(31,61,46,.08);color:#1F3D2E}.green-wrap{position:relative;border-radius:26px;overflow:hidden;background:#16412d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 40px 100px rgba(255,255,255,.06)}#puttCanvas{display:block;width:100%;height:auto;min-height:500px;touch-action:none;cursor:crosshair;background:#16412d}.hint{position:absolute;left:18px;right:18px;bottom:18px;display:flex;justify-content:space-between;gap:12px;color:rgba(241,236,223,.78);font:900 10px var(--sans);letter-spacing:.13em;text-transform:uppercase;pointer-events:none}.direction-pill{position:absolute;top:18px;left:50%;transform:translateX(-50%);padding:8px 12px;border-radius:999px;background:rgba(7,17,12,.42);color:rgba(241,236,223,.8);font:900 9px var(--sans);letter-spacing:.14em;text-transform:uppercase;pointer-events:none}@media(max-width:800px){body{padding:16px}.lab-nav{border-radius:24px;height:auto;padding:14px;align-items:flex-start;flex-direction:column}.hero{grid-template-columns:1fr}.stat-card{display:none}.scorebar{align-items:flex-start;flex-direction:column}.hint{position:static;background:#1F3D2E;padding:12px 14px;display:block}.direction-pill{display:none}#puttCanvas{min-height:420px}}</style></head>
+:root{--cream:#F1ECDF;--paper:#FBF8F0;--forest:#1F3D2E;--deep:#07110C;--sage:#C4D9CB;--ink:#15140F;--sans:'Geist',system-ui,sans-serif;--display:'Instrument Serif',serif}*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 16% -8%,rgba(196,217,203,.22),transparent 31%),linear-gradient(145deg,#06100b 0%,#10241a 52%,#06100b 100%);font-family:var(--sans);color:var(--cream);padding:28px}.lab-shell{max-width:1180px;margin:0 auto}.lab-nav{height:66px;border:1px solid rgba(241,236,223,.12);background:rgba(6,16,11,.58);backdrop-filter:blur(18px);border-radius:999px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 18px 0 20px;margin-bottom:34px;box-shadow:0 18px 48px rgba(0,0,0,.18)}.brand{display:flex;align-items:center;gap:12px;color:var(--sage);font:900 12px/1 var(--sans);letter-spacing:.16em;text-transform:uppercase}.brand-mark{width:34px;height:34px;border-radius:12px;background:rgba(196,217,203,.13);display:grid;place-items:center}.brand-mark:before{content:'M';font-family:var(--display);font-size:24px;color:var(--sage)}.lab-pill{border:1px solid rgba(241,236,223,.13);border-radius:999px;padding:10px 14px;color:rgba(241,236,223,.70);font:900 10px/1 var(--sans);letter-spacing:.14em;text-transform:uppercase}.hero{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:28px;align-items:end;margin-bottom:22px}.kicker{font:900 11px var(--sans);letter-spacing:.20em;text-transform:uppercase;color:var(--sage);margin-bottom:14px}.hero h1{font-family:var(--display);font-size:clamp(48px,6vw,86px);font-weight:400;line-height:.92;letter-spacing:-.04em;margin:0}.hero p{color:rgba(241,236,223,.70);max-width:640px;font-size:15px;line-height:1.65;margin:18px 0 0}.stat-card{border:1px solid rgba(241,236,223,.12);background:rgba(251,248,240,.065);border-radius:28px;padding:22px}.stat-card span{display:block;font:900 9px var(--sans);letter-spacing:.16em;text-transform:uppercase;color:rgba(241,236,223,.46);margin-bottom:10px}.stat-card strong{font-family:var(--display);font-size:34px;font-weight:400}.game-card{background:linear-gradient(145deg,#F7F3EA 0%,#E9E1D2 100%);color:var(--ink);border-radius:34px;padding:18px;border:1px solid rgba(255,255,255,.55);box-shadow:0 34px 90px rgba(0,0,0,.28), inset 0 1px 0 rgba(255,255,255,.72)}.scorebar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:4px 8px 16px;color:var(--forest)}.scorebar strong{font:900 10px var(--sans);letter-spacing:.16em;text-transform:uppercase}.scorebar span{font:800 12px var(--sans);color:rgba(31,61,46,.64)}.controls{display:flex;gap:8px}.btn{height:38px;border:1px solid rgba(31,61,46,.13);background:#1F3D2E;color:#F1ECDF;border-radius:999px;padding:0 14px;font:900 9px var(--sans);letter-spacing:.13em;text-transform:uppercase;cursor:pointer}.btn.secondary{background:rgba(31,61,46,.08);color:#1F3D2E}.green-wrap{position:relative;border-radius:26px;overflow:hidden;background:#16412d;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12),inset 0 40px 100px rgba(255,255,255,.06)}#puttCanvas{display:block;width:100%;height:auto;min-height:500px;touch-action:none;cursor:crosshair;background:#16412d}.hint{position:absolute;left:18px;right:18px;bottom:18px;display:flex;justify-content:space-between;gap:12px;color:rgba(241,236,223,.78);font:900 10px var(--sans);letter-spacing:.13em;text-transform:uppercase;pointer-events:none}.direction-pill{position:absolute;top:18px;left:50%;transform:translateX(-50%);padding:8px 12px;border-radius:999px;background:rgba(7,17,12,.42);color:rgba(241,236,223,.8);font:900 9px var(--sans);letter-spacing:.14em;text-transform:uppercase;pointer-events:none}@media(max-width:800px){body{padding:16px}.lab-nav{border-radius:24px;height:auto;padding:14px;align-items:flex-start;flex-direction:column}.hero{grid-template-columns:1fr}.stat-card{display:none}.scorebar{align-items:flex-start;flex-direction:column}.hint{position:static;background:#1F3D2E;padding:12px 14px;display:block}.direction-pill{display:none}#puttCanvas{min-height:420px}}</style>
+<style id="sectionToolStyles">
+.section-tool-card{grid-column:1/-1!important;position:relative;overflow:hidden}
+.section-tool-card::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 92% 0%,rgba(196,217,203,.22),transparent 34%);pointer-events:none}
+.section-tool-card>*{position:relative;z-index:1}
+.section-tool-shell{display:grid;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);gap:18px;align-items:start}
+.section-tool-add{display:grid;gap:12px;background:rgba(251,248,240,.72);border:1px solid rgba(31,61,46,.10);border-radius:20px;padding:16px}
+.section-tool-add label{display:grid;gap:7px;font-size:8px;text-transform:uppercase;letter-spacing:.16em;color:rgba(21,20,15,.48);font-weight:900}
+.section-tool-add select{width:100%;border:1px solid rgba(31,61,46,.12);background:#F8F4EA;color:#15140F;border-radius:14px;min-height:44px;padding:0 12px;font-size:12px;font-weight:800;outline:none}
+.section-tool-add p{font-size:12px;line-height:1.45;color:rgba(21,20,15,.56);margin:0}
+.section-tool-list{display:grid;gap:10px}
+.section-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;background:rgba(255,255,255,.72);border:1px solid rgba(31,61,46,.09);border-radius:18px;padding:12px;box-shadow:0 8px 24px rgba(31,61,46,.045)}
+.section-row.is-hidden{opacity:.58;background:rgba(241,236,223,.62)}
+.section-row-main{display:grid;gap:4px;min-width:0}
+.section-row-title{display:flex;align-items:center;gap:8px;min-width:0;color:#244834;font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.section-row-title span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.section-row-index{display:inline-flex;align-items:center;justify-content:center;min-width:27px;height:27px;border-radius:999px;background:rgba(31,61,46,.10);color:#244834;font-size:9px;font-weight:900;letter-spacing:.08em}
+.section-row-sub{font-size:11px;line-height:1.35;color:rgba(21,20,15,.48);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.section-row-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+.section-tool-btn{border:1px solid rgba(31,61,46,.12);background:#F8F4EA;color:#244834;border-radius:999px;min-height:32px;padding:0 10px;font-size:8px;font-weight:900;letter-spacing:.11em;text-transform:uppercase;cursor:pointer;transition:.18s}
+.section-tool-btn:hover{background:#244834;color:#F1ECDF;transform:translateY(-1px)}
+.section-tool-btn.subtle{background:rgba(255,255,255,.64)}
+.section-tool-btn.danger:hover{background:#7E352F;color:#F1ECDF}
+.section-color-input{width:34px;height:34px;border:1px solid rgba(31,61,46,.14);border-radius:999px;background:transparent;overflow:hidden;padding:3px;cursor:pointer}
+.is-section-hidden{display:none!important}
+.guide-section[data-section-tool-id]{transition:background .18s ease,color .18s ease}
+.dynamic-section-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;margin-top:34px}
+.dynamic-card{min-height:220px;background:var(--paper);border:1px solid var(--rule);border-radius:24px;padding:30px;display:grid;align-content:end;gap:12px;position:relative;overflow:hidden}
+.dynamic-card.dark{background:var(--c1);color:var(--c4)}
+.dynamic-card.accent{background:var(--c3)}
+.dynamic-card b{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:inherit;opacity:.62}
+.dynamic-card p{font-size:14px;color:currentColor;opacity:.68;line-height:1.45;margin:0}
+.before-after-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px;margin-top:34px;border:1px solid var(--rule);background:var(--rule)}
+.before-after-card{min-height:300px;background:var(--paper);display:grid;place-items:center;padding:34px;position:relative;text-align:center}
+.before-after-card.after{background:var(--c1);color:var(--c4)}
+.before-after-card strong{font-family:var(--preview-display,var(--display));font-size:clamp(34px,5vw,58px);font-weight:400;letter-spacing:-.04em}
+.before-after-card span{position:absolute;left:20px;bottom:18px;font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;opacity:.48}
+.text-image-grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:2px;margin-top:34px}
+.text-image-copy,.text-image-visual{min-height:300px;border:1px solid var(--rule);background:var(--paper);border-radius:26px;padding:34px}
+.text-image-copy{display:grid;align-content:end;gap:18px}
+.text-image-copy h3{font-family:var(--preview-display,var(--display));font-size:clamp(30px,4vw,48px);line-height:1;letter-spacing:-.035em;font-weight:400;color:inherit;margin:0}
+.text-image-copy p{font-size:15px;color:currentColor;opacity:.68;line-height:1.55;margin:0}
+.text-image-visual{display:grid;place-items:center;background:radial-gradient(circle at 80% 10%,rgba(196,217,203,.45),transparent 34%),linear-gradient(135deg,var(--c4),color-mix(in srgb,var(--c3),var(--c4) 70%));color:var(--c1)}
+.text-image-visual span{font-size:10px;letter-spacing:.18em;text-transform:uppercase;font-weight:900;opacity:.55}
+@media(max-width:980px){.section-tool-shell{grid-template-columns:1fr}.section-row{grid-template-columns:1fr}.section-row-actions{justify-content:flex-start}.dynamic-section-grid,.before-after-grid,.text-image-grid{grid-template-columns:1fr}}
+</style>
+
+</head>
 <body><div class="lab-shell"><nav class="lab-nav"><div class="brand"><span class="brand-mark"></span><span>Moving Day · Putt Lab</span></div><div class="lab-pill">Brand Restoration Platform</div></nav><section class="hero"><div><div class="kicker">Mouse / touch mini-game</div><h1>Put it forward.</h1><p>Pull back from the ball like a putter, then release toward the cup. The ball starts at the bottom of the green and rolls forward toward the hole.</p></div><div class="stat-card"><span>Current guide</span><strong>${esc(client)}</strong></div></section><section class="game-card"><div class="scorebar"><div><strong id="status">Ready on the green</strong><span id="score">Strokes 0 · Best —</span></div><div class="controls"><button class="btn" id="startBtn">Start Round</button><button class="btn secondary" id="resetBtn">Reset</button></div></div><div class="green-wrap"><div class="direction-pill">Putting direction ↑</div><canvas id="puttCanvas" width="1100" height="650"></canvas><div class="hint"><span>Pull back behind the ball, release forward</span><i>Putting bottom → top</i></div></div></section></div>
 <script>
 const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:0,y:0,vx:0,vy:0,r:12},hole:{x:0,y:0,r:22},drag:{x:0,y:0}};const canvas=document.getElementById('puttCanvas'),ctx=canvas.getContext('2d');function pos(e){const r=canvas.getBoundingClientRect();return{x:(e.clientX-r.left)*(canvas.width/r.width),y:(e.clientY-r.top)*(canvas.height/r.height)}}function resize(){const r=canvas.getBoundingClientRect();canvas.width=Math.max(780,Math.floor(r.width*devicePixelRatio));canvas.height=Math.max(540,Math.floor((r.width*.60)*devicePixelRatio));reset(false)}function reset(update=true){game.active=false;game.dragging=false;game.strokes=0;game.ball={x:canvas.width*.50,y:canvas.height*.82,vx:0,vy:0,r:Math.max(10,canvas.width*.012)};game.hole={x:canvas.width*.50,y:canvas.height*.18,r:Math.max(18,canvas.width*.021)};statusText('Ready on the green');score();draw();}function statusText(t){document.getElementById('status').textContent=t}function score(){document.getElementById('score').textContent='Strokes '+game.strokes+' · Best '+(game.best||'—')}canvas.addEventListener('pointerdown',e=>{e.preventDefault();const p=pos(e),b=game.ball;if(Math.hypot(p.x-b.x,p.y-b.y)<b.r*3.2&&!game.active){game.dragging=true;game.drag=p;canvas.setPointerCapture(e.pointerId);statusText('Line it up · release to putt');draw();}});canvas.addEventListener('pointermove',e=>{if(!game.dragging)return;e.preventDefault();game.drag=pos(e);draw();});canvas.addEventListener('pointerup',e=>{if(!game.dragging)return;e.preventDefault();const p=pos(e),b=game.ball;let dx=b.x-p.x,dy=b.y-p.y;const power=Math.min(28,Math.hypot(dx,dy)*.08);const len=Math.hypot(dx,dy)||1;b.vx=(dx/len)*power;b.vy=(dy/len)*power;game.strokes++;game.dragging=false;game.active=true;score();statusText('Rolling forward...');requestAnimationFrame(step);});function step(){if(!game.active)return;const b=game.ball,h=game.hole;b.x+=b.vx;b.y+=b.vy;b.vx*=.982;b.vy*=.982;const m=b.r+8;if(b.x<m||b.x>canvas.width-m){b.vx*=-.68;b.x=Math.max(m,Math.min(canvas.width-m,b.x))}if(b.y<m||b.y>canvas.height-m){b.vy*=-.68;b.y=Math.max(m,Math.min(canvas.height-m,b.y))}const d=Math.hypot(b.x-h.x,b.y-h.y),speed=Math.hypot(b.vx,b.vy);if(d<h.r*.86&&speed<8.2){game.active=false;b.x=h.x;b.y=h.y;b.vx=0;b.vy=0;if(!game.best||game.strokes<game.best)game.best=game.strokes;statusText(game.strokes===1?'One-putt energy.':'Nice putt. Moving Day.');score();draw(true);return}if(speed<.12){game.active=false;b.vx=0;b.vy=0;statusText('Stopped short. Pull back and putt forward.')}draw();if(game.active)requestAnimationFrame(step)}function draw(made=false){const w=canvas.width,h=canvas.height;const bg=ctx.createLinearGradient(0,h,0,0);bg.addColorStop(0,'#123a27');bg.addColorStop(.44,'#1d5738');bg.addColorStop(1,'#2c7048');ctx.fillStyle=bg;ctx.fillRect(0,0,w,h);for(let y=-80;y<h+80;y+=58){ctx.fillStyle=(Math.floor(y/58)%2)?'rgba(255,255,255,.034)':'rgba(0,0,0,.035)';ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y-120);ctx.lineTo(w,y-64);ctx.lineTo(0,y+56);ctx.closePath();ctx.fill()}const lane=ctx.createRadialGradient(w*.5,h*.52,10,w*.5,h*.52,w*.42);lane.addColorStop(0,'rgba(196,217,203,.22)');lane.addColorStop(1,'rgba(196,217,203,0)');ctx.fillStyle=lane;ctx.fillRect(0,0,w,h);for(let i=0;i<260;i++){ctx.fillStyle='rgba(241,236,223,.04)';ctx.fillRect((i*97)%w,(i*149)%h,1.2,1.2)}const hole=game.hole;ctx.beginPath();ctx.ellipse(hole.x+2,hole.y+5,hole.r*1.18,hole.r*.82,0,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.34)';ctx.fill();ctx.beginPath();ctx.arc(hole.x,hole.y,hole.r,0,Math.PI*2);ctx.fillStyle='#050806';ctx.fill();ctx.strokeStyle='rgba(241,236,223,.72)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(hole.x,hole.y-hole.r*4.2);ctx.lineTo(hole.x,hole.y-hole.r*.75);ctx.stroke();ctx.beginPath();ctx.moveTo(hole.x,hole.y-hole.r*4.2);ctx.lineTo(hole.x+hole.r*1.7,hole.y-hole.r*3.45);ctx.lineTo(hole.x,hole.y-hole.r*2.8);ctx.closePath();ctx.fillStyle='#C4D9CB';ctx.fill();const b=game.ball;if(game.dragging){const dx=b.x-game.drag.x,dy=b.y-game.drag.y,len=Math.hypot(dx,dy)||1,ux=dx/len,uy=dy/len;ctx.setLineDash([9,9]);ctx.strokeStyle='rgba(241,236,223,.60)';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(b.x,b.y);ctx.lineTo(b.x+ux*Math.min(300,len*1.55),b.y+uy*Math.min(300,len*1.55));ctx.stroke();ctx.setLineDash([]);ctx.strokeStyle='rgba(13,18,14,.78)';ctx.lineWidth=Math.max(6,w*.006);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(game.drag.x,game.drag.y);ctx.lineTo(game.drag.x-uy*52,game.drag.y+ux*52);ctx.stroke();ctx.strokeStyle='rgba(241,236,223,.60)';ctx.lineWidth=Math.max(3,w*.004);ctx.beginPath();ctx.moveTo(game.drag.x-uy*32,game.drag.y+ux*32);ctx.lineTo(game.drag.x+uy*32,game.drag.y-ux*32);ctx.stroke()}ctx.beginPath();ctx.ellipse(b.x+5,b.y+8,b.r*1.08,b.r*.56,0,0,Math.PI*2);ctx.fillStyle='rgba(0,0,0,.24)';ctx.fill();const ball=ctx.createRadialGradient(b.x-b.r*.35,b.y-b.r*.45,1,b.x,b.y,b.r*1.25);ball.addColorStop(0,'#ffffff');ball.addColorStop(.55,'#EDECE4');ball.addColorStop(1,'#b8b8ae');ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,Math.PI*2);ctx.fillStyle=ball;ctx.fill();ctx.beginPath();ctx.arc(b.x-b.r*.34,b.y-b.r*.38,b.r*.22,0,Math.PI*2);ctx.fillStyle='rgba(255,255,255,.88)';ctx.fill();if(made){ctx.fillStyle='rgba(241,236,223,.92)';ctx.font='900 '+Math.max(20,w*.032)+'px Geist, Arial';ctx.textAlign='center';ctx.fillText('MADE IT',w/2,h*.50)}}document.getElementById('startBtn').onclick=()=>reset();document.getElementById('resetBtn').onclick=()=>reset();window.addEventListener('resize',resize);resize();
 <\/script></body></html>`;
     w.document.open(); w.document.write(html); w.document.close(); w.focus();
   }
+
+  function managedGuideSections(){
+    return Array.from(document.querySelectorAll('#guidePreview > .guide-section')).filter(el=>!el.classList.contains('putt-lab-section'));
+  }
+  function ensureSectionToolId(el){
+    if(!el.dataset.sectionToolId)el.dataset.sectionToolId='sec-'+Date.now().toString(36)+'-'+Math.random().toString(16).slice(2,7);
+    return el.dataset.sectionToolId;
+  }
+  function sectionByToolId(id){return managedGuideSections().find(el=>el.dataset.sectionToolId===id);}
+  function sectionTitle(el,index){
+    const label=el.querySelector('.section-label')?.textContent?.trim();
+    const title=el.querySelector('.section-title')?.textContent?.trim();
+    return label || title || `Section ${String(index+1).padStart(2,'0')}`;
+  }
+  function sectionSubtitle(el){
+    const title=el.querySelector('.section-title')?.textContent?.trim();
+    const copy=el.querySelector('.section-copy')?.textContent?.trim();
+    return title || copy || 'Custom guide section';
+  }
+  function currentSectionBgValue(el){
+    return normalizeHex(el.dataset.sectionSolidBg || '#F1ECDF');
+  }
+  function renderSectionTool(){
+    const list=$('#sectionToolList');
+    if(!list)return;
+    const sections=managedGuideSections();
+    sections.forEach(ensureSectionToolId);
+    list.innerHTML=sections.map((el,index)=>{
+      const id=ensureSectionToolId(el);
+      const hidden=el.classList.contains('is-section-hidden');
+      const bg=currentSectionBgValue(el);
+      return `<div class="section-row${hidden?' is-hidden':''}" data-section-row="${id}">
+        <div class="section-row-main">
+          <div class="section-row-title"><i class="section-row-index">${String(index+1).padStart(2,'0')}</i><span>${escapeHtml(sectionTitle(el,index))}</span></div>
+          <div class="section-row-sub">${escapeHtml(sectionSubtitle(el))}</div>
+        </div>
+        <div class="section-row-actions">
+          <input class="section-color-input" type="color" value="${bg}" data-section-bg-color="${id}" title="Section background">
+          <button class="section-tool-btn subtle" type="button" data-section-action="up" data-section-id="${id}">Up</button>
+          <button class="section-tool-btn subtle" type="button" data-section-action="down" data-section-id="${id}">Down</button>
+          <button class="section-tool-btn${hidden?'':' subtle'}" type="button" data-section-action="toggle" data-section-id="${id}">${hidden?'Show':'Hide'}</button>
+          <button class="section-tool-btn danger" type="button" data-section-action="delete" data-section-id="${id}">Delete</button>
+        </div>
+      </div>`;
+    }).join('') || '<div class="section-row"><div class="section-row-main"><div class="section-row-title"><span>No guide sections yet</span></div><div class="section-row-sub">Add a section to start building the guide.</div></div></div>';
+  }
+  function nextGuideSectionNumber(){
+    return managedGuideSections().filter(el=>!el.classList.contains('is-section-hidden')).length+1;
+  }
+  function sectionNumberLabel(name){return `${String(nextGuideSectionNumber()).padStart(2,'0')} · ${name}`;}
+  function customSectionHtml(type){
+    const labelMap={
+      'logo-grid':'Logo System','color-palette':'Color Palette','typography':'Typography','mockup-grid':'In Use','before-after':'Before / After','text-image':'Brand Story','brand-rules':'Usage Rules'
+    };
+    const label=sectionNumberLabel(labelMap[type]||'Custom Section');
+    if(type==='logo-grid')return `<section class="guide-section" data-section-type="logo-grid"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="customLabel">${label}</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="customTitle">A flexible logo system for every touchpoint.</h2><p class="section-copy editable" contenteditable="true" data-guide-edit="customCopy">Use this section to show alternate marks, clear space, badges, or special-use versions.</p><div class="logo-grid"><div class="logo-cell"><div class="missing editable" contenteditable="true" data-guide-edit="customLogoCell">Primary Mark</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="customCellLabel">Primary</span></div><div class="logo-cell dark"><div class="missing editable" contenteditable="true" data-guide-edit="customLogoCell">Secondary</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="customCellLabel">Reverse</span></div><div class="logo-cell brand"><div class="missing editable" contenteditable="true" data-guide-edit="customLogoCell">Icon</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="customCellLabel">Icon</span></div></div></div></section>`;
+    if(type==='color-palette')return `<section class="guide-section" data-section-type="color-palette"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="customLabel">${label}</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="customTitle">Color roles that make the system easier to use.</h2><p class="section-copy editable" contenteditable="true" data-guide-edit="customCopy">Use this optional palette section for color roles, accessibility notes, or campaign-specific colors.</p><div class="palette-row"><div class="swatch" style="background:var(--c1);color:#F1ECDF"><span>Primary</span></div><div class="swatch" style="background:var(--c2);color:#F1ECDF"><span>Secondary</span></div><div class="swatch" style="background:var(--c3);color:#15140F"><span>Accent</span></div><div class="swatch" style="background:var(--c4);color:#15140F"><span>Light</span></div><div class="swatch" style="background:var(--c5);color:#F1ECDF"><span>Dark</span></div></div></div></section>`;
+    if(type==='typography')return `<section class="guide-section" data-section-type="typography"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="customLabel">${label}</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="customTitle">A type system with hierarchy and restraint.</h2><div class="type-grid"><div class="type-card-preview"><div class="section-label editable" contenteditable="true" data-guide-edit="customTypeLabel">Headline</div><div class="type-sample-display editable" contenteditable="true" data-guide-edit="customTypeSample">Sharp, memorable, ownable.</div><p class="editable" contenteditable="true" data-guide-edit="customTypeName">Client display font</p></div><div class="type-card-preview"><div class="section-label editable" contenteditable="true" data-guide-edit="customTypeLabel">Support</div><div class="type-sample-body editable" contenteditable="true" data-guide-edit="customTypeSample">Readable supporting copy for captions, pages, decks, and digital UI.</div><p class="editable" contenteditable="true" data-guide-edit="customTypeName">Client body font</p></div></div></div></section>`;
+    if(type==='mockup-grid')return `<section class="guide-section" data-section-type="mockup-grid"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="customLabel">${label}</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="customTitle">How the brand shows up in the real world.</h2><div class="mockup-grid"><div class="mockup profile"><div class="missing editable" contenteditable="true" data-guide-edit="customMockup">Application 01</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="customMockupLabel">Profile</span></div><div class="mockup digital"><div class="missing editable" contenteditable="true" data-guide-edit="customMockup">Application 02</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="customMockupLabel">Digital</span></div><div class="mockup print"><div class="missing editable" contenteditable="true" data-guide-edit="customMockup">Application 03</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="customMockupLabel">Print</span></div><div class="mockup social"><div class="missing editable" contenteditable="true" data-guide-edit="customMockup">Application 04</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="customMockupLabel">Social</span></div></div></div></section>`;
+    if(type==='before-after')return `<section class="guide-section" data-section-type="before-after"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="customLabel">${label}</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="customTitle">From scattered files to a usable brand system.</h2><p class="section-copy editable" contenteditable="true" data-guide-edit="customCopy">Use this section to show the transformation clearly without over-explaining it.</p><div class="before-after-grid"><div class="before-after-card"><strong class="editable" contenteditable="true" data-guide-edit="beforeText">Before</strong><span class="editable" contenteditable="true" data-guide-edit="beforeLabel">Original state</span></div><div class="before-after-card after"><strong class="editable" contenteditable="true" data-guide-edit="afterText">After</strong><span class="editable" contenteditable="true" data-guide-edit="afterLabel">Moving Day cleanup</span></div></div></div></section>`;
+    if(type==='text-image')return `<section class="guide-section" data-section-type="text-image"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="customLabel">${label}</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="customTitle">A concise brand story section.</h2><div class="text-image-grid"><div class="text-image-copy"><h3 class="editable" contenteditable="true" data-guide-edit="customStoryTitle">Clarity, consistency, and confidence.</h3><p class="editable" contenteditable="true" data-guide-edit="customStoryCopy">Use this block for positioning notes, voice, market context, or a short explanation of the visual direction.</p></div><div class="text-image-visual"><span class="editable" contenteditable="true" data-guide-edit="customVisualLabel">Drop visual / brand note</span></div></div></div></section>`;
+    return `<section class="guide-section" data-section-type="brand-rules"><div class="guide-wrap"><div class="section-label editable" contenteditable="true" data-guide-edit="customLabel">${label}</div><h2 class="section-title editable" contenteditable="true" data-guide-edit="customTitle">Simple rules for using the brand well.</h2><div class="dynamic-section-grid"><div class="dynamic-card"><b class="editable" contenteditable="true" data-guide-edit="customRuleLabel">Do</b><p class="editable" contenteditable="true" data-guide-edit="customRuleCopy">Use approved files, keep spacing consistent, and lean on the core palette.</p></div><div class="dynamic-card dark"><b class="editable" contenteditable="true" data-guide-edit="customRuleLabel">Don’t</b><p class="editable" contenteditable="true" data-guide-edit="customRuleCopy">Do not stretch logos, invent colors, or add effects that weaken recognition.</p></div><div class="dynamic-card accent"><b class="editable" contenteditable="true" data-guide-edit="customRuleLabel">Best use</b><p class="editable" contenteditable="true" data-guide-edit="customRuleCopy">Use this section for quick client-facing notes and rollout guidance.</p></div><div class="dynamic-card"><b class="editable" contenteditable="true" data-guide-edit="customRuleLabel">Reminder</b><p class="editable" contenteditable="true" data-guide-edit="customRuleCopy">Keep the system simple enough for the client to actually follow.</p></div></div></div></section>`;
+  }
+  function addGuideSection(){
+    const type=$('#sectionToolAddType')?.value||'text-image';
+    const template=document.createElement('template');
+    template.innerHTML=customSectionHtml(type).trim();
+    const section=template.content.firstElementChild;
+    ensureSectionToolId(section);
+    const anchor=$('#puttLabSection')||document.querySelector('#guidePreview .guide-footer');
+    if(anchor)anchor.parentNode.insertBefore(section,anchor);else $('#guidePreview')?.appendChild(section);
+    state.published=false;
+    renderSectionTool();
+    ensureLivePreview('New guide section added. Edit the text directly in the preview.');
+  }
+  function duplicateGuideSection(id){
+    const section=sectionByToolId(id);
+    if(!section)return;
+    const clone=section.cloneNode(true);
+    clone.classList.remove('is-section-hidden');
+    clone.querySelectorAll('[id]').forEach(el=>el.removeAttribute('id'));
+    clone.removeAttribute('data-section-bg');
+    clone.dataset.sectionType=(section.dataset.sectionType||'duplicate')+'-copy';
+    clone.dataset.sectionToolId='sec-'+Date.now().toString(36)+'-'+Math.random().toString(16).slice(2,7);
+    const label=clone.querySelector('.section-label');
+    if(label && !/copy/i.test(label.textContent)) label.textContent=label.textContent.trim()+' · Copy';
+    section.parentNode.insertBefore(clone,section.nextSibling);
+    state.published=false;
+    renderSectionTool();
+    ensureLivePreview('Guide section duplicated.');
+  }
+  function moveGuideSection(id,direction){
+    const section=sectionByToolId(id);
+    if(!section)return;
+    const sections=managedGuideSections();
+    const index=sections.indexOf(section);
+    if(direction==='up'&&index>0){section.parentNode.insertBefore(section,sections[index-1]);}
+    if(direction==='down'&&index<sections.length-1){section.parentNode.insertBefore(sections[index+1],section);}
+    state.published=false;
+    renderSectionTool();
+    ensureLivePreview('Guide section order updated.');
+  }
+  function toggleGuideSection(id){
+    const section=sectionByToolId(id);
+    if(!section)return;
+    section.classList.toggle('is-section-hidden');
+    state.published=false;
+    renderSectionTool();
+    status(section.classList.contains('is-section-hidden')?'Section hidden from the guide.':'Section shown in the guide.');
+  }
+  function deleteGuideSection(id){
+    const section=sectionByToolId(id);
+    if(!section)return;
+    if(managedGuideSections().length<=1){status('Keep at least one guide section in the preview.');return;}
+    section.remove();
+    state.published=false;
+    renderSectionTool();
+    ensureLivePreview('Guide section deleted.');
+  }
+  function applySectionSolidColor(id,hex){
+    const section=sectionByToolId(id);
+    if(!section)return;
+    hex=normalizeHex(hex);
+    const fg=textColor(hex);
+    section.dataset.sectionSolidBg=hex;
+    section.style.background=hex;
+    section.style.color=fg;
+    section.querySelectorAll('.section-label,.section-title,.section-copy,.type-card-preview p,.dynamic-card p,.text-image-copy p').forEach(el=>{el.style.color=fg;el.style.opacity=el.classList.contains('section-copy')||el.tagName==='P'?'.72':'1';});
+    section.querySelectorAll('.logo-cell,.type-card-preview,.usage-card,.dynamic-card,.text-image-copy,.text-image-visual,.before-after-card').forEach(card=>{
+      if(card.classList.contains('dark')||card.classList.contains('after'))return;
+      card.style.borderColor='rgba(21,20,15,.12)';
+    });
+    state.published=false;
+  }
+
   function wire(){
     document.querySelector('#openPuttWindowBtn')?.addEventListener('click', openMovingDayPuttLabWindow);
     document.querySelector('#backToEditorBtnTop')?.addEventListener('click', function(){ document.querySelector('#backToEditorBtn')?.click(); });
@@ -3916,6 +4401,129 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     if(display) display.placeholder='Client heading font';
     if(body) body.placeholder='Client body font';
   });
+})();
+</script>
+
+
+
+
+<style id="md-v18-simple-section-box-tool">
+/* V18 · simplified section box tool
+   Keeps the workflow focused: select a section, add a box, rename labels. */
+.simple-section-tool-card{grid-column:1/-1!important;overflow:hidden}
+[data-section-action="duplicate"]{display:none!important}
+.simple-section-tool-card .card-head{align-items:flex-start!important}
+.simple-section-tool{display:grid;grid-template-columns:minmax(280px,.72fr) minmax(320px,1fr);gap:16px;align-items:start}
+.simple-box-builder,.simple-box-editor,.simple-section-manager{border:1px solid rgba(31,61,46,.10);background:linear-gradient(135deg,rgba(251,248,240,.88),rgba(241,236,223,.64));border-radius:22px;padding:18px;box-shadow:inset 0 1px 0 rgba(255,255,255,.78)}
+.simple-box-builder,.simple-box-editor{display:grid;gap:13px}
+.simple-step-label{color:#244834;font-size:10px;font-weight:950;letter-spacing:.18em;text-transform:uppercase}
+.simple-field{display:grid;gap:7px;color:rgba(31,61,46,.62);font-size:9px;font-weight:950;letter-spacing:.15em;text-transform:uppercase}
+.simple-field select,.simple-field input,.simple-box-row input[type="text"]{width:100%;min-height:46px;border:1px solid rgba(31,61,46,.13);border-radius:15px;background:#F8F4EA;color:#15140F;padding:0 14px;font-size:13px;font-weight:850;outline:none;box-shadow:inset 0 1px 0 rgba(255,255,255,.76)}
+.simple-field select:focus,.simple-field input:focus,.simple-box-row input[type="text"]:focus{border-color:rgba(31,61,46,.32);box-shadow:0 0 0 4px rgba(196,217,203,.22),inset 0 1px 0 rgba(255,255,255,.82)}
+.simple-box-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.simple-box-btn{min-height:46px;border:1px solid rgba(31,61,46,.13);border-radius:999px;background:#F8F4EA;color:#244834;font-size:9px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:transform .18s ease,background .18s ease,color .18s ease,border-color .18s ease}
+.simple-box-btn:hover{transform:translateY(-1px);background:#244834;color:#F1ECDF;border-color:#244834}
+.simple-box-btn.dark{background:#15140F;color:#F1ECDF;border-color:rgba(21,20,15,.22)}
+.simple-box-btn.brand{background:#244834;color:#F1ECDF;border-color:#244834}
+.simple-help{margin:0;color:rgba(21,20,15,.55);font-size:12px;line-height:1.45}
+.simple-selected-title{min-height:46px;border-radius:15px;background:rgba(31,61,46,.08);color:#244834;display:flex;align-items:center;padding:0 14px;font-size:13px;font-weight:950;letter-spacing:.03em}
+.simple-box-list{display:grid;gap:9px;max-height:360px;overflow:auto;padding-right:2px}
+.simple-box-row{display:grid;grid-template-columns:34px minmax(0,1fr) 42px 78px;gap:9px;align-items:center;padding:10px;border:1px solid rgba(31,61,46,.08);border-radius:17px;background:rgba(251,248,240,.74)}
+.simple-box-num{width:34px;height:34px;border-radius:999px;background:rgba(31,61,46,.10);color:#244834;display:grid;place-items:center;font-size:10px;font-weight:950;letter-spacing:.08em}
+.simple-box-row input[type="color"],.simple-section-item input[type="color"]{width:42px;height:42px;border:1px solid rgba(31,61,46,.13);border-radius:999px;background:transparent;padding:4px;cursor:pointer}
+.simple-remove-box{min-height:40px;border:1px solid rgba(126,53,47,.16);background:rgba(126,53,47,.06);color:#7E352F;border-radius:999px;font-size:8px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}
+.simple-remove-box:disabled{opacity:.32;cursor:not-allowed}
+.simple-empty{padding:14px;border:1px dashed rgba(31,61,46,.18);border-radius:16px;background:rgba(251,248,240,.58);color:rgba(21,20,15,.55);font-size:12px;line-height:1.45}
+.simple-section-manager{grid-column:1/-1;padding:0;overflow:hidden}
+.simple-section-manager summary{cursor:pointer;list-style:none;padding:18px;color:#244834;font-size:10px;font-weight:950;letter-spacing:.18em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between}
+.simple-section-manager summary::-webkit-details-marker{display:none}
+.simple-section-manager summary::after{content:'+';font-size:18px;line-height:1;color:#244834}
+.simple-section-manager[open] summary::after{content:'–'}
+.simple-manager-inner{display:grid;gap:12px;border-top:1px solid rgba(31,61,46,.08);padding:16px}
+.simple-add-section-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:end}
+.simple-section-list{display:grid;gap:8px;max-height:280px;overflow:auto;padding-right:2px}
+.simple-section-item{display:grid;grid-template-columns:minmax(0,1fr) 42px auto auto auto auto;gap:8px;align-items:center;background:rgba(255,255,255,.68);border:1px solid rgba(31,61,46,.09);border-radius:17px;padding:10px;cursor:pointer}
+.simple-section-item.is-selected{border-color:rgba(31,61,46,.30);box-shadow:0 0 0 4px rgba(196,217,203,.20)}
+.simple-section-item.is-hidden{opacity:.58}
+.simple-section-name{display:grid;gap:3px;min-width:0}.simple-section-name b{color:#244834;font-size:12px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.simple-section-name span{color:rgba(21,20,15,.48);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.simple-section-action{min-height:36px;border:1px solid rgba(31,61,46,.12);background:#F8F4EA;color:#244834;border-radius:999px;padding:0 10px;font-size:8px;font-weight:950;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}.simple-section-action:hover{background:#244834;color:#F1ECDF}.simple-section-action.danger:hover{background:#7E352F;color:#F1ECDF}
+.logo-cell.md-extra-box,.mockup.md-extra-box,.dynamic-card.md-extra-box,.type-card-preview.md-extra-box,.usage-card.md-extra-box,.before-after-card.md-extra-box,.text-image-copy.md-extra-box,.text-image-visual.md-extra-box,.swatch.md-extra-box{position:relative;outline:0}
+.logo-cell.md-extra-box{background:var(--paper);border:1px solid rgba(21,20,15,.12);box-shadow:inset 0 1px 0 rgba(255,255,255,.65)}
+.logo-cell.md-extra-box.dark{background:var(--c1);color:var(--c4)}
+.logo-cell.md-extra-box.brand{background:var(--c5);color:var(--c4)}
+.box-remove-btn{display:none;position:absolute;right:12px;top:12px;z-index:5;width:30px;height:30px;border:1px solid rgba(21,20,15,.13);border-radius:999px;background:rgba(251,248,240,.84);color:#15140F;font-size:16px;line-height:1;cursor:pointer;box-shadow:0 8px 20px rgba(21,20,15,.08)}
+.builder-mode .md-extra-box:hover .box-remove-btn{display:grid;place-items:center}.locked .box-remove-btn,.box-remove-btn[hidden]{display:none!important}
+@media(max-width:980px){.simple-section-tool{grid-template-columns:1fr}.simple-section-item{grid-template-columns:1fr 42px;}.simple-section-action{min-height:34px}.simple-add-section-row,.simple-box-row{grid-template-columns:1fr}.simple-box-row input[type="color"]{width:100%}.simple-box-buttons{grid-template-columns:1fr}}
+</style>
+
+<script id="md-v18-simple-section-box-tool-script">
+(function(){
+  const ready=fn=>document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();
+  const $=(s,r=document)=>r.querySelector(s);
+  const $$=(s,r=document)=>Array.from(r.querySelectorAll(s));
+  const uid=p=>p+'-'+Date.now().toString(36)+'-'+Math.random().toString(16).slice(2,7);
+  const escapeHtml=s=>String(s||'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const normalizeHex=value=>{let v=String(value||'').trim();if(/^rgb/i.test(v)){const n=v.match(/\d+/g)||[];if(n.length>=3)return '#'+n.slice(0,3).map(x=>Math.max(0,Math.min(255,parseInt(x,10)||0)).toString(16).padStart(2,'0')).join('').toUpperCase();} if(!v.startsWith('#'))v='#'+v;if(/^#[0-9a-f]{3}$/i.test(v))v='#'+v.slice(1).split('').map(c=>c+c).join('');return /^#[0-9a-f]{6}$/i.test(v)?v.toUpperCase():'#F1ECDF';};
+  let selectedSectionId='';
+  let rendering=false;
+  function managedSections(){return $$('#guidePreview > .guide-section').filter(el=>!el.classList.contains('putt-lab-section'));}
+  function ensureSectionId(section){if(!section.dataset.sectionToolId)section.dataset.sectionToolId=uid('sec');return section.dataset.sectionToolId;}
+  function sectionById(id){return managedSections().find(el=>ensureSectionId(el)===id);}
+  function sectionTitle(section,index){return (section.querySelector('.section-label')?.textContent||section.querySelector('.section-title')?.textContent||`Section ${index+1}`).trim();}
+  function sectionSub(section){return (section.querySelector('.section-title')?.textContent||section.querySelector('.section-copy')?.textContent||'Guide section').trim();}
+  function boxSelector(){return '.logo-cell,.mockup,.dynamic-card,.type-card-preview,.usage-card,.before-after-card,.text-image-copy,.text-image-visual,.swatch';}
+  function boxesInSection(section){return $$(boxSelector(),section).filter(box=>!box.closest('.asset-package-card') && !box.closest('.section-tool-card'));}
+  function ensureBoxId(box){if(!box.dataset.mdBoxId)box.dataset.mdBoxId=uid('box');return box.dataset.mdBoxId;}
+  function boxById(id){return $(`[data-md-box-id="${CSS.escape(id)}"]`);}
+  function labelElement(box){return box.querySelector('.logo-cell-label,.mockup-label,[data-guide-edit="sectionBoxLabel"],.swatch span,b,.section-label')||box.querySelector('span,b,strong');}
+  function contentElement(box){return box.querySelector('.missing,[data-guide-edit="sectionBoxContent"],p,strong');}
+  function currentTargetSection(){return sectionById(selectedSectionId)||managedSections()[0]||null;}
+  function setSelectedSection(id){selectedSectionId=id;renderSimpleTool();}
+  function findGrid(section,type){
+    if(type.startsWith('logo'))return section.querySelector('.logo-grid')||makeGrid(section,'logo-grid');
+    if(type==='mockup')return section.querySelector('.mockup-grid')||makeGrid(section,'mockup-grid');
+    if(type==='swatch')return section.querySelector('.palette-row')||makeGrid(section,'palette-row');
+    if(type==='text-card')return section.querySelector('.dynamic-section-grid')||makeGrid(section,'dynamic-section-grid');
+    return section.querySelector('.logo-grid,.mockup-grid,.palette-row,.dynamic-section-grid,.type-grid,.usage-grid,.before-after-grid,.text-image-grid')||makeGrid(section,'dynamic-section-grid');
+  }
+  function makeGrid(section,className){const grid=document.createElement('div');grid.className=className+' is-addable-grid';const copy=section.querySelector('.section-copy');if(copy)copy.insertAdjacentElement('afterend',grid);else section.querySelector('.guide-wrap')?.appendChild(grid);return grid;}
+  function createBox(type,label){
+    const safe=escapeHtml(label||'New Box');const id=uid('guide-box');
+    if(type.startsWith('logo')){const tone=type==='logo-dark'?' dark':type==='logo-brand'?' brand':'';return `<div class="logo-cell md-extra-box${tone}" data-md-extra-box="true" data-md-box-id="${id}"><div class="missing editable" contenteditable="true" data-guide-edit="sectionBoxContent">${safe}</div><span class="logo-cell-label editable" contenteditable="true" data-guide-edit="sectionBoxLabel">${safe}</span><button class="box-remove-btn" type="button" data-simple-remove-box="${id}" aria-label="Remove box">×</button></div>`;}
+    if(type==='mockup')return `<div class="mockup md-extra-box" data-md-extra-box="true" data-md-box-id="${id}"><div class="missing editable" contenteditable="true" data-guide-edit="sectionBoxContent">${safe}</div><span class="mockup-label editable" contenteditable="true" data-guide-edit="sectionBoxLabel">${safe}</span><button class="box-remove-btn" type="button" data-simple-remove-box="${id}" aria-label="Remove box">×</button></div>`;
+    if(type==='swatch')return `<div class="swatch md-extra-box" data-md-extra-box="true" data-md-box-id="${id}" style="background:var(--c3);color:#15140F"><span class="editable" contenteditable="true" data-guide-edit="sectionBoxLabel">${safe}</span><button class="box-remove-btn" type="button" data-simple-remove-box="${id}" aria-label="Remove box">×</button></div>`;
+    return `<div class="dynamic-card md-extra-box" data-md-extra-box="true" data-md-box-id="${id}"><b class="editable" contenteditable="true" data-guide-edit="sectionBoxLabel">${safe}</b><p class="editable" contenteditable="true" data-guide-edit="sectionBoxContent">Add a short note, usage rule, or application detail here.</p><button class="box-remove-btn" type="button" data-simple-remove-box="${id}" aria-label="Remove box">×</button></div>`;
+  }
+  function addBox(type){
+    const section=currentTargetSection(); if(!section)return;
+    selectedSectionId=ensureSectionId(section);
+    const label=($('#simpleBoxLabel')?.value||'New Box').trim()||'New Box';
+    const template=document.createElement('template');template.innerHTML=createBox(type,label).trim();
+    findGrid(section,type).appendChild(template.content.firstElementChild);
+    section.scrollIntoView({behavior:'smooth',block:'center'});
+    renderSimpleTool();
+  }
+  function setBoxLabel(id,value){const box=boxById(id);if(!box)return;const label=labelElement(box);if(label)label.textContent=value;const content=contentElement(box);if(content&&content.classList.contains('missing'))content.textContent=value;}
+  function setBoxBg(id,value){const box=boxById(id);if(!box)return;const hex=normalizeHex(value);box.dataset.mdBoxBg=hex;box.style.background=hex;const h=hex.slice(1);const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);box.style.color=((r*299+g*587+b*114)/1000<145)?'#F1ECDF':'#15140F';}
+  function removeBox(id){const box=boxById(id);if(!box||box.dataset.mdExtraBox!=='true')return;box.remove();renderSimpleTool();}
+  function renderTargetSelect(sections){const sel=$('#simpleSectionTarget');if(!sel)return;const old=selectedSectionId||sel.value;sel.innerHTML=sections.map((section,index)=>`<option value="${ensureSectionId(section)}">${escapeHtml(sectionTitle(section,index))}</option>`).join('');if(old&&sectionById(old)){selectedSectionId=old;sel.value=old;}else if(sections[0]){selectedSectionId=ensureSectionId(sections[0]);sel.value=selectedSectionId;}}
+  function renderBoxEditor(){const section=currentTargetSection();const title=$('#simpleSelectedTitle');const list=$('#simpleBoxList');if(!list)return;if(!section){if(title)title.textContent='No section selected';list.innerHTML='<div class="simple-empty">Add a section first, then use this tool to place boxes inside it.</div>';return;}const idx=managedSections().indexOf(section);if(title)title.textContent=sectionTitle(section,idx);const boxes=boxesInSection(section);boxes.forEach(ensureBoxId);if(!boxes.length){list.innerHTML='<div class="simple-empty">This section has no editable boxes yet. Add a logo box, mockup square, text card, or color swatch.</div>';return;}list.innerHTML=boxes.map((box,index)=>{const id=ensureBoxId(box);const label=labelElement(box);const value=label?.textContent?.trim()||`Box ${index+1}`;const bg=normalizeHex(box.dataset.mdBoxBg||box.style.backgroundColor||'#F1ECDF');const extra=box.dataset.mdExtraBox==='true';return `<div class="simple-box-row" data-simple-box-row="${id}"><span class="simple-box-num">${String(index+1).padStart(2,'0')}</span><input type="text" value="${escapeHtml(value)}" data-simple-box-label="${id}" maxlength="54" aria-label="Box label"><input type="color" value="${bg}" data-simple-box-bg="${id}" title="Box background"><button class="simple-remove-box" type="button" data-simple-remove-box="${id}" ${extra?'':'disabled'}>${extra?'Remove':'Locked'}</button></div>`;}).join('');}
+  function renderSectionList(sections){const list=$('#sectionToolList');if(!list)return;list.innerHTML=sections.map((section,index)=>{const id=ensureSectionId(section);const selected=id===selectedSectionId;const hidden=section.classList.contains('is-section-hidden');const bg=normalizeHex(section.dataset.sectionSolidBg||'#F1ECDF');const count=boxesInSection(section).length;return `<div class="simple-section-item${selected?' is-selected':''}${hidden?' is-hidden':''}" data-simple-select-section="${id}"><div class="simple-section-name"><b>${String(index+1).padStart(2,'0')} · ${escapeHtml(sectionTitle(section,index).replace(/^\d+\s*·\s*/,''))}</b><span>${count} box${count===1?'':'es'} · ${escapeHtml(sectionSub(section)).slice(0,72)}</span></div><input type="color" value="${bg}" data-section-bg-color="${id}" title="Section background"><button class="simple-section-action" type="button" data-section-action="up" data-section-id="${id}">Up</button><button class="simple-section-action" type="button" data-section-action="down" data-section-id="${id}">Down</button><button class="simple-section-action" type="button" data-section-action="toggle" data-section-id="${id}">${hidden?'Show':'Hide'}</button><button class="simple-section-action danger" type="button" data-section-action="delete" data-section-id="${id}">Delete</button></div>`;}).join('')||'<div class="simple-empty">No sections yet. Add a section above.</div>';}
+  function renderSimpleTool(){if(rendering)return;rendering=true;requestAnimationFrame(()=>{const sections=managedSections();sections.forEach(ensureSectionId);if(!selectedSectionId&&sections[0])selectedSectionId=ensureSectionId(sections[0]);if(selectedSectionId&&!sectionById(selectedSectionId)&&sections[0])selectedSectionId=ensureSectionId(sections[0]);renderTargetSelect(sections);renderBoxEditor();renderSectionList(sections);rendering=false;});}
+  function boot(){
+    renderSimpleTool();
+    document.addEventListener('change',e=>{if(e.target.matches('#simpleSectionTarget')){selectedSectionId=e.target.value;renderSimpleTool();}});
+    document.addEventListener('click',e=>{
+      const add=e.target.closest('[data-simple-add-box]');if(add){addBox(add.dataset.simpleAddBox);return;}
+      const row=e.target.closest('[data-simple-select-section]');if(row&&!e.target.closest('button,input,select')){setSelectedSection(row.dataset.simpleSelectSection);return;}
+      const remove=e.target.closest('[data-simple-remove-box]');if(remove){removeBox(remove.dataset.simpleRemoveBox);return;}
+      if(e.target.closest('#addGuideSectionBtn'))setTimeout(renderSimpleTool,140);
+      if(e.target.closest('[data-section-action]'))setTimeout(renderSimpleTool,140);
+    });
+    document.addEventListener('input',e=>{if(e.target.matches('[data-simple-box-label]'))setBoxLabel(e.target.dataset.simpleBoxLabel,e.target.value);if(e.target.matches('[data-simple-box-bg]'))setBoxBg(e.target.dataset.simpleBoxBg,e.target.value);if(e.target.matches('[data-section-bg-color]'))setTimeout(renderSimpleTool,80);if(e.target.closest('#guidePreview')){clearTimeout(window.__mdSimpleBoxRefresh);window.__mdSimpleBoxRefresh=setTimeout(renderSimpleTool,180);}});
+    const guide=$('#guidePreview');if(guide){new MutationObserver(()=>{clearTimeout(window.__mdSimpleGuideRefresh);window.__mdSimpleGuideRefresh=setTimeout(renderSimpleTool,80);}).observe(guide,{childList:true,subtree:true});}
+  }
+  ready(()=>setTimeout(boot,80));
 })();
 </script>
 
