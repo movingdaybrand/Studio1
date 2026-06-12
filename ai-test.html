@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Moving Day AI Test</title>
-
+  <title>Moving Day · AI Review Lab</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
     :root {
       --cream: #F1ECDF;
@@ -14,215 +14,723 @@
       --sage: #C4D9CB;
       --ink: #15140F;
       --muted: #6B6558;
-      --rule: rgba(21, 20, 15, .12);
+      --rule: rgba(21,20,15,.10);
+      --rule-mid: rgba(21,20,15,.16);
     }
+
+    *, *::before, *::after { box-sizing: border-box; }
 
     body {
       margin: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: radial-gradient(circle at top right, rgba(196,217,203,.28), transparent 30%),
-        linear-gradient(145deg, #07110c, #10241a);
+      background: linear-gradient(145deg, #07110c, #0e1f16);
       color: var(--cream);
       min-height: 100vh;
-      padding: 32px;
     }
 
+    /* NAV */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 32px;
+      border-bottom: 1px solid rgba(241,236,223,.08);
+      position: sticky;
+      top: 0;
+      background: rgba(7,17,12,.88);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+    }
+
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: Georgia, serif;
+      font-size: 15px;
+      letter-spacing: -.02em;
+      color: var(--cream);
+      text-decoration: none;
+    }
+
+    .nav-logo-mark {
+      width: 28px;
+      height: 28px;
+      background: var(--forest);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+    }
+
+    .nav-pill {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--sage);
+      background: rgba(196,217,203,.12);
+      border: 1px solid rgba(196,217,203,.2);
+      border-radius: 999px;
+      padding: 4px 10px;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .nav-link {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: rgba(241,236,223,.5);
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 999px;
+      border: 1px solid rgba(241,236,223,.12);
+      transition: color .15s, border-color .15s;
+    }
+
+    .nav-link:hover { color: var(--cream); border-color: rgba(241,236,223,.28); }
+
+    /* LAYOUT */
     .wrap {
       max-width: 1100px;
       margin: 0 auto;
+      padding: 40px 32px 80px;
     }
 
-    .hero {
-      border: 1px solid rgba(241,236,223,.14);
-      border-radius: 32px;
-      padding: 44px;
-      background: rgba(251,248,240,.06);
-      margin-bottom: 24px;
-    }
-
-    h1 {
-      font-family: Georgia, serif;
-      font-size: clamp(48px, 7vw, 86px);
-      line-height: .92;
-      font-weight: 400;
-      letter-spacing: -.05em;
-      margin: 0 0 16px;
-    }
-
-    p {
-      color: rgba(241,236,223,.72);
-      max-width: 640px;
-    }
-
-    .panel {
-      background: var(--paper);
-      color: var(--ink);
+    /* UPLOAD ZONE */
+    .upload-zone {
+      border: 1px solid rgba(241,236,223,.12);
       border-radius: 28px;
-      padding: 26px;
-      box-shadow: 0 24px 70px rgba(0,0,0,.22);
+      padding: 36px 40px;
+      background: rgba(251,248,240,.04);
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 24px;
+      align-items: center;
     }
 
-    .upload {
-      border: 1px dashed rgba(31,61,46,.28);
-      border-radius: 22px;
-      padding: 24px;
-      background: #F6F2E8;
-      margin-bottom: 18px;
+    .upload-zone-left h2 {
+      font-family: Georgia, serif;
+      font-size: 28px;
+      font-weight: 400;
+      letter-spacing: -.04em;
+      margin: 0 0 6px;
+      color: var(--cream);
     }
 
-    input {
+    .upload-zone-left p {
+      margin: 0;
+      font-size: 13px;
+      color: rgba(241,236,223,.5);
+      max-width: 480px;
+    }
+
+    .upload-zone-right {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: flex-end;
+    }
+
+    .file-input-wrapper {
+      position: relative;
+    }
+
+    .file-input-wrapper input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
       width: 100%;
-      margin-top: 12px;
+      height: 100%;
     }
 
-    button {
+    .file-input-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(241,236,223,.2);
+      background: rgba(241,236,223,.06);
+      color: var(--cream);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    #fileCount {
+      font-size: 12px;
+      color: rgba(241,236,223,.45);
+      text-align: right;
+    }
+
+    .analyze-btn {
       border: 0;
       border-radius: 999px;
-      padding: 13px 18px;
+      padding: 14px 28px;
       background: var(--forest);
       color: var(--cream);
       font-weight: 800;
-      cursor: pointer;
-    }
-
-    button:disabled {
-      opacity: .5;
-      cursor: not-allowed;
-    }
-
-    .results {
-      display: grid;
-      gap: 14px;
-      margin-top: 22px;
-    }
-
-    .card {
-      border: 1px solid var(--rule);
-      border-radius: 20px;
-      background: white;
-      padding: 18px;
-    }
-
-    .card h3 {
-      margin: 0 0 8px;
       font-size: 12px;
-      letter-spacing: .16em;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: background .15s;
+    }
+
+    .analyze-btn:hover { background: #2a5240; }
+    .analyze-btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* STATUS BAR */
+    .status-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 18px;
+      border-radius: 14px;
+      background: rgba(196,217,203,.08);
+      border: 1px solid rgba(196,217,203,.14);
+      font-size: 12px;
+      color: var(--sage);
+      margin-bottom: 20px;
+      display: none;
+    }
+
+    .status-bar.visible { display: flex; }
+
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--sage);
+      flex-shrink: 0;
+    }
+
+    .status-dot.pulsing {
+      animation: pulse 1.2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: .3; }
+    }
+
+    /* RESULTS GRID */
+    .results-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .results-grid .full { grid-column: 1 / -1; }
+
+    /* PANEL */
+    .panel {
+      background: var(--paper);
+      color: var(--ink);
+      border-radius: 24px;
+      padding: 0;
+      overflow: hidden;
+      border: 1px solid rgba(21,20,15,.06);
+    }
+
+    .panel-head {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--rule);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .eyebrow {
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .18em;
       text-transform: uppercase;
       color: var(--forest);
+      margin: 0 0 3px;
     }
 
-    .small {
+    .panel-title {
+      font-family: Georgia, serif;
+      font-size: 22px;
+      font-weight: 400;
+      letter-spacing: -.04em;
+      margin: 0;
+      color: var(--ink);
+    }
+
+    .panel-body {
+      padding: 20px 24px;
+    }
+
+    /* BRAND IDENTITY */
+    .brand-name {
+      font-family: Georgia, serif;
+      font-size: 36px;
+      font-weight: 400;
+      letter-spacing: -.05em;
+      margin: 0 0 12px;
+      color: var(--ink);
+      line-height: 1;
+    }
+
+    .meta-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--rule-mid);
       color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
+      background: #f7f3e9;
+    }
+
+    .tag.forest {
+      background: var(--forest);
+      color: var(--cream);
+      border-color: transparent;
+    }
+
+    /* PALETTE */
+    .palette-bar {
+      display: flex;
+      height: 72px;
+      border-radius: 14px;
+      overflow: hidden;
+      margin-bottom: 16px;
+    }
+
+    .palette-bar-swatch {
+      flex: 1;
+      position: relative;
+    }
+
+    .palette-bar-swatch span {
+      position: absolute;
+      bottom: 7px;
+      left: 9px;
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      mix-blend-mode: overlay;
+      opacity: .8;
+      color: white;
     }
 
     .swatches {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 10px;
+      gap: 8px;
     }
 
     .swatch {
-      width: 120px;
-      border-radius: 14px;
+      flex: 1;
+      min-width: 80px;
+      border-radius: 12px;
       overflow: hidden;
       border: 1px solid var(--rule);
       background: #fff;
     }
 
-    .swatch i {
-      display: block;
-      height: 60px;
+    .swatch-color {
+      height: 48px;
     }
 
-    .swatch span {
-      display: block;
-      padding: 8px;
+    .swatch-info {
+      padding: 8px 10px;
+    }
+
+    .swatch-name {
       font-size: 11px;
       font-weight: 800;
+      color: var(--ink);
+      display: block;
+      margin-bottom: 2px;
     }
+
+    .swatch-hex {
+      font-size: 10px;
+      color: var(--muted);
+      font-family: monospace;
+    }
+
+    .swatch-usage {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 4px;
+      line-height: 1.4;
+      display: block;
+    }
+
+    /* TYPOGRAPHY */
+    .type-pair {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .type-block {
+      border: 1px solid var(--rule);
+      border-radius: 14px;
+      padding: 16px;
+      background: #faf7ef;
+    }
+
+    .type-label {
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--forest);
+      margin: 0 0 10px;
+    }
+
+    .type-display {
+      font-family: Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -.04em;
+      color: var(--ink);
+      margin: 0 0 6px;
+      line-height: 1;
+    }
+
+    .type-body-sample {
+      font-size: 13px;
+      color: var(--ink);
+      line-height: 1.6;
+      margin: 0 0 6px;
+    }
+
+    .type-meta {
+      font-size: 11px;
+      color: var(--muted);
+      margin: 0;
+    }
+
+    /* ASSET PLACEMENTS */
+    .assignment-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .assignment-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #f7f3e9;
+      border: 1px solid var(--rule);
+    }
+
+    .assignment-slot {
+      font-size: 11px;
+      font-weight: 900;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: var(--forest);
+      min-width: 110px;
+      flex-shrink: 0;
+      padding-top: 1px;
+    }
+
+    .assignment-detail {
+      flex: 1;
+    }
+
+    .assignment-file {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0 0 2px;
+    }
+
+    .assignment-reason {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    /* COPY */
+    .copy-grid {
+      display: grid;
+      gap: 12px;
+    }
+
+    .copy-block {
+      border-left: 2px solid var(--forest);
+      padding: 10px 14px;
+      background: #f7f3e9;
+      border-radius: 0 10px 10px 0;
+    }
+
+    .copy-label {
+      font-size: 10px;
+      font-weight: 900;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--forest);
+      margin: 0 0 4px;
+    }
+
+    .copy-text {
+      font-size: 14px;
+      color: var(--ink);
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* PREFLIGHT */
+    .preflight-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .preflight-row {
+      display: flex;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--rule);
+      background: #f7f3e9;
+      align-items: flex-start;
+    }
+
+    .preflight-badge {
+      font-size: 9px;
+      font-weight: 900;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: 4px 9px;
+      border-radius: 999px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .preflight-badge.warning {
+      background: #fef3cd;
+      color: #856404;
+    }
+
+    .preflight-badge.suggestion {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .preflight-badge.note {
+      background: #e2e3e5;
+      color: #383d41;
+    }
+
+    .preflight-issue {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--ink);
+      margin: 0 0 3px;
+    }
+
+    .preflight-fix {
+      font-size: 12px;
+      color: var(--muted);
+      margin: 0;
+      line-height: 1.45;
+    }
+
+    /* JSON TOGGLE */
+    .json-toggle {
+      background: none;
+      border: 1px solid var(--rule-mid);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      padding: 8px 14px;
+      border-radius: 999px;
+      cursor: pointer;
+    }
+
+    .json-toggle:hover { border-color: var(--forest); color: var(--forest); }
 
     pre {
       white-space: pre-wrap;
       word-break: break-word;
-      background: #10241a;
+      background: #0e1f16;
       color: var(--cream);
-      border-radius: 16px;
-      padding: 16px;
-      font-size: 12px;
+      border-radius: 14px;
+      padding: 18px;
+      font-size: 11px;
       overflow: auto;
+      margin: 16px 0 0;
+      display: none;
+    }
+
+    pre.visible { display: block; }
+
+    /* ERROR */
+    .error-card {
+      background: #fff5f5;
+      border: 1px solid rgba(220,53,69,.2);
+      border-radius: 16px;
+      padding: 20px 24px;
+      grid-column: 1 / -1;
+    }
+
+    .error-card h3 {
+      margin: 0 0 6px;
+      font-size: 13px;
+      font-weight: 800;
+      color: #c0392b;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+
+    .error-card p {
+      margin: 0;
+      font-size: 13px;
+      color: #6b2c2c;
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 800px) {
+      .upload-zone { grid-template-columns: 1fr; }
+      .upload-zone-right { align-items: flex-start; }
+      .results-grid { grid-template-columns: 1fr; }
+      .type-pair { grid-template-columns: 1fr; }
+      .wrap { padding: 24px 18px 60px; }
+      .nav { padding: 14px 18px; }
     }
   </style>
 </head>
 
 <body>
+
+  <nav class="nav">
+    <a class="nav-logo" href="/">
+      <span class="nav-logo-mark">M</span>
+      Moving Day
+    </a>
+    <span class="nav-pill">AI Review Lab</span>
+    <div class="nav-actions">
+      <a class="nav-link" href="/guide.html">Back to Builder</a>
+      <a class="nav-link" href="/api/analyze-brand-files">API Route</a>
+    </div>
+  </nav>
+
   <main class="wrap">
-    <section class="hero">
-      <h1>AI Brand Analysis Test</h1>
-      <p>This page is separate from your real builder. Test the AI response here first. Nothing touches your main guide.</p>
-    </section>
 
-    <section class="panel">
-      <div class="upload">
-        <strong>Upload brand files</strong>
-        <p class="small">Try logos, screenshots, PNGs, JPGs, or SVGs. This test sends the files to your backend and returns structured brand recommendations.</p>
-        <input id="files" type="file" multiple accept=".png,.jpg,.jpeg,.webp,.svg" />
+    <div class="upload-zone">
+      <div class="upload-zone-left">
+        <h2>Analyze brand files</h2>
+        <p>Upload logos, screenshots, or brand assets. The AI reads every file, returns a color palette, font recommendations, asset placements, copy suggestions, and preflight issues.</p>
       </div>
+      <div class="upload-zone-right">
+        <div class="file-input-wrapper">
+          <input id="files" type="file" multiple accept=".png,.jpg,.jpeg,.webp,.svg" />
+          <span class="file-input-label">Choose files</span>
+        </div>
+        <div id="fileCount">No files selected</div>
+        <button class="analyze-btn" id="analyzeBtn">Analyze Brand</button>
+      </div>
+    </div>
 
-      <button id="analyzeBtn">Analyze Brand</button>
+    <div class="status-bar" id="statusBar">
+      <span class="status-dot pulsing" id="statusDot"></span>
+      <span id="statusText">Sending to AI analyzer...</span>
+    </div>
 
-      <div id="results" class="results"></div>
-    </section>
+    <div class="results-grid" id="resultsGrid"></div>
+
   </main>
 
   <script>
     const filesInput = document.getElementById("files");
     const analyzeBtn = document.getElementById("analyzeBtn");
-    const results = document.getElementById("results");
+    const fileCountEl = document.getElementById("fileCount");
+    const statusBar = document.getElementById("statusBar");
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
+    const resultsGrid = document.getElementById("resultsGrid");
+
+    filesInput.addEventListener("change", () => {
+      const count = filesInput.files?.length || 0;
+      fileCountEl.textContent = count ? `${count} file${count > 1 ? "s" : ""} selected` : "No files selected";
+    });
+
+    function setStatus(msg, loading = false) {
+      statusText.textContent = msg;
+      statusBar.classList.add("visible");
+      statusDot.classList.toggle("pulsing", loading);
+    }
+
+    function hideStatus() {
+      statusBar.classList.remove("visible");
+    }
 
     analyzeBtn.addEventListener("click", async () => {
       const files = Array.from(filesInput.files || []);
-
-      if (!files.length) {
-        alert("Upload at least one brand file first.");
-        return;
-      }
+      if (!files.length) { alert("Upload at least one brand file first."); return; }
 
       analyzeBtn.disabled = true;
       analyzeBtn.textContent = "Analyzing...";
-      results.innerHTML = "";
+      resultsGrid.innerHTML = "";
+      setStatus("Reading files...", true);
 
       try {
-        const assets = await Promise.all(files.map(fileToDataUrl));
+        const dataUrls = await Promise.all(files.map(fileToDataUrl));
+        setStatus("Sending to AI analyzer...", true);
 
         const response = await fetch("/api/analyze-brand-files", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            assets: assets.map((asset, index) => ({
-              id: `asset_${index + 1}`,
-              name: files[index].name,
-              type: files[index].type,
-              dataUrl: asset
+            assets: dataUrls.map((url, i) => ({
+              id: `asset_${i + 1}`,
+              name: files[i].name,
+              type: files[i].type,
+              dataUrl: url
             }))
           })
         });
 
-        if (!response.ok) {
-          throw new Error(await response.text());
-        }
+        if (!response.ok) throw new Error(await response.text());
 
         const data = await response.json();
+        setStatus("Analysis complete.", false);
         renderResults(data);
-      } catch (error) {
-        results.innerHTML = `
-          <div class="card">
+      } catch (err) {
+        hideStatus();
+        resultsGrid.innerHTML = `
+          <div class="error-card">
             <h3>Error</h3>
-            <p class="small">${escapeHtml(error.message)}</p>
-          </div>
-        `;
+            <p>${escapeHtml(err.message)}</p>
+          </div>`;
       } finally {
         analyzeBtn.disabled = false;
         analyzeBtn.textContent = "Analyze Brand";
@@ -230,93 +738,209 @@
     });
 
     function fileToDataUrl(file) {
-      return new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+      return new Promise((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(r.result);
+        r.onerror = rej;
+        r.readAsDataURL(file);
       });
     }
 
     function renderResults(data) {
-      const palette = data.palette || [];
+      const palette     = data.palette || [];
       const assignments = data.assetAssignments || [];
-      const copy = data.copySuggestions || {};
-      const preflight = data.preflight || [];
-      const typography = data.typography || {};
+      const copy        = data.copySuggestions || {};
+      const preflight   = data.preflight || [];
+      const typography  = data.typography || {};
+      const brand       = data.brand || {};
 
-      results.innerHTML = `
-        <div class="card">
-          <h3>Brand Identity</h3>
-          <p><strong>${escapeHtml(data.brand?.name || "Unknown brand")}</strong></p>
-          <p class="small">Industry: ${escapeHtml(data.brand?.industry || "Not detected")}</p>
-          <p class="small">Tone: ${(data.brand?.tone || []).map(escapeHtml).join(", ")}</p>
-        </div>
+      const panels = [];
 
-        <div class="card">
-          <h3>Palette</h3>
-          <div class="swatches">
-            ${palette.map(color => `
-              <div class="swatch">
-                <i style="background:${escapeHtml(color.hex)}"></i>
-                <span>${escapeHtml(color.name)}<br>${escapeHtml(color.hex)}<br><span style="font-weight:400;color:#6B6558">${escapeHtml(color.usage || "")}</span></span>
-              </div>
-            `).join("")}
+      // BRAND IDENTITY
+      panels.push(`
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Brand Identity</p>
+              <p class="panel-title">Detected client</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <p class="brand-name">${escapeHtml(brand.name || "Unknown brand")}</p>
+            <div class="meta-row">
+              ${brand.industry ? `<span class="tag forest">${escapeHtml(brand.industry)}</span>` : ""}
+              ${(brand.tone || []).map(t => `<span class="tag">${escapeHtml(t)}</span>`).join("")}
+            </div>
           </div>
         </div>
+      `);
 
-        <div class="card">
-          <h3>Typography</h3>
-          ${typography.display ? `
-            <p class="small"><strong>Display:</strong> ${escapeHtml(typography.display.name || "Unknown")} · ${escapeHtml(typography.display.weight || "")}
-            <br>${escapeHtml(typography.display.usage || "")}</p>
-          ` : ""}
-          ${typography.body ? `
-            <p class="small"><strong>Body:</strong> ${escapeHtml(typography.body.name || "Unknown")} · ${escapeHtml(typography.body.weight || "")}
-            <br>${escapeHtml(typography.body.usage || "")}</p>
-          ` : ""}
-          ${!typography.display && !typography.body ? `<p class="small">No typography data returned.</p>` : ""}
-        </div>
+      // PALETTE
+      const paletteBar = palette.map(c =>
+        `<div class="palette-bar-swatch" style="background:${escapeHtml(c.hex)}"><span>${escapeHtml(c.name)}</span></div>`
+      ).join("");
 
-        <div class="card">
-          <h3>Asset Placement</h3>
-          ${assignments.map(item => `
-            <p class="small">
-              <strong>${escapeHtml(item.slot)}</strong> → ${escapeHtml(item.fileId)}
-              <br>${escapeHtml(item.reason || "")}
-            </p>
-          `).join("") || `<p class="small">No placement recommendations returned.</p>`}
+      const swatchCards = palette.map(c => `
+        <div class="swatch">
+          <div class="swatch-color" style="background:${escapeHtml(c.hex)}"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">${escapeHtml(c.name)}</span>
+            <span class="swatch-hex">${escapeHtml(c.hex)}</span>
+            ${c.usage ? `<span class="swatch-usage">${escapeHtml(c.usage)}</span>` : ""}
+          </div>
         </div>
+      `).join("");
 
-        <div class="card">
-          <h3>Copy Suggestions</h3>
-          ${Object.entries(copy).map(([key, value]) => `
-            <p class="small">
-              <strong>${escapeHtml(key)}</strong><br>
-              ${escapeHtml(typeof value === "string" ? value : value?.suggested || value || "")}
-            </p>
-          `).join("") || `<p class="small">No copy suggestions returned.</p>`}
+      panels.push(`
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Color System</p>
+              <p class="panel-title">Palette</p>
+            </div>
+            <span class="tag">${palette.length} colors</span>
+          </div>
+          <div class="panel-body">
+            ${palette.length ? `<div class="palette-bar">${paletteBar}</div>` : ""}
+            <div class="swatches">${swatchCards || `<p style="color:var(--muted);font-size:13px">No palette returned.</p>`}</div>
+          </div>
         </div>
+      `);
 
-        <div class="card">
-          <h3>Preflight</h3>
-          ${preflight.map(item => `
-            <p class="small">
-              <strong>${escapeHtml(item.severity || "note")}</strong>: ${escapeHtml(item.issue || "")}
-              <br>${escapeHtml(item.suggestedFix || "")}
-            </p>
-          `).join("") || `<p class="small">No issues found.</p>`}
-        </div>
+      // TYPOGRAPHY
+      const dispBlock = typography.display ? `
+        <div class="type-block">
+          <p class="type-label">Display</p>
+          <p class="type-display">${escapeHtml(typography.display.name || "Unknown")}</p>
+          <p class="type-meta">${escapeHtml(typography.display.weight || "")} · ${escapeHtml(typography.display.usage || "")}</p>
+        </div>` : "";
 
-        <div class="card">
-          <h3>Raw JSON</h3>
-          <pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre>
+      const bodyBlock = typography.body ? `
+        <div class="type-block">
+          <p class="type-label">Body / UI</p>
+          <p class="type-body-sample">The quick brown fox jumps over the lazy dog.</p>
+          <p class="type-meta">${escapeHtml(typography.body.name || "Unknown")} · ${escapeHtml(typography.body.weight || "")} · ${escapeHtml(typography.body.usage || "")}</p>
+        </div>` : "";
+
+      panels.push(`
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Typography</p>
+              <p class="panel-title">Type system</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            ${dispBlock || bodyBlock ? `<div class="type-pair">${dispBlock}${bodyBlock}</div>` : `<p style="color:var(--muted);font-size:13px">No typography data returned.</p>`}
+          </div>
         </div>
-      `;
+      `);
+
+      // ASSET PLACEMENTS
+      const assignRows = assignments.map(item => `
+        <div class="assignment-row">
+          <span class="assignment-slot">${escapeHtml(item.slot)}</span>
+          <div class="assignment-detail">
+            <p class="assignment-file">${escapeHtml(item.fileId)}</p>
+            <p class="assignment-reason">${escapeHtml(item.reason || "")}</p>
+          </div>
+        </div>
+      `).join("");
+
+      panels.push(`
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Asset Placements</p>
+              <p class="panel-title">Recommended roles</p>
+            </div>
+            <span class="tag">${assignments.length} files</span>
+          </div>
+          <div class="panel-body">
+            <div class="assignment-list">
+              ${assignRows || `<p style="color:var(--muted);font-size:13px">No placements returned.</p>`}
+            </div>
+          </div>
+        </div>
+      `);
+
+      // COPY SUGGESTIONS
+      const copyBlocks = Object.entries(copy).map(([key, value]) => `
+        <div class="copy-block">
+          <p class="copy-label">${escapeHtml(key)}</p>
+          <p class="copy-text">${escapeHtml(typeof value === "string" ? value : value?.suggested || String(value) || "")}</p>
+        </div>
+      `).join("");
+
+      panels.push(`
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Copy Suggestions</p>
+              <p class="panel-title">Brand language</p>
+            </div>
+          </div>
+          <div class="panel-body">
+            <div class="copy-grid">
+              ${copyBlocks || `<p style="color:var(--muted);font-size:13px">No copy suggestions returned.</p>`}
+            </div>
+          </div>
+        </div>
+      `);
+
+      // PREFLIGHT
+      const preflightRows = preflight.map(item => `
+        <div class="preflight-row">
+          <span class="preflight-badge ${escapeHtml((item.severity || "note").toLowerCase())}">${escapeHtml(item.severity || "note")}</span>
+          <div>
+            <p class="preflight-issue">${escapeHtml(item.issue || "")}</p>
+            <p class="preflight-fix">${escapeHtml(item.suggestedFix || "")}</p>
+          </div>
+        </div>
+      `).join("");
+
+      panels.push(`
+        <div class="panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Preflight</p>
+              <p class="panel-title">Issues &amp; flags</p>
+            </div>
+            <span class="tag">${preflight.length} item${preflight.length !== 1 ? "s" : ""}</span>
+          </div>
+          <div class="panel-body">
+            <div class="preflight-list">
+              ${preflightRows || `<p style="color:var(--muted);font-size:13px;margin:0">No issues found.</p>`}
+            </div>
+          </div>
+        </div>
+      `);
+
+      // RAW JSON
+      panels.push(`
+        <div class="panel full">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">Developer</p>
+              <p class="panel-title">Raw response</p>
+            </div>
+            <button class="json-toggle" onclick="this.closest('.panel').querySelector('pre').classList.toggle('visible');this.textContent=this.textContent==='Show JSON'?'Hide JSON':'Show JSON'">Show JSON</button>
+          </div>
+          <div class="panel-body" style="padding-top:0">
+            <pre>${escapeHtml(JSON.stringify(data, null, 2))}</pre>
+          </div>
+        </div>
+      `);
+
+      // Assign column spans
+      const spans = ["", "", "full", "", "", "", "full"];
+      resultsGrid.innerHTML = panels.map((p, i) =>
+        spans[i] ? p.replace('class="panel"', `class="panel ${spans[i]}"`) : p
+      ).join("");
     }
 
-    function escapeHtml(value) {
-      return String(value || "")
+    function escapeHtml(v) {
+      return String(v ?? "")
         .replaceAll("&", "&amp;")
         .replaceAll("<", "&lt;")
         .replaceAll(">", "&gt;")
