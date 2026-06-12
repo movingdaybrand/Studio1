@@ -1,154 +1,179 @@
+export const config = {
+  maxDuration: 60,
+};
 
-const MODEL = process.env.OPENAI_MODEL || "gpt-5.4-mini";
+const SYSTEM_PROMPT = `You are a brand identity analyst. You will receive one or more uploaded brand files (logos, screenshots, mockups) and return a structured JSON analysis.
 
-function json(statusCode, body) {
-  return {
-    statusCode,
-    headers: {
-      "Content-Type": "application/json",
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "Content-Type",
-      "Access-Control-Allow-Methods": "POST, OPTIONS"
-    },
-    body: JSON.stringify(body)
-  };
-}
+You MUST return ONLY valid JSON — no markdown fences, no preamble, no explanation. The response must parse cleanly with JSON.parse().
 
-function stripData(asset) {
-  return {
-    slot: asset.slot,
-    label: asset.label,
-    name: asset.name,
-    type: asset.type,
-    ext: asset.ext,
-    size: asset.size,
-    width: asset.width,
-    height: asset.height,
-    qualityScore: asset.qualityScore,
-    transparency: asset.transparency
-  };
-}
+Return this exact shape:
 
-function buildPrompt(payload) {
-  const assets = (payload.assets || []).map(stripData);
-  return `You are Moving Day Studio's brand asset intake and guide-building engine.
-
-Goal: convert a messy client upload folder into a polished brand identity guide data object.
-
-Project fields:
-${JSON.stringify(payload.project || {}, null, 2)}
-
-Current palette:
-${JSON.stringify(payload.colors || [], null, 2)}
-
-Uploaded assets metadata:
-${JSON.stringify(assets, null, 2)}
-
-Return ONLY valid JSON. Do not include markdown.
-
-Required JSON shape:
 {
-  "guide": {
-    "clientName": "string",
-    "category": "string",
-    "heroDescription": "string",
-    "deliveryDate": "string",
-    "assetCount": number
+  "brand": {
+    "name": "string — detected or inferred brand name",
+    "industry": "string — e.g. Law, Accounting, Consulting, Healthcare, Real Estate",
+    "tone": ["array", "of", "tone", "words"] 
   },
-  "selectedAssets": {
-    "heroLogo": "exact uploaded filename",
-    "primaryLogo": "exact uploaded filename",
-    "iconMark": "exact uploaded filename",
-    "iconVariant": "exact uploaded filename",
-    "profileImage": "exact uploaded filename",
-    "websiteHeader": "exact uploaded filename",
-    "businessCard": "exact uploaded filename",
-    "socialPost": "exact uploaded filename"
-  },
-  "colors": [
-    {"hex":"#000000","role":"primary","reason":"short reason"}
+  "palette": [
+    {
+      "name": "string — role name e.g. Primary, Secondary, Accent, Background, Text",
+      "hex": "#rrggbb",
+      "usage": "string — one sentence on where this color is used"
+    }
   ],
   "typography": {
-    "displayFont":"string",
-    "bodyFont":"string"
+    "display": {
+      "name": "string — font name or best guess e.g. Playfair Display",
+      "weight": "string — e.g. 700 Bold",
+      "usage": "string — e.g. Headlines, hero text, cover titles"
+    },
+    "body": {
+      "name": "string — font name or best guess e.g. Inter",
+      "weight": "string — e.g. 400 Regular",
+      "usage": "string — e.g. Body copy, UI labels, captions"
+    }
   },
-  "usage": {
-    "do": ["5 short client-facing rules"],
-    "dont": ["5 short client-facing rules"]
+  "assetAssignments": [
+    {
+      "fileId": "string — the asset id passed in e.g. asset_1",
+      "slot": "string — one of: PrimaryLogo, SecondaryLogo, IconMark, WebsiteHeader, SocialAvatar, BusinessCard, PrintAsset, ExtraAsset",
+      "reason": "string — one sentence explaining this assignment"
+    }
+  ],
+  "copySuggestions": {
+    "tagline": "string — a short brand tagline under 10 words",
+    "heroHeadline": "string — a strong homepage headline under 12 words",
+    "elevatorPitch": "string — 1-2 sentence brand description"
   },
-  "downloadCards": [
-    {"title":"Logo Files","description":"short", "files":["exact filename"], "formats":["SVG","PNG"]}
-  ],
-  "assetReport": [
-    {"name":"exact filename", "assetRole":"primary_logo | icon | social | print | website | source | font | reference", "placement":"where it should go", "qualityScore": 1, "reason":"short"}
-  ],
-  "warnings": ["missing assets or quality issues"],
-  "confidence": {
-    "overall": 1,
-    "assetMapping": 1,
-    "colors": 1,
-    "typography": 1,
-    "downloads": 1
-  }
+  "preflight": [
+    {
+      "severity": "string — one of: warning, suggestion, note",
+      "issue": "string — what the problem is",
+      "suggestedFix": "string — what to do about it"
+    }
+  ]
 }
 
 Rules:
-- Use exact uploaded filenames for selectedAssets and downloadCards.files.
-- Prefer SVG, PDF, AI, EPS, and transparent PNGs for logo/source roles.
-- Do not choose screenshots as final logos if better logo files exist.
-- If you cannot infer a slot, use an empty string.
-- Keep copy premium, concise, and client-facing.
-- The app will automatically fall back to local sorting if this response fails.`;
-}
-
-async function analyzeBrandFiles(payload) {
-  if (!process.env.OPENAI_API_KEY) {
-    return { error: "Missing OPENAI_API_KEY. Add it in Netlify/Vercel environment variables." };
-  }
-
-  const prompt = buildPrompt(payload);
-  const response = await fetch("https://api.openai.com/v1/responses", {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      input: [
-        {
-          role: "user",
-          content: [
-            { type: "input_text", text: prompt }
-          ]
-        }
-      ],
-      text: { format: { type: "json_object" } }
-    })
-  });
-
-  const data = await response.json();
-  if (!response.ok) {
-    throw new Error(data?.error?.message || `OpenAI request failed with ${response.status}`);
-  }
-
-  const text = data.output_text || data.output?.flatMap(o => o.content || []).map(c => c.text || c.output_text || "").join("\n") || "{}";
-  try {
-    return JSON.parse(text);
-  } catch (error) {
-    return { error: "Model did not return parseable JSON.", raw: text };
-  }
-}
+- palette must have exactly 5 items
+- assetAssignments must include one entry per uploaded asset
+- preflight should flag low contrast, missing variants, unclear marks, or weak typography — be specific
+- if you cannot detect a font name, make your best educated guess based on visual style
+- tone should be 3-5 words like: professional, approachable, modern, classic, bold, minimal, playful, trustworthy
+- do not invent colors that are not visible in the uploaded files`;
 
 export default async function handler(req, res) {
-  if (req.method === "OPTIONS") return res.status(200).json({ ok: true });
-  if (req.method !== "POST") return res.status(405).json({ error: "Use POST" });
-  try {
-    const body = typeof req.body === "string" ? JSON.parse(req.body || "{}") : (req.body || {});
-    const result = await analyzeBrandFiles(body);
-    if (result.error) return res.status(400).json(result);
-    return res.status(200).json(result);
-  } catch (error) {
-    return res.status(500).json({ error: error.message || "Analysis failed" });
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
   }
+
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: "OPENAI_API_KEY environment variable is not set." });
+  }
+
+  let body;
+  try {
+    body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+  } catch {
+    return res.status(400).json({ error: "Invalid JSON body." });
+  }
+
+  const assets = body?.assets;
+  if (!Array.isArray(assets) || assets.length === 0) {
+    return res.status(400).json({ error: "No assets provided. Send { assets: [{ id, name, type, dataUrl }] }" });
+  }
+
+  // Build the content array for GPT-4o — images + labels
+  const content = [];
+
+  for (const asset of assets) {
+    const { id, name, type, dataUrl } = asset;
+
+    if (!dataUrl || !type) continue;
+
+    // SVGs can't be sent as image_url blocks — send a text notice instead
+    if (type === "image/svg+xml" || name?.toLowerCase().endsWith(".svg")) {
+      content.push({
+        type: "text",
+        text: `[SVG file uploaded: ${name} (id: ${id}). Analyze based on filename and any other uploaded images. Assign it a role in assetAssignments.]`
+      });
+      continue;
+    }
+
+    // OpenAI expects data URLs directly in image_url blocks
+    content.push({
+      type: "image_url",
+      image_url: {
+        url: dataUrl,
+        detail: "high"
+      }
+    });
+
+    content.push({
+      type: "text",
+      text: `The image above is: ${name} (id: ${id})`
+    });
+  }
+
+  content.push({
+    type: "text",
+    text: "Analyze all uploaded brand files and return the JSON analysis as specified."
+  });
+
+  let openAiResponse;
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`
+      },
+      body: JSON.stringify({
+        model: "gpt-4o",
+        max_tokens: 2000,
+        messages: [
+          {
+            role: "system",
+            content: SYSTEM_PROMPT
+          },
+          {
+            role: "user",
+            content
+          }
+        ]
+      })
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      return res.status(502).json({ error: `OpenAI API error: ${response.status}`, detail: errorText });
+    }
+
+    openAiResponse = await response.json();
+  } catch (err) {
+    return res.status(502).json({ error: "Failed to reach OpenAI API.", detail: err.message });
+  }
+
+  // Extract text from the first choice
+  const rawText = openAiResponse?.choices?.[0]?.message?.content || "";
+
+  // Strip markdown fences if the model added them anyway
+  const cleaned = rawText
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
+
+  let parsed;
+  try {
+    parsed = JSON.parse(cleaned);
+  } catch {
+    return res.status(422).json({
+      error: "OpenAI returned non-JSON output.",
+      raw: cleaned
+    });
+  }
+
+  return res.status(200).json(parsed);
 }
