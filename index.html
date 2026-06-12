@@ -1319,6 +1319,124 @@ body{
 .putt-hint i{font-style:normal;opacity:.7;}
 .putt-lab-section:not(.active) + .guide-footer{border-top:0;}
 @media(max-width:780px){.putt-lab-head{grid-template-columns:1fr}.putt-lab-controls{justify-content:flex-start}.putt-game-shell{padding:12px;border-radius:24px}#puttCanvas{min-height:360px}.putt-hint{position:static;background:#1F3D2E;padding:12px 14px;border-radius:0;display:block}}
+
+
+/* ─────────────────────────────────────────────
+   V14 · LOCAL PALETTE EXTRACTOR · ALWAYS VISIBLE
+   Sits directly above the five manual color cards.
+───────────────────────────────────────────── */
+.palette-card{
+  position:relative!important;
+}
+.palette-extract-panel,
+#aiPaletteControl{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  gap:16px!important;
+  align-items:center!important;
+  width:100%!important;
+  margin:0 0 16px!important;
+  padding:18px!important;
+  border-radius:24px!important;
+  border:1px solid rgba(31,61,46,.12)!important;
+  background:
+    radial-gradient(circle at 96% 0%,rgba(196,217,203,.34),transparent 38%),
+    linear-gradient(145deg,rgba(255,255,255,.82),rgba(241,236,223,.62))!important;
+  box-shadow:0 16px 40px rgba(31,61,46,.07), inset 0 1px 0 rgba(255,255,255,.86)!important;
+  visibility:visible!important;
+  opacity:1!important;
+  transform:none!important;
+}
+.palette-extract-copy b,
+#aiPaletteControl b{
+  display:block!important;
+  margin:0 0 6px!important;
+  font-family:var(--sans)!important;
+  font-size:10px!important;
+  line-height:1!important;
+  font-weight:950!important;
+  letter-spacing:.18em!important;
+  text-transform:uppercase!important;
+  color:var(--forest)!important;
+}
+.palette-extract-copy span,
+#aiPaletteControl span{
+  display:block!important;
+  max-width:580px!important;
+  font-size:12px!important;
+  line-height:1.48!important;
+  color:rgba(21,20,15,.58)!important;
+}
+#analyzePaletteBtn,
+.palette-extract-button{
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:46px!important;
+  min-width:148px!important;
+  padding:0 18px!important;
+  border-radius:999px!important;
+  border:0!important;
+  background:linear-gradient(135deg,var(--forest),var(--forest-deep))!important;
+  color:var(--cream)!important;
+  font-family:var(--sans)!important;
+  font-size:10px!important;
+  font-weight:950!important;
+  letter-spacing:.14em!important;
+  text-transform:uppercase!important;
+  cursor:pointer!important;
+  box-shadow:0 14px 30px rgba(31,61,46,.18)!important;
+  white-space:nowrap!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+#analyzePaletteBtn:hover,
+.palette-extract-button:hover{
+  transform:translateY(-1px)!important;
+  box-shadow:0 18px 38px rgba(31,61,46,.22)!important;
+}
+#analyzePaletteBtn:disabled,
+.palette-extract-button:disabled{
+  opacity:.66!important;
+  cursor:progress!important;
+  transform:none!important;
+}
+.ai-palette-feedback,
+#aiPaletteFeedback{
+  display:flex!important;
+  align-items:center!important;
+  min-height:40px!important;
+  margin:0 0 15px!important;
+  padding:11px 13px!important;
+  border-radius:17px!important;
+  border:1px solid rgba(31,61,46,.10)!important;
+  background:rgba(251,248,240,.74)!important;
+  color:rgba(21,20,15,.58)!important;
+  font-size:11px!important;
+  line-height:1.35!important;
+  visibility:visible!important;
+  opacity:1!important;
+}
+#aiPaletteFeedback[data-tone="success"]{
+  background:rgba(196,217,203,.36)!important;
+  color:var(--forest)!important;
+  border-color:rgba(31,61,46,.15)!important;
+}
+#aiPaletteFeedback[data-tone="error"]{
+  background:rgba(156,60,60,.08)!important;
+  color:#7F2F2F!important;
+  border-color:rgba(156,60,60,.16)!important;
+}
+#aiPaletteFeedback[data-tone="loading"]{
+  background:rgba(31,61,46,.07)!important;
+  color:var(--forest)!important;
+  border-color:rgba(31,61,46,.14)!important;
+}
+@media(max-width:760px){
+  .palette-extract-panel,
+  #aiPaletteControl{grid-template-columns:1fr!important;}
+  #analyzePaletteBtn,.palette-extract-button{width:100%!important;}
+}
 </style>
 
 <style id="md-text-only-legibility-patch">
@@ -2088,6 +2206,36 @@ body{
 }
 </style>
 
+
+<style id="assetRecolorToolStyles">
+.asset-recolor-panel{
+  margin-top:16px;
+  border:1px solid rgba(31,61,46,.11);
+  background:linear-gradient(135deg,rgba(251,248,240,.92),rgba(241,236,223,.64));
+  border-radius:18px;
+  padding:16px;
+  display:grid;
+  gap:12px;
+  box-shadow:0 18px 44px rgba(31,61,46,.06),inset 0 1px 0 rgba(255,255,255,.72);
+}
+.asset-recolor-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px}
+.asset-recolor-head b{display:block;color:#244834;font:900 12px/1.2 var(--sans);letter-spacing:.12em;text-transform:uppercase}
+.asset-recolor-head span{display:block;margin-top:5px;color:rgba(21,20,15,.56);font-size:12px;line-height:1.45}
+.asset-recolor-badge{flex:0 0 auto!important;margin-top:0!important;border:1px solid rgba(31,61,46,.12);background:rgba(196,217,203,.35);color:#244834!important;border-radius:999px;padding:6px 8px;font:900 9px/1 var(--sans)!important;letter-spacing:.12em;text-transform:uppercase}
+.asset-recolor-grid{display:grid;grid-template-columns:minmax(0,1.4fr) .72fr .9fr;gap:10px;align-items:end}
+.asset-recolor-field{display:grid;gap:6px;min-width:0}
+.asset-recolor-field span{font-size:8px;text-transform:uppercase;letter-spacing:.16em;color:rgba(21,20,15,.48);font-weight:900}
+.asset-recolor-field select,.asset-recolor-field input[type=color]{width:100%;border:1px solid rgba(31,61,46,.12);background:#F8F4EA;color:#15140F;border-radius:12px;min-height:42px;font-size:12px;font-weight:800;outline:none}
+.asset-recolor-field input[type=color]{padding:4px;cursor:pointer}
+.recolor-palette-picks{display:flex;flex-wrap:wrap;gap:8px}
+.recolor-chip{width:34px;height:34px;border-radius:999px;border:1px solid rgba(21,20,15,.14);box-shadow:inset 0 0 0 3px rgba(255,255,255,.52),0 7px 18px rgba(31,61,46,.12);cursor:pointer}
+.recolor-check{display:flex;align-items:center;gap:8px;color:rgba(21,20,15,.58);font-size:12px;font-weight:700}
+.recolor-check input{accent-color:#1F3D2E}
+.recolor-preview{min-height:58px;border:1px solid rgba(31,61,46,.10);border-radius:14px;background:rgba(255,255,255,.55);display:flex;align-items:center;gap:12px;padding:10px;color:rgba(21,20,15,.55);font-size:12px;line-height:1.4;overflow:hidden}
+.recolor-preview img{width:48px;height:48px;border-radius:12px;object-fit:contain;background:linear-gradient(45deg,rgba(21,20,15,.05) 25%,transparent 25%,transparent 75%,rgba(21,20,15,.05) 75%),linear-gradient(45deg,rgba(21,20,15,.05) 25%,transparent 25%,transparent 75%,rgba(21,20,15,.05) 75%);background-size:12px 12px;background-position:0 0,6px 6px;border:1px solid rgba(21,20,15,.08)}
+#duplicateRecolorBtn:disabled{opacity:.46;cursor:not-allowed;transform:none!important}
+@media(max-width:760px){.asset-recolor-grid{grid-template-columns:1fr}.asset-recolor-head{display:grid}.asset-recolor-badge{width:max-content}}
+</style>
 </head>
 <body>
 <div class="builder-app" id="builderApp">
@@ -2228,6 +2376,37 @@ body{
           <div class="card-head"><h3>Asset intake</h3><span class="note">Upload once, assign below</span></div>
           <div class="upload-zone" id="uploadZone"><div><strong>Add client assets</strong><p>Drag files here or click Upload Assets. Recommended: transparent SVG/PNG logos, high-res JPG/PNG mockups, and font files.</p></div><button class="builder-btn primary" type="button" id="chooseFilesBtn" style="border-radius:12px;width:max-content">Choose files</button></div>
           <div class="asset-list" id="assetList"></div>
+
+          <div class="asset-recolor-panel" id="assetRecolorPanel">
+            <div class="asset-recolor-head">
+              <div>
+                <b>Recolor + duplicate</b>
+                <span>Select any uploaded image/logo, apply a new color, and save it as a separate file.</span>
+              </div>
+              <span class="asset-recolor-badge">Local only</span>
+            </div>
+            <div class="asset-recolor-grid">
+              <label class="asset-recolor-field wide">
+                <span>Source file</span>
+                <select id="recolorAssetSelect"><option value="">Upload an image first</option></select>
+              </label>
+              <label class="asset-recolor-field">
+                <span>New color</span>
+                <input type="color" id="recolorTargetColor" value="#1F3D2E">
+              </label>
+              <label class="asset-recolor-field">
+                <span>Mode</span>
+                <select id="recolorMode">
+                  <option value="flat">Flat brand color</option>
+                  <option value="tone" selected>Preserve highlights</option>
+                </select>
+              </label>
+            </div>
+            <div class="recolor-palette-picks" id="recolorPaletteChips"></div>
+            <label class="recolor-check"><input type="checkbox" id="recolorDropWhite" checked> Remove near-white background pixels</label>
+            <div class="recolor-preview" id="recolorPreview">Upload or select an image asset to create a recolored duplicate.</div>
+            <button class="builder-btn primary" type="button" id="duplicateRecolorBtn" disabled>Duplicate recolored file</button>
+          </div>
         </article>
 
         <article class="card wide">
@@ -2247,14 +2426,14 @@ body{
 
         <article class="card palette-card">
           <div class="card-head"><h3>Brand palette</h3><span class="note">Five-color guide system</span></div>
-          <div class="ai-palette-control" id="aiPaletteControl">
-            <div>
+          <div class="palette-extract-panel" id="aiPaletteControl">
+            <div class="palette-extract-copy">
               <b>Local color extractor</b>
-              <span>Reads uploaded logos/images directly in the browser and applies a clean 5-color client palette. No API calls.</span>
+              <span>Analyze uploaded logos/images in-browser and apply a clean five-color client palette. No API calls, no OpenAI usage.</span>
             </div>
-            <button class="builder-btn primary" type="button" id="analyzePaletteBtn">Extract colors</button>
+            <button class="palette-extract-button" type="button" id="analyzePaletteBtn">Extract colors</button>
           </div>
-          <div class="ai-palette-feedback" id="aiPaletteFeedback">Upload logos or images first. Color extraction runs locally in this page only.</div>
+          <div class="ai-palette-feedback" id="aiPaletteFeedback">Upload client logos or images, then click Extract colors to generate the five-color guide palette locally.</div>
           <div class="colors" id="colorGrid"></div>
         </article>
       </div>
@@ -2507,7 +2686,7 @@ body{
 
 
 
-  function init(){buildColors();buildSlots();wire();renderAll();}
+  function init(){buildColors();ensurePaletteExtractorUi();buildSlots();wire();renderAll();}
   function buildColors(){const roles=['Primary','Secondary','Accent','Light','Dark'];const areas=['Hero · accents','Support · depth','Highlights','Cards · backgrounds','Footer · print'];$('#colorGrid').innerHTML=state.colors.map((hex,i)=>`<div class="color"><input type="color" data-color="${i}" value="${hex}"><b>${String(i+1).padStart(2,'0')} ${roles[i]}</b><span>${areas[i]}</span><input type="text" data-hex="${i}" value="${hex}" maxlength="7"></div>`).join('')}
   function slotClass(key){
     if(key==='profileImage'||key==='iconMark'||key==='socialPost') return 'is-square';
@@ -2560,6 +2739,7 @@ body{
         if(file){
           const a=await makeAsset(file);
           state.assets.push(a);
+          syncAssetCount();
           state.slots[key]=a.id;
           populateSelects();
           renderAll();
@@ -2571,9 +2751,17 @@ body{
     });
     document.addEventListener('input',e=>{if(e.target.matches('[data-color]')){const i=+e.target.dataset.color;state.colors[i]=e.target.value.toUpperCase();$(`[data-hex="${i}"]`).value=state.colors[i];state.published=false;renderAll()} if(e.target.matches('[data-hex]')){const i=+e.target.dataset.hex;const v=normalizeHex(e.target.value);state.colors[i]=v;$(`[data-color="${i}"]`).value=v;e.target.value=v;state.published=false;renderAll()} if(e.target.matches('[data-edit-preview]')&&!state.published){const k=e.target.dataset.editPreview;state.fields[k]=e.target.innerText.trim();const field=$(`[data-field="${k}"]`); if(field) field.value=state.fields[k];renderAll(false)} if(e.target.matches('[data-guide-edit]')&&!state.published){state.published=false;status('Preview text updated. Changes will be included in the downloaded guide.')}});
     $('#displayFontUpload').addEventListener('change',e=>uploadFont('display',e.target.files[0])); $('#bodyFontUpload').addEventListener('change',e=>uploadFont('body',e.target.files[0]));
+    ensurePaletteExtractorUi();
     $('#analyzePaletteBtn')?.addEventListener('click',analyzeUploadedPalette);
+    $('#recolorAssetSelect')?.addEventListener('change',renderRecolorPreview);
+    $('#recolorTargetColor')?.addEventListener('input',renderRecolorPreview);
+    $('#recolorMode')?.addEventListener('change',renderRecolorPreview);
+    $('#recolorDropWhite')?.addEventListener('change',renderRecolorPreview);
+    $('#duplicateRecolorBtn')?.addEventListener('click',duplicateRecoloredAsset);
     $('#resetBtn').addEventListener('click',()=>{if(confirm('Reset all builder data and uploaded assets?')) location.reload()});
     document.addEventListener('click',e=>{
+      const chip=e.target.closest('[data-recolor-chip]');
+      if(chip){const input=$('#recolorTargetColor');if(input){input.value=normalizeHex(chip.dataset.recolorChip);renderRecolorPreview();}return;}
       if(state.published) return;
       const slotEl=e.target.closest('[data-preview-slot]');
       if(!slotEl) return;
@@ -2596,8 +2784,97 @@ body{
       input.click();
     });
   }
+  function assetBaseName(name){return String(name||'asset').replace(/\.[^.]+$/,'').replace(/[^a-z0-9_-]+/gi,'-').replace(/^-+|-+$/g,'')||'asset'}
+  function syncAssetCount(){if(!state.fields.assetCount||/^\d+\s+file/i.test(state.fields.assetCount)){state.fields.assetCount=`${state.assets.length} file${state.assets.length!==1?'s':''}`;const input=$('[data-field="assetCount"]');if(input)input.value=state.fields.assetCount;}}
+  function renderRecolorTool(){
+    const select=$('#recolorAssetSelect');
+    if(!select)return;
+    const imageAssets=state.assets.filter(isImage);
+    const current=select.value;
+    select.innerHTML=imageAssets.length?'<option value="">Select image to recolor</option>'+imageAssets.map(a=>`<option value="${a.id}">${escapeHtml(a.name)}</option>`).join(''):'<option value="">Upload an image first</option>';
+    if(imageAssets.some(a=>a.id===current))select.value=current;
+    const colorInput=$('#recolorTargetColor');
+    if(colorInput && !/^#[0-9a-f]{6}$/i.test(colorInput.value||''))colorInput.value=state.colors[0]||'#1F3D2E';
+    const chips=$('#recolorPaletteChips');
+    if(chips)chips.innerHTML=state.colors.map((c,i)=>`<button class="recolor-chip" type="button" data-recolor-chip="${escapeHtml(c)}" aria-label="Use palette color ${i+1}: ${escapeHtml(c)}" title="${escapeHtml(c)}" style="background:${escapeHtml(c)}"></button>`).join('');
+    renderRecolorPreview();
+  }
+  function renderRecolorPreview(){
+    const preview=$('#recolorPreview');
+    const btn=$('#duplicateRecolorBtn');
+    const select=$('#recolorAssetSelect');
+    if(!preview||!btn||!select)return;
+    const asset=assetById(select.value);
+    const color=normalizeHex($('#recolorTargetColor')?.value||state.colors[0]||'#1F3D2E');
+    if(!asset||!isImage(asset)){
+      preview.textContent=state.assets.some(isImage)?'Choose an image/logo above, then duplicate a recolored copy.':'Upload a PNG, JPG, WEBP, GIF, or SVG first.';
+      btn.disabled=true;
+      return;
+    }
+    btn.disabled=false;
+    preview.innerHTML=`<img src="${asset.data}" alt="${escapeHtml(asset.name)}"><span><strong>${escapeHtml(asset.name)}</strong><br>New duplicate will be recolored to <b>${color}</b> and added back to uploaded assets.</span>`;
+  }
+  function recolorPixelToTarget(r,g,b,target,mode){
+    if(mode==='flat')return target;
+    const lum=(0.2126*r+0.7152*g+0.0722*b)/255;
+    const mix=(a,b,t)=>Math.round(a+(b-a)*t);
+    if(lum<.5){const t=.68+(lum*.58);return {r:mix(0,target.r,t),g:mix(0,target.g,t),b:mix(0,target.b,t)};}
+    const t=(lum-.5)*.72;return {r:mix(target.r,255,t),g:mix(target.g,255,t),b:mix(target.b,255,t)};
+  }
+  async function recolorAssetToPng(asset,targetHex,mode='tone',dropWhite=true){
+    const img=await loadImageAsset(asset);
+    const naturalW=img.naturalWidth||img.width||1200;
+    const naturalH=img.naturalHeight||img.height||1200;
+    const maxDim=2400;
+    const ratio=Math.min(1,maxDim/Math.max(naturalW,naturalH));
+    const w=Math.max(1,Math.round(naturalW*ratio));
+    const h=Math.max(1,Math.round(naturalH*ratio));
+    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.clearRect(0,0,w,h);ctx.drawImage(img,0,0,w,h);
+    const image=ctx.getImageData(0,0,w,h);const data=image.data;const target=hexToRgb(targetHex);
+    for(let i=0;i<data.length;i+=4){
+      const a=data[i+3];if(a<4)continue;
+      const r=data[i],g=data[i+1],b=data[i+2];
+      const hsl=rgbToHsl(r,g,b);
+      if(dropWhite&&a>220&&hsl.l>.91&&hsl.s<.16){data[i+3]=0;continue;}
+      const next=recolorPixelToTarget(r,g,b,target,mode);
+      data[i]=next.r;data[i+1]=next.g;data[i+2]=next.b;
+    }
+    ctx.putImageData(image,0,0);
+    return canvas.toDataURL('image/png');
+  }
+  async function duplicateRecoloredAsset(){
+    const select=$('#recolorAssetSelect');
+    const source=assetById(select?.value);
+    if(!source||!isImage(source)){status('Choose an uploaded image or logo before duplicating.');renderRecolorPreview();return;}
+    const targetHex=normalizeHex($('#recolorTargetColor')?.value||state.colors[0]||'#1F3D2E');
+    const mode=$('#recolorMode')?.value||'tone';
+    const dropWhite=!!$('#recolorDropWhite')?.checked;
+    const btn=$('#duplicateRecolorBtn');
+    const oldText=btn?btn.textContent:'';
+    try{
+      if(btn){btn.disabled=true;btn.textContent='Duplicating…';}
+      const data=await recolorAssetToPng(source,targetHex,mode,dropWhite);
+      const name=`${assetBaseName(source.name)}-recolored-${targetHex.replace('#','')}.png`;
+      const a={id:'a'+Date.now()+Math.random().toString(16).slice(2),name,type:'image/png',ext:'png',data,derivedFrom:source.id,recolor:{color:targetHex,mode,dropWhite}};
+      state.assets.push(a);
+      syncAssetCount();
+      populateSelects();
+      renderAll();
+      const newSelect=$('#recolorAssetSelect');if(newSelect)newSelect.value=a.id;
+      renderRecolorPreview();
+      status(`${name} created as a new duplicated asset. Original file was not changed.`);
+    }catch(err){
+      console.error(err);
+      status('Could not recolor that file. Try a PNG, JPG, WEBP, or SVG logo/image.');
+    }finally{
+      if(btn){btn.textContent=oldText||'Duplicate recolored file';btn.disabled=!assetById($('#recolorAssetSelect')?.value);}
+    }
+  }
+
   async function makeAsset(file){const ext=fileExt(file.name);const raw=await readFile(file);return {id:'a'+Date.now()+Math.random().toString(16).slice(2),name:file.name,type:file.type||({svg:'image/svg+xml',png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif'}[ext]||'application/octet-stream'),ext,data:normalizeDataUrl(raw,ext)}}
-  async function addFiles(files){for(const file of Array.from(files||[])){state.assets.push(await makeAsset(file))} if(!state.fields.assetCount) state.fields.assetCount=`${state.assets.length} file${state.assets.length!==1?'s':''}`;populateSelects();renderAll();status(`${state.assets.length} file(s) loaded. Assign them to guide slots below.`)}
+  async function addFiles(files){for(const file of Array.from(files||[])){state.assets.push(await makeAsset(file))} syncAssetCount();populateSelects();renderAll();status(`${state.assets.length} file(s) loaded. Assign them to guide slots below.`)}
 
   function setPaletteFeedback(message,tone='neutral'){
     const el=$('#aiPaletteFeedback');
@@ -2695,6 +2972,46 @@ body{
       push(rgbToHex(Number(m[1]),Number(m[2]),Number(m[3])));
     }
     return found;
+  }
+  function ensurePaletteExtractorUi(){
+    const colorGrid=$('#colorGrid');
+    if(!colorGrid || !colorGrid.parentNode)return;
+    let control=$('#aiPaletteControl');
+    if(!control){
+      control=document.createElement('div');
+      control.id='aiPaletteControl';
+      control.className='palette-extract-panel';
+      control.innerHTML=`<div class="palette-extract-copy"><b>Local color extractor</b><span>Analyze uploaded logos/images in-browser and apply a clean five-color client palette. No API calls, no OpenAI usage.</span></div><button class="palette-extract-button" type="button" id="analyzePaletteBtn">Extract colors</button>`;
+      colorGrid.parentNode.insertBefore(control,colorGrid);
+    }else{
+      control.classList.add('palette-extract-panel');
+      const copy=control.querySelector('div');
+      if(copy)copy.classList.add('palette-extract-copy');
+    }
+    let btn=$('#analyzePaletteBtn');
+    if(!btn){
+      btn=document.createElement('button');
+      btn.type='button';
+      btn.id='analyzePaletteBtn';
+      btn.className='palette-extract-button';
+      btn.textContent='Extract colors';
+      control.appendChild(btn);
+    }else{
+      btn.classList.add('palette-extract-button');
+      btn.style.display='inline-flex';
+      btn.style.visibility='visible';
+      btn.style.opacity='1';
+    }
+    let feedback=$('#aiPaletteFeedback');
+    if(!feedback){
+      feedback=document.createElement('div');
+      feedback.id='aiPaletteFeedback';
+      feedback.className='ai-palette-feedback';
+      feedback.textContent='Upload client logos or images, then click Extract colors to generate the five-color guide palette locally.';
+      colorGrid.parentNode.insertBefore(feedback,colorGrid);
+    }else{
+      feedback.classList.add('ai-palette-feedback');
+    }
   }
   async function localPaletteFromUploads(){
     const all=[];
@@ -2816,7 +3133,7 @@ body{
     const hero=assetById(state.slots.heroLogo);const heroImg=$('#pvHeroLogo');if(isImage(hero)){heroImg.src=hero.data;heroImg.classList.add('visible')}else{heroImg.removeAttribute('src');heroImg.classList.remove('visible')}
     applySlotBackgrounds();
     setImgWrap('#pvPrimaryLogoWrap',assetById(state.slots.primaryLogo),'Primary Logo');setImgWrap('#pvIconMarkWrap',assetById(state.slots.iconMark),'Icon Mark');setImgWrap('#pvIconVariantWrap',assetById(state.slots.iconVariant),'Brand Variant');setImgWrap('#pvProfileImageWrap',assetById(state.slots.profileImage),'Profile Image');setImgWrap('#pvWebsiteHeaderWrap',assetById(state.slots.websiteHeader),'Digital Mockup');setImgWrap('#pvBusinessCardWrap',assetById(state.slots.businessCard),'Print Mockup');setImgWrap('#pvSocialPostWrap',assetById(state.slots.socialPost),'Social Post');forceGuideSlotPlacement();injectAssetPackage(document);applySectionBackgrounds(document);
-    renderAssetList();populateSelects();updateProgress();
+    renderAssetList();renderRecolorTool();populateSelects();updateProgress();
   }
   function applySlotBackgrounds(){
     applyBgToElement(document.querySelector('.guide-hero'),slotBgKey('heroLogo'));
@@ -2921,81 +3238,6 @@ body{
     const title=`${state.fields.clientName||'Client'} · Downloadable Brand Assets`;
     const cards=assetPackageCardsHtml(items);
     return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>${escapeHtml(title)}</title><style>:root{--cream:#F1ECDF;--paper:#FBF8F0;--forest:#1F3D2E;--deep:#14291F;--ink:#15140F;--sage:#C4D9CB}*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,var(--cream),#E8E0CF);color:var(--ink);font-family:Inter,Arial,sans-serif;padding:42px}.shell{max-width:1160px;margin:0 auto}.eyebrow{font-weight:900;font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--forest);margin-bottom:22px}.hero{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:28px;align-items:end;border-bottom:1px solid rgba(31,61,46,.12);padding-bottom:30px;margin-bottom:30px}h1{font-family:Georgia,serif;font-size:clamp(44px,7vw,78px);line-height:.92;font-weight:400;letter-spacing:-.055em;max-width:820px;margin:0}p{max-width:700px;color:rgba(21,20,15,.62);font-size:16px;line-height:1.58}.index-pill{display:inline-flex;align-items:center;justify-content:center;min-height:46px;border-radius:999px;padding:0 18px;background:var(--forest);color:var(--cream);font-weight:900;font-size:10px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px;margin-top:30px}.asset-package-card{display:grid;grid-template-rows:178px auto;overflow:hidden;border:1px solid rgba(31,61,46,.13);border-radius:28px;background:#fff;color:#15140F;text-decoration:none;box-shadow:0 20px 56px rgba(31,61,46,.09);transition:.18s}.asset-package-card:hover{transform:translateY(-3px);box-shadow:0 28px 72px rgba(31,61,46,.13)}.asset-package-thumb{height:178px;display:grid;place-items:center;padding:26px;background:radial-gradient(circle at 80% 0%,rgba(196,217,203,.42),transparent 42%),linear-gradient(135deg,#F8F4EA,#E8E0CF);border-bottom:1px solid rgba(21,20,15,.08)}.asset-package-thumb.dark{background:radial-gradient(circle at 78% 0%,rgba(196,217,203,.24),transparent 42%),linear-gradient(135deg,#1F3D2E,#14291F)}.asset-package-thumb img{max-width:100%;max-height:124px;object-fit:contain;filter:drop-shadow(0 10px 22px rgba(21,20,15,.14))}.asset-package-file-icon{width:78px;height:78px;border-radius:24px;display:grid;place-items:center;background:#1F3D2E;color:#F1ECDF;font-weight:900;font-size:13px;letter-spacing:.12em;text-transform:uppercase}.asset-package-body{display:grid;grid-template-rows:auto auto 1fr auto;gap:12px;padding:20px}.asset-package-meta{display:flex;flex-wrap:wrap;gap:7px}.asset-package-chip{display:inline-flex;align-items:center;min-height:24px;padding:0 9px;border-radius:999px;border:1px solid rgba(31,61,46,.12);background:#F5F0E6;color:#1F3D2E;font-weight:900;font-size:8px;letter-spacing:.12em;text-transform:uppercase}.asset-package-card h3{margin:0;color:#15140F;font-size:17px;line-height:1.15;letter-spacing:-.03em}.asset-package-card p{margin:0;font-size:13px;line-height:1.45}.asset-package-download{display:flex;justify-content:space-between;gap:12px;padding-top:12px;border-top:1px solid rgba(21,20,15,.08);color:#1F3D2E;font-weight:900;font-size:9px;letter-spacing:.13em;text-transform:uppercase}@media(max-width:720px){body{padding:24px}.hero{grid-template-columns:1fr}.index-pill{width:max-content}}</style></head><body><main class="shell"><div class="eyebrow">Moving Day · Asset Handoff</div><section class="hero"><div><h1>${escapeHtml(title)}</h1><p>Every uploaded file is embedded directly in this handoff page. Click any card to download the asset. Use vector files for vendors and print, PNG files for transparent digital use, JPG files for previews, and PDFs for reference.</p></div><a class="index-pill" href="#files">Asset index</a></section><div class="grid" id="files">${cards}</div></main>
-<style id="md-v12-ai-palette-analyzer-patch">
-/* V13 · Local color extractor button and generated palette feedback */
-.ai-palette-control{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  gap:14px;
-  align-items:center;
-  padding:16px;
-  margin:-2px 0 14px;
-  border:1px solid rgba(31,61,46,.10);
-  border-radius:22px;
-  background:
-    radial-gradient(circle at 95% 0%,rgba(196,217,203,.32),transparent 36%),
-    linear-gradient(145deg,rgba(255,255,255,.72),rgba(241,236,223,.56));
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.72),0 14px 34px rgba(31,61,46,.055);
-}
-.ai-palette-control b{
-  display:block;
-  font:900 10px/1 var(--sans);
-  letter-spacing:.16em;
-  text-transform:uppercase;
-  color:#1F3D2E;
-  margin-bottom:6px;
-}
-.ai-palette-control span{
-  display:block;
-  max-width:460px;
-  font-size:12px;
-  line-height:1.45;
-  color:rgba(21,20,15,.56);
-}
-.ai-palette-control .builder-btn{
-  white-space:nowrap;
-  border-radius:999px!important;
-  min-height:42px!important;
-}
-.ai-palette-control .builder-btn:disabled{
-  opacity:.64;
-  cursor:progress;
-  transform:none!important;
-}
-.ai-palette-feedback{
-  min-height:38px;
-  display:flex;
-  align-items:center;
-  padding:10px 12px;
-  margin:0 0 13px;
-  border-radius:16px;
-  border:1px solid rgba(31,61,46,.09);
-  background:rgba(251,248,240,.68);
-  color:rgba(21,20,15,.56);
-  font-size:11px;
-  line-height:1.35;
-}
-.ai-palette-feedback[data-tone="success"]{
-  background:rgba(196,217,203,.34);
-  color:#1F3D2E;
-  border-color:rgba(31,61,46,.14);
-}
-.ai-palette-feedback[data-tone="error"]{
-  background:rgba(156,60,60,.08);
-  color:#7F2F2F;
-  border-color:rgba(156,60,60,.16);
-}
-.ai-palette-feedback[data-tone="loading"]{
-  background:rgba(31,61,46,.07);
-  color:#1F3D2E;
-  border-color:rgba(31,61,46,.13);
-}
-@media(max-width:760px){
-  .ai-palette-control{grid-template-columns:1fr;}
-  .ai-palette-control .builder-btn{width:100%;}
-}
-</style>
-
 </body></html>`;
   }
   function assetPackageSectionHtml(){
