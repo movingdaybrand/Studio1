@@ -393,13 +393,38 @@ body.dragging .glass {
     0 0 40px rgba(60,160,100,0.09);
 }
 
-.drop-zone {
-  position: absolute; inset: 0; z-index: 4;
-  border-radius: 24px; cursor: default;
-}
+/* UPLOAD FIX: the file input is truly hidden; it no longer overlays the glass panel. */
 .drop-input {
-  position: absolute; inset: 0; opacity: 0;
-  cursor: pointer; font-size: 0;
+  position: fixed;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* FILE INPUT TRIGGER: only this intended area opens the picker on click/keyboard. */
+.upload-select-area {
+  width: 100%;
+  max-width: 390px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border-radius: 24px;
+  padding: 0.4rem 0.35rem 0.2rem;
+  cursor: pointer;
+  outline: none;
+  transition: transform .35s cubic-bezier(0.22,1,0.36,1), filter .35s ease;
+}
+.upload-select-area:hover,
+.upload-select-area:focus-visible {
+  transform: translateY(-1px);
+  filter: brightness(1.015);
+}
+.upload-select-area:focus-visible {
+  box-shadow: 0 0 0 3px rgba(44, 120, 76, .13);
 }
 
 .glass-inner {
@@ -861,39 +886,40 @@ pre.open { display: block; }
       <p class="p-sub" id="p-sub">Reviewing your assets</p>
     </div>
 
-    <!-- Full-panel drop zone — no border, no visible box -->
-    <div class="drop-zone" id="drop-zone" aria-label="Drop brand assets anywhere">
-      <input class="drop-input" type="file" id="file-input" multiple
-        accept=".pdf,.png,.jpg,.jpeg,.svg,.gif,.webp,.ai,.eps,.zip,.ttf,.otf,.woff,.woff2,.pptx,.docx,.xlsx,.mp4,.mov,.sketch,.fig"
-        tabindex="-1" aria-label="Choose brand files" />
-    </div>
+    <!-- UPLOAD FIX: one hidden file input only. It is triggered by JS, never by an overlay. -->
+    <input class="drop-input" type="file" id="file-input" multiple
+      accept=".pdf,.png,.jpg,.jpeg,.svg,.gif,.webp,.ai,.eps,.zip,.ttf,.otf,.woff,.woff2,.pptx,.docx,.xlsx,.mp4,.mov,.sketch,.fig"
+      tabindex="-1" aria-label="Choose brand files" />
 
     <div class="glass-inner">
-      <div class="up-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24">
-          <polyline points="16 16 12 12 8 16"/>
-          <line x1="12" y1="12" x2="12" y2="21"/>
-          <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
-        </svg>
-      </div>
+      <!-- FILE INPUT TRIGGER: this is the only upload surface that opens the picker. -->
+      <div class="upload-select-area" id="upload-zone" role="button" tabindex="0" aria-label="Choose or drop brand files">
+        <div class="up-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <polyline points="16 16 12 12 8 16"/>
+            <line x1="12" y1="12" x2="12" y2="21"/>
+            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+          </svg>
+        </div>
 
-      <div class="normal-copy">
-        <p class="up-head">Move your brand in.</p>
-        <p class="up-sub">Drop your logos, guidelines, fonts, photography,<br>presentations, websites, PDFs, and every brand asset here.</p>
-      </div>
-      <div class="drag-copy">
-        <p class="up-head">Drop your brand anywhere.</p>
-        <p class="up-sub">The door is open.</p>
-      </div>
+        <div class="normal-copy">
+          <p class="up-head">Move your brand in.</p>
+          <p class="up-sub">Drop your logos, guidelines, fonts, photography,<br>presentations, websites, PDFs, and every brand asset here.</p>
+        </div>
+        <div class="drag-copy">
+          <p class="up-head">Drop your brand anywhere.</p>
+          <p class="up-sub">The door is open.</p>
+        </div>
 
-      <div class="file-tags">
-        <span class="f-tag">Logos</span>
-        <span class="f-tag">Fonts</span>
-        <span class="f-tag">Guidelines</span>
-        <span class="f-tag">Photography</span>
-        <span class="f-tag">PDFs</span>
-        <span class="f-tag">Presentations</span>
-        <span class="f-tag">Websites</span>
+        <div class="file-tags" aria-hidden="true">
+          <span class="f-tag">Logos</span>
+          <span class="f-tag">Fonts</span>
+          <span class="f-tag">Guidelines</span>
+          <span class="f-tag">Photography</span>
+          <span class="f-tag">PDFs</span>
+          <span class="f-tag">Presentations</span>
+          <span class="f-tag">Websites</span>
+        </div>
       </div>
 
       <button class="btn-movein" id="btn-movein" disabled aria-label="Move In">
@@ -998,77 +1024,188 @@ pre.open { display: block; }
   el.appendChild(l2);
 })();
 
-/* ── Move In → Upload state ── */
-const intro    = document.getElementById('intro');
-const upload   = document.getElementById('upload');
-const btnBegin = document.getElementById('btn-begin');
+/* APP STATE ROUTER
+   Internal states keep Moving Day feeling like one continuous product environment. */
+const APP_STATES = ['welcome', 'movein', 'upload', 'preparing', 'review', 'brandhome'];
+let appState = 'welcome';
+let staged = [];
+let dragDepth = 0;
 
-btnBegin.addEventListener('click', () => {
-  intro.style.transition    = 'opacity 0.45s ease';
-  intro.style.opacity       = '0';
-  intro.style.pointerEvents = 'none';
-  setTimeout(() => {
-    intro.setAttribute('aria-hidden', 'true');
-    upload.setAttribute('aria-hidden', 'false');
-    upload.classList.add('on');
-  }, 420);
+const intro       = document.getElementById('intro');
+const upload      = document.getElementById('upload');
+const glass       = document.getElementById('glass');
+const btnBegin    = document.getElementById('btn-begin');
+const btnMovein   = document.getElementById('btn-movein');
+const status      = document.getElementById('status');
+const sTxt        = document.getElementById('s-txt');
+const tray        = document.getElementById('tray');
+const fileInput   = document.getElementById('file-input');
+const uploadZone  = document.getElementById('upload-zone');
+const preparing   = document.getElementById('preparing');
+const pSub        = document.getElementById('p-sub');
+const fmt         = b => b < 1048576 ? Math.round(b / 1024) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
+window.pSub = pSub;
+
+function renderState(state) {
+  appState = state;
+  document.body.classList.remove('dragging');
+  dragDepth = 0;
+
+  const onIntro = state === 'welcome' || state === 'movein';
+  const onUpload = state === 'upload' || state === 'preparing';
+  const onPreparing = state === 'preparing';
+  const onResults = state === 'review' || state === 'brandhome';
+
+  document.body.classList.toggle('show-results', onResults);
+  intro.style.transition = 'opacity 0.45s ease';
+  intro.style.opacity = onIntro ? '1' : '0';
+  intro.style.pointerEvents = onIntro ? 'auto' : 'none';
+  intro.setAttribute('aria-hidden', onIntro ? 'false' : 'true');
+
+  upload.classList.toggle('on', onUpload);
+  upload.setAttribute('aria-hidden', onUpload ? 'false' : 'true');
+  preparing.classList.toggle('on', onPreparing);
+
+  const results = document.getElementById('resultsApp');
+  if (results) results.classList.toggle('visible', onResults);
+}
+
+function goToState(state, options = {}) {
+  if (!APP_STATES.includes(state)) return;
+  const { replace = false, push = true } = options;
+  renderState(state);
+
+  if (push) {
+    const method = replace ? 'replaceState' : 'pushState';
+    history[method]({ mdState: state }, '', window.location.href);
+  }
+}
+
+history.replaceState({ mdState: appState }, '', window.location.href);
+renderState(appState);
+
+/* BACK BUTTON HANDLER */
+window.addEventListener('popstate', event => {
+  const state = event.state?.mdState;
+  if (state && APP_STATES.includes(state)) {
+    renderState(state);
+  }
 });
 
-/* ── UPLOAD HOOK ── */
-let staged      = [];
-const fmt       = b => b < 1048576 ? Math.round(b/1024)+' KB' : (b/1048576).toFixed(1)+' MB';
-const btnMovein = document.getElementById('btn-movein');
-const status    = document.getElementById('status');
-const sTxt      = document.getElementById('s-txt');
-const tray      = document.getElementById('tray');
-const fileInput = document.getElementById('file-input');
+/* ── Move In → Upload state ── */
+btnBegin.addEventListener('click', event => {
+  event.preventDefault();
+  event.stopPropagation();
+  goToState('upload');
+});
 
+/* UPLOAD FIX */
 function renderTray() {
   if (!staged.length) {
-    tray.classList.remove('on'); tray.innerHTML = '';
-    btnMovein.disabled = true; status.classList.remove('on'); return;
+    tray.classList.remove('on');
+    tray.innerHTML = '';
+    btnMovein.disabled = true;
+    status.classList.remove('on');
+    return;
   }
+
   tray.classList.add('on');
   tray.innerHTML = staged.map(f => `
     <div class="ti" role="listitem">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      <span class="tn">${f.name}</span><span class="ts">${fmt(f.size)}</span>
+      <span class="tn">${esc(f.name)}</span><span class="ts">${fmt(f.size)}</span>
     </div>`).join('');
+
   btnMovein.disabled = false;
   status.classList.add('on');
-  sTxt.textContent = staged.length === 1 ? '1 asset ready' : `${staged.length} assets ready`;
+  sTxt.textContent = staged.length === 1 ? '1 asset received' : `${staged.length} assets received`;
 }
 
-function addFiles(list) {
-  Array.from(list).forEach(f => {
-    if (!staged.find(s => s.name===f.name && s.size===f.size)) staged.push(f);
+function addFiles(fileList) {
+  const incoming = Array.from(fileList || []).filter(Boolean);
+  if (!incoming.length) return;
+
+  incoming.forEach(file => {
+    const exists = staged.some(s => s.name === file.name && s.size === file.size && s.lastModified === file.lastModified);
+    if (!exists) staged.push(file);
   });
+
   renderTray();
+
+  if (appState !== 'upload') {
+    goToState('upload');
+  }
 }
 
-/* DRAG OVER STATE */
-let dc = 0;
-document.addEventListener('dragenter', e => { e.preventDefault(); dc++; document.body.classList.add('dragging'); });
-document.addEventListener('dragleave', () => { dc--; if (dc<=0) { dc=0; document.body.classList.remove('dragging'); } });
-document.addEventListener('dragover',  e => e.preventDefault());
-document.addEventListener('drop', e => {
-  e.preventDefault(); dc=0; document.body.classList.remove('dragging');
-  if (e.dataTransfer.files.length) addFiles(e.dataTransfer.files);
+/* FILE INPUT TRIGGER */
+function openFilePicker(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  if (appState !== 'upload') return;
+  fileInput.click();
+}
+
+uploadZone.addEventListener('click', openFilePicker);
+uploadZone.addEventListener('keydown', event => {
+  if (event.key === 'Enter' || event.key === ' ') openFilePicker(event);
 });
 
-fileInput.addEventListener('change', () => { if (fileInput.files.length) addFiles(fileInput.files); fileInput.value=''; });
-document.getElementById('drop-zone').addEventListener('click', () => fileInput.click());
+fileInput.addEventListener('click', event => event.stopPropagation());
+fileInput.addEventListener('change', event => {
+  event.stopPropagation();
+  if (fileInput.files?.length) addFiles(fileInput.files);
+  fileInput.value = '';
+});
 
-/* ── PREPARING HOOK ── */
-const preparing = document.getElementById('preparing');
-const pSub      = document.getElementById('p-sub');
-window.pSub = pSub;
+/* DRAG DROP HANDLERS */
+function hasDraggedFiles(event) {
+  return Array.from(event.dataTransfer?.types || []).includes('Files');
+}
 
-btnMovein.addEventListener('click', () => {
-  if (!staged.length) return;
-  preparing.classList.add('on');
+document.addEventListener('dragenter', event => {
+  if (!hasDraggedFiles(event)) return;
+  event.preventDefault();
+  dragDepth += 1;
+  if (appState === 'upload') document.body.classList.add('dragging');
+});
+
+document.addEventListener('dragover', event => {
+  if (!hasDraggedFiles(event)) return;
+  event.preventDefault();
+  if (event.dataTransfer) event.dataTransfer.dropEffect = appState === 'upload' ? 'copy' : 'none';
+});
+
+document.addEventListener('dragleave', event => {
+  if (!hasDraggedFiles(event)) return;
+  event.preventDefault();
+  dragDepth = Math.max(0, dragDepth - 1);
+  if (dragDepth === 0) document.body.classList.remove('dragging');
+});
+
+document.addEventListener('drop', event => {
+  if (!hasDraggedFiles(event)) return;
+  event.preventDefault();
+  event.stopPropagation();
+  dragDepth = 0;
+  document.body.classList.remove('dragging');
+  if (appState === 'upload' && event.dataTransfer?.files?.length) {
+    addFiles(event.dataTransfer.files);
+  }
+});
+
+// Prevent the browser from opening files if they are dropped outside the intended app area.
+window.addEventListener('dragover', event => event.preventDefault());
+window.addEventListener('drop', event => event.preventDefault());
+
+/* PREPARING STATE HOOK */
+btnMovein.addEventListener('click', event => {
+  event.preventDefault();
+  event.stopPropagation();
+  if (!staged.length || appState !== 'upload') return;
+  goToState('preparing');
   runBrandPipeline(staged);
 });
+
 
 
   const BUILDER_KEY = 'movingDayStudio_v3';
@@ -1152,6 +1289,12 @@ btnMovein.addEventListener('click', () => {
 
 
   // ── MAIN PIPELINE — called by the Move In screen ──
+  // Modes for testing:
+  //   default / ?mode=auto  → try the Brand Concierge route first, fall back to local organization
+  //   ?mode=ai             → require /api/analyze-brand-files
+  //   ?mode=local          → skip the API and organize locally
+  const ANALYSIS_MODE = (new URLSearchParams(window.location.search).get('mode') || 'auto').toLowerCase();
+
   function isAnalyzableFile(file) {
     const e = ext(file.name);
     return (file.type || '').startsWith('image/') || ['svg','png','jpg','jpeg','webp'].includes(e);
@@ -1169,15 +1312,182 @@ btnMovein.addEventListener('click', () => {
   }
 
   function revealResults() {
-    document.body.classList.add('show-results');
-    $('resultsApp').classList.add('visible');
+    goToState('review');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function guessClientNameFromFiles(files) {
+    const first = Array.from(files || [])[0]?.name || 'Brand';
+    const base = first
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b(logo|primary|secondary|final|brand|mark|icon|asset|transparent|white|black|png|jpg|jpeg|svg|webp|v\d+)\b/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return base ? base.replace(/\b\w/g, c => c.toUpperCase()) : 'Brand';
+  }
+
+  function rgbToHex(r, g, b) {
+    return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('').toUpperCase();
+  }
+
+  function luminance(r, g, b) {
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  }
+
+  async function extractColorsFromImageDataUrl(dataUrl) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const c = document.createElement('canvas');
+          const max = 72;
+          const ratio = Math.min(max / img.naturalWidth, max / img.naturalHeight, 1);
+          c.width = Math.max(1, Math.round(img.naturalWidth * ratio));
+          c.height = Math.max(1, Math.round(img.naturalHeight * ratio));
+          const ctx = c.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0, c.width, c.height);
+          const data = ctx.getImageData(0, 0, c.width, c.height).data;
+          const buckets = new Map();
+
+          for (let i = 0; i < data.length; i += 16) {
+            const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+            if (a < 48) continue;
+            const l = luminance(r, g, b);
+            const sat = Math.max(r, g, b) - Math.min(r, g, b);
+            if (l > 0.94 || l < 0.035 || sat < 12) continue;
+            const qr = Math.round(r / 24) * 24;
+            const qg = Math.round(g / 24) * 24;
+            const qb = Math.round(b / 24) * 24;
+            const key = `${qr},${qg},${qb}`;
+            buckets.set(key, (buckets.get(key) || 0) + 1);
+          }
+
+          const colors = Array.from(buckets.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 6)
+            .map(([key]) => {
+              const [r, g, b] = key.split(',').map(Number);
+              return rgbToHex(r, g, b);
+            });
+          resolve(colors);
+        } catch (e) {
+          console.warn('Local color extraction skipped:', e);
+          resolve([]);
+        }
+      };
+      img.onerror = () => resolve([]);
+      img.src = dataUrl;
+    });
+  }
+
+  async function extractLocalPalette(dataUrls) {
+    const found = [];
+    for (const url of dataUrls.slice(0, 6)) {
+      const colors = await extractColorsFromImageDataUrl(url);
+      colors.forEach(hex => { if (!found.includes(hex)) found.push(hex); });
+      if (found.length >= 5) break;
+    }
+
+    const fallback = ['#1F3D2E', '#C4D9CB', '#F1ECDF', '#15140F', '#6B6558'];
+    const palette = (found.length ? found : fallback).slice(0, 5);
+    const names = ['Primary', 'Secondary', 'Light', 'Ink', 'Muted'];
+    return palette.map((hex, i) => ({
+      name: names[i] || `Color ${i + 1}`,
+      hex,
+      usage: i === 0 ? 'Primary brand presence' : i === 1 ? 'Supporting color' : 'System color'
+    }));
+  }
+
+  function buildLocalReviewData(allFiles, analyzable, dataUrls, palette) {
+    const clientName = guessClientNameFromFiles(allFiles);
+    return {
+      reviewMode: 'local',
+      guide: {
+        clientName,
+        category: 'Brand System',
+        description: 'A prepared brand package organized from the files provided.'
+      },
+      brand: {
+        name: clientName,
+        industry: 'Brand System',
+        tone: ['Clean', 'Organized', 'Ready']
+      },
+      palette,
+      typography: {
+        display: { name: 'Inter', weight: '300–500', usage: 'Clean display and interface typography' },
+        body: { name: 'Inter', weight: '300–400', usage: 'Readable supporting copy' }
+      },
+      assetAssignments: allFiles.map((file, index) => ({
+        fileId: `asset_${index + 1}`,
+        slot: guessRole(file.name),
+        rationale: 'Organized locally by filename and file type.'
+      })),
+      preflight: [{
+        severity: 'note',
+        issue: 'Prepared with local organization.',
+        suggestedFix: 'Run the Brand Concierge review when the API route is available for deeper typography, color, and usage recommendations.'
+      }],
+      copySuggestions: {
+        positioning: 'A cleaner, organized brand home prepared from the provided assets.'
+      }
+    };
+  }
+
+  async function requestBrandConciergeReview(analyzable, dataUrls) {
+    const res = await fetch('/api/analyze-brand-files', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        assets: dataUrls.map((url, i) => ({
+          id: analyzable[i].uploadId,
+          name: analyzable[i].file.name,
+          type: analyzable[i].file.type,
+          dataUrl: url
+        }))
+      })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const json = await res.json();
+    json.reviewMode = 'concierge';
+    return json;
+  }
+
+  function organizeOriginalAssets(allFiles, reviewData) {
+    const brandName = reviewData.guide?.clientName || reviewData.brand?.name || 'Brand';
+    return allFiles.map((file, i) => {
+      const uploadId = `asset_${i + 1}`;
+      const aiAssignment = (reviewData.assetAssignments || []).find(a => a.fileId === uploadId);
+      const role = aiAssignment ? resolveRole(aiAssignment.slot) : guessRole(file.name);
+      return {
+        id: crypto.randomUUID(), uploadId, file, url: URL.createObjectURL(file),
+        originalName: file.name, role, label: labelForRole(role), extension: ext(file.name),
+        folder: folderForRole(role), colorName: 'Original',
+        finalName: makeFinalName(brandName, role, 'Original', ext(file.name)),
+      };
+    });
+  }
+
+  async function createColorVariantsForAssets() {
+    const palette = aiData.palette || aiData.colors || [];
+    const primaryHex = palette.find(c => /primary|main|brand/i.test(c.name || ''))?.hex || palette[0]?.hex || '#1F3D2E';
+    const colorVariants = [{hex:'#000000',name:'Black'}, {hex:'#ffffff',name:'White'}, {hex:primaryHex,name:'Primary'}];
+    for (const asset of orgAssets) {
+      if (!isPreviewableImage(asset)) continue;
+      for (const cv of colorVariants) {
+        try { const v = await recolorPng(asset, cv.hex, cv.name); variants.push(v); }
+        catch(e) { console.warn('Variant failed:', asset.originalName, cv.name, e); }
+      }
+    }
   }
 
   async function runBrandPipeline(files) {
     const allFiles = Array.from(files || []);
     if (!allFiles.length) return;
 
+    btnMovein.disabled = true;
+    btnMovein.style.opacity = '0.42';
+    btnMovein.setAttribute('aria-busy', 'true');
     $('resultsApp').classList.remove('visible');
     $('progressStrip').classList.add('visible');
     $('summaryBar').classList.remove('visible');
@@ -1204,52 +1514,29 @@ btnMovein.addEventListener('click', () => {
       const dataUrls = await Promise.all(analyzable.map(item => fileToDataUrl(item.file)));
       stepDone(1);
 
-      setPreparingLine('Reviewing your assets');
+      setPreparingLine(ANALYSIS_MODE === 'local' ? 'Organizing locally' : 'Reviewing your assets');
       stepActive(2);
-      const res = await fetch('/api/analyze-brand-files', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          assets: dataUrls.map((url, i) => ({
-            id: analyzable[i].uploadId,
-            name: analyzable[i].file.name,
-            type: analyzable[i].file.type,
-            dataUrl: url
-          }))
-        })
-      });
-      if (!res.ok) throw new Error(await res.text());
-      aiData = await res.json();
+      try {
+        if (ANALYSIS_MODE === 'local') throw new Error('Local organization requested.');
+        aiData = await requestBrandConciergeReview(analyzable, dataUrls);
+      } catch (apiErr) {
+        if (ANALYSIS_MODE === 'ai') throw apiErr;
+        console.warn('Brand Concierge route unavailable; using local organization:', apiErr);
+        setPreparingLine('Organizing locally');
+        const palette = await extractLocalPalette(dataUrls);
+        aiData = buildLocalReviewData(allFiles, analyzable, dataUrls, palette);
+        aiData.localFallbackReason = String(apiErr?.message || apiErr || 'API route unavailable');
+      }
       stepDone(2);
 
       setPreparingLine('Organizing your brand home');
       stepActive(3);
-      const brandName = aiData.guide?.clientName || aiData.brand?.name || 'Brand';
-      orgAssets = allFiles.map((file, i) => {
-        const uploadId = `asset_${i + 1}`;
-        const aiAssignment = (aiData.assetAssignments || []).find(a => a.fileId === uploadId);
-        const role = aiAssignment ? resolveRole(aiAssignment.slot) : guessRole(file.name);
-        return {
-          id: crypto.randomUUID(), uploadId, file, url: URL.createObjectURL(file),
-          originalName: file.name, role, label: labelForRole(role), extension: ext(file.name),
-          folder: folderForRole(role), colorName: 'Original',
-          finalName: makeFinalName(brandName, role, 'Original', ext(file.name)),
-        };
-      });
+      orgAssets = organizeOriginalAssets(allFiles, aiData);
       stepDone(3);
 
       setPreparingLine('Preparing your color system');
       stepActive(4);
-      const palette = aiData.palette || aiData.colors || [];
-      const primaryHex = palette.find(c => /primary|main|brand/i.test(c.name || ''))?.hex || palette[0]?.hex || '#1F3D2E';
-      const colorVariants = [{hex:'#000000',name:'Black'}, {hex:'#ffffff',name:'White'}, {hex:primaryHex,name:'Primary'}];
-      for (const asset of orgAssets) {
-        if (!isPreviewableImage(asset)) continue;
-        for (const cv of colorVariants) {
-          try { const v = await recolorPng(asset, cv.hex, cv.name); variants.push(v); }
-          catch(e) { console.warn('Variant failed:', asset.originalName, cv.name, e); }
-        }
-      }
+      await createColorVariantsForAssets();
       stepDone(4);
 
       setPreparingLine('Arranging your review');
@@ -1257,6 +1544,7 @@ btnMovein.addEventListener('click', () => {
       renderBrandSystem();
       renderAssets();
       renderVariants();
+      const palette = aiData.palette || aiData.colors || [];
       $('statFiles').textContent = allFiles.length;
       $('statVariants').textContent = variants.length;
       $('statColors').textContent = palette.length;
@@ -1267,7 +1555,7 @@ btnMovein.addEventListener('click', () => {
       $('jsonSection').style.display = 'block';
       stepDone(5);
 
-      setPreparingLine('Welcome home');
+      setPreparingLine(aiData.reviewMode === 'local' ? 'Your files are organized' : 'Welcome home');
       setTimeout(revealResults, 700);
 
     } catch(err) {
@@ -1275,6 +1563,10 @@ btnMovein.addEventListener('click', () => {
       $('brandSection').style.display = 'block';
       setPreparingLine('A little more is needed');
       setTimeout(revealResults, 700);
+    } finally {
+      btnMovein.disabled = !staged.length;
+      btnMovein.style.opacity = '';
+      btnMovein.removeAttribute('aria-busy');
     }
   }
 
@@ -1501,8 +1793,14 @@ btnMovein.addEventListener('click', () => {
   });
 
 
-/* Back to first screen for another review */
-document.getElementById('backToMoveIn').addEventListener('click', () => { window.location.reload(); });
+/* APP STATE ROUTER: reset without a page refresh. */
+document.getElementById('backToMoveIn').addEventListener('click', event => {
+  event.preventDefault();
+  event.stopPropagation();
+  staged = [];
+  renderTray();
+  goToState('welcome');
+});
 </script>
 </body>
 </html>
