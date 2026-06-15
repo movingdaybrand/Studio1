@@ -134,6 +134,14 @@ Rules:
 - do not invent colors not visible in the uploaded files
 - qualityScore is 1-10 based on resolution, clarity, and usefulness of the asset
 - customer-facing language should feel calm, professional, and concierge-level
+- recommendations must include 3 items
+- recommendations must be specific to the uploaded files
+- do not use generic recommendation titles like "Primary identity", "Color system", or "Asset preparation" unless no better file-specific recommendation can be made
+- each recommendation should feel like it came from a senior brand director reviewing the actual assets
+- reference exact filenames when useful
+- good recommendations explain which asset should lead the system, which files are references, what should be cleaned or confirmed, what is missing, and what should happen next
+- avoid generic software language
+- avoid saying only "I found X colors" unless paired with a real recommendation
 - do not use words like processing, model, JSON, AI, or confidence score inside any customer-facing fields`;
 
 export default async function handler(req, res) {
