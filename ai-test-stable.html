@@ -1,0 +1,4700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Moving Day</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,200;14..32,300;14..32,400;14..32,500&display=swap" rel="stylesheet" />
+<style>
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ENVIRONMENT
+   Abstract product environment — not a room, not a scene.
+   Frosted light, soft depth, atmospheric glass planes.
+   Apple setup / VisionOS energy.
+═══════════════════════════════════════════════════════ */
+
+.env {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  /* Base: clearer ice white with a very soft Moving Day sage undertone */
+  background: #f3f7f3;
+  transition: filter 1.4s ease;
+  overflow: hidden;
+}
+
+/* Near-invisible glass atmosphere — gives depth without becoming a card or room */
+.env::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 47%;
+  width: min(980px, 76vw);
+  height: min(620px, 62vh);
+  transform: translate(-50%, -50%);
+  border-radius: 54px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.34), rgba(255,255,255,0.09)),
+    radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.46), transparent 62%);
+  border: 0.5px solid rgba(255,255,255,0.48);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.70),
+    inset 0 -1px 0 rgba(55,95,70,0.035),
+    0 40px 120px rgba(42,82,58,0.055);
+  opacity: 0.46;
+  pointer-events: none;
+}
+
+.env::after {
+  content: '';
+  position: absolute;
+  inset: -16%;
+  background:
+    linear-gradient(118deg, transparent 0 32%, rgba(255,255,255,0.30) 43%, transparent 54%),
+    linear-gradient(90deg, transparent 0 46%, rgba(190,220,208,0.12) 50%, transparent 56%);
+  filter: blur(22px);
+  opacity: 0.36;
+  transform: translate3d(-2%, -1%, 0);
+  animation: ambientShift 16s cubic-bezier(0.22,1,0.36,1) infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes ambientShift {
+  from { transform: translate3d(-2%, -1%, 0) scale(1); opacity: 0.30; }
+  to   { transform: translate3d(2%, 1.5%, 0) scale(1.025); opacity: 0.44; }
+}
+
+/* Layered light planes — abstract, not spatial */
+.env-l1 {
+  position: absolute;
+  inset: 0;
+  background:
+    /* Morning light through frosted glass */
+    radial-gradient(ellipse 120% 88% at 50% -18%,
+      rgba(255,255,255,1.0)    0%,
+      rgba(251,254,252,0.90)  30%,
+      rgba(232,244,238,0.44)  56%,
+      transparent              76%),
+    /* Icy blue-green lift — barely there */
+    radial-gradient(ellipse 62% 58% at 0% 96%,
+      rgba(178,218,210,0.30)   0%,
+      transparent              62%),
+    /* Restrained emerald depth */
+    radial-gradient(ellipse 46% 48% at 102% 28%,
+      rgba(146,188,164,0.22)   0%,
+      transparent              60%),
+    /* Soft base glow */
+    radial-gradient(ellipse 96% 38% at 50% 118%,
+      rgba(134,178,154,0.26)   0%,
+      transparent              64%);
+}
+
+/* Glass plane 1 — wide horizontal band, mid-screen, barely visible */
+.env-g1 {
+  position: absolute;
+  top: 39%; left: -4%; right: -4%;
+  height: 24%;
+  background: linear-gradient(180deg,
+    transparent                           0%,
+    rgba(255,255,255,0.11)               34%,
+    rgba(245,252,248,0.20)               50%,
+    rgba(255,255,255,0.09)               66%,
+    transparent                          100%);
+  border-top: 0.5px solid rgba(255,255,255,0.54);
+  border-bottom: 0.5px solid rgba(82,126,96,0.035);
+  transform: skewY(-1.15deg);
+  pointer-events: none;
+}
+
+/* Glass plane 2 — narrower, offset — cross-light */
+.env-g2 {
+  position: absolute;
+  top: 58%; left: -6%; right: -6%;
+  height: 13%;
+  background: linear-gradient(180deg,
+    transparent                           0%,
+    rgba(207,232,222,0.13)               48%,
+    transparent                          100%);
+  border-top: 0.5px solid rgba(214,238,226,0.28);
+  transform: skewY(0.65deg);
+  pointer-events: none;
+}
+
+/* Vignette — soft, product-focused. Pulls center forward. */
+.env-v {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 86% 78% at 50% 48%,
+    transparent              50%,
+    rgba(58,96,72,0.055)     74%,
+    rgba(28,58,42,0.12)      100%);
+}
+
+/* Ambient center glow — extremely subtle warm center */
+.env-glow {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 58% 48% at 50% 47%, rgba(255,255,255,0.32) 0%, transparent 68%),
+    radial-gradient(ellipse 44% 24% at 50% 66%, rgba(190,220,204,0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+body.dragging .env { filter: brightness(1.03) saturate(1.06); }
+
+
+/* ═══════════════════════════════════════════════════════
+   STAGE
+═══════════════════════════════════════════════════════ */
+.stage {
+  position: relative;
+  z-index: 1;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ═══════════════════════════════════════════════════════
+   MOVE IN INTRO
+═══════════════════════════════════════════════════════ */
+.intro {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 2rem;
+  position: relative;
+  isolation: isolate;
+}
+
+/* ── LOGO MARK
+   Integrated frosted brand chip — proprietary, quiet, not a placeholder badge.
+────────────────────────────────────────────────────── */
+.logo-badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1.05rem;
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,0.78), rgba(248,253,250,0.44)),
+    rgba(255,255,255,0.34);
+  backdrop-filter: blur(22px) saturate(160%);
+  -webkit-backdrop-filter: blur(22px) saturate(160%);
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.95),
+    0 0 0 1px rgba(36,76,52,0.075),
+    inset 0 1px 0 rgba(255,255,255,0.95),
+    inset 0 -1px 0 rgba(36,76,52,0.035),
+    0 10px 30px rgba(30,70,48,0.075),
+    0 22px 52px rgba(30,70,48,0.045);
+  opacity: 0;
+  transform: translateY(8px);
+  animation: rise 1.1s cubic-bezier(0.22,1,0.36,1) 0.15s forwards;
+}
+
+.logo-badge::before {
+  content: '';
+  position: absolute;
+  inset: 5px;
+  border-radius: inherit;
+  border: 0.5px solid rgba(255,255,255,0.62);
+  pointer-events: none;
+}
+
+.logo-badge::after {
+  content: '';
+  position: absolute;
+  top: 9px;
+  left: 15px;
+  right: 15px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.82), transparent);
+  pointer-events: none;
+}
+
+.logo-mark {
+  display: block;
+  width: 38px;
+  height: 27px;
+  fill: rgba(20,41,31,0.88);
+  opacity: 0.9;
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,0.55));
+}
+
+/* ── WORDMARK ─────────────────────────────────────── */
+.wordmark {
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: rgba(18,46,28,0.52);
+  margin-bottom: 3.1rem;
+
+  opacity: 0;
+  animation: rise 1s cubic-bezier(0.22,1,0.36,1) 0.38s forwards;
+}
+
+/* ── HEADLINE ─────────────────────────────────────── */
+.headline {
+  font-size: clamp(2.95rem, 5.9vw, 4.45rem);
+  font-weight: 300;
+  line-height: 1.105;
+  letter-spacing: -0.052em;
+  color: rgba(8,30,18,0.90);
+  margin-bottom: 1.15rem;
+}
+
+.headline .home {
+  color: rgba(10,30,18,0.52);
+}
+
+.w {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(8px);
+  animation: rise 0.9s cubic-bezier(0.22,1,0.36,1) forwards;
+}
+
+/* ── SUBHEADLINE ─────────────────────────────────── */
+.sub {
+  font-size: 0.94rem;
+  font-weight: 300;
+  line-height: 1.62;
+  letter-spacing: -0.006em;
+  color: rgba(14,40,22,0.62);
+  margin-bottom: 3.25rem;
+
+  opacity: 0;
+  animation: rise 0.9s cubic-bezier(0.22,1,0.36,1) 1.18s forwards;
+}
+
+/* ── BEGIN CTA — floating glass pill ─────────────── */
+.btn-begin {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  padding: 0.88rem 2.28rem;
+  border: none;
+  border-radius: 100px;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.76rem;
+  font-weight: 450;
+  letter-spacing: 0.09em;
+  color: rgba(8,28,16,0.90);
+  background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(248,253,250,0.82));
+  backdrop-filter: blur(30px) saturate(165%);
+  -webkit-backdrop-filter: blur(30px) saturate(165%);
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.98),
+    0 0 0 1px rgba(44,92,62,0.24),
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -0.5px 0 rgba(44,90,60,0.065),
+    0 2px 8px rgba(20,60,36,0.10),
+    0 10px 28px rgba(20,60,36,0.11),
+    0 24px 56px rgba(20,60,36,0.08);
+  position: relative;
+  overflow: hidden;
+  transition: background 0.25s ease, box-shadow 0.28s ease, transform 0.18s ease;
+
+  opacity: 0;
+  animation: rise 0.9s cubic-bezier(0.22,1,0.36,1) 1.46s forwards;
+}
+
+.btn-begin:hover {
+  background: linear-gradient(180deg, rgba(255,255,255,0.99), rgba(250,255,252,0.88));
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,1),
+    0 0 0 1px rgba(44,100,66,0.34),
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -0.5px 0 rgba(44,90,60,0.08),
+    0 4px 12px rgba(20,60,36,0.13),
+    0 14px 34px rgba(20,60,36,0.13),
+    0 30px 64px rgba(20,60,36,0.09);
+}
+.btn-begin:active { transform: scale(0.978); transition-duration: 0.08s; }
+
+.btn-begin::after {
+  content: '';
+  position: absolute;
+  top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.30), transparent);
+  transition: left 0.7s ease;
+}
+.btn-begin:hover::after { left: 160%; }
+
+.arrow {
+  width: 12px; height: 12px;
+  stroke: rgba(8,28,16,0.42);
+  stroke-width: 1.5; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+  transition: transform 0.22s ease; flex-shrink: 0;
+}
+.btn-begin:hover .arrow { transform: translateX(2px); }
+
+
+/* ═══════════════════════════════════════════════════════
+   UPLOAD STATE
+═══════════════════════════════════════════════════════ */
+.upload {
+  position: fixed; inset: 0; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  padding: 2rem; opacity: 0; pointer-events: none;
+  transition: opacity 0.6s cubic-bezier(0.22,1,0.36,1);
+}
+.upload.on { opacity: 1; pointer-events: all; }
+
+.glass {
+  width: 100%; max-width: 480px;
+  border-radius: 24px; position: relative; overflow: hidden;
+  background: rgba(255,255,255,0.68);
+  backdrop-filter: blur(48px) saturate(180%);
+  -webkit-backdrop-filter: blur(48px) saturate(180%);
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.96),
+    0 0 0 1px rgba(44,90,60,0.13),
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -0.5px 0 rgba(30,70,44,0.04),
+    0 4px 12px rgba(20,60,36,0.07),
+    0 16px 48px rgba(20,60,36,0.10),
+    0 40px 80px rgba(20,60,36,0.08);
+  transition:
+    transform 0.55s cubic-bezier(0.22,1,0.36,1),
+    box-shadow 0.55s ease;
+}
+
+body.dragging .glass {
+  transform: translateY(-5px);
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,1),
+    0 0 0 1px rgba(44,140,84,0.28),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 8px 20px rgba(20,60,36,0.09),
+    0 24px 60px rgba(20,60,36,0.15),
+    0 0 40px rgba(60,160,100,0.09);
+}
+
+/* UPLOAD FIX: the file input is truly hidden; it no longer overlays the glass panel. */
+.drop-input {
+  position: fixed;
+  left: -9999px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* FILE INPUT TRIGGER: only this intended area opens the picker on click/keyboard. */
+.upload-select-area {
+  width: 100%;
+  max-width: 390px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  border-radius: 24px;
+  padding: 0.4rem 0.35rem 0.2rem;
+  cursor: pointer;
+  outline: none;
+  transition: transform .35s cubic-bezier(0.22,1,0.36,1), filter .35s ease;
+}
+.upload-select-area:hover,
+.upload-select-area:focus-visible {
+  transform: translateY(-1px);
+  filter: brightness(1.015);
+}
+.upload-select-area:focus-visible {
+  box-shadow: 0 0 0 3px rgba(44, 120, 76, .13);
+}
+
+.glass-inner {
+  position: relative; z-index: 3;
+  padding: 2.75rem 2.75rem 2.5rem;
+  display: flex; flex-direction: column;
+  align-items: center; text-align: center;
+}
+
+.up-icon {
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(255,255,255,0.75);
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.92),
+    0 0 0 1px rgba(44,90,60,0.10),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 2px 8px rgba(20,60,36,0.07);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 1.5rem;
+  transition: transform 0.45s cubic-bezier(0.22,1,0.36,1);
+}
+body.dragging .up-icon { transform: translateY(-3px); }
+.up-icon svg {
+  width: 16px; height: 16px;
+  stroke: rgba(16,46,26,0.50);
+  stroke-width: 1.5; fill: none;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+.up-head {
+  font-size: 1.5rem; font-weight: 200;
+  letter-spacing: -0.025em; line-height: 1.14;
+  color: rgba(8,28,16,0.85); margin-bottom: 0.85rem;
+}
+.up-sub {
+  font-size: 0.815rem; font-weight: 300; line-height: 1.80;
+  color: rgba(14,42,24,0.44); max-width: 300px; margin-bottom: 2rem;
+}
+
+.drag-copy { display: none; }
+body.dragging .normal-copy { display: none; }
+body.dragging .drag-copy   { display: block; }
+body.dragging .file-tags   { opacity: 0.22; }
+
+.file-tags {
+  display: flex; flex-wrap: wrap; gap: 5px;
+  justify-content: center; margin-bottom: 2rem;
+  transition: opacity 0.35s;
+}
+.f-tag {
+  font-size: 9px; font-weight: 400; letter-spacing: 0.09em;
+  text-transform: uppercase; color: rgba(16,46,26,0.38);
+  padding: 3px 9px; border-radius: 100px;
+  background: rgba(255,255,255,0.55);
+  border: 0.5px solid rgba(44,90,60,0.14);
+}
+
+.btn-movein {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.85rem 2.2rem; border: none; border-radius: 100px;
+  cursor: pointer; font-family: 'Inter', sans-serif;
+  font-size: 0.76rem; font-weight: 400; letter-spacing: 0.09em;
+  color: rgba(8,28,16,0.88);
+  background: rgba(255,255,255,0.90);
+  backdrop-filter: blur(28px); -webkit-backdrop-filter: blur(28px);
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.98),
+    0 0 0 1px rgba(44,90,60,0.22),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 2px 8px rgba(20,60,36,0.10),
+    0 8px 24px rgba(20,60,36,0.09);
+  position: relative; overflow: hidden;
+  transition: background 0.25s ease, box-shadow 0.28s ease, transform 0.18s ease, opacity 0.3s;
+}
+.btn-movein:disabled { opacity: 0.28; pointer-events: none; }
+.btn-movein:not(:disabled):hover {
+  background: rgba(255,255,255,0.97);
+  transform: translateY(-1px);
+}
+.btn-movein:active { transform: scale(0.978); }
+.btn-movein::after {
+  content: ''; position: absolute; top: 0; left: -60%; width: 40%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.30), transparent);
+  transition: left 0.7s ease;
+}
+.btn-movein:hover::after { left: 160%; }
+
+.up-micro {
+  font-size: 10px; font-weight: 300; letter-spacing: 0.02em;
+  color: rgba(14,42,24,0.28); margin-top: 0.75rem;
+}
+
+.status {
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px; height: 18px; margin-top: 1rem;
+  opacity: 0; transition: opacity 0.5s;
+}
+.status.on { opacity: 1; }
+.s-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: rgba(30,90,52,0.45);
+  animation: pulse 2.2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%,100% { opacity: 0.2; transform: scale(0.75); }
+  50%      { opacity: 0.85; transform: scale(1.2); }
+}
+.s-txt { font-size:10px; font-weight:300; letter-spacing:0.07em; color: rgba(14,42,24,0.40); }
+
+/* LOCAL PREPARATION SUMMARY — customer-facing. No visible file manager rows. */
+body.has-preparation .upload-select-area { display: none; }
+
+.prep-summary {
+  width: 100%;
+  max-width: 390px;
+  display: none;
+  text-align: center;
+  margin-top: 0.25rem;
+}
+.prep-summary.on { display: block; animation: softIn .55s cubic-bezier(0.22,1,0.36,1) both; }
+@keyframes softIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.prep-count {
+  font-size: 1.45rem;
+  line-height: 1.1;
+  font-weight: 240;
+  letter-spacing: -0.035em;
+  color: rgba(8,28,16,0.86);
+  margin: 0 0 .55rem;
+}
+.prep-copy {
+  font-size: .82rem;
+  font-weight: 300;
+  line-height: 1.65;
+  color: rgba(14,42,24,.52);
+  margin: 0 auto 1.4rem;
+  max-width: 310px;
+}
+.prep-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+  margin: 0 0 1.25rem;
+}
+.prep-card {
+  border-radius: 15px;
+  padding: 11px 12px;
+  text-align: left;
+  background: rgba(255,255,255,.48);
+  border: .5px solid rgba(44,90,60,.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.75);
+}
+.prep-card strong {
+  display: block;
+  font-size: 1.02rem;
+  line-height: 1;
+  font-weight: 360;
+  letter-spacing: -.025em;
+  color: rgba(8,28,16,.78);
+  margin-bottom: 4px;
+}
+.prep-card span {
+  display: block;
+  font-size: 9px;
+  font-weight: 450;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.38);
+}
+.prep-ready {
+  margin: 0 auto 1rem;
+  font-size: .75rem;
+  line-height: 1.55;
+  color: rgba(14,42,24,.54);
+  max-width: 300px;
+}
+.btn-add-more {
+  border: 0;
+  background: transparent;
+  color: rgba(8,28,16,.48);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 480;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 8px 10px;
+}
+.btn-add-more:hover { color: rgba(8,28,16,.75); }
+
+/* Founder-only file tray. Kept internally, hidden from customer mode. */
+.developer-files { display: none; width: 100%; max-width: 390px; margin-top: .7rem; }
+body.founder-mode .developer-files { display: block; }
+.developer-files summary {
+  cursor: pointer;
+  color: rgba(14,42,24,.36);
+  font-size: 10px;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: .5rem;
+}
+.tray { width:100%; display:none; flex-direction:column; gap:4px; margin-top:0.5rem; }
+.tray.on { display:flex; }
+.ti {
+  display:flex; align-items:center; gap:8px;
+  background: rgba(255,255,255,0.52); border-radius:8px; padding:6px 10px;
+  border: 0.5px solid rgba(44,90,60,0.12);
+  font-size:11px; font-weight:300; color: rgba(14,42,24,0.56);
+}
+.ti svg { width:12px; height:12px; stroke: rgba(14,42,24,0.32); stroke-width:1.5; fill:none; flex-shrink:0; }
+.tn { flex:1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ts { font-size:9.5px; opacity:0.38; flex-shrink:0; }
+
+/* ── PREPARING HOOK ─────────────────────────────── */
+.preparing {
+  position:absolute; inset:0; border-radius:24px;
+  background: rgba(242,248,244,0.93);
+  backdrop-filter:blur(24px); -webkit-backdrop-filter:blur(24px);
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:1.5rem;
+  opacity:0; pointer-events:none;
+  transition:opacity 0.7s ease; z-index:10;
+}
+.preparing.on { opacity:1; pointer-events:all; }
+.p-ring {
+  width:34px; height:34px; border-radius:50%;
+  border:1px solid rgba(16,52,28,0.10);
+  border-top-color: rgba(16,52,28,0.38);
+  animation: spin 2s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.p-head { font-size:1.3rem; font-weight:200; letter-spacing:-0.02em; color: rgba(8,28,16,0.82); }
+.p-sub { font-size:10px; font-weight:400; letter-spacing:0.14em; text-transform:uppercase; color: rgba(14,42,24,0.34); transition:opacity 0.4s; }
+
+/* ── KEYFRAMES ──────────────────────────────────── */
+@keyframes rise { to { opacity: 1; transform: translateY(0); } }
+
+@media (max-width: 520px) {
+  .glass-inner { padding: 2.25rem 1.75rem; }
+  .headline { font-size: 2.4rem; }
+  .logo-badge { width: 56px; height: 56px; }
+  .logo-mark { width: 34px; height: 24px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .logo-badge, .wordmark, .w, .sub, .btn-begin { animation: none; opacity: 1; transform: none; }
+  .s-dot, .p-ring { animation: none; }
+  .upload { transition: none; }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   CONCIERGE MODE — confirm the foundation, not a dashboard
+═══════════════════════════════════════════════════════ */
+.concierge {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .65s cubic-bezier(0.22,1,0.36,1);
+}
+.concierge.on { opacity: 1; pointer-events: auto; }
+.concierge-shell {
+  width: min(920px, 100%);
+  max-height: min(760px, calc(100vh - 4rem));
+  overflow: auto;
+  border-radius: 30px;
+  padding: 2.25rem;
+  background: rgba(255,255,255,.62);
+  backdrop-filter: blur(52px) saturate(170%);
+  -webkit-backdrop-filter: blur(52px) saturate(170%);
+  border: .5px solid rgba(255,255,255,.86);
+  box-shadow:
+    0 0 0 1px rgba(44,90,60,.10),
+    inset 0 1px 0 rgba(255,255,255,.95),
+    0 22px 70px rgba(20,60,36,.13);
+  color: rgba(8,28,16,.86);
+}
+.concierge-kicker {
+  margin: 0 0 .8rem;
+  font-size: 10px;
+  font-weight: 520;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.40);
+}
+.concierge-title {
+  margin: 0;
+  font-size: clamp(2rem, 4vw, 3.15rem);
+  line-height: 1.04;
+  font-weight: 250;
+  letter-spacing: -.055em;
+}
+.concierge-note {
+  max-width: 560px;
+  margin: 1rem 0 1.65rem;
+  font-size: .96rem;
+  line-height: 1.72;
+  font-weight: 300;
+  color: rgba(14,42,24,.58);
+}
+.concierge-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+.concierge-card {
+  min-height: 190px;
+  display: flex;
+  flex-direction: column;
+  border-radius: 22px;
+  padding: 14px;
+  background: rgba(255,255,255,.48);
+  border: .5px solid rgba(44,90,60,.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.78);
+}
+.concierge-preview {
+  height: 86px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(242,248,244,.72);
+  border: .5px solid rgba(44,90,60,.08);
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+.concierge-preview img { max-width: 78%; max-height: 70%; object-fit: contain; }
+.concierge-placeholder {
+  font-size: 10px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.30);
+}
+.concierge-card h3 {
+  margin: 0 0 5px;
+  font-size: .92rem;
+  font-weight: 430;
+  letter-spacing: -.02em;
+}
+.concierge-card p {
+  margin: 0 0 12px;
+  font-size: .72rem;
+  line-height: 1.5;
+  color: rgba(14,42,24,.50);
+}
+.concierge-actions { margin-top: auto; display: flex; gap: 6px; }
+.concierge-actions button {
+  flex: 1;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 9px;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 520;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: rgba(8,28,16,.70);
+  background: rgba(255,255,255,.72);
+  box-shadow: 0 0 0 .5px rgba(44,90,60,.14), inset 0 1px 0 rgba(255,255,255,.85);
+}
+.concierge-actions button.approved { color: rgba(8,60,26,.82); background: rgba(220,240,228,.70); }
+.color-dots { display: flex; gap: 7px; align-items: center; justify-content: center; }
+.color-dot { width: 24px; height: 24px; border-radius: 999px; box-shadow: 0 0 0 .5px rgba(20,60,36,.16), inset 0 1px 0 rgba(255,255,255,.45); }
+.concierge-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: center;
+  margin-top: 1.35rem;
+}
+.concierge-micro {
+  margin: 0;
+  font-size: .72rem;
+  color: rgba(14,42,24,.42);
+}
+.concierge-continue {
+  border: 0;
+  border-radius: 999px;
+  padding: .86rem 1.65rem;
+  cursor: pointer;
+  background: rgba(255,255,255,.88);
+  color: rgba(8,28,16,.88);
+  font-size: .72rem;
+  font-weight: 500;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,.95),
+    0 0 0 1px rgba(44,90,60,.20),
+    inset 0 1px 0 rgba(255,255,255,.98),
+    0 10px 28px rgba(20,60,36,.10);
+}
+body:not(.founder-mode) #assetsSection,
+body:not(.founder-mode) #variantsSection,
+body:not(.founder-mode) #jsonSection { display: none !important; }
+@media (max-width: 850px) {
+  .concierge-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .concierge-shell { padding: 1.35rem; border-radius: 24px; }
+  .concierge-grid { grid-template-columns: 1fr; }
+  .concierge-footer { flex-direction: column; align-items: stretch; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   REVIEW RESULTS — existing analyzer output, restyled quietly
+═══════════════════════════════════════════════════════ */
+body.show-results {
+  overflow: auto;
+  min-height: 100%;
+  background: #f3f7f3;
+}
+body.show-results .stage,
+body.show-results .upload { display: none; }
+
+.results-app {
+  display: none;
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  min-height: 100vh;
+  padding: 28px 28px 96px;
+  color: rgba(8,28,16,0.88);
+}
+.results-app.visible { display: block; }
+.results-shell {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+.results-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 18px;
+  padding: 18px 20px;
+  border-radius: 24px;
+  background: rgba(255,255,255,0.48);
+  border: 0.5px solid rgba(255,255,255,0.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.88),
+    0 20px 70px rgba(20,60,36,0.075);
+  backdrop-filter: blur(28px) saturate(160%);
+  -webkit-backdrop-filter: blur(28px) saturate(160%);
+}
+.results-kicker {
+  font-size: 9px;
+  font-weight: 550;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: rgba(18,46,28,0.48);
+  margin-bottom: 5px;
+}
+.results-title {
+  font-size: 1.3rem;
+  font-weight: 300;
+  letter-spacing: -0.035em;
+  color: rgba(8,28,16,0.86);
+}
+.results-note {
+  margin-top: 5px;
+  font-size: 0.78rem;
+  font-weight: 300;
+  color: rgba(14,42,24,0.52);
+}
+.results-back {
+  border: 0;
+  border-radius: 100px;
+  padding: 0.78rem 1.15rem;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(8,28,16,0.78);
+  background: rgba(255,255,255,0.72);
+  box-shadow:
+    0 0 0 0.5px rgba(255,255,255,0.98),
+    0 0 0 1px rgba(44,90,60,0.14),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 10px 28px rgba(20,60,36,0.08);
+}
+.progress-strip {
+  display: none;
+  border-radius: 20px;
+  overflow: hidden;
+  background: rgba(255,255,255,0.44);
+  border: 0.5px solid rgba(255,255,255,0.76);
+  box-shadow: 0 14px 44px rgba(20,60,36,0.055);
+  margin-bottom: 18px;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+.progress-strip.visible { display: block; }
+.progress-steps { display: flex; }
+.progress-step {
+  flex: 1;
+  padding: 14px 14px;
+  font-size: 9px;
+  font-weight: 520;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.28);
+  border-right: 0.5px solid rgba(44,90,60,.08);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: color .35s ease;
+}
+.progress-step:last-child { border-right: 0; }
+.progress-step.done { color: rgba(25,82,48,.66); }
+.progress-step.active { color: rgba(8,28,16,.86); }
+.step-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; opacity: .5; }
+.progress-step.active .step-dot { opacity: 1; animation: pulse 1.2s infinite; }
+.progress-step.done .step-dot { opacity: 1; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.28} }
+.summary-bar {
+  display: none;
+  padding: 16px 18px;
+  border-radius: 22px;
+  background: rgba(255,255,255,0.52);
+  border: 0.5px solid rgba(255,255,255,0.78);
+  box-shadow: 0 16px 48px rgba(20,60,36,0.06);
+  margin-bottom: 24px;
+  gap: 24px;
+  align-items: center;
+  flex-wrap: wrap;
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+.summary-bar.visible { display: flex; }
+.summary-stat { display: flex; flex-direction: column; gap: 2px; }
+.summary-stat-n { font-size: 26px; line-height: 1; font-weight: 300; color: rgba(8,28,16,0.86); letter-spacing: -.045em; }
+.summary-stat-l { font-size: 9px; font-weight: 540; letter-spacing: .13em; text-transform: uppercase; color: rgba(14,42,24,.42); }
+.summary-divider { width: 1px; height: 34px; background: rgba(44,90,60,.10); }
+.summary-actions { margin-left: auto; display: flex; gap: 10px; flex-wrap: wrap; }
+.sum-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: 12px 18px;
+  font-size: 10px;
+  font-weight: 560;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  white-space: nowrap;
+  color: rgba(8,28,16,.88);
+  background: rgba(255,255,255,0.78);
+  box-shadow: 0 0 0 1px rgba(44,90,60,0.14), inset 0 1px 0 rgba(255,255,255,1), 0 10px 24px rgba(20,60,36,0.06);
+}
+.sum-btn.apply { background: rgba(214,232,222,.78); }
+.sum-btn.zip { background: rgba(20,48,32,.88); color: rgba(255,255,255,.92); }
+.sum-btn:disabled { opacity: .38; cursor: not-allowed; }
+.section-head { display: flex; align-items: baseline; gap: 12px; margin: 32px 0 14px; }
+.section-head h3 { font-size: 1.14rem; font-weight: 300; letter-spacing: -.035em; color: rgba(8,28,16,.88); margin: 0; }
+.section-head span { font-size: 9px; font-weight: 560; letter-spacing: .14em; text-transform: uppercase; color: rgba(14,42,24,.38); }
+.brand-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.brand-grid .span2 { grid-column: span 2; }
+.bcard,
+.asset-card,
+.variant-card {
+  background: rgba(255,255,255,0.58);
+  color: rgba(8,28,16,.86);
+  border-radius: 22px;
+  overflow: hidden;
+  border: 0.5px solid rgba(255,255,255,0.78);
+  box-shadow: 0 18px 52px rgba(20,60,36,0.055);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+.bcard-head { padding: 16px 18px 12px; border-bottom: 1px solid rgba(44,90,60,.07); display: flex; align-items: flex-start; justify-content: space-between; }
+.eyebrow { font-size: 9px; font-weight: 650; letter-spacing: .16em; text-transform: uppercase; color: rgba(22,74,42,.62); margin: 0 0 3px; }
+.bcard-title { font-size: 1rem; font-weight: 300; letter-spacing: -.03em; margin: 0; }
+.bcard-body { padding: 16px 18px; }
+.brand-name-big { font-size: 1.8rem; font-weight: 300; letter-spacing: -.055em; margin: 0 0 10px; line-height: 1; color: rgba(8,28,16,.88); }
+.tag-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { font-size: 9px; font-weight: 560; letter-spacing: .08em; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(44,90,60,.12); color: rgba(14,42,24,.55); background: rgba(255,255,255,.54); }
+.tag.dark { background: rgba(20,48,32,.88); color: rgba(255,255,255,.9); border-color: transparent; }
+.palette-bar { display: flex; height: 64px; border-radius: 14px; overflow: hidden; margin-bottom: 12px; border: 0.5px solid rgba(44,90,60,.10); }
+.pb-swatch { flex: 1; }
+.mini-swatches { display: flex; gap: 6px; flex-wrap: wrap; }
+.mini-swatch { flex: 1; min-width: 60px; border-radius: 14px; overflow: hidden; border: 1px solid rgba(44,90,60,.09); background: rgba(255,255,255,.44); }
+.mini-swatch-color { height: 36px; }
+.mini-swatch-info { padding: 6px 8px; }
+.mini-swatch-name { font-size: 10px; font-weight: 560; color: rgba(8,28,16,.82); display: block; }
+.mini-swatch-hex { font-size: 10px; color: rgba(14,42,24,.46); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.type-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.type-block { background: rgba(255,255,255,.48); border-radius: 14px; padding: 12px 14px; border: 1px solid rgba(44,90,60,.08); }
+.type-label { font-size: 9px; font-weight: 650; letter-spacing: .12em; text-transform: uppercase; color: rgba(22,74,42,.62); margin: 0 0 6px; }
+.type-display-sample { font-size: 20px; font-weight: 450; letter-spacing: -.04em; color: rgba(8,28,16,.86); margin: 0 0 4px; line-height: 1; }
+.type-meta { font-size: 11px; color: rgba(14,42,24,.52); margin: 0; }
+.preflight-rows { display: grid; gap: 7px; }
+.pf-row { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border-radius: 14px; background: rgba(255,255,255,.48); border: 1px solid rgba(44,90,60,.08); }
+.pf-badge { font-size: 8px; font-weight: 650; letter-spacing: .08em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; flex-shrink: 0; margin-top: 1px; }
+.pf-badge.warning { background: #fff5d7; color: #8a6400; }
+.pf-badge.suggestion { background: #dcf0f2; color: #0d6066; }
+.pf-badge.note { background: rgba(220,228,222,.7); color: rgba(8,28,16,.62); }
+.pf-issue { font-size: 12px; font-weight: 550; color: rgba(8,28,16,.86); margin: 0 0 2px; }
+.pf-fix { font-size: 11px; color: rgba(14,42,24,.52); margin: 0; line-height: 1.4; }
+.asset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; }
+.asset-card { display: flex; flex-direction: column; }
+.asset-card.ignored { opacity: .4; }
+.asset-preview, .variant-preview {
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background:
+    linear-gradient(45deg, rgba(190,210,198,.30) 25%, transparent 25%),
+    linear-gradient(-45deg, rgba(190,210,198,.30) 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, rgba(190,210,198,.30) 75%),
+    linear-gradient(-45deg, transparent 75%, rgba(190,210,198,.30) 75%);
+  background-size: 16px 16px;
+  background-position: 0 0,0 8px,8px -8px,-8px 0;
+  background-color: rgba(255,255,255,.36);
+}
+.asset-preview img, .variant-preview img { max-width: 80%; max-height: 80%; object-fit: contain; }
+.file-fallback { font-size: 11px; font-weight: 650; letter-spacing: .14em; text-transform: uppercase; color: rgba(14,42,24,.42); padding: 8px 12px; border-radius: 999px; background: rgba(255,255,255,.58); border: 1px solid rgba(44,90,60,.10); }
+.asset-info { padding: 12px 14px; flex: 1; border-top: 1px solid rgba(44,90,60,.07); }
+.asset-role { font-size: 9px; font-weight: 650; letter-spacing: .13em; text-transform: uppercase; color: rgba(22,74,42,.62); margin: 0 0 3px; }
+.asset-filename { font-size: 12px; font-weight: 550; color: rgba(8,28,16,.86); margin: 0 0 2px; word-break: break-all; }
+.asset-folder { font-size: 11px; color: rgba(14,42,24,.52); margin: 0 0 6px; }
+.asset-rename { width: 100%; border: 1px solid rgba(44,90,60,.12); border-radius: 10px; padding: 7px 8px; font-size: 11px; color: rgba(8,28,16,.86); background: rgba(255,255,255,.50); font-family: inherit; margin-top: 4px; }
+.asset-actions { padding: 10px 14px; border-top: 1px solid rgba(44,90,60,.07); display: flex; gap: 6px; flex-wrap: wrap; }
+.act-btn { font-size: 9px; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; padding: 6px 10px; border-radius: 999px; cursor: pointer; border: 1px solid rgba(44,90,60,.14); background: rgba(255,255,255,.52); color: rgba(22,74,42,.72); }
+.act-btn.primary { background: rgba(20,48,32,.88); color: rgba(255,255,255,.9); border-color: transparent; }
+.variant-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.variant-preview { height: 90px; }
+.variant-preview.dark-bg { background: #132019; }
+.variant-info { padding: 10px 12px; border-top: 1px solid rgba(44,90,60,.07); }
+.variant-color-row { display: flex; align-items: center; gap: 7px; margin-bottom: 4px; }
+.variant-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; border: 1px solid rgba(44,90,60,.12); }
+.variant-label { font-size: 11px; font-weight: 560; color: rgba(8,28,16,.86); }
+.variant-file { font-size: 10px; color: rgba(14,42,24,.50); margin: 0 0 8px; word-break: break-all; }
+.variant-dl { width: 100%; border: 0; border-radius: 999px; padding: 7px; background: rgba(20,48,32,.88); color: rgba(255,255,255,.9); font-size: 9px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.json-toggle { background: rgba(255,255,255,.50); border: 1px solid rgba(44,90,60,.12); color: rgba(14,42,24,.52); font-size: 10px; font-weight: 560; letter-spacing: .08em; text-transform: uppercase; padding: 8px 14px; border-radius: 999px; cursor: pointer; margin-top: 32px; }
+pre { white-space: pre-wrap; word-break: break-word; background: rgba(20,48,32,.92); color: rgba(255,255,255,.88); border-radius: 18px; padding: 18px; font-size: 11px; overflow: auto; margin-top: 12px; display: none; }
+pre.open { display: block; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px); background: rgba(20,48,32,.92); color: rgba(255,255,255,.92); padding: 12px 22px; border-radius: 999px; font-size: 12px; font-weight: 500; z-index: 9999; box-shadow: 0 8px 32px rgba(0,0,0,.16); transition: transform .3s cubic-bezier(.22,.61,.36,1), opacity .3s; opacity: 0; pointer-events: none; white-space: nowrap; }
+.toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+@media (max-width: 800px) {
+  .brand-grid { grid-template-columns: 1fr; }
+  .brand-grid .span2 { grid-column: span 1; }
+  .results-app { padding: 18px 14px 72px; }
+  .results-top { align-items: flex-start; flex-direction: column; }
+  .summary-actions { margin-left: 0; }
+  .progress-steps { flex-direction: column; }
+  .progress-step { border-right: 0; border-bottom: 1px solid rgba(44,90,60,.07); }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   FLOW REFINEMENT — local prep, dedicated preparing, quiet concierge/review
+═══════════════════════════════════════════════════════ */
+
+/* Local prep is readable and calm. It is not hidden behind the preparing overlay. */
+body.md-state-local_preparing .preparing { display: none !important; }
+body.md-state-local_preparing .glass {
+  max-width: 520px;
+  min-height: 520px;
+}
+body.md-state-local_preparing .prep-summary.on {
+  display: block;
+}
+body.md-state-local_preparing .btn-movein {
+  opacity: 1 !important;
+  pointer-events: auto;
+}
+body.md-state-local_preparing .prep-count {
+  color: rgba(8,28,16,.88);
+}
+body.md-state-local_preparing .prep-copy,
+body.md-state-local_preparing .prep-ready {
+  color: rgba(14,42,24,.66);
+}
+body.md-state-local_preparing .prep-card {
+  background: rgba(255,255,255,.68);
+  border-color: rgba(44,90,60,.15);
+}
+
+/* Preparing is now a focused environment, not a transparent overlay on busy content. */
+body.md-state-preparing .glass {
+  max-width: 520px;
+  min-height: 440px;
+}
+body.md-state-preparing .glass-inner {
+  opacity: .035;
+  filter: blur(14px);
+  pointer-events: none;
+}
+body.md-state-preparing .preparing {
+  background:
+    radial-gradient(ellipse 70% 48% at 50% 35%, rgba(255,255,255,.98), rgba(245,250,247,.98) 64%, rgba(239,247,243,.99)),
+    rgba(245,249,246,.99);
+  backdrop-filter: blur(34px) saturate(150%);
+  -webkit-backdrop-filter: blur(34px) saturate(150%);
+}
+body.md-state-preparing .p-head {
+  color: rgba(8,28,16,.84);
+}
+body.md-state-preparing .p-sub {
+  color: rgba(14,42,24,.46);
+}
+
+/* Concierge: calm brand director, not admin modal. */
+.concierge {
+  overflow: auto;
+}
+.concierge-shell {
+  width: min(760px, calc(100vw - 3rem));
+  max-height: none;
+  overflow: visible;
+  border-radius: 34px;
+  padding: 2.35rem;
+}
+.concierge-title {
+  max-width: 620px;
+  font-size: clamp(2.1rem, 4.4vw, 3.35rem);
+}
+.concierge-note {
+  max-width: 570px;
+  margin-bottom: 1.2rem;
+}
+.concierge-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.concierge-card {
+  min-height: 176px;
+  border-radius: 24px;
+  background: rgba(255,255,255,.54);
+}
+.concierge-preview {
+  height: 82px;
+}
+.concierge-actions button {
+  font-size: 8.5px;
+  letter-spacing: .11em;
+}
+
+/* Missing items are supporting notes, not big failure cards. */
+.concierge-missing {
+  margin: 1rem 0 0;
+  padding: .8rem 1rem;
+  border-radius: 18px;
+  background: rgba(255,255,255,.42);
+  border: .5px solid rgba(44,90,60,.10);
+  color: rgba(14,42,24,.48);
+  font-size: .76rem;
+  line-height: 1.55;
+}
+
+/* Customer Review replaces technical output unless Founder Mode is active. */
+.customer-review {
+  display: none;
+  margin-top: 18px;
+  border-radius: 30px;
+  padding: 2.2rem;
+  background: rgba(255,255,255,.58);
+  border: .5px solid rgba(255,255,255,.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.9),
+    0 24px 80px rgba(20,60,36,.075);
+  backdrop-filter: blur(34px) saturate(160%);
+  -webkit-backdrop-filter: blur(34px) saturate(160%);
+}
+.results-app.visible .customer-review { display: block; }
+.customer-review-kicker {
+  margin: 0 0 .65rem;
+  font-size: 10px;
+  font-weight: 560;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.42);
+}
+.customer-review-title {
+  margin: 0;
+  max-width: 680px;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 250;
+  line-height: 1.05;
+  letter-spacing: -.055em;
+  color: rgba(8,28,16,.86);
+}
+.customer-review-copy {
+  margin: 1rem 0 1.5rem;
+  max-width: 560px;
+  font-size: .95rem;
+  line-height: 1.7;
+  color: rgba(14,42,24,.58);
+}
+.review-reco-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.review-reco-card {
+  min-height: 170px;
+  border-radius: 24px;
+  padding: 1.15rem;
+  background: rgba(255,255,255,.52);
+  border: .5px solid rgba(44,90,60,.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.78);
+}
+.review-reco-card span {
+  display: block;
+  margin-bottom: .8rem;
+  font-size: 9px;
+  font-weight: 560;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(22,74,42,.52);
+}
+.review-reco-card h3 {
+  margin: 0 0 .55rem;
+  font-size: 1rem;
+  font-weight: 430;
+  letter-spacing: -.025em;
+  color: rgba(8,28,16,.86);
+}
+.review-reco-card p {
+  margin: 0;
+  font-size: .78rem;
+  line-height: 1.58;
+  color: rgba(14,42,24,.54);
+}
+.customer-review-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.45rem;
+}
+.customer-review-micro {
+  margin: 0;
+  font-size: .76rem;
+  color: rgba(14,42,24,.42);
+}
+.prepare-home-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: .92rem 1.7rem;
+  cursor: pointer;
+  background: rgba(20,48,32,.88);
+  color: rgba(255,255,255,.94);
+  font-size: .72rem;
+  font-weight: 520;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,.85),
+    0 0 0 1px rgba(44,90,60,.18),
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 16px 44px rgba(20,60,36,.16);
+}
+
+/* Hide internal machinery from customer mode. Keep it available with ?founder=1. */
+body:not(.founder-mode) .results-top,
+body:not(.founder-mode) .progress-strip,
+body:not(.founder-mode) .summary-bar,
+body:not(.founder-mode) #brandSection,
+body:not(.founder-mode) #assetsSection,
+body:not(.founder-mode) #variantsSection,
+body:not(.founder-mode) #jsonSection {
+  display: none !important;
+}
+body.founder-mode .customer-review {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .concierge-shell { width: min(100%, calc(100vw - 1.5rem)); padding: 1.45rem; }
+  .concierge-grid,
+  .review-reco-grid { grid-template-columns: 1fr; }
+  .customer-review-footer { flex-direction: column; align-items: stretch; }
+  .prepare-home-btn { width: 100%; }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   LOCAL ARRIVAL EXPERIENCE — Screen 2 polish only
+   Turns local_preparing from a stat report into a calm arrival moment.
+═══════════════════════════════════════════════════════ */
+body.md-state-local_preparing .env {
+  filter: brightness(1.045) saturate(1.055);
+}
+body.md-state-local_preparing .env::before {
+  opacity: .62;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.74),
+    inset 0 -1px 0 rgba(55,95,70,0.04),
+    0 34px 110px rgba(42,82,58,0.075),
+    0 0 90px rgba(155,205,176,0.10);
+  animation: arrivalGlassBreathe 8s cubic-bezier(0.22,1,0.36,1) infinite alternate;
+}
+body.md-state-local_preparing .env-glow {
+  background:
+    radial-gradient(ellipse 54% 42% at 50% 44%, rgba(255,255,255,0.46) 0%, transparent 70%),
+    radial-gradient(ellipse 44% 28% at 50% 63%, rgba(156,206,178,0.18) 0%, transparent 72%);
+}
+@keyframes arrivalGlassBreathe {
+  from { transform: translate(-50%, -50%) scale(.992); }
+  to   { transform: translate(-50%, -50%) scale(1.012); }
+}
+
+body.md-state-local_preparing .glass {
+  width: min(92vw, 660px);
+  max-width: 660px;
+  min-height: 0;
+  border-radius: 42px;
+  background:
+    radial-gradient(ellipse 84% 54% at 50% 10%, rgba(255,255,255,.64), transparent 70%),
+    linear-gradient(180deg, rgba(255,255,255,.76), rgba(247,252,249,.58)),
+    rgba(255,255,255,.50);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,.96),
+    0 0 0 1px rgba(44,90,60,.11),
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(44,90,60,.045),
+    0 18px 48px rgba(20,60,36,.075),
+    0 46px 120px rgba(20,60,36,.13),
+    0 0 110px rgba(164,210,182,.11);
+  animation: prepPanelBreathe 7s cubic-bezier(0.22,1,0.36,1) infinite alternate;
+}
+@keyframes prepPanelBreathe {
+  from { transform: translateY(0) scale(1); }
+  to   { transform: translateY(-2px) scale(1.004); }
+}
+body.md-state-local_preparing .glass-inner {
+  min-height: min(670px, calc(100vh - 5rem));
+  justify-content: center;
+  padding: clamp(2.2rem, 4.6vh, 3.4rem) clamp(1.65rem, 4vw, 3.25rem);
+}
+body.md-state-local_preparing .upload-select-area,
+body.md-state-local_preparing .up-micro,
+body.md-state-local_preparing .status {
+  display: none !important;
+}
+body.md-state-local_preparing .prep-summary {
+  order: 10;
+  max-width: 540px;
+  margin: 0 auto;
+}
+body.md-state-local_preparing .btn-movein {
+  order: 20;
+  margin-top: 1.45rem;
+  align-self: center;
+  opacity: 0 !important;
+  pointer-events: auto;
+  animation: continueArrive .8s cubic-bezier(0.22,1,0.36,1) 1.08s forwards;
+}
+body.md-state-local_preparing .btn-movein:disabled {
+  display: none;
+}
+@keyframes continueArrive {
+  from { opacity: 0; transform: translateY(8px) scale(.985); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+.prep-arrival {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.prep-arrival-orb {
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1.1rem;
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(255,255,255,.96), rgba(248,253,250,.62) 58%, rgba(235,246,240,.36)),
+    rgba(255,255,255,.52);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,1),
+    0 0 0 1px rgba(44,90,60,.10),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 12px 34px rgba(20,60,36,.08),
+    0 0 46px rgba(125,190,150,.20);
+  animation: orbArrival 3.8s cubic-bezier(0.22,1,0.36,1) infinite alternate;
+}
+.prep-arrival-orb::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: inherit;
+  border: 1px solid rgba(76,128,90,.08);
+  opacity: .78;
+  animation: orbHalo 4.2s ease-in-out infinite;
+}
+.prep-arrival-orb svg {
+  width: 29px;
+  height: 20px;
+  fill: rgba(20,41,31,.78);
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,.65));
+}
+@keyframes orbArrival {
+  from { transform: translateY(0); box-shadow: 0 0 0 .5px rgba(255,255,255,1), 0 0 0 1px rgba(44,90,60,.10), inset 0 1px 0 rgba(255,255,255,1), 0 12px 34px rgba(20,60,36,.08), 0 0 36px rgba(125,190,150,.14); }
+  to   { transform: translateY(-2px); box-shadow: 0 0 0 .5px rgba(255,255,255,1), 0 0 0 1px rgba(44,110,70,.14), inset 0 1px 0 rgba(255,255,255,1), 0 15px 42px rgba(20,60,36,.10), 0 0 56px rgba(125,190,150,.24); }
+}
+@keyframes orbHalo {
+  0%,100% { transform: scale(.96); opacity: .36; }
+  50% { transform: scale(1.08); opacity: .72; }
+}
+.prep-kicker {
+  margin: 0 0 .75rem;
+  font-size: 9px;
+  font-weight: 520;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.38);
+}
+.prep-title {
+  margin: 0;
+  font-size: clamp(2.1rem, 5.2vw, 3.35rem);
+  line-height: 1.04;
+  font-weight: 250;
+  letter-spacing: -.058em;
+  color: rgba(8,28,16,.86);
+}
+.prep-support {
+  max-width: 430px;
+  margin: 1rem auto .8rem;
+  font-size: .98rem;
+  font-weight: 300;
+  line-height: 1.68;
+  letter-spacing: -.018em;
+  color: rgba(14,42,24,.58);
+}
+.prep-safe-line {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin: .15rem auto 1.35rem;
+  font-size: .76rem;
+  font-weight: 390;
+  letter-spacing: .02em;
+  color: rgba(14,42,24,.48);
+}
+.prep-safe-line::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(67,130,82,.55);
+  box-shadow: 0 0 18px rgba(67,130,82,.28);
+}
+.prep-capsules {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 9px;
+  max-width: 480px;
+  margin: 0 auto 1.35rem;
+}
+.prep-capsule {
+  display: inline-flex;
+  align-items: center;
+  gap: .48rem;
+  min-height: 38px;
+  padding: .64rem .86rem;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.72), rgba(250,254,252,.48)),
+    rgba(255,255,255,.44);
+  border: .5px solid rgba(44,90,60,.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.86),
+    0 8px 20px rgba(20,60,36,.045);
+  color: rgba(8,28,16,.66);
+  opacity: 0;
+  transform: translateY(6px);
+  animation: capsuleIn .68s cubic-bezier(0.22,1,0.36,1) forwards;
+  animation-delay: calc(.28s + (var(--i, 0) * .08s));
+}
+.prep-capsule-label {
+  font-size: 10px;
+  font-weight: 520;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.42);
+}
+.prep-capsule-value {
+  font-size: .84rem;
+  font-weight: 360;
+  letter-spacing: -.012em;
+  color: rgba(8,28,16,.68);
+}
+@keyframes capsuleIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+.prep-ready {
+  margin: 0 auto;
+  font-size: .88rem;
+  line-height: 1.58;
+  font-weight: 300;
+  letter-spacing: -.012em;
+  color: rgba(14,42,24,.58);
+  max-width: 420px;
+}
+.btn-add-more {
+  margin-top: .75rem;
+  opacity: .72;
+}
+@media (max-width: 620px) {
+  body.md-state-local_preparing .glass {
+    width: min(94vw, 520px);
+    border-radius: 34px;
+  }
+  body.md-state-local_preparing .glass-inner {
+    min-height: calc(100vh - 3rem);
+  }
+  .prep-title { font-size: 2.25rem; }
+  .prep-support { font-size: .9rem; }
+}
+
+
+
+/* ═══════════════════════════════════════════════════════
+   UPLOAD EXPERIENCE V2 — Make Move In feel like a moment
+   Logic remains untouched: the real local prep begins only after Move In.
+═══════════════════════════════════════════════════════ */
+body.md-state-upload .glass {
+  max-width: min(860px, 92vw);
+  min-height: min(720px, calc(100vh - 4.5rem));
+  border-radius: 44px;
+  background:
+    radial-gradient(circle at 50% 14%, rgba(255,255,255,.88), rgba(255,255,255,.20) 34%, transparent 64%),
+    radial-gradient(circle at 18% 24%, rgba(204,230,214,.30), transparent 34%),
+    radial-gradient(circle at 82% 70%, rgba(108,166,128,.14), transparent 35%),
+    linear-gradient(180deg, rgba(255,255,255,.72), rgba(247,252,249,.54)),
+    rgba(255,255,255,.50);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,.98),
+    0 0 0 1px rgba(44,90,60,.11),
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(44,90,60,.04),
+    0 22px 60px rgba(20,60,36,.08),
+    0 58px 140px rgba(20,60,36,.13),
+    0 0 130px rgba(162,207,181,.12);
+}
+body.md-state-upload .glass::before,
+body.md-state-upload .glass::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  border-radius: 999px;
+  z-index: 1;
+}
+body.md-state-upload .glass::before {
+  width: 520px;
+  height: 520px;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(circle, transparent 0 47%, rgba(58,112,72,.10) 48%, transparent 49%),
+    radial-gradient(circle, transparent 0 64%, rgba(255,255,255,.48) 65%, transparent 66%);
+  opacity: .74;
+  animation: uploadOrbit 18s linear infinite;
+}
+body.md-state-upload .glass::after {
+  width: 220px;
+  height: 220px;
+  right: 8%;
+  bottom: 7%;
+  background: radial-gradient(circle, rgba(118,184,143,.22), transparent 68%);
+  filter: blur(4px);
+  animation: uploadGlowDrift 8s cubic-bezier(.22,1,.36,1) infinite alternate;
+}
+@keyframes uploadOrbit { to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes uploadGlowDrift {
+  from { transform: translate3d(0, 0, 0) scale(.94); opacity: .48; }
+  to { transform: translate3d(-34px, -22px, 0) scale(1.08); opacity: .82; }
+}
+body.md-state-upload .glass-inner {
+  min-height: min(720px, calc(100vh - 4.5rem));
+  justify-content: center;
+  padding: clamp(2.4rem, 5vh, 4.25rem) clamp(1.5rem, 5vw, 4rem);
+}
+body.md-state-upload .upload-select-area {
+  max-width: 640px;
+  padding: .4rem 0 .1rem;
+  position: relative;
+  z-index: 3;
+}
+body.md-state-upload .up-icon {
+  width: 82px;
+  height: 82px;
+  margin-bottom: 1.85rem;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(255,255,255,1), rgba(247,253,249,.68) 56%, rgba(222,239,228,.30)),
+    rgba(255,255,255,.62);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,1),
+    0 0 0 1px rgba(44,90,60,.10),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 16px 42px rgba(20,60,36,.10),
+    0 0 64px rgba(121,185,145,.20);
+  animation: uploadDoorBreathe 4.8s cubic-bezier(.22,1,.36,1) infinite alternate;
+}
+body.md-state-upload .up-icon::before,
+body.md-state-upload .up-icon::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: inherit;
+  border: 1px solid rgba(44,90,60,.08);
+  opacity: .54;
+  animation: uploadDoorRing 4.5s ease-in-out infinite;
+}
+body.md-state-upload .up-icon::after {
+  inset: -25px;
+  animation-delay: 1.1s;
+  opacity: .28;
+}
+body.md-state-upload .up-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: rgba(16,46,26,.62);
+}
+@keyframes uploadDoorBreathe {
+  from { transform: translateY(0) scale(1); }
+  to { transform: translateY(-3px) scale(1.018); }
+}
+@keyframes uploadDoorRing {
+  0%, 100% { transform: scale(.96); opacity: .20; }
+  50% { transform: scale(1.09); opacity: .62; }
+}
+body.md-state-upload .up-head {
+  font-size: clamp(2.35rem, 5.7vw, 4.7rem);
+  line-height: .98;
+  font-weight: 240;
+  letter-spacing: -.07em;
+  color: rgba(8,28,16,.90);
+  margin-bottom: 1.1rem;
+}
+body.md-state-upload .up-sub {
+  max-width: 560px;
+  font-size: clamp(.95rem, 1.55vw, 1.18rem);
+  line-height: 1.72;
+  letter-spacing: -.025em;
+  color: rgba(14,42,24,.56);
+  margin-bottom: 1.8rem;
+}
+body.md-state-upload .file-tags {
+  max-width: 620px;
+  gap: 8px;
+  margin-bottom: 1.35rem;
+}
+body.md-state-upload .f-tag {
+  font-size: 10px;
+  letter-spacing: .13em;
+  padding: 6px 13px;
+  color: rgba(16,46,26,.46);
+  background: linear-gradient(180deg, rgba(255,255,255,.70), rgba(250,254,252,.46));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.78), 0 8px 18px rgba(20,60,36,.035);
+  animation: tagFloat 5.5s cubic-bezier(.22,1,.36,1) infinite alternate;
+}
+body.md-state-upload .f-tag:nth-child(2n) { animation-delay: .45s; }
+body.md-state-upload .f-tag:nth-child(3n) { animation-delay: .9s; }
+@keyframes tagFloat {
+  from { transform: translateY(0); opacity: .82; }
+  to { transform: translateY(-3px); opacity: 1; }
+}
+.upload-journey {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .62rem;
+  margin: .95rem auto 0;
+  color: rgba(14,42,24,.40);
+  font-size: 9px;
+  font-weight: 520;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.upload-journey i {
+  width: 30px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(44,90,60,.20), transparent);
+}
+.upload-stage {
+  width: min(100%, 540px);
+  display: none;
+  margin: 1.65rem auto 0;
+  position: relative;
+  z-index: 4;
+}
+.upload-stage.on {
+  display: block;
+  animation: stageIn .65s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes stageIn {
+  from { opacity: 0; transform: translateY(10px); filter: blur(5px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.upload-stage-card {
+  border-radius: 28px;
+  padding: 1.15rem 1.25rem 1.05rem;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,.68), transparent 70%),
+    linear-gradient(180deg, rgba(255,255,255,.62), rgba(247,252,249,.42));
+  border: .5px solid rgba(44,90,60,.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82), 0 14px 34px rgba(20,60,36,.055);
+  text-align: center;
+}
+.upload-stage-kicker {
+  margin: 0 0 .45rem;
+  font-size: 9px;
+  font-weight: 560;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.38);
+}
+.upload-stage-card h3 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.8vw, 2rem);
+  line-height: 1.08;
+  font-weight: 270;
+  letter-spacing: -.045em;
+  color: rgba(8,28,16,.84);
+}
+.upload-stage-card p:not(.upload-stage-kicker) {
+  max-width: 420px;
+  margin: .6rem auto .95rem;
+  font-size: .82rem;
+  line-height: 1.55;
+  font-weight: 300;
+  letter-spacing: -.012em;
+  color: rgba(14,42,24,.54);
+}
+.upload-stage-pills {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.upload-stage-pills span {
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: rgba(255,255,255,.50);
+  border: .5px solid rgba(44,90,60,.10);
+  font-size: 10px;
+  color: rgba(14,42,24,.52);
+}
+body.md-state-upload:not(.has-staged-assets) .btn-movein {
+  display: none;
+}
+body.md-state-upload.has-staged-assets .btn-movein {
+  margin-top: 1.2rem;
+  animation: continueArrive .7s cubic-bezier(.22,1,.36,1) both;
+}
+body.md-state-upload.has-staged-assets .up-micro {
+  margin-top: .65rem;
+}
+body.md-state-upload.has-staged-assets .upload-select-area {
+  transform: scale(.96);
+  opacity: .78;
+}
+body.dragging.md-state-upload .glass {
+  transform: translateY(-6px) scale(1.006);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,1),
+    0 0 0 1px rgba(58,146,90,.32),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 24px 68px rgba(20,60,36,.12),
+    0 0 120px rgba(96,178,122,.20);
+}
+body.dragging.md-state-upload .up-icon {
+  transform: translateY(-5px) scale(1.04);
+}
+body.dragging.md-state-upload .up-head {
+  color: rgba(8,28,16,.96);
+}
+@media (max-width: 720px) {
+  body.md-state-upload .glass { max-width: 94vw; border-radius: 34px; }
+  body.md-state-upload .glass-inner { padding: 2.2rem 1.35rem; }
+  body.md-state-upload .up-icon { width: 68px; height: 68px; margin-bottom: 1.45rem; }
+  body.md-state-upload .up-head { font-size: clamp(2.1rem, 11vw, 3.25rem); }
+  body.md-state-upload .up-sub { font-size: .94rem; }
+  .upload-journey { flex-wrap: wrap; row-gap: .42rem; }
+  .upload-journey i { width: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.md-state-upload .glass::before,
+  body.md-state-upload .glass::after,
+  body.md-state-upload .up-icon,
+  body.md-state-upload .up-icon::before,
+  body.md-state-upload .up-icon::after,
+  body.md-state-upload .f-tag {
+    animation: none !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   SCENE 2 SCALE + 20 SECOND UPLOAD GLOW
+   Scene 1 stays large and cinematic. Scene 2 becomes a smaller,
+   centered confirmation moment that fits cleanly on screen.
+═══════════════════════════════════════════════════════ */
+body.md-state-upload.has-staged-assets .glass {
+  max-width: min(610px, 92vw);
+  min-height: min(560px, calc(100vh - 3rem));
+  border-radius: 38px;
+}
+
+body.md-state-upload.has-staged-assets .glass-inner {
+  min-height: min(560px, calc(100vh - 3rem));
+  justify-content: center;
+  padding: clamp(1.65rem, 4vh, 2.65rem) clamp(1.35rem, 4vw, 2.6rem);
+}
+
+/* Scene 2 should not stack under the first upload pitch. */
+body.md-state-upload.has-staged-assets .upload-select-area,
+body.md-state-upload.has-staged-assets .file-tags,
+body.md-state-upload.has-staged-assets .upload-journey,
+body.md-state-upload.has-staged-assets .up-icon,
+body.md-state-upload.has-staged-assets .normal-copy,
+body.md-state-upload.has-staged-assets .drag-copy {
+  display: none !important;
+}
+
+body.md-state-upload.has-staged-assets .upload-stage {
+  width: min(100%, 430px);
+  margin: 0 auto;
+}
+
+body.md-state-upload.has-staged-assets .upload-stage-card {
+  border-radius: 30px;
+  padding: 1.35rem 1.35rem 1.2rem;
+  background:
+    radial-gradient(circle at 50% 4%, rgba(255,255,255,.82), transparent 62%),
+    radial-gradient(circle at 50% 24%, rgba(177,218,193,.20), transparent 50%),
+    linear-gradient(180deg, rgba(255,255,255,.68), rgba(247,252,249,.46));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.86),
+    0 16px 38px rgba(20,60,36,.06),
+    0 0 52px rgba(132,196,155,.08);
+}
+
+.upload-stage-orb {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto .88rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 26%, rgba(255,255,255,1), rgba(249,254,251,.72) 58%, rgba(225,242,232,.34)),
+    rgba(255,255,255,.60);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,1),
+    0 0 0 1px rgba(44,90,60,.10),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 10px 30px rgba(20,60,36,.08),
+    0 0 42px rgba(124,190,150,.18);
+}
+
+.upload-stage-orb svg {
+  width: 32px;
+  height: 24px;
+  fill: rgba(20,41,31,.78);
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,.58));
+}
+
+.upload-stage-orb::before,
+.upload-stage-orb::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: inherit;
+  border: 1px solid rgba(66,122,82,.10);
+  opacity: .45;
+}
+
+.upload-stage-orb::after {
+  inset: -18px;
+  opacity: .22;
+}
+
+body.upload-glow-active .upload-stage-orb {
+  animation:
+    stageOrbGlow 2.4s ease-in-out infinite,
+    stageOrbFloat 7s cubic-bezier(.22,1,.36,1) infinite alternate;
+}
+
+body.upload-glow-active .upload-stage-orb::before {
+  animation: stageOrbRing 2.9s ease-in-out infinite;
+}
+
+body.upload-glow-active .upload-stage-orb::after {
+  animation: stageOrbRing 3.6s ease-in-out infinite .45s;
+}
+
+@keyframes stageOrbGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 0 .5px rgba(255,255,255,1),
+      0 0 0 1px rgba(44,90,60,.10),
+      inset 0 1px 0 rgba(255,255,255,1),
+      0 10px 30px rgba(20,60,36,.08),
+      0 0 38px rgba(124,190,150,.18);
+    filter: saturate(1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 .5px rgba(255,255,255,1),
+      0 0 0 1px rgba(74,142,92,.22),
+      inset 0 1px 0 rgba(255,255,255,1),
+      0 16px 42px rgba(20,60,36,.10),
+      0 0 72px rgba(96,188,124,.34);
+    filter: saturate(1.08);
+  }
+}
+
+@keyframes stageOrbFloat {
+  from { transform: translateY(0) scale(1); }
+  to   { transform: translateY(-3px) scale(1.018); }
+}
+
+@keyframes stageOrbRing {
+  0%, 100% { transform: scale(.94); opacity: .18; }
+  50%      { transform: scale(1.12); opacity: .58; }
+}
+
+body.md-state-upload.has-staged-assets .upload-stage-kicker {
+  margin-bottom: .42rem;
+  font-size: 8.5px;
+}
+
+body.md-state-upload.has-staged-assets .upload-stage-card h3 {
+  font-size: clamp(1.32rem, 3.2vw, 1.85rem);
+}
+
+body.md-state-upload.has-staged-assets .upload-stage-card p:not(.upload-stage-kicker) {
+  max-width: 350px;
+  margin: .58rem auto .82rem;
+  font-size: .76rem;
+  line-height: 1.52;
+}
+
+.upload-stage-steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .48rem;
+  margin: 0 auto .82rem;
+  color: rgba(14,42,24,.42);
+  font-size: 8px;
+  font-weight: 560;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.upload-stage-steps i {
+  width: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(44,90,60,.20), transparent);
+}
+
+body.md-state-upload.has-staged-assets .upload-stage-pills {
+  gap: 5px;
+}
+
+body.md-state-upload.has-staged-assets .upload-stage-pills span {
+  padding: 4px 8px;
+  font-size: 9px;
+}
+
+body.md-state-upload.has-staged-assets .btn-movein {
+  margin-top: 1rem;
+}
+
+body.md-state-upload.has-staged-assets .up-micro {
+  margin-top: .55rem;
+  font-size: 9.5px;
+}
+
+body.md-state-upload.has-staged-assets .status {
+  display: none !important;
+}
+
+@media (max-height: 690px) {
+  body.md-state-upload.has-staged-assets .glass {
+    min-height: min(500px, calc(100vh - 1.5rem));
+  }
+  body.md-state-upload.has-staged-assets .glass-inner {
+    min-height: min(500px, calc(100vh - 1.5rem));
+    padding-top: 1.35rem;
+    padding-bottom: 1.35rem;
+  }
+  .upload-stage-orb {
+    width: 52px;
+    height: 52px;
+    margin-bottom: .68rem;
+  }
+  body.md-state-upload.has-staged-assets .upload-stage-card {
+    padding: 1.08rem 1.08rem 1rem;
+  }
+  body.md-state-upload.has-staged-assets .upload-stage-card p:not(.upload-stage-kicker) {
+    margin-bottom: .65rem;
+  }
+  .upload-stage-steps {
+    margin-bottom: .65rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.upload-glow-active .upload-stage-orb,
+  body.upload-glow-active .upload-stage-orb::before,
+  body.upload-glow-active .upload-stage-orb::after {
+    animation: none !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   LOCAL PREP NEXT STEP — make the arrival checkpoint actionable
+   Adds a clear “Next” moment without changing upload/API logic.
+═══════════════════════════════════════════════════════ */
+body.md-state-local_preparing .glass {
+  width: min(92vw, 610px) !important;
+  max-width: 610px !important;
+  border-radius: 38px !important;
+}
+body.md-state-local_preparing .glass-inner {
+  min-height: min(590px, calc(100vh - 2.5rem)) !important;
+  padding: clamp(1.45rem, 3.5vh, 2.35rem) clamp(1.35rem, 4vw, 2.65rem) !important;
+}
+body.md-state-local_preparing .btn-movein {
+  display: none !important;
+}
+body.md-state-local_preparing .prep-summary {
+  max-width: 500px !important;
+}
+body.md-state-local_preparing .prep-arrival-orb {
+  width: 54px;
+  height: 54px;
+  margin-bottom: .82rem;
+}
+body.md-state-local_preparing .prep-arrival-orb svg {
+  width: 27px;
+  height: 19px;
+}
+body.md-state-local_preparing .prep-kicker {
+  margin-bottom: .55rem;
+}
+body.md-state-local_preparing .prep-title {
+  font-size: clamp(2rem, 4.5vw, 3.05rem);
+}
+body.md-state-local_preparing .prep-support {
+  max-width: 390px;
+  margin: .78rem auto .62rem;
+  font-size: .92rem;
+  line-height: 1.58;
+}
+body.md-state-local_preparing .prep-safe-line {
+  margin: .08rem auto 1rem;
+}
+body.md-state-local_preparing .prep-capsules {
+  max-width: 445px;
+  gap: 7px;
+  margin-bottom: 1rem;
+}
+body.md-state-local_preparing .prep-capsule {
+  min-height: 34px;
+  padding: .52rem .72rem;
+}
+body.md-state-local_preparing .prep-capsule-label {
+  font-size: 8.5px;
+}
+body.md-state-local_preparing .prep-capsule-value {
+  font-size: .78rem;
+}
+.prep-next-card {
+  width: min(100%, 420px);
+  margin: .1rem auto .9rem;
+  padding: .92rem 1rem;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,.78), transparent 68%),
+    linear-gradient(180deg, rgba(255,255,255,.64), rgba(247,252,249,.46));
+  border: .5px solid rgba(44,90,60,.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.86),
+    0 14px 32px rgba(20,60,36,.055),
+    0 0 42px rgba(132,196,155,.07);
+  opacity: 0;
+  transform: translateY(7px);
+  animation: nextCardIn .78s cubic-bezier(.22,1,.36,1) .62s forwards;
+}
+@keyframes nextCardIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+.prep-next-kicker {
+  margin: 0 0 .34rem;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.38);
+}
+.prep-next-card h3 {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.12;
+  font-weight: 390;
+  letter-spacing: -.035em;
+  color: rgba(8,28,16,.82);
+}
+.prep-next-card p:not(.prep-next-kicker) {
+  margin: .44rem auto .72rem;
+  max-width: 330px;
+  font-size: .75rem;
+  line-height: 1.48;
+  font-weight: 300;
+  color: rgba(14,42,24,.54);
+}
+.prep-next-rail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .42rem;
+  color: rgba(14,42,24,.42);
+  font-size: 8px;
+  font-weight: 570;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.prep-next-rail i {
+  width: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(44,90,60,.22), transparent);
+}
+.prep-ready {
+  font-size: .8rem !important;
+  max-width: 360px !important;
+  margin-bottom: .78rem !important;
+}
+.prep-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .7rem;
+  flex-wrap: wrap;
+}
+.prep-next-button {
+  display: inline-flex;
+  align-items: center;
+  gap: .52rem;
+  border: 0;
+  border-radius: 999px;
+  padding: .82rem 1.55rem;
+  cursor: pointer;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .68rem;
+  font-weight: 540;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.94);
+  background:
+    linear-gradient(180deg, rgba(33,65,45,.96), rgba(14,41,26,.92));
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,.86),
+    0 0 0 1px rgba(44,90,60,.18),
+    inset 0 1px 0 rgba(255,255,255,.16),
+    0 12px 30px rgba(20,60,36,.14),
+    0 0 46px rgba(100,180,125,.12);
+  opacity: 0;
+  transform: translateY(8px);
+  animation: nextButtonIn .75s cubic-bezier(.22,1,.36,1) .92s forwards;
+}
+.prep-next-button:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,.9),
+    0 0 0 1px rgba(64,130,84,.24),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 16px 40px rgba(20,60,36,.18),
+    0 0 58px rgba(100,180,125,.16);
+}
+.prep-next-button:active { transform: scale(.98); }
+.prep-next-button svg {
+  width: 12px;
+  height: 12px;
+  stroke: rgba(255,255,255,.72);
+  stroke-width: 1.7;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@keyframes nextButtonIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+body.md-state-local_preparing .btn-add-more {
+  margin-top: 0;
+  padding: .78rem .85rem;
+  opacity: .62;
+}
+@media (max-height: 720px) {
+  body.md-state-local_preparing .glass-inner {
+    min-height: min(540px, calc(100vh - 1.5rem)) !important;
+    padding-top: 1.2rem !important;
+    padding-bottom: 1.2rem !important;
+  }
+  body.md-state-local_preparing .prep-arrival-orb {
+    width: 48px;
+    height: 48px;
+    margin-bottom: .62rem;
+  }
+  body.md-state-local_preparing .prep-title {
+    font-size: clamp(1.85rem, 4vw, 2.65rem);
+  }
+  body.md-state-local_preparing .prep-support {
+    margin-top: .58rem;
+    font-size: .84rem;
+  }
+  .prep-next-card {
+    padding: .75rem .86rem;
+    margin-bottom: .7rem;
+  }
+}
+@media (max-width: 520px) {
+  .prep-actions { flex-direction: column; gap: .45rem; }
+  .prep-next-button { width: min(100%, 280px); justify-content: center; }
+}
+
+
+
+/* ═══════════════════════════════════════════════════════
+   FIRST SCREEN VISIONOS STAGE WINDOW
+   Wraps the initial Move In screen in a large centered glass product environment.
+   Screen One content is preserved; only the containing stage is refined.
+═══════════════════════════════════════════════════════ */
+.stage {
+  padding: 32px;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.stage::before,
+.stage::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(1560px, calc(100vw - 64px));
+  height: calc(100vh - 64px);
+  transform: translate(-50%, -50%);
+  border-radius: clamp(34px, 4.4vw, 62px);
+  pointer-events: none;
+}
+
+.stage::before {
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 88% 72% at 50% 0%, rgba(255,255,255,.72), rgba(255,255,255,.30) 58%, rgba(255,255,255,.12) 100%),
+    radial-gradient(ellipse 58% 42% at 50% 76%, rgba(183,221,202,.18), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,.54), rgba(247,252,249,.30)),
+    rgba(255,255,255,.34);
+  backdrop-filter: blur(46px) saturate(172%);
+  -webkit-backdrop-filter: blur(46px) saturate(172%);
+  border: .5px solid rgba(255,255,255,.78);
+  box-shadow:
+    0 0 0 1px rgba(44,90,60,.075),
+    inset 0 1px 0 rgba(255,255,255,.94),
+    inset 0 -1px 0 rgba(44,90,60,.045),
+    0 18px 56px rgba(20,60,36,.06),
+    0 48px 130px rgba(20,60,36,.11),
+    0 0 120px rgba(176,218,196,.10);
+}
+
+.stage::after {
+  z-index: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(115deg, transparent 0 24%, rgba(255,255,255,.18) 39%, transparent 54%),
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,255,255,.42), transparent 68%),
+    radial-gradient(ellipse 68% 28% at 50% 104%, rgba(136,188,158,.12), transparent 70%);
+  opacity: .72;
+  mix-blend-mode: screen;
+}
+
+.stage .intro {
+  z-index: 2;
+  max-width: 920px;
+  padding: clamp(1.45rem, 3vw, 2.6rem);
+  transform: scale(.94);
+  transform-origin: center;
+}
+
+.stage .logo-badge {
+  margin-bottom: .92rem;
+}
+
+.stage .wordmark {
+  margin-bottom: clamp(2.05rem, 4.4vh, 2.75rem);
+}
+
+.stage .headline {
+  font-size: clamp(2.65rem, 5vw, 4.1rem);
+}
+
+.stage .sub {
+  margin-bottom: clamp(2.35rem, 5.2vh, 3rem);
+}
+
+body.md-state-welcome .env::before,
+body.md-state-movein .env::before {
+  opacity: .34;
+}
+
+@media (min-width: 1500px) {
+  .stage .intro { transform: scale(.96); }
+}
+
+@media (max-height: 760px) {
+  .stage .intro { transform: scale(.88); }
+  .stage .wordmark { margin-bottom: 1.55rem; }
+  .stage .sub { margin-bottom: 2rem; }
+}
+
+@media (max-width: 720px) {
+  .stage { padding: 20px; }
+  .stage::before,
+  .stage::after {
+    width: calc(100vw - 40px);
+    height: calc(100vh - 40px);
+    border-radius: 34px;
+  }
+  .stage .intro {
+    transform: scale(.92);
+    padding: 1.25rem;
+  }
+  .stage .headline {
+    font-size: clamp(2.25rem, 11vw, 3.25rem);
+  }
+}
+
+@media (max-width: 420px) {
+  .stage { padding: 16px; }
+  .stage::before,
+  .stage::after {
+    width: calc(100vw - 32px);
+    height: calc(100vh - 32px);
+    border-radius: 30px;
+  }
+  .stage .intro { transform: scale(.88); }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   EXPERIENCE WINDOW — ALL PHASES
+   Keeps every Moving Day screen inside one centered VisionOS product window.
+   The window stays constrained while each phase fades inside it.
+═══════════════════════════════════════════════════════ */
+:root {
+  --md-window-x: clamp(24px, 2vw, 32px);
+  --md-window-radius: clamp(34px, 4.2vw, 62px);
+}
+
+body {
+  background: #f3f7f3;
+  overflow: hidden;
+}
+
+.experience-window {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: min(1560px, calc(100vw - (var(--md-window-x) * 2)));
+  height: calc(100vh - (var(--md-window-x) * 2));
+  transform: translate(-50%, -50%);
+  border-radius: var(--md-window-radius);
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 92% 76% at 50% 0%, rgba(255,255,255,.72), rgba(255,255,255,.30) 58%, rgba(255,255,255,.12) 100%),
+    radial-gradient(ellipse 64% 42% at 50% 78%, rgba(183,221,202,.18), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,.54), rgba(247,252,249,.30)),
+    rgba(255,255,255,.34);
+  border: .5px solid rgba(255,255,255,.78);
+  backdrop-filter: blur(48px) saturate(172%);
+  -webkit-backdrop-filter: blur(48px) saturate(172%);
+  box-shadow:
+    0 0 0 1px rgba(44,90,60,.075),
+    inset 0 1px 0 rgba(255,255,255,.94),
+    inset 0 -1px 0 rgba(44,90,60,.045),
+    0 18px 56px rgba(20,60,36,.06),
+    0 48px 130px rgba(20,60,36,.11),
+    0 0 120px rgba(176,218,196,.10);
+  transition:
+    opacity .72s cubic-bezier(.22,1,.36,1),
+    filter .9s cubic-bezier(.22,1,.36,1),
+    box-shadow .9s cubic-bezier(.22,1,.36,1),
+    transform .9s cubic-bezier(.22,1,.36,1);
+}
+
+.experience-window::before,
+.experience-window::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.experience-window::before {
+  background:
+    linear-gradient(115deg, transparent 0 24%, rgba(255,255,255,.18) 39%, transparent 54%),
+    radial-gradient(ellipse 58% 38% at 50% 0%, rgba(255,255,255,.42), transparent 70%),
+    radial-gradient(ellipse 68% 28% at 50% 104%, rgba(136,188,158,.12), transparent 70%);
+  opacity: .74;
+  mix-blend-mode: screen;
+}
+
+.experience-window::after {
+  inset: auto 8% 8% 8%;
+  height: 34%;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(156,206,178,.14), transparent 68%);
+  filter: blur(34px);
+  opacity: .62;
+}
+
+body.dragging .experience-window {
+  filter: brightness(1.018) saturate(1.045);
+  box-shadow:
+    0 0 0 1px rgba(44,130,78,.11),
+    inset 0 1px 0 rgba(255,255,255,.96),
+    inset 0 -1px 0 rgba(44,90,60,.045),
+    0 18px 56px rgba(20,60,36,.065),
+    0 50px 138px rgba(20,60,36,.13),
+    0 0 132px rgba(150,214,176,.15);
+}
+
+body.md-state-preparing .experience-window,
+body.md-state-concierge .experience-window,
+body.show-results .experience-window {
+  filter: brightness(1.01) saturate(1.025);
+}
+
+/* Every phase occupies the same product window instead of the browser viewport. */
+.experience-window > .stage,
+.experience-window > .upload,
+.experience-window > .concierge,
+.experience-window > .results-app {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.experience-window > .stage,
+.experience-window > .upload,
+.experience-window > .concierge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(20px, 3vw, 42px);
+  overflow: hidden;
+  background: transparent;
+}
+
+.experience-window > .stage {
+  z-index: 1;
+}
+
+.experience-window > .upload {
+  z-index: 2;
+}
+
+.experience-window > .concierge {
+  z-index: 3;
+}
+
+/* The window is now the environment. Disable the old first-screen-only pseudo-window. */
+.experience-window .stage::before,
+.experience-window .stage::after {
+  display: none !important;
+}
+
+.experience-window .stage .intro {
+  position: relative;
+  z-index: 2;
+  transform: scale(.92);
+}
+
+.experience-window .glass {
+  position: relative;
+  z-index: 2;
+  max-width: min(760px, calc(100% - 48px));
+  max-height: calc(100% - 48px);
+}
+
+body.md-state-upload .experience-window .glass {
+  max-width: min(720px, calc(100% - 48px));
+}
+
+body.md-state-local_preparing .experience-window .glass {
+  width: min(900px, calc(100% - 56px));
+  max-width: min(900px, calc(100% - 56px));
+  max-height: calc(100% - 56px);
+}
+
+body.md-state-local_preparing .experience-window .glass-inner {
+  min-height: min(590px, calc(100vh - 144px)) !important;
+  max-height: calc(100vh - 144px);
+  padding-top: clamp(1.35rem, 3vh, 2.6rem) !important;
+  padding-bottom: clamp(1.35rem, 3vh, 2.6rem) !important;
+}
+
+body.md-state-preparing .experience-window .glass {
+  width: min(760px, calc(100% - 56px));
+  max-width: min(760px, calc(100% - 56px));
+}
+
+.experience-window > .concierge {
+  overflow: auto;
+}
+
+.experience-window .concierge-shell {
+  position: relative;
+  z-index: 2;
+  width: min(780px, calc(100% - 52px));
+  max-height: calc(100% - 52px);
+  overflow: auto;
+  scrollbar-width: none;
+}
+.experience-window .concierge-shell::-webkit-scrollbar { display: none; }
+
+/* Results/review also stays inside the same window and scrolls internally if needed. */
+.experience-window > .results-app {
+  z-index: 4;
+  overflow: auto;
+  padding: clamp(20px, 3vw, 42px) clamp(20px, 3.2vw, 48px) clamp(36px, 5vw, 72px) !important;
+  background: transparent !important;
+  scrollbar-width: thin;
+}
+
+body.show-results {
+  overflow: hidden !important;
+  background: #f3f7f3;
+}
+
+.experience-window .results-shell {
+  position: relative;
+  z-index: 2;
+  min-height: 100%;
+}
+
+.experience-window .customer-review {
+  margin-top: 0;
+}
+
+.experience-window .toast {
+  z-index: 20;
+}
+
+@media (min-width: 1500px) and (min-height: 850px) {
+  .experience-window .stage .intro { transform: scale(.94); }
+}
+
+@media (max-height: 760px) {
+  .experience-window .stage .intro { transform: scale(.84); }
+  body.md-state-local_preparing .experience-window .glass-inner {
+    min-height: min(510px, calc(100vh - 112px)) !important;
+    max-height: calc(100vh - 112px);
+  }
+}
+
+@media (max-width: 720px) {
+  :root { --md-window-x: 20px; --md-window-radius: 34px; }
+  .experience-window > .stage,
+  .experience-window > .upload,
+  .experience-window > .concierge {
+    padding: 18px;
+  }
+  .experience-window .stage .intro { transform: scale(.88); }
+  .experience-window .glass,
+  body.md-state-local_preparing .experience-window .glass,
+  body.md-state-preparing .experience-window .glass {
+    width: min(100%, calc(100vw - 56px));
+    max-width: min(100%, calc(100vw - 56px));
+    max-height: calc(100vh - 72px);
+  }
+  .experience-window .concierge-shell {
+    width: min(100%, calc(100vw - 56px));
+    max-height: calc(100vh - 72px);
+  }
+}
+
+@media (max-width: 420px) {
+  :root { --md-window-x: 16px; --md-window-radius: 30px; }
+  .experience-window .stage .intro { transform: scale(.84); }
+}
+
+
+
+/* ═══════════════════════════════════════════════════════
+   SEAMLESS EXPERIENCE WINDOW FIX
+   One persistent VisionOS window. Inner states no longer create stacked borders.
+   The frame evolves; content changes inside it.
+═══════════════════════════════════════════════════════ */
+
+/* The background should feel atmospheric, not like a second window behind the product. */
+.env::before {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  opacity: .18 !important;
+  background:
+    radial-gradient(ellipse 70% 48% at 50% 38%, rgba(255,255,255,.30), transparent 68%),
+    radial-gradient(ellipse 70% 34% at 50% 72%, rgba(164,210,184,.12), transparent 72%) !important;
+}
+
+/* The experience window is the only large glass boundary. */
+.experience-window {
+  background:
+    radial-gradient(ellipse 86% 68% at 50% 0%, rgba(255,255,255,.78), rgba(255,255,255,.34) 58%, rgba(255,255,255,.16) 100%),
+    radial-gradient(ellipse 62% 42% at 50% 74%, rgba(183,221,202,.20), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,.56), rgba(247,252,249,.31)),
+    rgba(255,255,255,.35) !important;
+  border: .5px solid rgba(255,255,255,.82) !important;
+  box-shadow:
+    0 0 0 1px rgba(44,90,60,.070),
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -1px 0 rgba(44,90,60,.040),
+    0 22px 64px rgba(20,60,36,.065),
+    0 54px 142px rgba(20,60,36,.12),
+    0 0 132px rgba(176,218,196,.11) !important;
+}
+
+/* State shifts happen on the same frame instead of spawning new cards. */
+body.md-state-upload .experience-window {
+  filter: brightness(1.01) saturate(1.025);
+}
+body.md-state-upload.has-staged-assets .experience-window,
+body.md-state-local_preparing .experience-window {
+  filter: brightness(1.025) saturate(1.045);
+  box-shadow:
+    0 0 0 1px rgba(44,116,72,.085),
+    inset 0 1px 0 rgba(255,255,255,.96),
+    inset 0 -1px 0 rgba(44,90,60,.040),
+    0 22px 64px rgba(20,60,36,.070),
+    0 58px 150px rgba(20,60,36,.13),
+    0 0 150px rgba(150,214,176,.16) !important;
+}
+
+/* Kill the old inner upload/local/preparing panel visual.
+   .glass remains as a layout shell only. */
+.experience-window .glass,
+body.md-state-upload .experience-window .glass,
+body.md-state-upload.has-staged-assets .experience-window .glass,
+body.md-state-local_preparing .experience-window .glass,
+body.md-state-preparing .experience-window .glass {
+  width: min(1120px, calc(100% - 56px)) !important;
+  max-width: min(1120px, calc(100% - 56px)) !important;
+  max-height: calc(100% - 56px) !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  animation: none !important;
+}
+
+.experience-window .glass::before,
+.experience-window .glass::after {
+  display: none !important;
+}
+
+.experience-window .glass-inner,
+body.md-state-local_preparing .experience-window .glass-inner {
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: clamp(1.6rem, 4vh, 3.2rem) clamp(1.25rem, 3.6vw, 3rem) !important;
+}
+
+/* Upload scene 1 stays immersive, but without a card inside the card. */
+body.md-state-upload:not(.has-staged-assets) .experience-window .glass-inner {
+  min-height: min(650px, calc(100vh - 120px)) !important;
+  justify-content: center;
+}
+
+body.md-state-upload:not(.has-staged-assets) .upload-select-area {
+  max-width: 980px;
+}
+
+body.md-state-upload:not(.has-staged-assets) .up-icon {
+  width: 74px;
+  height: 74px;
+  margin-bottom: clamp(1.2rem, 3vh, 2rem);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,.98),
+    0 0 0 1px rgba(44,90,60,.10),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 18px 44px rgba(20,60,36,.09),
+    0 0 74px rgba(150,210,176,.16);
+}
+body.md-state-upload:not(.has-staged-assets) .up-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+body.md-state-upload:not(.has-staged-assets) .up-head {
+  font-size: clamp(3.1rem, 6.1vw, 5.45rem);
+  line-height: .98;
+  letter-spacing: -.078em;
+  max-width: 900px;
+  margin-bottom: 1.35rem;
+}
+
+body.md-state-upload:not(.has-staged-assets) .up-sub {
+  max-width: 820px;
+  font-size: clamp(1.05rem, 1.6vw, 1.34rem);
+  line-height: 1.62;
+  margin-bottom: 1.8rem;
+}
+
+body.md-state-upload:not(.has-staged-assets) .file-tags {
+  max-width: 760px;
+  margin-bottom: clamp(1.8rem, 4.6vh, 3.5rem);
+}
+
+/* Scene 2 becomes a focused state inside the same glass window. No second window. */
+body.md-state-upload.has-staged-assets .glass-inner {
+  min-height: min(620px, calc(100vh - 120px)) !important;
+  justify-content: center;
+}
+
+body.md-state-upload.has-staged-assets .upload-stage-card {
+  width: min(880px, 100%);
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.md-state-upload.has-staged-assets .upload-stage-card h3 {
+  font-size: clamp(2.65rem, 5.2vw, 4.7rem);
+  line-height: 1.02;
+  margin-bottom: .8rem;
+}
+
+body.md-state-upload.has-staged-assets .upload-stage-card p:not(.upload-stage-kicker) {
+  max-width: 640px;
+}
+
+/* Local arrival screen also shares the frame, not a nested card. */
+body.md-state-local_preparing .prep-summary,
+body.md-state-upload.has-staged-assets .upload-stage {
+  max-width: 880px;
+}
+body.md-state-local_preparing .prep-arrival {
+  max-width: 820px;
+  margin: 0 auto;
+}
+body.md-state-local_preparing .prep-title {
+  font-size: clamp(2.6rem, 5vw, 4.7rem);
+}
+
+/* Concierge/review are content inside the product window, not new admin panes. */
+.experience-window .concierge-shell,
+.experience-window .customer-review {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.experience-window .concierge-shell {
+  width: min(980px, calc(100% - 56px));
+  max-height: calc(100% - 56px);
+  padding: clamp(1.2rem, 3.2vw, 2.4rem);
+}
+
+.experience-window .customer-review {
+  padding: clamp(1.2rem, 3.2vw, 2.4rem);
+}
+
+/* Small cards/capsules can still exist, but they should feel like objects in the window,
+   not another large bordered container. */
+.upload-stage-pills span,
+.prep-pill,
+.prep-next-card,
+.concierge-card,
+.review-reco-card {
+  background: rgba(255,255,255,.42) !important;
+  border-color: rgba(44,90,60,.10) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.72),
+    0 10px 26px rgba(20,60,36,.035) !important;
+}
+
+/* Keep constraints on small screens without creating cropped nested frames. */
+@media (max-width: 900px) {
+  .experience-window .glass,
+  body.md-state-upload .experience-window .glass,
+  body.md-state-local_preparing .experience-window .glass,
+  body.md-state-preparing .experience-window .glass {
+    width: min(100%, calc(100vw - 56px)) !important;
+    max-width: min(100%, calc(100vw - 56px)) !important;
+  }
+
+  body.md-state-upload:not(.has-staged-assets) .up-head,
+  body.md-state-upload.has-staged-assets .upload-stage-card h3,
+  body.md-state-local_preparing .prep-title {
+    font-size: clamp(2.35rem, 11vw, 3.75rem);
+  }
+}
+
+@media (max-height: 760px) {
+  body.md-state-upload:not(.has-staged-assets) .experience-window .glass-inner,
+  body.md-state-upload.has-staged-assets .glass-inner {
+    min-height: 0 !important;
+    padding-top: 1.05rem !important;
+    padding-bottom: 1.05rem !important;
+  }
+
+  body.md-state-upload:not(.has-staged-assets) .up-icon {
+    width: 58px;
+    height: 58px;
+    margin-bottom: .9rem;
+  }
+
+  body.md-state-upload:not(.has-staged-assets) .up-head {
+    font-size: clamp(2.45rem, 5vw, 4.1rem);
+    margin-bottom: .85rem;
+  }
+
+  body.md-state-upload:not(.has-staged-assets) .up-sub {
+    margin-bottom: 1.1rem;
+  }
+
+  body.md-state-upload:not(.has-staged-assets) .file-tags {
+    margin-bottom: 1.25rem;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   FIT INSIDE WINDOW FIX — local arrival should never crop
+   Keeps the one persistent VisionOS window, but compresses the
+   Arrival Check content into a balanced, contained composition.
+═══════════════════════════════════════════════════════ */
+body.md-state-local_preparing .experience-window > .upload {
+  padding: clamp(18px, 2.4vw, 34px) !important;
+  align-items: center !important;
+  justify-content: center !important;
+  overflow: hidden !important;
+}
+
+body.md-state-local_preparing .experience-window .glass {
+  width: min(1040px, calc(100% - 36px)) !important;
+  max-width: min(1040px, calc(100% - 36px)) !important;
+  max-height: 100% !important;
+  overflow: visible !important;
+}
+
+body.md-state-local_preparing .experience-window .glass-inner {
+  min-height: 0 !important;
+  height: 100% !important;
+  max-height: 100% !important;
+  justify-content: center !important;
+  padding: clamp(.85rem, 2.2vh, 1.55rem) clamp(1rem, 3vw, 2.2rem) !important;
+}
+
+body.md-state-local_preparing .prep-summary {
+  width: 100% !important;
+  max-width: 820px !important;
+  margin: 0 auto !important;
+}
+
+body.md-state-local_preparing .prep-arrival {
+  max-width: 780px !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+body.md-state-local_preparing .prep-arrival-orb {
+  width: clamp(44px, 5vh, 56px) !important;
+  height: clamp(44px, 5vh, 56px) !important;
+  margin-bottom: clamp(.44rem, 1.25vh, .72rem) !important;
+}
+
+body.md-state-local_preparing .prep-arrival-orb svg {
+  width: clamp(22px, 2.7vh, 29px) !important;
+  height: auto !important;
+}
+
+body.md-state-local_preparing .prep-kicker {
+  margin: 0 0 clamp(.36rem, .9vh, .56rem) !important;
+  font-size: 9px !important;
+  letter-spacing: .22em !important;
+}
+
+body.md-state-local_preparing .prep-title {
+  font-size: clamp(2.45rem, 4.05vw, 3.72rem) !important;
+  line-height: .98 !important;
+  letter-spacing: -.075em !important;
+  margin: 0 !important;
+}
+
+body.md-state-local_preparing .prep-support {
+  max-width: 560px !important;
+  margin: clamp(.55rem, 1.3vh, .82rem) auto clamp(.32rem, .8vh, .52rem) !important;
+  font-size: clamp(.82rem, 1.25vw, .98rem) !important;
+  line-height: 1.42 !important;
+}
+
+body.md-state-local_preparing .prep-safe-line {
+  margin: 0 auto clamp(.55rem, 1.35vh, .86rem) !important;
+  font-size: clamp(.74rem, 1vw, .88rem) !important;
+}
+
+body.md-state-local_preparing .prep-capsules {
+  max-width: 620px !important;
+  margin: 0 auto clamp(.72rem, 1.55vh, 1rem) !important;
+  gap: 7px !important;
+}
+
+body.md-state-local_preparing .prep-capsule {
+  min-height: 32px !important;
+  padding: .46rem .72rem !important;
+  border-radius: 999px !important;
+}
+
+body.md-state-local_preparing .prep-capsule-label {
+  font-size: 8px !important;
+  letter-spacing: .13em !important;
+}
+
+body.md-state-local_preparing .prep-capsule-value {
+  font-size: .76rem !important;
+}
+
+body.md-state-local_preparing .prep-next-card {
+  width: min(680px, 100%) !important;
+  margin: 0 auto clamp(.58rem, 1.35vh, .82rem) !important;
+  padding: clamp(.68rem, 1.4vh, .88rem) clamp(.9rem, 2.4vw, 1.25rem) !important;
+  border-radius: 24px !important;
+  display: grid !important;
+  grid-template-columns: minmax(130px, 180px) 1fr !important;
+  column-gap: clamp(.75rem, 2vw, 1.2rem) !important;
+  row-gap: .22rem !important;
+  align-items: center !important;
+  text-align: left !important;
+}
+
+body.md-state-local_preparing .prep-next-kicker {
+  grid-column: 1 !important;
+  margin: 0 !important;
+  font-size: 7.5px !important;
+  letter-spacing: .18em !important;
+}
+
+body.md-state-local_preparing .prep-next-card h3 {
+  grid-column: 1 !important;
+  margin: 0 !important;
+  font-size: clamp(1rem, 1.55vw, 1.18rem) !important;
+  line-height: 1.05 !important;
+}
+
+body.md-state-local_preparing .prep-next-card p:not(.prep-next-kicker) {
+  grid-column: 2 !important;
+  grid-row: 1 / span 2 !important;
+  max-width: none !important;
+  margin: 0 !important;
+  font-size: clamp(.68rem, 1vw, .78rem) !important;
+  line-height: 1.42 !important;
+  text-align: left !important;
+}
+
+body.md-state-local_preparing .prep-next-rail {
+  grid-column: 1 / -1 !important;
+  margin-top: .44rem !important;
+  font-size: 7.5px !important;
+  gap: .38rem !important;
+  justify-content: center !important;
+}
+
+body.md-state-local_preparing .prep-next-rail i {
+  width: 16px !important;
+}
+
+body.md-state-local_preparing .prep-ready {
+  max-width: 520px !important;
+  margin: 0 auto clamp(.55rem, 1.2vh, .78rem) !important;
+  font-size: clamp(.72rem, 1vw, .82rem) !important;
+  line-height: 1.42 !important;
+}
+
+body.md-state-local_preparing .prep-actions {
+  gap: .52rem !important;
+}
+
+body.md-state-local_preparing .prep-next-button {
+  padding: .72rem 1.38rem !important;
+  font-size: .64rem !important;
+}
+
+body.md-state-local_preparing .btn-add-more {
+  padding: .62rem .74rem !important;
+  font-size: 9px !important;
+}
+
+@media (max-height: 820px) {
+  body.md-state-local_preparing .experience-window > .upload {
+    padding-top: 16px !important;
+    padding-bottom: 16px !important;
+  }
+
+  body.md-state-local_preparing .prep-title {
+    font-size: clamp(2.25rem, 3.55vw, 3.25rem) !important;
+  }
+
+  body.md-state-local_preparing .prep-support {
+    margin-top: .46rem !important;
+    margin-bottom: .28rem !important;
+  }
+
+  body.md-state-local_preparing .prep-capsules {
+    margin-bottom: .6rem !important;
+  }
+
+  body.md-state-local_preparing .prep-next-card {
+    padding-top: .62rem !important;
+    padding-bottom: .62rem !important;
+    margin-bottom: .48rem !important;
+  }
+
+  body.md-state-local_preparing .prep-next-rail {
+    display: none !important;
+  }
+}
+
+@media (max-height: 700px) {
+  body.md-state-local_preparing .prep-arrival-orb {
+    width: 42px !important;
+    height: 42px !important;
+    margin-bottom: .35rem !important;
+  }
+
+  body.md-state-local_preparing .prep-kicker {
+    margin-bottom: .28rem !important;
+  }
+
+  body.md-state-local_preparing .prep-title {
+    font-size: clamp(2rem, 3.2vw, 2.85rem) !important;
+  }
+
+  body.md-state-local_preparing .prep-safe-line {
+    margin-bottom: .45rem !important;
+  }
+
+  body.md-state-local_preparing .prep-capsules {
+    gap: 5px !important;
+  }
+
+  body.md-state-local_preparing .prep-capsule {
+    min-height: 29px !important;
+    padding: .38rem .6rem !important;
+  }
+}
+
+@media (max-width: 700px) {
+  body.md-state-local_preparing .prep-next-card {
+    display: block !important;
+    text-align: center !important;
+    width: min(430px, 100%) !important;
+  }
+
+  body.md-state-local_preparing .prep-next-card p:not(.prep-next-kicker) {
+    text-align: center !important;
+    margin-top: .38rem !important;
+  }
+
+  body.md-state-local_preparing .prep-next-rail {
+    margin-top: .55rem !important;
+  }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ══ ENVIRONMENT ════════════════════════════════════ -->
+<div class="env" aria-hidden="true">
+  <div class="env-l1"></div>
+  <div class="env-g1"></div>
+  <div class="env-g2"></div>
+  <div class="env-glow"></div>
+  <div class="env-v"></div>
+</div>
+
+<div class="experience-window" id="experienceWindow" aria-label="Moving Day experience">
+
+<!-- ══ MOVE IN INTRO ══════════════════════════════════ -->
+<div class="stage" id="intro" role="main" aria-label="Moving Day">
+  <div class="intro">
+
+    <!-- LOGO MARK — Moving Day deep forest icon, embedded inline for preview -->
+    <div class="logo-badge" aria-hidden="true">
+      <svg class="logo-mark" viewBox="596 85 178 122" role="img" aria-label="Moving Day mark" xmlns="http://www.w3.org/2000/svg">
+        <path d="M769.4,89.65v111.85h-39.04c.07-25.79-35.02-31.29-50.28-36.68-16.18-5.71,0-14.05,0-14.05l89.32-61.11Z"/>
+        <path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/>
+      </svg>
+    </div>
+
+    <!-- WORDMARK -->
+    <p class="wordmark">Moving Day</p>
+
+    <!-- HEADLINE -->
+    <h1 class="headline" id="headline" aria-label="Every brand deserves a home."></h1>
+
+    <!-- SUBHEADLINE -->
+    <p class="sub">Move everything in. We'll prepare the rest.</p>
+
+    <!-- BEGIN CTA -->
+    <button class="btn-begin" id="btn-begin" aria-label="Move In">
+      Move In
+      <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true">
+        <line x1="5" y1="12" x2="19" y2="12"/>
+        <polyline points="13 6 19 12 13 18"/>
+      </svg>
+    </button>
+
+  </div>
+</div>
+
+<!-- ══ UPLOAD STATE ═══════════════════════════════════ -->
+<div class="upload" id="upload" aria-hidden="true">
+  <div class="glass" id="glass">
+
+    <!-- PREPARING HOOK -->
+    <div class="preparing" id="preparing" aria-live="polite">
+      <div class="p-ring" aria-hidden="true"></div>
+      <p class="p-head">Preparing your brand…</p>
+      <p class="p-sub" id="p-sub">Reviewing your assets</p>
+    </div>
+
+    <!-- UPLOAD FIX: one hidden file input only. It is triggered by JS, never by an overlay. -->
+    <input class="drop-input" type="file" id="file-input" multiple
+      accept=".pdf,.png,.jpg,.jpeg,.svg,.gif,.webp,.ai,.eps,.zip,.ttf,.otf,.woff,.woff2,.pptx,.docx,.xlsx,.mp4,.mov,.sketch,.fig"
+      tabindex="-1" aria-label="Choose brand files" />
+
+    <div class="glass-inner">
+      <!-- FILE INPUT TRIGGER: this is the only upload surface that opens the picker. -->
+      <div class="upload-select-area" id="upload-zone" role="button" tabindex="0" aria-label="Choose or drop brand files">
+        <div class="up-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24">
+            <polyline points="16 16 12 12 8 16"/>
+            <line x1="12" y1="12" x2="12" y2="21"/>
+            <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+          </svg>
+        </div>
+
+        <div class="normal-copy">
+          <p class="up-head">Bring the whole brand over.</p>
+          <p class="up-sub">Drop in the messy folder — logos, guidelines, fonts, photos, decks, screenshots, PDFs, and old brand files. Moving Day will sort the rest.</p>
+        </div>
+        <div class="drag-copy">
+          <p class="up-head">Let it all in.</p>
+          <p class="up-sub">Release the files and I’ll start arranging the foundation.</p>
+        </div>
+
+        <div class="file-tags" aria-hidden="true">
+          <span class="f-tag">Logos</span>
+          <span class="f-tag">Fonts</span>
+          <span class="f-tag">Guidelines</span>
+          <span class="f-tag">Photography</span>
+          <span class="f-tag">PDFs</span>
+          <span class="f-tag">Presentations</span>
+          <span class="f-tag">Websites</span>
+        </div>
+
+        <div class="upload-journey" aria-hidden="true">
+          <span>Receive</span><i></i><span>Sort</span><i></i><span>Understand</span><i></i><span>Welcome Home</span>
+        </div>
+      </div>
+
+      <div class="upload-stage" id="uploadStage" aria-live="polite"></div>
+
+      <button class="btn-movein" id="btn-movein" disabled aria-label="Move In">
+        Move In
+        <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true">
+          <line x1="5" y1="12" x2="19" y2="12"/>
+          <polyline points="13 6 19 12 13 18"/>
+        </svg>
+      </button>
+
+      <p class="up-micro">Your assets stay secure, private, and organized.</p>
+
+      <div class="status" id="status">
+        <div class="s-dot" aria-hidden="true"></div>
+        <span class="s-txt" id="s-txt"></span>
+      </div>
+
+      <!-- LOCAL PREPARATION SUMMARY: customer-facing. No individual file rows. -->
+      <div class="prep-summary" id="prepSummary" aria-live="polite"></div>
+
+      <!-- Founder/developer view only. Files stay available internally without becoming the customer UI. -->
+      <details class="developer-files" id="developerFiles">
+        <summary>Founder file view</summary>
+        <div class="tray" id="tray" role="list"></div>
+      </details>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- ══ CONCIERGE MODE ═════════════════════════════════ -->
+<section class="concierge" id="concierge" aria-hidden="true">
+  <div class="concierge-shell" role="region" aria-label="Moving Day Brand Concierge">
+    <p class="concierge-kicker">Brand Concierge</p>
+    <h2 class="concierge-title">I’ve organized your brand foundation.</h2>
+    <p class="concierge-note" id="conciergeMessage">
+      Good afternoon. I’ve organized your assets and found the foundation of your visual identity.
+      Before I prepare your Brand Home, I’d like to confirm a few key elements.
+    </p>
+    <div class="concierge-grid" id="conciergeGrid"></div>
+    <div class="concierge-footer">
+      <p class="concierge-micro">You can adjust these now, or refine every asset later inside Brand Home.</p>
+      <button class="concierge-continue" id="conciergeContinue" type="button">Continue to Review</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══ REVIEW RESULTS / EXISTING ANALYZER OUTPUT ══════ -->
+<div class="toast" id="toast"></div>
+<main class="results-app" id="resultsApp" aria-label="Moving Day brand review results">
+  <div class="results-shell">
+    <header class="results-top">
+      <div>
+        <p class="results-kicker">Moving Day</p>
+        <h2 class="results-title">Your brand is prepared.</h2>
+        <p class="results-note">Review the organized system, then apply it to the builder or download the package.</p>
+      </div>
+      <button class="results-back" id="backToMoveIn" type="button">Move in another brand</button>
+    </header>
+
+    <!-- CUSTOMER REVIEW: recommendations first. Technical output is Founder Mode only. -->
+    <section class="customer-review" id="customerReview" aria-label="Moving Day recommendations">
+      <p class="customer-review-kicker">Brand Concierge</p>
+      <h2 class="customer-review-title">I have three recommendations before we prepare your Brand Home.</h2>
+      <p class="customer-review-copy">
+        I’ve reviewed the foundation. These are the first decisions I recommend confirming before I arrange the final system.
+      </p>
+      <div class="review-reco-grid" id="reviewRecoGrid"></div>
+      <div class="customer-review-footer">
+        <p class="customer-review-micro">The full asset library, downloads, and variants will live inside Brand Home.</p>
+        <button class="prepare-home-btn" id="prepareHomeBtn" type="button">Prepare Brand Home</button>
+      </div>
+    </section>
+
+    <div class="progress-strip" id="progressStrip">
+      <div class="progress-steps">
+        <div class="progress-step" id="ps1"><span class="step-dot"></span>Reading files</div>
+        <div class="progress-step" id="ps2"><span class="step-dot"></span>Reviewing assets</div>
+        <div class="progress-step" id="ps3"><span class="step-dot"></span>Organizing files</div>
+        <div class="progress-step" id="ps4"><span class="step-dot"></span>Color variants</div>
+        <div class="progress-step" id="ps5"><span class="step-dot"></span>Package ready</div>
+      </div>
+    </div>
+
+    <div class="summary-bar" id="summaryBar">
+      <div class="summary-stat"><span class="summary-stat-n" id="statFiles">0</span><span class="summary-stat-l">Files reviewed</span></div>
+      <div class="summary-divider"></div>
+      <div class="summary-stat"><span class="summary-stat-n" id="statVariants">0</span><span class="summary-stat-l">Variants created</span></div>
+      <div class="summary-divider"></div>
+      <div class="summary-stat"><span class="summary-stat-n" id="statColors">0</span><span class="summary-stat-l">Colors detected</span></div>
+      <div class="summary-actions">
+        <button class="sum-btn apply" id="applyBtn" disabled>Apply to Builder</button>
+        <button class="sum-btn zip" id="zipBtn" disabled>Download ZIP</button>
+      </div>
+    </div>
+
+    <div id="brandSection" style="display:none">
+      <div class="section-head"><h3>Detected Brand System</h3><span id="brandLabel"></span></div>
+      <div class="brand-grid" id="brandGrid"></div>
+    </div>
+
+    <div id="assetsSection" style="display:none">
+      <div class="section-head"><h3>Organized Assets</h3><span id="assetsLabel"></span></div>
+      <div class="asset-grid" id="assetGrid"></div>
+    </div>
+
+    <div id="variantsSection" style="display:none">
+      <div class="section-head"><h3>Generated Variants</h3><span id="variantsLabel"></span></div>
+      <div class="variant-grid" id="variantGrid"></div>
+    </div>
+
+    <div id="jsonSection" style="display:none">
+      <button class="json-toggle" id="jsonToggle">Show review data</button>
+      <pre id="jsonPre"></pre>
+    </div>
+  </div>
+</main>
+
+</div><!-- /.experience-window -->
+
+<script>
+/* ── Headline word animation ── */
+(function() {
+  const el = document.getElementById('headline');
+  const config = [
+    { t:'Every',    home:false, d:0.55 },
+    { t:'brand',    home:false, d:0.67 },
+    { t:'deserves', home:false, d:0.83 },
+    { t:'a',        home:false, d:0.95 },
+    { t:'home.',    home:true,  d:1.05 },
+  ];
+  const l1 = document.createElement('div');
+  const l2 = document.createElement('div');
+  config.forEach(c => {
+    const s = document.createElement('span');
+    s.className = 'w' + (c.home ? ' home' : '');
+    s.textContent = c.t + '\u00A0';
+    s.style.animationDelay = c.d + 's';
+    (c.t === 'deserves' || c.t === 'a' || c.t === 'home.') ? l2.appendChild(s) : l1.appendChild(s);
+  });
+  el.appendChild(l1);
+  el.appendChild(l2);
+})();
+
+/* APP STATE ROUTER
+   Internal states keep Moving Day feeling like one continuous product environment. */
+const APP_STATES = ['welcome', 'movein', 'upload', 'local_preparing', 'preparing', 'concierge', 'review', 'welcome_home', 'brand_home'];
+let appState = 'welcome';
+let staged = [];
+let preparationReport = null;
+let dragDepth = 0;
+let uploadGlowTimer = null;
+
+const intro       = document.getElementById('intro');
+const upload      = document.getElementById('upload');
+const glass       = document.getElementById('glass');
+const btnBegin    = document.getElementById('btn-begin');
+const btnMovein   = document.getElementById('btn-movein');
+const status      = document.getElementById('status');
+const sTxt        = document.getElementById('s-txt');
+const tray        = document.getElementById('tray');
+const prepSummary = document.getElementById('prepSummary');
+const fileInput   = document.getElementById('file-input');
+const uploadZone  = document.getElementById('upload-zone');
+const uploadStage = document.getElementById('uploadStage');
+const preparing   = document.getElementById('preparing');
+const pSub        = document.getElementById('p-sub');
+const concierge   = document.getElementById('concierge');
+const conciergeGrid = document.getElementById('conciergeGrid');
+const conciergeContinue = document.getElementById('conciergeContinue');
+const fmt         = b => b < 1048576 ? Math.round(b / 1024) + ' KB' : (b / 1048576).toFixed(1) + ' MB';
+window.pSub = pSub;
+
+function renderState(state) {
+  appState = state;
+  document.body.classList.remove('dragging');
+  APP_STATES.forEach(s => document.body.classList.remove(`md-state-${s}`));
+  document.body.classList.add(`md-state-${state}`);
+  document.body.dataset.mdState = state;
+  dragDepth = 0;
+
+  const onIntro = state === 'welcome' || state === 'movein';
+  const onUpload = state === 'upload' || state === 'local_preparing' || state === 'preparing';
+  // Preparing overlay is now reserved for the true brand-understanding step only.
+  // Local preparation remains visible as its own readable summary state.
+  const onPreparing = state === 'preparing';
+  const onConcierge = state === 'concierge';
+  const onResults = state === 'review' || state === 'brand_home' || state === 'welcome_home';
+
+  document.body.classList.toggle('show-results', onResults);
+  intro.style.transition = 'opacity 0.45s ease';
+  intro.style.opacity = onIntro ? '1' : '0';
+  intro.style.pointerEvents = onIntro ? 'auto' : 'none';
+  intro.setAttribute('aria-hidden', onIntro ? 'false' : 'true');
+
+  upload.classList.toggle('on', onUpload);
+  upload.setAttribute('aria-hidden', onUpload ? 'false' : 'true');
+  preparing.classList.toggle('on', onPreparing);
+  if (concierge) {
+    concierge.classList.toggle('on', onConcierge);
+    concierge.setAttribute('aria-hidden', onConcierge ? 'false' : 'true');
+  }
+
+  const results = document.getElementById('resultsApp');
+  if (results) results.classList.toggle('visible', onResults);
+
+  if (state === 'upload' && !preparationReport) {
+    setMoveButtonLabel('Move In');
+    if (btnMovein) btnMovein.disabled = staged.length === 0;
+    renderUploadStagePreview();
+  }
+  if (state === 'local_preparing' && preparationReport) setMoveButtonLabel('Next');
+}
+
+function setMoveButtonLabel(label) {
+  if (!btnMovein) return;
+  btnMovein.innerHTML = `${esc(label)}
+    <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true">
+      <line x1="5" y1="12" x2="19" y2="12"/>
+      <polyline points="13 6 19 12 13 18"/>
+    </svg>`;
+}
+
+function goToState(state, options = {}) {
+  if (!APP_STATES.includes(state)) return;
+  const { replace = false, push = true } = options;
+  renderState(state);
+
+  if (push) {
+    const method = replace ? 'replaceState' : 'pushState';
+    history[method]({ mdState: state }, '', window.location.href);
+  }
+}
+
+history.replaceState({ mdState: appState }, '', window.location.href);
+renderState(appState);
+
+/* BACK BUTTON HANDLER */
+window.addEventListener('popstate', event => {
+  const state = event.state?.mdState;
+  if (state && APP_STATES.includes(state)) {
+    renderState(state);
+  }
+});
+
+/* ── Move In → Upload state ── */
+btnBegin.addEventListener('click', event => {
+  event.preventDefault();
+  event.stopPropagation();
+  goToState('upload');
+});
+
+/* UPLOAD FIX */
+function categoryOrder() {
+  return ['Logos', 'Icons', 'Wordmarks', 'Brand Guidelines', 'Typography / Fonts', 'Photography', 'Presentations', 'Documents', 'Video', 'Miscellaneous'];
+}
+
+function categorizeFile(file) {
+  const name = (file.name || '').toLowerCase();
+  const e = ext(file.name);
+  if (['ttf','otf','woff','woff2'].includes(e) || /font|typeface|typography/.test(name)) return 'Typography / Fonts';
+  if (['ppt','pptx','key'].includes(e) || /presentation|deck|slides/.test(name)) return 'Presentations';
+  if (['mp4','mov','avi','webm'].includes(e)) return 'Video';
+  if (['pdf','doc','docx','txt','rtf'].includes(e)) {
+    if (/guideline|guidelines|brand[\s_-]?guide|style[\s_-]?guide|standards|manual/.test(name)) return 'Brand Guidelines';
+    return 'Documents';
+  }
+  if (['jpg','jpeg','png','webp','gif','svg','ai','eps'].includes(e)) {
+    if (/wordmark|word[\s_-]?mark|logotype/.test(name)) return 'Wordmarks';
+    if (/favicon|icon|mark|symbol|badge|avatar/.test(name)) return 'Icons';
+    if (/logo|lockup|primary|secondary|alternate|alt/.test(name)) return 'Logos';
+    if (/photo|image|photography|portrait|headshot|building|team|hero|background/.test(name)) return 'Photography';
+    return 'Logos';
+  }
+  if (['zip','fig','sketch'].includes(e)) return 'Miscellaneous';
+  return 'Miscellaneous';
+}
+
+function detectExactDuplicates(files) {
+  const seen = new Map();
+  const unique = [];
+  const duplicates = [];
+  Array.from(files || []).forEach(file => {
+    const key = [file.name, file.size, file.lastModified].join('::');
+    if (seen.has(key)) duplicates.push(file);
+    else { seen.set(key, true); unique.push(file); }
+  });
+  return { unique, duplicates };
+}
+
+function getImageMetadata(file) {
+  const e = ext(file.name);
+  const isImage = (file.type || '').startsWith('image/') || ['svg','png','jpg','jpeg','webp','gif'].includes(e);
+  if (!isImage) return Promise.resolve({ width: null, height: null, transparentBackground: null });
+
+  return new Promise(resolve => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const meta = { width: img.naturalWidth || null, height: img.naturalHeight || null, transparentBackground: null };
+      try {
+        if (['png','webp','gif','svg'].includes(e)) {
+          const max = 96;
+          const ratio = Math.min(max / (img.naturalWidth || max), max / (img.naturalHeight || max), 1);
+          const c = document.createElement('canvas');
+          c.width = Math.max(1, Math.round((img.naturalWidth || max) * ratio));
+          c.height = Math.max(1, Math.round((img.naturalHeight || max) * ratio));
+          const ctx = c.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0, c.width, c.height);
+          const data = ctx.getImageData(0, 0, c.width, c.height).data;
+          let transparent = false;
+          for (let i = 3; i < data.length; i += 16) {
+            if (data[i] < 245) { transparent = true; break; }
+          }
+          meta.transparentBackground = transparent;
+        }
+      } catch (err) {
+        meta.transparentBackground = null;
+      } finally {
+        URL.revokeObjectURL(url);
+        resolve(meta);
+      }
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve({ width: null, height: null, transparentBackground: null });
+    };
+    img.src = url;
+  });
+}
+
+function buildPreparationReport(preparedFiles, duplicateFiles, originalFiles, assetsMeta) {
+  const counts = Object.fromEntries(categoryOrder().map(c => [c, 0]));
+  assetsMeta.forEach(asset => { counts[asset.category] = (counts[asset.category] || 0) + 1; });
+
+  const mainLogo = assetsMeta.find(a => a.category === 'Logos') || assetsMeta.find(a => ['Icons','Wordmarks'].includes(a.category)) || assetsMeta.find(a => a.previewable);
+  const mainIcon = assetsMeta.find(a => a.category === 'Icons') || null;
+  const mainWordmark = assetsMeta.find(a => a.category === 'Wordmarks') || null;
+  const guideline = assetsMeta.find(a => a.category === 'Brand Guidelines') || null;
+  const typography = assetsMeta.find(a => a.category === 'Typography / Fonts') || null;
+
+  return {
+    createdAt: new Date().toISOString(),
+    originalFileCount: originalFiles.length,
+    preparedFileCount: preparedFiles.length,
+    duplicateCount: duplicateFiles.length,
+    duplicateFiles: duplicateFiles.map(file => ({ name: file.name, size: file.size, lastModified: file.lastModified })),
+    categoryCounts: counts,
+    assets: assetsMeta,
+    foundation: { mainLogo, mainIcon, mainWordmark, guideline, typography },
+    hasEnoughForUnderstanding: preparedFiles.length > 0 && assetsMeta.some(a => ['Logos','Icons','Wordmarks','Brand Guidelines','Photography'].includes(a.category)),
+    preparedFiles
+  };
+}
+
+async function prepareFilesLocally(files) {
+  const originalFiles = Array.from(files || []).filter(Boolean);
+  const { unique, duplicates } = detectExactDuplicates(originalFiles);
+  const assetsMeta = [];
+
+  for (let index = 0; index < unique.length; index += 1) {
+    const file = unique[index];
+    const extension = ext(file.name);
+    const category = categorizeFile(file);
+    const imageMeta = await getImageMetadata(file);
+    assetsMeta.push({
+      id: `asset_${index + 1}`,
+      uploadId: `asset_${index + 1}`,
+      name: file.name,
+      extension,
+      size: file.size,
+      sizeLabel: fmt(file.size),
+      lastModified: file.lastModified,
+      type: file.type || extension,
+      category,
+      width: imageMeta.width,
+      height: imageMeta.height,
+      transparentBackground: imageMeta.transparentBackground,
+      previewable: (file.type || '').startsWith('image/') || ['svg','png','jpg','jpeg','webp','gif'].includes(extension),
+      roleGuess: guessRole(file.name),
+      file
+    });
+  }
+
+  return buildPreparationReport(unique, duplicates, originalFiles, assetsMeta);
+}
+
+function serializePreparationReport(report) {
+  if (!report) return null;
+  return {
+    createdAt: report.createdAt,
+    originalFileCount: report.originalFileCount,
+    preparedFileCount: report.preparedFileCount,
+    duplicateCount: report.duplicateCount,
+    duplicateFiles: report.duplicateFiles,
+    categoryCounts: report.categoryCounts,
+    hasEnoughForUnderstanding: report.hasEnoughForUnderstanding,
+    assets: (report.assets || []).map(({ file, ...safe }) => safe),
+    foundation: Object.fromEntries(Object.entries(report.foundation || {}).map(([key, asset]) => [key, asset ? { ...asset, file: undefined } : null]))
+  };
+}
+
+function renderDeveloperFileTray(report = preparationReport) {
+  if (!tray) return;
+  const assets = report?.assets || [];
+  if (!assets.length) { tray.classList.remove('on'); tray.innerHTML = ''; return; }
+  tray.classList.add('on');
+  tray.innerHTML = assets.map(asset => `
+    <div class="ti" role="listitem">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span class="tn">${esc(asset.name)}</span><span class="ts">${esc(asset.sizeLabel)}</span>
+    </div>`).join('');
+}
+
+function renderPreparationSummary(report) {
+  if (!prepSummary) return;
+  const c = report.categoryCounts || {};
+  const total = report.originalFileCount || 0;
+  const safeLine = total === 1 ? '1 asset received safely.' : `${total} assets received safely.`;
+  const enoughLine = report.hasEnoughForUnderstanding
+    ? 'I have enough to begin understanding your brand.'
+    : 'I can organize these files now. A logo or guideline will make the brand review stronger.';
+  const capsuleItems = [
+    ['Logos', c['Logos'] || 0, 'none yet'],
+    ['Icons', c['Icons'] || 0, 'none yet'],
+    ['Guidelines', c['Brand Guidelines'] || 0, 'none yet'],
+    ['Typography', c['Typography / Fonts'] || 0, 'none yet'],
+    ['Duplicates', report.duplicateCount || 0, 'none found', 'removed']
+  ];
+  const capsuleHTML = capsuleItems.map(([label, value, emptyText, suffix], index) => {
+    const display = value ? (suffix ? `${value} ${suffix}` : String(value)) : emptyText;
+    return `
+      <span class="prep-capsule" style="--i:${index}">
+        <span class="prep-capsule-label">${esc(label)}</span>
+        <span class="prep-capsule-value">${esc(display)}</span>
+      </span>`;
+  }).join('');
+
+  prepSummary.innerHTML = `
+    <div class="prep-arrival">
+      <div class="prep-arrival-orb" aria-hidden="true">
+        <svg viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg">
+          <path d="M769.4,89.65v111.85h-39.04c.07-25.79-35.02-31.29-50.28-36.68-16.18-5.71,0-14.05,0-14.05l89.32-61.11Z"/>
+          <path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/>
+        </svg>
+      </div>
+      <p class="prep-kicker">Arrival Check</p>
+      <h2 class="prep-title">Everything made it in.</h2>
+      <p class="prep-support">I’ve received your files and separated the first layer.</p>
+      <p class="prep-safe-line">${esc(safeLine)}</p>
+      <div class="prep-capsules" aria-label="Preparation summary">
+        ${capsuleHTML}
+      </div>
+      <div class="prep-next-card" aria-label="Next step">
+        <p class="prep-next-kicker">Next</p>
+        <h3>Brand Review</h3>
+        <p>I’ll review logos, identify likely names, and separate reference files from visual assets.</p>
+        <div class="prep-next-rail" aria-hidden="true">
+          <span>Logos</span><i></i><span>Names</span><i></i><span>References</span>
+        </div>
+      </div>
+      <p class="prep-ready">${esc(enoughLine)}</p>
+      <div class="prep-actions">
+        <button class="prep-next-button" id="prepNextBtn" type="button" aria-label="Next: Brand Review">
+          Next
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="13 6 19 12 13 18"/>
+          </svg>
+        </button>
+        <button class="btn-add-more" id="addMoreBtn" type="button">Add more assets</button>
+      </div>
+    </div>`;
+  prepSummary.classList.add('on');
+  document.body.classList.add('has-preparation');
+  btnMovein.disabled = !report.preparedFileCount;
+  status.classList.remove('on');
+  sTxt.textContent = '';
+  renderDeveloperFileTray(report);
+
+  const addMoreBtn = document.getElementById('addMoreBtn');
+  if (addMoreBtn) addMoreBtn.addEventListener('click', openFilePicker);
+
+  const prepNextBtn = document.getElementById('prepNextBtn');
+  if (prepNextBtn) {
+    prepNextBtn.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!preparationReport?.preparedFileCount) return;
+      goToState('preparing');
+      runBrandPipeline(preparationReport.preparedFiles, preparationReport);
+    });
+  }
+}
+
+function renderUploadStagePreview() {
+  if (!uploadStage) return;
+
+  if (!staged.length || preparationReport) {
+    uploadStage.classList.remove('on');
+    uploadStage.innerHTML = '';
+    document.body.classList.remove('has-staged-assets');
+    if (appState === 'upload' && btnMovein) btnMovein.disabled = true;
+    return;
+  }
+
+  const counts = staged.reduce((acc, file) => {
+    const category = categorizeFile(file);
+    acc[category] = (acc[category] || 0) + 1;
+    return acc;
+  }, {});
+
+  const total = staged.length;
+  const fileWord = total === 1 ? 'asset' : 'assets';
+  const highlights = [
+    ['Logos', counts['Logos'] || 0],
+    ['Guidelines', counts['Brand Guidelines'] || 0],
+    ['Fonts', counts['Typography / Fonts'] || 0],
+    ['Reference files', (counts['Documents'] || 0) + (counts['Presentations'] || 0)],
+    ['Visual assets', (counts['Photography'] || 0) + (counts['Icons'] || 0) + (counts['Wordmarks'] || 0)]
+  ].filter(([, count]) => count > 0).slice(0, 4);
+
+  const highlightHTML = highlights.length
+    ? highlights.map(([label, count]) => `<span>${esc(label)} · ${count}</span>`).join('')
+    : '<span>Ready to organize</span>';
+
+  uploadStage.innerHTML = `
+    <div class="upload-stage-card">
+      <div class="upload-stage-orb" aria-hidden="true">
+        <svg viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg">
+          <path d="M769.4,89.65v111.85h-39.04c.07-25.79-35.02-31.29-50.28-36.68-16.18-5.71,0-14.05,0-14.05l89.32-61.11Z"/>
+          <path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/>
+        </svg>
+      </div>
+      <p class="upload-stage-kicker">Everything is in</p>
+      <h3>${total} ${fileWord} at the door.</h3>
+      <p>Next I’ll identify likely logos, read visible names, and separate reference files from visual assets before the first brand review.</p>
+      <div class="upload-stage-steps" aria-hidden="true">
+        <span>Logos</span><i></i><span>Names</span><i></i><span>References</span>
+      </div>
+      <div class="upload-stage-pills">${highlightHTML}</div>
+    </div>`;
+
+  uploadStage.classList.add('on');
+  document.body.classList.add('has-staged-assets');
+  if (btnMovein) {
+    btnMovein.disabled = false;
+    setMoveButtonLabel('Move In');
+  }
+  if (status && sTxt) {
+    status.classList.add('on');
+    sTxt.textContent = `${total} ${fileWord} ready`;
+  }
+}
+
+async function beginLocalPreparation(files) {
+  if (uploadStage) {
+    uploadStage.classList.remove('on');
+    uploadStage.innerHTML = '';
+  }
+  document.body.classList.remove('has-staged-assets', 'upload-glow-active');
+  clearTimeout(uploadGlowTimer);
+  goToState('local_preparing');
+  setMoveButtonLabel('Preparing');
+  btnMovein.disabled = true;
+  status.classList.add('on');
+  sTxt.textContent = 'Organizing your assets';
+  try {
+    preparationReport = await prepareFilesLocally(files);
+    staged = preparationReport.preparedFiles.slice();
+    renderPreparationSummary(preparationReport);
+    setMoveButtonLabel('Next');
+    sTxt.textContent = `${preparationReport.preparedFileCount} prepared · ${preparationReport.duplicateCount} duplicate${preparationReport.duplicateCount === 1 ? '' : 's'} removed`;
+    // Stay in local_preparing so the customer can read the summary before continuing.
+  } catch (err) {
+    console.error('Local preparation failed:', err);
+    sTxt.textContent = 'A little more is needed';
+    setMoveButtonLabel('Move In');
+    btnMovein.disabled = false;
+  }
+}
+
+
+function activateUploadGlow() {
+  clearTimeout(uploadGlowTimer);
+  document.body.classList.remove('upload-glow-active');
+  // Restart the 20-second glow every time a new batch arrives.
+  void document.body.offsetWidth;
+  document.body.classList.add('upload-glow-active');
+  uploadGlowTimer = setTimeout(() => {
+    document.body.classList.remove('upload-glow-active');
+  }, 20000);
+}
+
+function addFiles(fileList) {
+  const incoming = Array.from(fileList || []).filter(Boolean);
+  if (!incoming.length) return;
+
+  incoming.forEach(file => {
+    const exists = staged.some(s => s.name === file.name && s.size === file.size && s.lastModified === file.lastModified);
+    if (!exists) staged.push(file);
+  });
+
+  // Keep the user in the Move In experience until they intentionally click Move In.
+  // The actual local preparation still happens on the button click.
+  preparationReport = null;
+  if (prepSummary) {
+    prepSummary.classList.remove('on');
+    prepSummary.innerHTML = '';
+  }
+  document.body.classList.remove('has-preparation');
+
+  if (appState !== 'upload') goToState('upload');
+  renderUploadStagePreview();
+  activateUploadGlow();
+}
+
+/* FILE INPUT TRIGGER */
+function openFilePicker(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  if (!['upload','local_preparing','concierge'].includes(appState)) return;
+  fileInput.click();
+}
+
+uploadZone.addEventListener('click', openFilePicker);
+uploadZone.addEventListener('keydown', event => {
+  if (event.key === 'Enter' || event.key === ' ') openFilePicker(event);
+});
+
+fileInput.addEventListener('click', event => event.stopPropagation());
+fileInput.addEventListener('change', event => {
+  event.stopPropagation();
+  if (fileInput.files?.length) addFiles(fileInput.files);
+  fileInput.value = '';
+});
+
+/* DRAG DROP HANDLERS */
+function hasDraggedFiles(event) {
+  return Array.from(event.dataTransfer?.types || []).includes('Files');
+}
+
+document.addEventListener('dragenter', event => {
+  if (!hasDraggedFiles(event)) return;
+  event.preventDefault();
+  dragDepth += 1;
+  if (appState === 'upload' || appState === 'local_preparing') document.body.classList.add('dragging');
+});
+
+document.addEventListener('dragover', event => {
+  if (!hasDraggedFiles(event)) return;
+  event.preventDefault();
+  if (event.dataTransfer) event.dataTransfer.dropEffect = (appState === 'upload' || appState === 'local_preparing') ? 'copy' : 'none';
+});
+
+document.addEventListener('dragleave', event => {
+  if (!hasDraggedFiles(event)) return;
+  event.preventDefault();
+  dragDepth = Math.max(0, dragDepth - 1);
+  if (dragDepth === 0) document.body.classList.remove('dragging');
+});
+
+document.addEventListener('drop', event => {
+  if (!hasDraggedFiles(event)) return;
+  event.preventDefault();
+  event.stopPropagation();
+  dragDepth = 0;
+  document.body.classList.remove('dragging');
+  if ((appState === 'upload' || appState === 'local_preparing') && event.dataTransfer?.files?.length) {
+    addFiles(event.dataTransfer.files);
+  }
+});
+
+// Prevent the browser from opening files if they are dropped outside the intended app area.
+window.addEventListener('dragover', event => event.preventDefault());
+window.addEventListener('drop', event => event.preventDefault());
+
+/* PREPARING STATE HOOK */
+btnMovein.addEventListener('click', event => {
+  event.preventDefault();
+  event.stopPropagation();
+  if (!staged.length || !['upload','local_preparing'].includes(appState)) return;
+  if (!preparationReport) {
+    beginLocalPreparation(staged);
+    return;
+  }
+  setMoveButtonLabel('Continue');
+  goToState('preparing');
+  runBrandPipeline(preparationReport.preparedFiles, preparationReport);
+});
+
+
+
+  const BUILDER_KEY = 'movingDayStudio_v3';
+  let aiData = null;
+  let orgAssets = [];
+  let variants = [];
+
+  const $ = id => document.getElementById(id);
+  function esc(v) { return String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;'); }
+  function cleanName(s) { return String(s||'Brand').replace(/\.[^/.]+$/,'').replace(/[^a-zA-Z0-9]+/g,'_').replace(/^_+|_+$/g,'')||'Brand'; }
+  function ext(n) { return (n||'').includes('.') ? n.split('.').pop().toLowerCase() : 'png'; }
+  function normalizeHex(v) { v=String(v||'').trim(); if(!v.startsWith('#'))v='#'+v; return /^#[0-9A-Fa-f]{6}$/.test(v)?v.toUpperCase():'#15140F'; }
+
+  function labelForRole(r) {
+    return {PrimaryLogo:'Primary Logo',SecondaryLogo:'Secondary Logo',IconMark:'Icon Mark',
+      WebsiteHeader:'Website Header',SocialAvatar:'Social Avatar',BusinessCard:'Business Card',
+      PrintAsset:'Print Asset',ExtraAsset:'Extra Asset'}[r]||r;
+  }
+  function folderForRole(r) {
+    return {PrimaryLogo:'01_Logos/Primary',SecondaryLogo:'01_Logos/Secondary',IconMark:'01_Logos/Icon',
+      WebsiteHeader:'04_Social_Assets',SocialAvatar:'04_Social_Assets',BusinessCard:'04_Social_Assets',
+      PrintAsset:'04_Social_Assets',ExtraAsset:'06_Extra_Assets'}[r]||'06_Extra_Assets';
+  }
+  function guessRole(name) {
+    const n=name.toLowerCase();
+    if(n.includes('favicon'))return 'IconMark';
+    if(n.includes('icon')||n.includes('mark')||n.includes('symbol'))return 'IconMark';
+    if(n.includes('secondary')||n.includes('alt'))return 'SecondaryLogo';
+    if(n.includes('header')||n.includes('hero'))return 'WebsiteHeader';
+    if(n.includes('social')||n.includes('avatar')||n.includes('profile'))return 'SocialAvatar';
+    if(n.includes('card'))return 'BusinessCard';
+    return 'PrimaryLogo';
+  }
+  function resolveRole(slot) {
+    const s=(slot||'').toLowerCase();
+    if(s.includes('primary')||s.includes('hero')||s.includes('lead')||s.includes('logo'))return 'PrimaryLogo';
+    if(s.includes('secondary')||s.includes('alternate'))return 'SecondaryLogo';
+    if(s.includes('icon')||s.includes('mark')||s.includes('favicon'))return 'IconMark';
+    if(s.includes('social')||s.includes('avatar')||s.includes('profile'))return 'SocialAvatar';
+    if(s.includes('header')||s.includes('website'))return 'WebsiteHeader';
+    if(s.includes('card'))return 'BusinessCard';
+    if(s.includes('print'))return 'PrintAsset';
+    return 'PrimaryLogo';
+  }
+  function makeFinalName(brandName, role, colorName, extension) {
+    return `${cleanName(brandName)}_${role}_${cleanName(colorName)}.${extension}`;
+  }
+  function fileToDataUrl(file) {
+    return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});
+  }
+  function downloadBlob(blob, name) {
+    const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
+  }
+  function showToast(msg) {
+    const t=$('toast');t.textContent=msg;t.classList.add('show');
+    clearTimeout(t._timer);t._timer=setTimeout(()=>t.classList.remove('show'),3000);
+  }
+  function stepDone(n){$(`ps${n}`).classList.remove('active');$(`ps${n}`).classList.add('done');}
+  function stepActive(n){$(`ps${n}`).classList.add('active');}
+
+  async function recolorPng(asset, hex, colorName) {
+    const img=new Image();img.crossOrigin='anonymous';img.src=asset.url;
+    await new Promise((res,rej)=>{img.onload=res;img.onerror=rej;});
+    const c=document.createElement('canvas');
+    c.width=img.naturalWidth||800;c.height=img.naturalHeight||800;
+    const ctx=c.getContext('2d');ctx.drawImage(img,0,0);
+    const id=ctx.getImageData(0,0,c.width,c.height);const d=id.data;
+    const rr=parseInt(hex.slice(1,3),16),gg=parseInt(hex.slice(3,5),16),bb=parseInt(hex.slice(5,7),16);
+    for(let i=0;i<d.length;i+=4){if(d[i+3]>12){d[i]=rr;d[i+1]=gg;d[i+2]=bb;}}
+    ctx.putImageData(id,0,0);
+    const blob=await new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(),'image/png'));
+    const brandName=aiData?.guide?.clientName||aiData?.brand?.name||'Brand';
+    return {
+      id:crypto.randomUUID(),file:blob,url:URL.createObjectURL(blob),
+      colorName,hex,extension:'png',
+      finalName:makeFinalName(brandName,asset.role,colorName,'png'),
+      role:asset.role,label:labelForRole(asset.role),
+      sourceLabel:asset.label,originalName:asset.originalName
+    };
+  }
+
+
+  // ── MAIN PIPELINE — called by the Move In screen ──
+  // Modes for testing:
+  //   default / ?mode=auto  → try the Brand Concierge route first, fall back to local organization
+  //   ?mode=ai             → require /api/analyze-brand-files
+  //   ?mode=local          → skip the API and organize locally
+  const PARAMS = new URLSearchParams(window.location.search);
+  const ANALYSIS_MODE = (PARAMS.get('mode') || 'auto').toLowerCase();
+  const FOUNDER_MODE = PARAMS.get('founder') === '1' || PARAMS.get('mode') === 'founder';
+  if (FOUNDER_MODE) document.body.classList.add('founder-mode');
+
+  function isAnalyzableFile(file) {
+    const e = ext(file.name);
+    return (file.type || '').startsWith('image/') || ['svg','png','jpg','jpeg','webp'].includes(e);
+  }
+
+  function isPreviewableImage(asset) {
+    const e = asset.extension;
+    return (asset.file?.type || '').startsWith('image/') || ['svg','png','jpg','jpeg','webp','gif'].includes(e);
+  }
+
+  function setPreparingLine(text) {
+    if (!window.pSub) return;
+    pSub.style.opacity = '0';
+    setTimeout(() => { pSub.textContent = text; pSub.style.opacity = ''; }, 240);
+  }
+
+  function revealResults() {
+    renderCustomerReview();
+    goToState('review');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function guessClientNameFromFiles(files) {
+    const first = Array.from(files || [])[0]?.name || 'Brand';
+    const base = first
+      .replace(/\.[^/.]+$/, '')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\b(logo|primary|secondary|final|brand|mark|icon|asset|transparent|white|black|png|jpg|jpeg|svg|webp|v\d+)\b/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return base ? base.replace(/\b\w/g, c => c.toUpperCase()) : 'Brand';
+  }
+
+  function rgbToHex(r, g, b) {
+    return '#' + [r, g, b].map(v => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('').toUpperCase();
+  }
+
+  function luminance(r, g, b) {
+    return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
+  }
+
+  async function extractColorsFromImageDataUrl(dataUrl) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const c = document.createElement('canvas');
+          const max = 72;
+          const ratio = Math.min(max / img.naturalWidth, max / img.naturalHeight, 1);
+          c.width = Math.max(1, Math.round(img.naturalWidth * ratio));
+          c.height = Math.max(1, Math.round(img.naturalHeight * ratio));
+          const ctx = c.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0, c.width, c.height);
+          const data = ctx.getImageData(0, 0, c.width, c.height).data;
+          const buckets = new Map();
+
+          for (let i = 0; i < data.length; i += 16) {
+            const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+            if (a < 48) continue;
+            const l = luminance(r, g, b);
+            const sat = Math.max(r, g, b) - Math.min(r, g, b);
+            if (l > 0.94 || l < 0.035 || sat < 12) continue;
+            const qr = Math.round(r / 24) * 24;
+            const qg = Math.round(g / 24) * 24;
+            const qb = Math.round(b / 24) * 24;
+            const key = `${qr},${qg},${qb}`;
+            buckets.set(key, (buckets.get(key) || 0) + 1);
+          }
+
+          const colors = Array.from(buckets.entries())
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, 6)
+            .map(([key]) => {
+              const [r, g, b] = key.split(',').map(Number);
+              return rgbToHex(r, g, b);
+            });
+          resolve(colors);
+        } catch (e) {
+          console.warn('Local color extraction skipped:', e);
+          resolve([]);
+        }
+      };
+      img.onerror = () => resolve([]);
+      img.src = dataUrl;
+    });
+  }
+
+  async function extractLocalPalette(dataUrls) {
+    const found = [];
+    for (const url of dataUrls.slice(0, 6)) {
+      const colors = await extractColorsFromImageDataUrl(url);
+      colors.forEach(hex => { if (!found.includes(hex)) found.push(hex); });
+      if (found.length >= 5) break;
+    }
+
+    const fallback = ['#1F3D2E', '#C4D9CB', '#F1ECDF', '#15140F', '#6B6558'];
+    const palette = (found.length ? found : fallback).slice(0, 5);
+    const names = ['Primary', 'Secondary', 'Light', 'Ink', 'Muted'];
+    return palette.map((hex, i) => ({
+      name: names[i] || `Color ${i + 1}`,
+      hex,
+      usage: i === 0 ? 'Primary brand presence' : i === 1 ? 'Supporting color' : 'System color'
+    }));
+  }
+
+  function buildLocalReviewData(allFiles, analyzable, dataUrls, palette, report = preparationReport) {
+    const clientName = guessClientNameFromFiles(allFiles);
+    return {
+      reviewMode: 'local',
+      guide: {
+        clientName,
+        category: 'Brand System',
+        description: 'A prepared brand package organized from the files provided.'
+      },
+      brand: {
+        name: clientName,
+        industry: 'Brand System',
+        tone: ['Clean', 'Organized', 'Ready']
+      },
+      palette,
+      typography: {
+        display: { name: 'Inter', weight: '300–500', usage: 'Clean display and interface typography' },
+        body: { name: 'Inter', weight: '300–400', usage: 'Readable supporting copy' }
+      },
+      assetAssignments: allFiles.map((file, index) => ({
+        fileId: `asset_${index + 1}`,
+        slot: guessRole(file.name),
+        rationale: 'Organized locally by filename and file type.'
+      })),
+      preflight: [{
+        severity: 'note',
+        issue: `${report?.preparedFileCount || allFiles.length} assets prepared locally.`,
+        suggestedFix: 'Confirm the foundation, then prepare the Brand Home.'
+      }],
+      copySuggestions: {
+        positioning: 'A cleaner, organized brand home prepared from the provided assets.'
+      }
+    };
+  }
+
+  async function requestBrandConciergeReview(analyzable, dataUrls, report = preparationReport) {
+    const res = await fetch('/api/analyze-brand-files', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        preparationReport: serializePreparationReport(report),
+        assets: dataUrls.map((url, i) => ({
+          id: analyzable[i].uploadId,
+          name: analyzable[i].file.name,
+          type: analyzable[i].file.type,
+          category: report?.assets?.find(a => a.uploadId === analyzable[i].uploadId)?.category,
+          dataUrl: url
+        }))
+      })
+    });
+    if (!res.ok) throw new Error(await res.text());
+    const json = await res.json();
+    json.reviewMode = 'concierge';
+    return json;
+  }
+
+  function organizeOriginalAssets(allFiles, reviewData) {
+    const brandName = reviewData.guide?.clientName || reviewData.brand?.name || 'Brand';
+    return allFiles.map((file, i) => {
+      const uploadId = `asset_${i + 1}`;
+      const aiAssignment = (reviewData.assetAssignments || []).find(a => a.fileId === uploadId);
+      const role = aiAssignment ? resolveRole(aiAssignment.slot) : guessRole(file.name);
+      return {
+        id: crypto.randomUUID(), uploadId, file, url: URL.createObjectURL(file),
+        originalName: file.name, role, label: labelForRole(role), extension: ext(file.name),
+        folder: folderForRole(role), colorName: 'Original',
+        finalName: makeFinalName(brandName, role, 'Original', ext(file.name)),
+      };
+    });
+  }
+
+  async function createColorVariantsForAssets() {
+    const palette = aiData.palette || aiData.colors || [];
+    const primaryHex = palette.find(c => /primary|main|brand/i.test(c.name || ''))?.hex || palette[0]?.hex || '#1F3D2E';
+    const colorVariants = [{hex:'#000000',name:'Black'}, {hex:'#ffffff',name:'White'}, {hex:primaryHex,name:'Primary'}];
+    for (const asset of orgAssets) {
+      if (!isPreviewableImage(asset)) continue;
+      for (const cv of colorVariants) {
+        try { const v = await recolorPng(asset, cv.hex, cv.name); variants.push(v); }
+        catch(e) { console.warn('Variant failed:', asset.originalName, cv.name, e); }
+      }
+    }
+  }
+
+  async function runBrandPipeline(files, report = preparationReport) {
+    if (!report) report = await prepareFilesLocally(files);
+    preparationReport = report;
+    const allFiles = Array.from(report.preparedFiles || files || []);
+    if (!allFiles.length) return;
+
+    btnMovein.disabled = true;
+    btnMovein.style.opacity = '0.42';
+    btnMovein.setAttribute('aria-busy', 'true');
+    $('resultsApp').classList.remove('visible');
+    $('progressStrip').classList.add('visible');
+    $('summaryBar').classList.remove('visible');
+    ['brandSection','assetsSection','variantsSection','jsonSection'].forEach(id => $(id).style.display = 'none');
+    $('brandGrid').innerHTML = '';
+    $('assetGrid').innerHTML = '';
+    $('variantGrid').innerHTML = '';
+    orgAssets = [];
+    variants = [];
+    aiData = null;
+    ['ps1','ps2','ps3','ps4','ps5'].forEach(id => { const el = $(id); el.classList.remove('done','active'); });
+
+    try {
+      setPreparingLine('Reviewing your assets');
+      stepActive(1);
+      const analyzable = allFiles
+        .map((file, index) => ({ file, uploadId: `asset_${index + 1}` }))
+        .filter(item => isAnalyzableFile(item.file));
+
+      if (!analyzable.length) {
+        throw new Error('Please include at least one PNG, JPG, WEBP, or SVG so Moving Day can prepare a visual review.');
+      }
+
+      const dataUrls = await Promise.all(analyzable.map(item => fileToDataUrl(item.file)));
+      stepDone(1);
+
+      setPreparingLine(ANALYSIS_MODE === 'local' ? 'Organizing your foundation' : 'Understanding your visual system');
+      stepActive(2);
+      try {
+        if (ANALYSIS_MODE === 'local') throw new Error('Local organization requested.');
+        aiData = await requestBrandConciergeReview(analyzable, dataUrls, report);
+      } catch (apiErr) {
+        if (ANALYSIS_MODE === 'ai') throw apiErr;
+        console.warn('Brand Concierge route unavailable; using local organization:', apiErr);
+        setPreparingLine('Organizing your foundation');
+        const palette = await extractLocalPalette(dataUrls);
+        aiData = buildLocalReviewData(allFiles, analyzable, dataUrls, palette, report);
+        aiData.localFallbackReason = String(apiErr?.message || apiErr || 'API route unavailable');
+      }
+      stepDone(2);
+
+      setPreparingLine('Organizing your foundation');
+      stepActive(3);
+      orgAssets = organizeOriginalAssets(allFiles, aiData);
+      stepDone(3);
+
+      setPreparingLine('Understanding your visual system');
+      stepActive(4);
+      await createColorVariantsForAssets();
+      stepDone(4);
+
+      setPreparingLine('Preparing your Brand Home');
+      stepActive(5);
+      renderBrandSystem();
+      renderAssets();
+      renderVariants();
+      const palette = aiData.palette || aiData.colors || [];
+      $('statFiles').textContent = report.preparedFileCount || allFiles.length;
+      $('statVariants').textContent = variants.length;
+      $('statColors').textContent = palette.length;
+      $('summaryBar').classList.add('visible');
+      $('applyBtn').disabled = false;
+      $('zipBtn').disabled = false;
+      $('jsonPre').textContent = JSON.stringify(aiData, null, 2);
+      $('jsonSection').style.display = 'block';
+      stepDone(5);
+
+      setPreparingLine('Confirming the foundation');
+      renderConciergeMode(report);
+      setTimeout(() => goToState('concierge'), 700);
+
+    } catch(err) {
+      $('brandGrid').innerHTML = `<div style="grid-column:1/-1;background:rgba(255,245,245,.82);border-radius:18px;padding:20px 24px;border:1px solid rgba(220,53,69,.16)"><p style="margin:0 0 4px;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#a33a35">Needs attention</p><p style="margin:0;font-size:13px;color:#6b2c2c">${esc(err.message)}</p></div>`;
+      $('brandSection').style.display = 'block';
+      setPreparingLine('A little more is needed');
+      setTimeout(revealResults, 700);
+    } finally {
+      btnMovein.disabled = !staged.length;
+      btnMovein.style.opacity = '';
+      btnMovein.removeAttribute('aria-busy');
+    }
+  }
+
+  // ── APPLY TO BUILDER ──
+  $('applyBtn').addEventListener('click',()=>{
+    if(!aiData){alert('Run an analysis first.');return;}
+    let existing={};
+    try{existing=JSON.parse(localStorage.getItem(BUILDER_KEY)||'{}');}catch(e){}
+    const fields={...(existing.fields||{})};
+    const g=aiData.guide||{};
+    const b=aiData.brand||{};
+    if(g.clientName)fields.clientName=g.clientName;
+    else if(b.name)fields.clientName=b.name;
+    if(g.category)fields.category=g.category;
+    else if(b.industry)fields.category=b.industry;
+    if(g.description)fields.tagline=g.description;
+    const t=aiData.typography||{};
+    if(t.displayFont)fields.displayFont=t.displayFont;
+    else if(t.display?.name)fields.displayFont=t.display.name;
+    if(t.bodyFont)fields.bodyFont=t.bodyFont;
+    else if(t.body?.name)fields.bodyFont=t.body.name;
+    if(t.display?.usage)fields.displayFontNote=t.display.usage;
+    if(t.body?.usage)fields.bodyFontNote=t.body.usage;
+    const palette=aiData.palette||aiData.colors||[];
+    const colors=palette.slice(0,5).map(c=>normalizeHex(c.hex||c.value||c));
+    while(colors.length<5)colors.push('#15140F');
+    fields.colorNames=palette.slice(0,5).map(c=>c.name||'Color').join(', ');
+    const copy=aiData.copySuggestions||{};
+    if(copy.tagline&&!fields.tagline)fields.tagline=copy.tagline;
+    try{localStorage.setItem(BUILDER_KEY,JSON.stringify({...existing,fields,colors}));}
+    catch(e){alert('Could not save — browser storage may be full.');return;}
+    const name=fields.clientName||'this brand';
+    if(confirm(`Apply "${name}" to the builder and open it now?`)){
+      window.location.href='/guide.html';
+    } else {
+      showToast(`Builder pre-filled with ${name}`);
+    }
+  });
+
+  // ── ZIP ──
+  $('zipBtn').addEventListener('click', async ()=>{
+    if(!window.JSZip){alert('JSZip not loaded.');return;}
+    $('zipBtn').textContent='Building...';$('zipBtn').disabled=true;
+    const brandName=cleanName(aiData?.guide?.clientName||aiData?.brand?.name||'Brand');
+    const zip=new JSZip();
+    const root=zip.folder(`${brandName}_Brand_Package`);
+    for(const a of orgAssets){
+      if(!document.querySelector(`.asset-card[data-id="${a.id}"]`)?.classList.contains('ignored')){
+        root.folder(a.folder).file(a.finalName,a.file);
+      }
+    }
+    for(const v of variants){
+      root.folder(`02_Color_Variants/${v.colorName}`).file(v.finalName,v.file);
+    }
+    const palette=aiData?.palette||aiData?.colors||[];
+    if(palette.length){
+      root.folder('03_Color_System').file(`${brandName}_palette.css`,`:root {\n${palette.map(c=>`  --${cleanName(c.name||'color').toLowerCase()}: ${c.hex};`).join('\n')}\n}\n`);
+      root.folder('03_Color_System').file(`${brandName}_palette.txt`,palette.map(c=>`${c.name}: ${c.hex}${c.usage?' — '+c.usage:''}`).join('\n'));
+    }
+    const typo=aiData?.typography;
+    if(typo){
+      root.folder('04_Typography').file(`${brandName}_type_notes.txt`,
+        `Display: ${typo.displayFont||typo.display?.name||'Unknown'}\nUsage: ${typo.display?.usage||''}\n\nBody: ${typo.bodyFont||typo.body?.name||'Unknown'}\nUsage: ${typo.body?.usage||''}\n`);
+    }
+    const usage=aiData?.usage||{};
+    if(usage.do?.length||usage.dont?.length){
+      root.folder('05_Brand_Guide').file(`${brandName}_usage_rules.txt`,
+        ['BRAND USAGE RULES','','DO:',...(usage.do||[]).map(r=>`  ✓ ${r}`),'',"DON'T:",...(usage.dont||[]).map(r=>`  ✕ ${r}`)].join('\n'));
+    }
+    root.folder('05_Brand_Guide').file(`${brandName}_brand_review_data.json`,JSON.stringify(aiData||{},null,2));
+    const copy=aiData?.copySuggestions||{};
+    if(Object.keys(copy).length){
+      root.folder('05_Brand_Guide').file(`${brandName}_copy_suggestions.txt`,Object.entries(copy).map(([k,v])=>`${k.toUpperCase()}:\n${v}`).join('\n\n'));
+    }
+    root.file('README.txt',[`${brandName} Brand Package`,`Generated by Moving Day Studio`,'','01_Logos/           — Original assets','02_Color_Variants/  — Black, White, Primary recolors','03_Color_System/    — Palette CSS + reference','04_Typography/      — Font usage notes','05_Brand_Guide/     — Usage rules, copy, Brand review data','','Review all assets before client delivery.'].join('\n'));
+    const blob=await zip.generateAsync({type:'blob'});
+    downloadBlob(blob,`${brandName}_Brand_Package.zip`);
+    showToast(`${brandName} package downloaded`);
+    $('zipBtn').textContent='Download ZIP';$('zipBtn').disabled=false;
+  });
+
+  function assetPreviewHTML(asset) {
+    if (!asset?.file) return '<span class="concierge-placeholder">Not found</span>';
+    const url = URL.createObjectURL(asset.file);
+    if (asset.previewable) return `<img src="${esc(url)}" alt="${esc(asset.category)} preview">`;
+    return `<span class="concierge-placeholder">${esc(asset.extension || 'Asset')}</span>`;
+  }
+
+  function renderConciergeMode(report = preparationReport) {
+    if (!conciergeGrid || !report) return;
+    const palette = (aiData?.palette || aiData?.colors || []).slice(0, 5);
+    const foundation = report.foundation || {};
+    const missing = [];
+    const cards = [];
+
+    if (foundation.mainLogo) {
+      cards.push({
+        key: 'logo',
+        title: 'Primary Logo',
+        asset: foundation.mainLogo,
+        copy: 'I believe this is the primary identity asset.'
+      });
+    } else {
+      missing.push('I did not find a clear standalone primary logo yet.');
+    }
+
+    if (foundation.mainIcon && foundation.mainIcon !== foundation.mainLogo) {
+      cards.push({
+        key: 'icon',
+        title: 'Icon Mark',
+        asset: foundation.mainIcon,
+        copy: 'This appears to be the mark that can carry the brand at smaller sizes.'
+      });
+    }
+
+    if (foundation.mainWordmark && foundation.mainWordmark !== foundation.mainLogo) {
+      cards.push({
+        key: 'wordmark',
+        title: 'Wordmark',
+        asset: foundation.mainWordmark,
+        copy: 'This appears to be the wordmark or lockup.'
+      });
+    } else {
+      missing.push('I did not separate a wordmark yet. I can prepare one later.');
+    }
+
+    if (palette.length) {
+      cards.push({
+        key: 'colors',
+        title: 'Color System',
+        colors: palette,
+        copy: 'I found the first colors for the visual system.'
+      });
+    }
+
+    const typographyDetected = (report.categoryCounts?.['Typography / Fonts'] || 0) > 0 || Boolean(aiData?.typography?.display || aiData?.typography?.displayFont);
+    const guidelinesDetected = (report.categoryCounts?.['Brand Guidelines'] || 0) > 0;
+
+    if (typographyDetected && cards.length < 4) {
+      cards.push({
+        key: 'type',
+        title: 'Typography',
+        asset: foundation.typography,
+        copy: 'Typography materials were included or detected.'
+      });
+    } else if (!typographyDetected) {
+      missing.push('Typography was not included yet.');
+    }
+
+    if (guidelinesDetected && cards.length < 4) {
+      cards.push({
+        key: 'guides',
+        title: 'Brand Guidelines',
+        asset: foundation.guideline,
+        copy: 'Brand guidance was included with your files.'
+      });
+    }
+
+    conciergeGrid.innerHTML = cards.slice(0, 4).map(card => `
+      <article class="concierge-card" data-key="${esc(card.key)}">
+        <div class="concierge-preview">
+          ${card.colors ? `<div class="color-dots">${card.colors.map(c => `<span class="color-dot" style="background:${esc(c.hex || c.value || c)}"></span>`).join('')}</div>` : assetPreviewHTML(card.asset)}
+        </div>
+        <h3>${esc(card.title)}</h3>
+        <p>${esc(card.copy)}</p>
+        <div class="concierge-actions">
+          <button type="button" data-action="confirm">Confirm</button>
+          <button type="button" data-action="change">${card.key === 'colors' ? 'Adjust' : 'Change'}</button>
+        </div>
+      </article>`).join('');
+
+    conciergeGrid.parentElement.querySelectorAll('.concierge-missing').forEach(el => el.remove());
+    const note = missing.length
+      ? `<div class="concierge-missing">${missing.slice(0, 2).map(esc).join(' ')}</div>`
+      : '';
+    if (note) conciergeGrid.insertAdjacentHTML('afterend', note);
+  }
+
+  conciergeGrid?.addEventListener('click', event => {
+    const btn = event.target.closest('button');
+    if (!btn) return;
+    event.preventDefault();
+    event.stopPropagation();
+    const action = btn.dataset.action;
+    if (action === 'confirm') {
+      btn.classList.add('approved');
+      btn.textContent = 'Confirmed';
+      return;
+    }
+    showToast(action === 'adjust' ? 'Color adjustments will live inside Brand Home.' : 'Change controls will live inside Brand Home.');
+  });
+
+  conciergeContinue?.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    renderCustomerReview();
+    goToState('review');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+
+  function renderCustomerReview(report = preparationReport) {
+    const grid = document.getElementById('reviewRecoGrid');
+    if (!grid) return;
+
+    const palette = aiData?.palette || aiData?.colors || [];
+    const fileCount = report?.preparedFileCount || orgAssets.length || 0;
+    const logoCount = report?.categoryCounts?.['Logos'] || 0;
+    const iconCount = report?.categoryCounts?.['Icons'] || 0;
+
+    const recommendations = [
+      {
+        n: '01',
+        title: 'Primary identity',
+        copy: logoCount || iconCount
+          ? `Confirm the primary logo and mark before I prepare the rest of the system.`
+          : `Add or confirm the main identity asset so the Brand Home starts from the right foundation.`
+      },
+      {
+        n: '02',
+        title: 'Color system',
+        copy: palette.length
+          ? `I found ${palette.length} colors. I recommend confirming the primary and supporting colors next.`
+          : `I can prepare a starter color system from the assets you moved in.`
+      },
+      {
+        n: '03',
+        title: 'Asset preparation',
+        copy: `${fileCount} asset${fileCount === 1 ? '' : 's'} can now be arranged into your Brand Home without showing every file at once.`
+      }
+    ];
+
+    grid.innerHTML = recommendations.map(item => `
+      <article class="review-reco-card">
+        <span>${esc(item.n)}</span>
+        <h3>${esc(item.title)}</h3>
+        <p>${esc(item.copy)}</p>
+      </article>
+    `).join('');
+  }
+
+  document.getElementById('prepareHomeBtn')?.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    goToState('welcome_home');
+    showToast('Brand Home preparation started');
+  });
+
+  // ── RENDER BRAND SYSTEM ──
+  function renderBrandSystem(){
+    const brand=aiData.brand||{};
+    const guide=aiData.guide||{};
+    const palette=aiData.palette||aiData.colors||[];
+    const typo=aiData.typography||{};
+    const preflight=aiData.preflight||[];
+    const copy=aiData.copySuggestions||{};
+    const name=guide.clientName||brand.name||'Unknown brand';
+    const industry=guide.category||brand.industry||'';
+    const tone=brand.tone||[];
+
+    $('brandLabel').textContent=name;
+    const grid=$('brandGrid');
+
+    grid.innerHTML+=`
+      <div class="bcard">
+        <div class="bcard-head"><div><p class="eyebrow">Brand Identity</p><p class="bcard-title">Detected client</p></div></div>
+        <div class="bcard-body">
+          <p class="brand-name-big">${esc(name)}</p>
+          <div class="tag-row">
+            ${industry?`<span class="tag dark">${esc(industry)}</span>`:''}
+            ${tone.map(t=>`<span class="tag">${esc(t)}</span>`).join('')}
+          </div>
+        </div>
+      </div>`;
+
+    const bar=palette.map(c=>`<div class="pb-swatch" style="background:${esc(c.hex)}"></div>`).join('');
+    const swatches=palette.map(c=>`
+      <div class="mini-swatch">
+        <div class="mini-swatch-color" style="background:${esc(c.hex)}"></div>
+        <div class="mini-swatch-info">
+          <span class="mini-swatch-name">${esc(c.name)}</span>
+          <span class="mini-swatch-hex">${esc(c.hex)}</span>
+        </div>
+      </div>`).join('');
+    grid.innerHTML+=`
+      <div class="bcard span2">
+        <div class="bcard-head"><div><p class="eyebrow">Color System</p><p class="bcard-title">Palette</p></div><span style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">${palette.length} colors</span></div>
+        <div class="bcard-body"><div class="palette-bar">${bar}</div><div class="mini-swatches">${swatches}</div></div>
+      </div>`;
+
+    const dispB=typo.display?`<div class="type-block"><p class="type-label">Display</p><p class="type-display-sample">${esc(typo.display.name||typo.displayFont||'Unknown')}</p><p class="type-meta">${esc(typo.display.weight||'')} · ${esc(typo.display.usage||'')}</p></div>`:'';
+    const bodyB=typo.body?`<div class="type-block"><p class="type-label">Body / UI</p><p style="font-size:13px;color:var(--ink);margin:0 0 4px;line-height:1.5">The quick brown fox.</p><p class="type-meta">${esc(typo.body.name||typo.bodyFont||'Unknown')} · ${esc(typo.body.weight||'')}</p></div>`:'';
+    grid.innerHTML+=`
+      <div class="bcard">
+        <div class="bcard-head"><div><p class="eyebrow">Typography</p><p class="bcard-title">Type system</p></div></div>
+        <div class="bcard-body"><div class="type-row">${dispB}${bodyB}${!dispB&&!bodyB?`<p style="color:var(--muted);font-size:13px">Not detected.</p>`:''}</div></div>
+      </div>`;
+
+    const copyHTML=Object.entries(copy).map(([k,v])=>`
+      <div style="border-left:2px solid var(--forest);padding:8px 12px;background:#f2ede2;border-radius:0 10px 10px 0;margin-bottom:8px">
+        <p style="margin:0 0 3px;font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;color:var(--forest)">${esc(k)}</p>
+        <p style="margin:0;font-size:13px;color:var(--ink)">${esc(typeof v==='string'?v:v?.suggested||String(v)||'')}</p>
+      </div>`).join('');
+    grid.innerHTML+=`
+      <div class="bcard">
+        <div class="bcard-head"><div><p class="eyebrow">Copy</p><p class="bcard-title">Brand language</p></div></div>
+        <div class="bcard-body">${copyHTML||`<p style="color:var(--muted);font-size:13px">None returned.</p>`}</div>
+      </div>`;
+
+    const pfHTML=preflight.map(p=>`
+      <div class="pf-row">
+        <span class="pf-badge ${esc((p.severity||'note').toLowerCase())}">${esc(p.severity||'note')}</span>
+        <div><p class="pf-issue">${esc(p.issue||'')}</p><p class="pf-fix">${esc(p.suggestedFix||'')}</p></div>
+      </div>`).join('');
+    grid.innerHTML+=`
+      <div class="bcard span2">
+        <div class="bcard-head"><div><p class="eyebrow">Preflight</p><p class="bcard-title">Issues &amp; flags</p></div><span style="font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)">${preflight.length} item${preflight.length!==1?'s':''}</span></div>
+        <div class="bcard-body"><div class="preflight-rows">${pfHTML||`<p style="color:var(--muted);font-size:13px;margin:0">No issues found.</p>`}</div></div>
+      </div>`;
+
+    $('brandSection').style.display='block';
+  }
+
+  // ── RENDER ASSETS ──
+  function renderAssets(){
+    $('assetsLabel').textContent=`${orgAssets.length} file${orgAssets.length!==1?'s':''}`;
+    $('assetGrid').innerHTML=orgAssets.map(a=>`
+      <div class="asset-card" data-id="${esc(a.id)}">
+        <div class="asset-preview">${isPreviewableImage(a)?`<img src="${esc(a.url)}" alt="${esc(a.label)}">`:`<div class="file-fallback">${esc(a.extension || 'file')}</div>`}</div>
+        <div class="asset-info">
+          <p class="asset-role">${esc(a.label)}</p>
+          <p class="asset-folder">${esc(a.folder)}</p>
+          <input class="asset-rename" type="text" value="${esc(a.finalName)}" data-asset-id="${esc(a.id)}" title="Rename file">
+        </div>
+        <div class="asset-actions">
+          <button class="act-btn primary" onclick="downloadAsset('${esc(a.id)}')">Download</button>
+          <button class="act-btn" onclick="ignoreAsset('${esc(a.id)}',this)">Ignore</button>
+        </div>
+      </div>`).join('');
+
+    // Wire rename inputs
+    document.querySelectorAll('.asset-rename').forEach(inp=>{
+      inp.addEventListener('change',e=>{
+        const id=e.target.dataset.assetId;
+        const asset=orgAssets.find(x=>x.id===id);
+        if(asset)asset.finalName=e.target.value.trim()||asset.finalName;
+      });
+    });
+
+    $('assetsSection').style.display='block';
+  }
+
+  // ── RENDER VARIANTS ──
+  function renderVariants(){
+    $('variantsLabel').textContent=`${variants.length} variant${variants.length!==1?'s':''}`;
+    $('variantGrid').innerHTML=variants.map(v=>`
+      <div class="variant-card">
+        <div class="variant-preview ${v.hex==='#ffffff'?'dark-bg':''}">
+          <img src="${esc(v.url)}" alt="${esc(v.label)}">
+        </div>
+        <div class="variant-info">
+          <div class="variant-color-row">
+            <span class="variant-dot" style="background:${esc(v.hex)};${v.hex==='#ffffff'?'border-color:#ccc':''}"></span>
+            <span class="variant-label">${esc(v.sourceLabel)} · ${esc(v.colorName)}</span>
+          </div>
+          <p class="variant-file">${esc(v.finalName)}</p>
+          <button class="variant-dl" onclick="downloadVariant('${esc(v.id)}')">Download</button>
+        </div>
+      </div>`).join('');
+    $('variantsSection').style.display='block';
+  }
+
+  function downloadAsset(id){
+    const a=orgAssets.find(x=>x.id===id);if(!a)return;
+    downloadBlob(a.file,a.finalName);
+  }
+  function ignoreAsset(id,btn){
+    const card=btn.closest('.asset-card');
+    card.classList.toggle('ignored');
+    btn.textContent=card.classList.contains('ignored')?'Restore':'Ignore';
+  }
+  function downloadVariant(id){
+    const v=variants.find(x=>x.id===id);if(!v)return;
+    downloadBlob(v.file,v.finalName);
+  }
+
+  $('jsonToggle').addEventListener('click',()=>{
+    const pre=$('jsonPre');
+    const open=pre.classList.toggle('open');
+    $('jsonToggle').textContent=open?'Hide review data':'Show review data';
+  });
+
+
+/* APP STATE ROUTER: reset without a page refresh. */
+document.getElementById('backToMoveIn').addEventListener('click', event => {
+  event.preventDefault();
+  event.stopPropagation();
+  staged = [];
+  preparationReport = null;
+  document.body.classList.remove('has-preparation');
+  if (prepSummary) { prepSummary.classList.remove('on'); prepSummary.innerHTML = ''; }
+  renderDeveloperFileTray(null);
+  goToState('welcome');
+});
+</script>
+</body>
+</html>
