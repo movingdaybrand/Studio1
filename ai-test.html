@@ -1309,6 +1309,790 @@ body.founder-mode .customer-review {
   .prepare-home-btn { width: 100%; }
 }
 
+
+/* ═══════════════════════════════════════════════════════
+   LOCAL ARRIVAL EXPERIENCE — Screen 2 polish only
+   Turns local_preparing from a stat report into a calm arrival moment.
+═══════════════════════════════════════════════════════ */
+body.md-state-local_preparing .env {
+  filter: brightness(1.045) saturate(1.055);
+}
+body.md-state-local_preparing .env::before {
+  opacity: .62;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.74),
+    inset 0 -1px 0 rgba(55,95,70,0.04),
+    0 34px 110px rgba(42,82,58,0.075),
+    0 0 90px rgba(155,205,176,0.10);
+  animation: arrivalGlassBreathe 8s cubic-bezier(0.22,1,0.36,1) infinite alternate;
+}
+body.md-state-local_preparing .env-glow {
+  background:
+    radial-gradient(ellipse 54% 42% at 50% 44%, rgba(255,255,255,0.46) 0%, transparent 70%),
+    radial-gradient(ellipse 44% 28% at 50% 63%, rgba(156,206,178,0.18) 0%, transparent 72%);
+}
+@keyframes arrivalGlassBreathe {
+  from { transform: translate(-50%, -50%) scale(.992); }
+  to   { transform: translate(-50%, -50%) scale(1.012); }
+}
+
+body.md-state-local_preparing .glass {
+  width: min(92vw, 660px);
+  max-width: 660px;
+  min-height: 0;
+  border-radius: 42px;
+  background:
+    radial-gradient(ellipse 84% 54% at 50% 10%, rgba(255,255,255,.64), transparent 70%),
+    linear-gradient(180deg, rgba(255,255,255,.76), rgba(247,252,249,.58)),
+    rgba(255,255,255,.50);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,.96),
+    0 0 0 1px rgba(44,90,60,.11),
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(44,90,60,.045),
+    0 18px 48px rgba(20,60,36,.075),
+    0 46px 120px rgba(20,60,36,.13),
+    0 0 110px rgba(164,210,182,.11);
+  animation: prepPanelBreathe 7s cubic-bezier(0.22,1,0.36,1) infinite alternate;
+}
+@keyframes prepPanelBreathe {
+  from { transform: translateY(0) scale(1); }
+  to   { transform: translateY(-2px) scale(1.004); }
+}
+body.md-state-local_preparing .glass-inner {
+  min-height: min(670px, calc(100vh - 5rem));
+  justify-content: center;
+  padding: clamp(2.2rem, 4.6vh, 3.4rem) clamp(1.65rem, 4vw, 3.25rem);
+}
+body.md-state-local_preparing .upload-select-area,
+body.md-state-local_preparing .up-micro,
+body.md-state-local_preparing .status {
+  display: none !important;
+}
+body.md-state-local_preparing .prep-summary {
+  order: 10;
+  max-width: 540px;
+  margin: 0 auto;
+}
+body.md-state-local_preparing .btn-movein {
+  order: 20;
+  margin-top: 1.45rem;
+  align-self: center;
+  opacity: 0 !important;
+  pointer-events: auto;
+  animation: continueArrive .8s cubic-bezier(0.22,1,0.36,1) 1.08s forwards;
+}
+body.md-state-local_preparing .btn-movein:disabled {
+  display: none;
+}
+@keyframes continueArrive {
+  from { opacity: 0; transform: translateY(8px) scale(.985); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+.prep-arrival {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+.prep-arrival-orb {
+  width: 58px;
+  height: 58px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 1.1rem;
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(255,255,255,.96), rgba(248,253,250,.62) 58%, rgba(235,246,240,.36)),
+    rgba(255,255,255,.52);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,1),
+    0 0 0 1px rgba(44,90,60,.10),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 12px 34px rgba(20,60,36,.08),
+    0 0 46px rgba(125,190,150,.20);
+  animation: orbArrival 3.8s cubic-bezier(0.22,1,0.36,1) infinite alternate;
+}
+.prep-arrival-orb::after {
+  content: '';
+  position: absolute;
+  inset: -7px;
+  border-radius: inherit;
+  border: 1px solid rgba(76,128,90,.08);
+  opacity: .78;
+  animation: orbHalo 4.2s ease-in-out infinite;
+}
+.prep-arrival-orb svg {
+  width: 29px;
+  height: 20px;
+  fill: rgba(20,41,31,.78);
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,.65));
+}
+@keyframes orbArrival {
+  from { transform: translateY(0); box-shadow: 0 0 0 .5px rgba(255,255,255,1), 0 0 0 1px rgba(44,90,60,.10), inset 0 1px 0 rgba(255,255,255,1), 0 12px 34px rgba(20,60,36,.08), 0 0 36px rgba(125,190,150,.14); }
+  to   { transform: translateY(-2px); box-shadow: 0 0 0 .5px rgba(255,255,255,1), 0 0 0 1px rgba(44,110,70,.14), inset 0 1px 0 rgba(255,255,255,1), 0 15px 42px rgba(20,60,36,.10), 0 0 56px rgba(125,190,150,.24); }
+}
+@keyframes orbHalo {
+  0%,100% { transform: scale(.96); opacity: .36; }
+  50% { transform: scale(1.08); opacity: .72; }
+}
+.prep-kicker {
+  margin: 0 0 .75rem;
+  font-size: 9px;
+  font-weight: 520;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.38);
+}
+.prep-title {
+  margin: 0;
+  font-size: clamp(2.1rem, 5.2vw, 3.35rem);
+  line-height: 1.04;
+  font-weight: 250;
+  letter-spacing: -.058em;
+  color: rgba(8,28,16,.86);
+}
+.prep-support {
+  max-width: 430px;
+  margin: 1rem auto .8rem;
+  font-size: .98rem;
+  font-weight: 300;
+  line-height: 1.68;
+  letter-spacing: -.018em;
+  color: rgba(14,42,24,.58);
+}
+.prep-safe-line {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin: .15rem auto 1.35rem;
+  font-size: .76rem;
+  font-weight: 390;
+  letter-spacing: .02em;
+  color: rgba(14,42,24,.48);
+}
+.prep-safe-line::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(67,130,82,.55);
+  box-shadow: 0 0 18px rgba(67,130,82,.28);
+}
+.prep-capsules {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 9px;
+  max-width: 480px;
+  margin: 0 auto 1.35rem;
+}
+.prep-capsule {
+  display: inline-flex;
+  align-items: center;
+  gap: .48rem;
+  min-height: 38px;
+  padding: .64rem .86rem;
+  border-radius: 999px;
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.72), rgba(250,254,252,.48)),
+    rgba(255,255,255,.44);
+  border: .5px solid rgba(44,90,60,.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.86),
+    0 8px 20px rgba(20,60,36,.045);
+  color: rgba(8,28,16,.66);
+  opacity: 0;
+  transform: translateY(6px);
+  animation: capsuleIn .68s cubic-bezier(0.22,1,0.36,1) forwards;
+  animation-delay: calc(.28s + (var(--i, 0) * .08s));
+}
+.prep-capsule-label {
+  font-size: 10px;
+  font-weight: 520;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.42);
+}
+.prep-capsule-value {
+  font-size: .84rem;
+  font-weight: 360;
+  letter-spacing: -.012em;
+  color: rgba(8,28,16,.68);
+}
+@keyframes capsuleIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+.prep-ready {
+  margin: 0 auto;
+  font-size: .88rem;
+  line-height: 1.58;
+  font-weight: 300;
+  letter-spacing: -.012em;
+  color: rgba(14,42,24,.58);
+  max-width: 420px;
+}
+.btn-add-more {
+  margin-top: .75rem;
+  opacity: .72;
+}
+@media (max-width: 620px) {
+  body.md-state-local_preparing .glass {
+    width: min(94vw, 520px);
+    border-radius: 34px;
+  }
+  body.md-state-local_preparing .glass-inner {
+    min-height: calc(100vh - 3rem);
+  }
+  .prep-title { font-size: 2.25rem; }
+  .prep-support { font-size: .9rem; }
+}
+
+
+
+/* ═══════════════════════════════════════════════════════
+   UPLOAD EXPERIENCE V2 — Make Move In feel like a moment
+   Logic remains untouched: the real local prep begins only after Move In.
+═══════════════════════════════════════════════════════ */
+body.md-state-upload .glass {
+  max-width: min(860px, 92vw);
+  min-height: min(720px, calc(100vh - 4.5rem));
+  border-radius: 44px;
+  background:
+    radial-gradient(circle at 50% 14%, rgba(255,255,255,.88), rgba(255,255,255,.20) 34%, transparent 64%),
+    radial-gradient(circle at 18% 24%, rgba(204,230,214,.30), transparent 34%),
+    radial-gradient(circle at 82% 70%, rgba(108,166,128,.14), transparent 35%),
+    linear-gradient(180deg, rgba(255,255,255,.72), rgba(247,252,249,.54)),
+    rgba(255,255,255,.50);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,.98),
+    0 0 0 1px rgba(44,90,60,.11),
+    inset 0 1px 0 rgba(255,255,255,1),
+    inset 0 -1px 0 rgba(44,90,60,.04),
+    0 22px 60px rgba(20,60,36,.08),
+    0 58px 140px rgba(20,60,36,.13),
+    0 0 130px rgba(162,207,181,.12);
+}
+body.md-state-upload .glass::before,
+body.md-state-upload .glass::after {
+  content: '';
+  position: absolute;
+  pointer-events: none;
+  border-radius: 999px;
+  z-index: 1;
+}
+body.md-state-upload .glass::before {
+  width: 520px;
+  height: 520px;
+  left: 50%;
+  top: 44%;
+  transform: translate(-50%, -50%);
+  background:
+    radial-gradient(circle, transparent 0 47%, rgba(58,112,72,.10) 48%, transparent 49%),
+    radial-gradient(circle, transparent 0 64%, rgba(255,255,255,.48) 65%, transparent 66%);
+  opacity: .74;
+  animation: uploadOrbit 18s linear infinite;
+}
+body.md-state-upload .glass::after {
+  width: 220px;
+  height: 220px;
+  right: 8%;
+  bottom: 7%;
+  background: radial-gradient(circle, rgba(118,184,143,.22), transparent 68%);
+  filter: blur(4px);
+  animation: uploadGlowDrift 8s cubic-bezier(.22,1,.36,1) infinite alternate;
+}
+@keyframes uploadOrbit { to { transform: translate(-50%, -50%) rotate(360deg); } }
+@keyframes uploadGlowDrift {
+  from { transform: translate3d(0, 0, 0) scale(.94); opacity: .48; }
+  to { transform: translate3d(-34px, -22px, 0) scale(1.08); opacity: .82; }
+}
+body.md-state-upload .glass-inner {
+  min-height: min(720px, calc(100vh - 4.5rem));
+  justify-content: center;
+  padding: clamp(2.4rem, 5vh, 4.25rem) clamp(1.5rem, 5vw, 4rem);
+}
+body.md-state-upload .upload-select-area {
+  max-width: 640px;
+  padding: .4rem 0 .1rem;
+  position: relative;
+  z-index: 3;
+}
+body.md-state-upload .up-icon {
+  width: 82px;
+  height: 82px;
+  margin-bottom: 1.85rem;
+  background:
+    radial-gradient(circle at 50% 28%, rgba(255,255,255,1), rgba(247,253,249,.68) 56%, rgba(222,239,228,.30)),
+    rgba(255,255,255,.62);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,1),
+    0 0 0 1px rgba(44,90,60,.10),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 16px 42px rgba(20,60,36,.10),
+    0 0 64px rgba(121,185,145,.20);
+  animation: uploadDoorBreathe 4.8s cubic-bezier(.22,1,.36,1) infinite alternate;
+}
+body.md-state-upload .up-icon::before,
+body.md-state-upload .up-icon::after {
+  content: '';
+  position: absolute;
+  inset: -12px;
+  border-radius: inherit;
+  border: 1px solid rgba(44,90,60,.08);
+  opacity: .54;
+  animation: uploadDoorRing 4.5s ease-in-out infinite;
+}
+body.md-state-upload .up-icon::after {
+  inset: -25px;
+  animation-delay: 1.1s;
+  opacity: .28;
+}
+body.md-state-upload .up-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: rgba(16,46,26,.62);
+}
+@keyframes uploadDoorBreathe {
+  from { transform: translateY(0) scale(1); }
+  to { transform: translateY(-3px) scale(1.018); }
+}
+@keyframes uploadDoorRing {
+  0%, 100% { transform: scale(.96); opacity: .20; }
+  50% { transform: scale(1.09); opacity: .62; }
+}
+body.md-state-upload .up-head {
+  font-size: clamp(2.35rem, 5.7vw, 4.7rem);
+  line-height: .98;
+  font-weight: 240;
+  letter-spacing: -.07em;
+  color: rgba(8,28,16,.90);
+  margin-bottom: 1.1rem;
+}
+body.md-state-upload .up-sub {
+  max-width: 560px;
+  font-size: clamp(.95rem, 1.55vw, 1.18rem);
+  line-height: 1.72;
+  letter-spacing: -.025em;
+  color: rgba(14,42,24,.56);
+  margin-bottom: 1.8rem;
+}
+body.md-state-upload .file-tags {
+  max-width: 620px;
+  gap: 8px;
+  margin-bottom: 1.35rem;
+}
+body.md-state-upload .f-tag {
+  font-size: 10px;
+  letter-spacing: .13em;
+  padding: 6px 13px;
+  color: rgba(16,46,26,.46);
+  background: linear-gradient(180deg, rgba(255,255,255,.70), rgba(250,254,252,.46));
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.78), 0 8px 18px rgba(20,60,36,.035);
+  animation: tagFloat 5.5s cubic-bezier(.22,1,.36,1) infinite alternate;
+}
+body.md-state-upload .f-tag:nth-child(2n) { animation-delay: .45s; }
+body.md-state-upload .f-tag:nth-child(3n) { animation-delay: .9s; }
+@keyframes tagFloat {
+  from { transform: translateY(0); opacity: .82; }
+  to { transform: translateY(-3px); opacity: 1; }
+}
+.upload-journey {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .62rem;
+  margin: .95rem auto 0;
+  color: rgba(14,42,24,.40);
+  font-size: 9px;
+  font-weight: 520;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+.upload-journey i {
+  width: 30px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(44,90,60,.20), transparent);
+}
+.upload-stage {
+  width: min(100%, 540px);
+  display: none;
+  margin: 1.65rem auto 0;
+  position: relative;
+  z-index: 4;
+}
+.upload-stage.on {
+  display: block;
+  animation: stageIn .65s cubic-bezier(.22,1,.36,1) both;
+}
+@keyframes stageIn {
+  from { opacity: 0; transform: translateY(10px); filter: blur(5px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+.upload-stage-card {
+  border-radius: 28px;
+  padding: 1.15rem 1.25rem 1.05rem;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,.68), transparent 70%),
+    linear-gradient(180deg, rgba(255,255,255,.62), rgba(247,252,249,.42));
+  border: .5px solid rgba(44,90,60,.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82), 0 14px 34px rgba(20,60,36,.055);
+  text-align: center;
+}
+.upload-stage-kicker {
+  margin: 0 0 .45rem;
+  font-size: 9px;
+  font-weight: 560;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.38);
+}
+.upload-stage-card h3 {
+  margin: 0;
+  font-size: clamp(1.35rem, 2.8vw, 2rem);
+  line-height: 1.08;
+  font-weight: 270;
+  letter-spacing: -.045em;
+  color: rgba(8,28,16,.84);
+}
+.upload-stage-card p:not(.upload-stage-kicker) {
+  max-width: 420px;
+  margin: .6rem auto .95rem;
+  font-size: .82rem;
+  line-height: 1.55;
+  font-weight: 300;
+  letter-spacing: -.012em;
+  color: rgba(14,42,24,.54);
+}
+.upload-stage-pills {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.upload-stage-pills span {
+  border-radius: 999px;
+  padding: 5px 10px;
+  background: rgba(255,255,255,.50);
+  border: .5px solid rgba(44,90,60,.10);
+  font-size: 10px;
+  color: rgba(14,42,24,.52);
+}
+body.md-state-upload:not(.has-staged-assets) .btn-movein {
+  display: none;
+}
+body.md-state-upload.has-staged-assets .btn-movein {
+  margin-top: 1.2rem;
+  animation: continueArrive .7s cubic-bezier(.22,1,.36,1) both;
+}
+body.md-state-upload.has-staged-assets .up-micro {
+  margin-top: .65rem;
+}
+body.md-state-upload.has-staged-assets .upload-select-area {
+  transform: scale(.96);
+  opacity: .78;
+}
+body.dragging.md-state-upload .glass {
+  transform: translateY(-6px) scale(1.006);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,1),
+    0 0 0 1px rgba(58,146,90,.32),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 24px 68px rgba(20,60,36,.12),
+    0 0 120px rgba(96,178,122,.20);
+}
+body.dragging.md-state-upload .up-icon {
+  transform: translateY(-5px) scale(1.04);
+}
+body.dragging.md-state-upload .up-head {
+  color: rgba(8,28,16,.96);
+}
+@media (max-width: 720px) {
+  body.md-state-upload .glass { max-width: 94vw; border-radius: 34px; }
+  body.md-state-upload .glass-inner { padding: 2.2rem 1.35rem; }
+  body.md-state-upload .up-icon { width: 68px; height: 68px; margin-bottom: 1.45rem; }
+  body.md-state-upload .up-head { font-size: clamp(2.1rem, 11vw, 3.25rem); }
+  body.md-state-upload .up-sub { font-size: .94rem; }
+  .upload-journey { flex-wrap: wrap; row-gap: .42rem; }
+  .upload-journey i { width: 18px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body.md-state-upload .glass::before,
+  body.md-state-upload .glass::after,
+  body.md-state-upload .up-icon,
+  body.md-state-upload .up-icon::before,
+  body.md-state-upload .up-icon::after,
+  body.md-state-upload .f-tag {
+    animation: none !important;
+  }
+}
+
+
+
+/* ═══════════════════════════════════════════════════════
+   UPLOAD SCENE 2 CLEANUP — staged assets should feel like a reveal,
+   not a second card bolted onto the upload screen.
+═══════════════════════════════════════════════════════ */
+body.md-state-upload.has-staged-assets .glass {
+  max-width: min(780px, 92vw);
+  min-height: min(680px, calc(100vh - 4.5rem));
+  background:
+    radial-gradient(circle at 50% 16%, rgba(255,255,255,.94), rgba(255,255,255,.20) 38%, transparent 68%),
+    radial-gradient(circle at 50% 66%, rgba(149,203,169,.18), transparent 42%),
+    linear-gradient(180deg, rgba(255,255,255,.76), rgba(247,252,249,.56)),
+    rgba(255,255,255,.52);
+}
+
+body.md-state-upload.has-staged-assets .glass-inner {
+  min-height: min(680px, calc(100vh - 4.5rem));
+  justify-content: center;
+  padding: clamp(2.5rem, 5vh, 4rem) clamp(1.4rem, 5vw, 4rem);
+}
+
+body.md-state-upload.has-staged-assets .upload-select-area,
+body.md-state-upload.has-staged-assets .up-micro {
+  display: none;
+}
+
+body.md-state-upload.has-staged-assets .upload-stage {
+  width: min(100%, 610px);
+  margin: 0 auto;
+}
+
+body.md-state-upload.has-staged-assets .btn-movein {
+  margin-top: 1.45rem;
+  min-width: 210px;
+  animation: stagedContinueIn .8s cubic-bezier(.22,1,.36,1) .18s both;
+}
+
+@keyframes stagedContinueIn {
+  from { opacity: 0; transform: translateY(12px) scale(.985); filter: blur(6px); }
+  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+}
+
+.upload-stage-card.stage-arrival {
+  position: relative;
+  isolation: isolate;
+  overflow: visible;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  text-align: center;
+}
+
+.stage-arrival::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: min(520px, 78vw);
+  height: min(360px, 48vh);
+  transform: translate(-50%, -50%);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,.86), rgba(255,255,255,.24) 36%, transparent 68%),
+    radial-gradient(circle at 50% 70%, rgba(125,187,150,.16), transparent 58%);
+  filter: blur(2px);
+  opacity: .92;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.stage-orb {
+  width: 86px;
+  height: 86px;
+  margin: 0 auto 1.45rem;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  position: relative;
+  background:
+    radial-gradient(circle at 50% 24%, rgba(255,255,255,1), rgba(250,254,252,.72) 54%, rgba(217,237,224,.34)),
+    rgba(255,255,255,.68);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,1),
+    0 0 0 1px rgba(44,90,60,.10),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 18px 44px rgba(20,60,36,.10),
+    0 0 86px rgba(121,185,145,.22);
+  animation: stageOrbSettle 4.8s cubic-bezier(.22,1,.36,1) infinite alternate;
+}
+
+.stage-orb::before,
+.stage-orb::after {
+  content: '';
+  position: absolute;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.stage-orb::before {
+  inset: -16px;
+  border: 1px solid rgba(44,90,60,.085);
+  animation: stageRing 5.2s ease-in-out infinite;
+}
+
+.stage-orb::after {
+  inset: -34px;
+  border: 1px solid rgba(44,90,60,.055);
+  animation: stageRing 5.2s ease-in-out 1.25s infinite;
+}
+
+.stage-orb svg {
+  width: 42px;
+  height: 30px;
+  fill: rgba(20,41,31,.78);
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,.65));
+}
+
+@keyframes stageOrbSettle {
+  from { transform: translateY(0) scale(1); }
+  to { transform: translateY(-3px) scale(1.018); }
+}
+
+@keyframes stageRing {
+  0%, 100% { transform: scale(.96); opacity: .20; }
+  50% { transform: scale(1.08); opacity: .62; }
+}
+
+.stage-kicker {
+  margin: 0 0 .65rem;
+  font-size: 9px;
+  font-weight: 560;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.40);
+  animation: stagedItemIn .65s cubic-bezier(.22,1,.36,1) .03s both;
+}
+
+.stage-arrival h3 {
+  margin: 0;
+  font-size: clamp(2.4rem, 5.1vw, 4.6rem);
+  line-height: .98;
+  font-weight: 240;
+  letter-spacing: -.075em;
+  color: rgba(8,28,16,.91);
+  animation: stagedItemIn .7s cubic-bezier(.22,1,.36,1) .09s both;
+}
+
+.stage-lede {
+  max-width: 520px;
+  margin: 1.05rem auto 1.35rem;
+  font-size: clamp(.95rem, 1.5vw, 1.08rem);
+  line-height: 1.72;
+  font-weight: 300;
+  letter-spacing: -.022em;
+  color: rgba(14,42,24,.58);
+  animation: stagedItemIn .7s cubic-bezier(.22,1,.36,1) .16s both;
+}
+
+.stage-count-line {
+  display: inline-flex;
+  align-items: center;
+  gap: .5rem;
+  margin-bottom: 1.35rem;
+  font-size: 11px;
+  font-weight: 470;
+  letter-spacing: .08em;
+  color: rgba(14,42,24,.48);
+  text-transform: uppercase;
+  animation: stagedItemIn .7s cubic-bezier(.22,1,.36,1) .22s both;
+}
+
+.stage-count-line::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(86,150,105,.62);
+  box-shadow: 0 0 18px rgba(86,150,105,.38);
+}
+
+.stage-map {
+  width: min(100%, 560px);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  animation: stagedItemIn .76s cubic-bezier(.22,1,.36,1) .30s both;
+}
+
+.stage-step {
+  min-height: 96px;
+  border-radius: 24px;
+  padding: 1rem .9rem .95rem;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,.74), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,.56), rgba(248,253,250,.38));
+  border: .5px solid rgba(44,90,60,.105);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82), 0 12px 28px rgba(20,60,36,.045);
+}
+
+.stage-step span {
+  display: block;
+  margin-bottom: .55rem;
+  font-size: 9px;
+  font-weight: 560;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.38);
+}
+
+.stage-step strong {
+  display: block;
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  line-height: 1.05;
+  font-weight: 290;
+  letter-spacing: -.045em;
+  color: rgba(8,28,16,.82);
+}
+
+.stage-step em {
+  display: block;
+  margin-top: .55rem;
+  font-style: normal;
+  font-size: 10px;
+  line-height: 1.35;
+  color: rgba(14,42,24,.45);
+}
+
+.stage-add-more {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  margin: 1.1rem auto 0;
+  padding: .35rem .6rem;
+  color: rgba(14,42,24,.46);
+  font-size: 10px;
+  font-weight: 560;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: color .25s ease, transform .25s cubic-bezier(.22,1,.36,1);
+  animation: stagedItemIn .7s cubic-bezier(.22,1,.36,1) .38s both;
+}
+
+.stage-add-more:hover {
+  color: rgba(8,28,16,.72);
+  transform: translateY(-1px);
+}
+
+@keyframes stagedItemIn {
+  from { opacity: 0; transform: translateY(10px); filter: blur(5px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@media (max-width: 720px) {
+  body.md-state-upload.has-staged-assets .glass-inner { padding: 2rem 1.25rem; }
+  .stage-orb { width: 72px; height: 72px; margin-bottom: 1.15rem; }
+  .stage-arrival h3 { font-size: clamp(2.2rem, 11vw, 3.5rem); }
+  .stage-map { grid-template-columns: 1fr; gap: 8px; }
+  .stage-step { min-height: 0; padding: .9rem .95rem; }
+}
+
 </style>
 </head>
 <body>
@@ -1383,12 +2167,12 @@ body.founder-mode .customer-review {
         </div>
 
         <div class="normal-copy">
-          <p class="up-head">Move your brand in.</p>
-          <p class="up-sub">Drop your logos, guidelines, fonts, photography,<br>presentations, websites, PDFs, and every brand asset here.</p>
+          <p class="up-head">Bring the whole brand over.</p>
+          <p class="up-sub">Drop in the messy folder — logos, guidelines, fonts, photos, decks, screenshots, PDFs, and old brand files. Moving Day will sort the rest.</p>
         </div>
         <div class="drag-copy">
-          <p class="up-head">Drop your brand anywhere.</p>
-          <p class="up-sub">The door is open.</p>
+          <p class="up-head">Let it all in.</p>
+          <p class="up-sub">Release the files and I’ll start arranging the foundation.</p>
         </div>
 
         <div class="file-tags" aria-hidden="true">
@@ -1400,7 +2184,13 @@ body.founder-mode .customer-review {
           <span class="f-tag">Presentations</span>
           <span class="f-tag">Websites</span>
         </div>
+
+        <div class="upload-journey" aria-hidden="true">
+          <span>Receive</span><i></i><span>Sort</span><i></i><span>Understand</span><i></i><span>Welcome Home</span>
+        </div>
       </div>
+
+      <div class="upload-stage" id="uploadStage" aria-live="polite"></div>
 
       <button class="btn-movein" id="btn-movein" disabled aria-label="Move In">
         Move In
@@ -1562,6 +2352,7 @@ const tray        = document.getElementById('tray');
 const prepSummary = document.getElementById('prepSummary');
 const fileInput   = document.getElementById('file-input');
 const uploadZone  = document.getElementById('upload-zone');
+const uploadStage = document.getElementById('uploadStage');
 const preparing   = document.getElementById('preparing');
 const pSub        = document.getElementById('p-sub');
 const concierge   = document.getElementById('concierge');
@@ -1603,7 +2394,11 @@ function renderState(state) {
   const results = document.getElementById('resultsApp');
   if (results) results.classList.toggle('visible', onResults);
 
-  if (state === 'upload' && !preparationReport) setMoveButtonLabel('Move In');
+  if (state === 'upload' && !preparationReport) {
+    setMoveButtonLabel('Move In');
+    if (btnMovein) btnMovein.disabled = staged.length === 0;
+    renderUploadStagePreview();
+  }
   if (state === 'local_preparing' && preparationReport) setMoveButtonLabel('Continue');
 }
 
@@ -1810,38 +2605,151 @@ function renderDeveloperFileTray(report = preparationReport) {
 function renderPreparationSummary(report) {
   if (!prepSummary) return;
   const c = report.categoryCounts || {};
-  const cards = [
-    ['Logos', c['Logos'] || 0],
-    ['Icons', c['Icons'] || 0],
-    ['Guidelines', c['Brand Guidelines'] || 0],
-    ['Typography', c['Typography / Fonts'] || 0],
-    ['Duplicates', report.duplicateCount || 0, 'removed']
+  const total = report.originalFileCount || 0;
+  const safeLine = total === 1 ? '1 asset received safely.' : `${total} assets received safely.`;
+  const enoughLine = report.hasEnoughForUnderstanding
+    ? 'I have enough to begin understanding your brand.'
+    : 'I can organize these files now. A logo or guideline will make the brand review stronger.';
+  const capsuleItems = [
+    ['Logos', c['Logos'] || 0, 'none yet'],
+    ['Icons', c['Icons'] || 0, 'none yet'],
+    ['Guidelines', c['Brand Guidelines'] || 0, 'none yet'],
+    ['Typography', c['Typography / Fonts'] || 0, 'none yet'],
+    ['Duplicates', report.duplicateCount || 0, 'none found', 'removed']
   ];
-  const received = report.originalFileCount === 1 ? '1 asset received.' : `${report.originalFileCount} assets received.`;
-  const prepared = report.preparedFileCount === 1 ? '1 asset prepared' : `${report.preparedFileCount} assets prepared`;
+  const capsuleHTML = capsuleItems.map(([label, value, emptyText, suffix], index) => {
+    const display = value ? (suffix ? `${value} ${suffix}` : String(value)) : emptyText;
+    return `
+      <span class="prep-capsule" style="--i:${index}">
+        <span class="prep-capsule-label">${esc(label)}</span>
+        <span class="prep-capsule-value">${esc(display)}</span>
+      </span>`;
+  }).join('');
 
   prepSummary.innerHTML = `
-    <p class="prep-count">${esc(received)}</p>
-    <p class="prep-copy">I’m organizing everything now. ${report.duplicateCount ? `${report.duplicateCount} exact duplicate${report.duplicateCount === 1 ? '' : 's'} removed.` : prepared + '.'}</p>
-    <div class="prep-grid">
-      ${cards.map(([label, value, suffix]) => `
-        <div class="prep-card"><strong>${esc(value)}</strong><span>${esc(label)}${suffix ? ' ' + esc(suffix) : ' found'}</span></div>
-      `).join('')}
-    </div>
-    <p class="prep-ready">${report.hasEnoughForUnderstanding ? 'I have enough to begin understanding your brand.' : 'I can organize these files, but a logo or guideline will make the brand review stronger.'}</p>
-    <button class="btn-add-more" id="addMoreBtn" type="button">Add more assets</button>`;
+    <div class="prep-arrival">
+      <div class="prep-arrival-orb" aria-hidden="true">
+        <svg viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg">
+          <path d="M769.4,89.65v111.85h-39.04c.07-25.79-35.02-31.29-50.28-36.68-16.18-5.71,0-14.05,0-14.05l89.32-61.11Z"/>
+          <path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/>
+        </svg>
+      </div>
+      <p class="prep-kicker">Move In Complete</p>
+      <h2 class="prep-title">Your brand has arrived.</h2>
+      <p class="prep-support">I’ve received your assets and started organizing the foundation.</p>
+      <p class="prep-safe-line">${esc(safeLine)}</p>
+      <div class="prep-capsules" aria-label="Preparation summary">
+        ${capsuleHTML}
+      </div>
+      <p class="prep-ready">${esc(enoughLine)}</p>
+      <button class="btn-add-more" id="addMoreBtn" type="button">Add more assets</button>
+    </div>`;
   prepSummary.classList.add('on');
   document.body.classList.add('has-preparation');
   btnMovein.disabled = !report.preparedFileCount;
-  status.classList.add('on');
-  sTxt.textContent = `${report.preparedFileCount} prepared · ${report.duplicateCount} duplicate${report.duplicateCount === 1 ? '' : 's'} removed`;
+  status.classList.remove('on');
+  sTxt.textContent = '';
   renderDeveloperFileTray(report);
 
   const addMoreBtn = document.getElementById('addMoreBtn');
   if (addMoreBtn) addMoreBtn.addEventListener('click', openFilePicker);
 }
 
+function renderUploadStagePreview() {
+  if (!uploadStage) return;
+
+  if (!staged.length || preparationReport) {
+    uploadStage.classList.remove('on');
+    uploadStage.innerHTML = '';
+    document.body.classList.remove('has-staged-assets');
+    if (appState === 'upload' && btnMovein) btnMovein.disabled = true;
+    return;
+  }
+
+  const counts = staged.reduce((acc, file) => {
+    const category = categorizeFile(file);
+    acc[category] = (acc[category] || 0) + 1;
+    return acc;
+  }, {});
+
+  const total = staged.length;
+  const fileWord = total === 1 ? 'asset' : 'assets';
+  const highlights = [
+    ['Logos', counts['Logos'] || 0],
+    ['Guidelines', counts['Brand Guidelines'] || 0],
+    ['Fonts', counts['Typography / Fonts'] || 0],
+    ['Reference files', (counts['Documents'] || 0) + (counts['Presentations'] || 0)],
+    ['Visual assets', (counts['Photography'] || 0) + (counts['Icons'] || 0) + (counts['Wordmarks'] || 0)]
+  ].filter(([, count]) => count > 0).slice(0, 4);
+
+  const highlightHTML = highlights.length
+    ? highlights.map(([label, count]) => `<span>${esc(label)} · ${count}</span>`).join('')
+    : '<span>Ready to organize</span>';
+
+  const logoCount = counts['Logos'] || 0;
+  const iconCount = counts['Icons'] || 0;
+  const wordmarkCount = counts['Wordmarks'] || 0;
+  const visualCount = (counts['Photography'] || 0) + iconCount + wordmarkCount + logoCount;
+  const referenceCount = (counts['Documents'] || 0) + (counts['Presentations'] || 0) + (counts['Brand Guidelines'] || 0);
+  const identityCount = logoCount + iconCount + wordmarkCount;
+
+  const visualLabel = visualCount ? `${visualCount} found` : 'Ready to sort';
+  const referenceLabel = referenceCount ? `${referenceCount} found` : 'None yet';
+  const identityLabel = identityCount ? `${identityCount} candidates` : 'Looking next';
+
+  uploadStage.innerHTML = `
+    <div class="upload-stage-card stage-arrival">
+      <div class="stage-orb" aria-hidden="true">
+        <svg viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg">
+          <path d="M769.4,89.65v111.85h-39.04c.07-25.79-35.02-31.29-50.28-36.68-16.18-5.71,0-14.05,0-14.05l89.32-61.11Z"/>
+          <path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/>
+        </svg>
+      </div>
+      <p class="stage-kicker">Assets received</p>
+      <h3>Everything is in.</h3>
+      <p class="stage-lede">${total} ${fileWord} are ready. Next I’ll separate reference files from visual assets, identify the likely logo system, and prepare the first brand review.</p>
+      <div class="stage-count-line">${total} ${fileWord} ready to move in</div>
+      <div class="stage-map" aria-label="What Moving Day will prepare next">
+        <div class="stage-step">
+          <span>Visual assets</span>
+          <strong>${esc(visualLabel)}</strong>
+          <em>logos, marks, photos, graphics</em>
+        </div>
+        <div class="stage-step">
+          <span>Reference files</span>
+          <strong>${esc(referenceLabel)}</strong>
+          <em>guidelines, decks, PDFs, notes</em>
+        </div>
+        <div class="stage-step">
+          <span>Identity system</span>
+          <strong>${esc(identityLabel)}</strong>
+          <em>name, logo, color, typography</em>
+        </div>
+      </div>
+      <button class="stage-add-more" id="stageAddMoreBtn" type="button">Add more assets</button>
+    </div>`;
+
+  uploadStage.classList.add('on');
+  document.body.classList.add('has-staged-assets');
+  if (btnMovein) {
+    btnMovein.disabled = false;
+    setMoveButtonLabel('Move In');
+  }
+  if (status && sTxt) {
+    status.classList.add('on');
+    sTxt.textContent = `${total} ${fileWord} ready`;
+  }
+
+  const stageAddMoreBtn = document.getElementById('stageAddMoreBtn');
+  if (stageAddMoreBtn) stageAddMoreBtn.addEventListener('click', openFilePicker);
+}
+
 async function beginLocalPreparation(files) {
+  if (uploadStage) {
+    uploadStage.classList.remove('on');
+    uploadStage.innerHTML = '';
+  }
+  document.body.classList.remove('has-staged-assets');
   goToState('local_preparing');
   setMoveButtonLabel('Preparing');
   btnMovein.disabled = true;
@@ -1871,8 +2779,17 @@ function addFiles(fileList) {
     if (!exists) staged.push(file);
   });
 
-  if (appState !== 'upload' && appState !== 'local_preparing') goToState('upload');
-  beginLocalPreparation(staged);
+  // Keep the user in the Move In experience until they intentionally click Move In.
+  // The actual local preparation still happens on the button click.
+  preparationReport = null;
+  if (prepSummary) {
+    prepSummary.classList.remove('on');
+    prepSummary.innerHTML = '';
+  }
+  document.body.classList.remove('has-preparation');
+
+  if (appState !== 'upload') goToState('upload');
+  renderUploadStagePreview();
 }
 
 /* FILE INPUT TRIGGER */
