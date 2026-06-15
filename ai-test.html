@@ -535,7 +535,12 @@ body.dragging .file-tags   { opacity: 0.22; }
 .s-txt { font-size:10px; font-weight:300; letter-spacing:0.07em; color: rgba(14,42,24,0.40); }
 
 /* LOCAL PREPARATION SUMMARY — customer-facing. No visible file manager rows. */
-body.has-preparation .upload-select-area { display: none; }
+body.has-preparation .upload-select-area,
+body.local-preparing .upload-select-area { display: none; }
+
+body.local-preparing .glass {
+  transform: translateY(-2px);
+}
 
 .prep-summary {
   width: 100%;
@@ -545,6 +550,8 @@ body.has-preparation .upload-select-area { display: none; }
   margin-top: 0.25rem;
 }
 .prep-summary.on { display: block; animation: softIn .55s cubic-bezier(0.22,1,0.36,1) both; }
+.prep-summary.preparing-local .prep-grid { opacity: .48; }
+.prep-summary.preparing-local .prep-card strong { color: rgba(8,28,16,.44); }
 @keyframes softIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .prep-count {
   font-size: 1.45rem;
@@ -1335,11 +1342,14 @@ function renderState(state) {
 
   const onIntro = state === 'welcome' || state === 'movein';
   const onUpload = state === 'upload' || state === 'local_preparing' || state === 'preparing';
-  const onPreparing = state === 'local_preparing' || state === 'preparing';
+  // LOCAL PREPARATION should show the customer-facing summary, not the full Preparing overlay.
+  // The Preparing overlay is reserved for the API / Brand Concierge understanding step.
+  const onPreparing = state === 'preparing';
   const onConcierge = state === 'concierge';
   const onResults = state === 'review' || state === 'brand_home' || state === 'welcome_home';
 
   document.body.classList.toggle('show-results', onResults);
+  document.body.classList.toggle('local-preparing', state === 'local_preparing');
   intro.style.transition = 'opacity 0.45s ease';
   intro.style.opacity = onIntro ? '1' : '0';
   intro.style.pointerEvents = onIntro ? 'auto' : 'none';
@@ -1548,6 +1558,35 @@ function renderDeveloperFileTray(report = preparationReport) {
     </div>`).join('');
 }
 
+function setMoveButtonLabel(label) {
+  if (!btnMovein) return;
+  const textNode = Array.from(btnMovein.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
+  if (textNode) textNode.textContent = `${label} `;
+}
+
+function renderLocalPreparationPending(files) {
+  if (!prepSummary) return;
+  const count = Array.from(files || []).length;
+  const received = count === 1 ? '1 asset received.' : `${count} assets received.`;
+  prepSummary.classList.remove('preparing-local');
+  prepSummary.innerHTML = `
+    <p class="prep-count">${esc(received)}</p>
+    <p class="prep-copy">I’m organizing everything now. This stays here before the Brand Concierge begins understanding the brand.</p>
+    <div class="prep-grid">
+      <div class="prep-card"><strong>—</strong><span>Logos</span></div>
+      <div class="prep-card"><strong>—</strong><span>Icons</span></div>
+      <div class="prep-card"><strong>—</strong><span>Guidelines</span></div>
+      <div class="prep-card"><strong>—</strong><span>Typography</span></div>
+    </div>
+    <p class="prep-ready">Preparing a clean local report from your files.</p>`;
+  prepSummary.classList.add('on', 'preparing-local');
+  document.body.classList.add('has-preparation');
+  status.classList.add('on');
+  sTxt.textContent = 'Organizing locally';
+  btnMovein.disabled = true;
+  setMoveButtonLabel('Preparing');
+}
+
 function renderPreparationSummary(report) {
   if (!prepSummary) return;
   const c = report.categoryCounts || {};
@@ -1561,6 +1600,7 @@ function renderPreparationSummary(report) {
   const received = report.originalFileCount === 1 ? '1 asset received.' : `${report.originalFileCount} assets received.`;
   const prepared = report.preparedFileCount === 1 ? '1 asset prepared' : `${report.preparedFileCount} assets prepared`;
 
+  prepSummary.classList.remove('preparing-local');
   prepSummary.innerHTML = `
     <p class="prep-count">${esc(received)}</p>
     <p class="prep-copy">I’m organizing everything now. ${report.duplicateCount ? `${report.duplicateCount} exact duplicate${report.duplicateCount === 1 ? '' : 's'} removed.` : prepared + '.'}</p>
@@ -1574,6 +1614,7 @@ function renderPreparationSummary(report) {
   prepSummary.classList.add('on');
   document.body.classList.add('has-preparation');
   btnMovein.disabled = !report.preparedFileCount;
+  setMoveButtonLabel(report.preparedFileCount ? 'Continue' : 'Move In');
   status.classList.add('on');
   sTxt.textContent = `${report.preparedFileCount} prepared · ${report.duplicateCount} duplicate${report.duplicateCount === 1 ? '' : 's'} removed`;
   renderDeveloperFileTray(report);
@@ -1583,20 +1624,31 @@ function renderPreparationSummary(report) {
 }
 
 async function beginLocalPreparation(files) {
+  // LOCAL PREPARATION: this is intentionally visible to the customer.
+  // It does not call the API. It only builds the local preparation report.
   goToState('local_preparing');
+  renderLocalPreparationPending(files);
   setPreparingLine('Organizing your files');
   btnMovein.disabled = true;
+
   try {
     preparationReport = await prepareFilesLocally(files);
     staged = preparationReport.preparedFiles.slice();
     renderPreparationSummary(preparationReport);
     setPreparingLine('Your assets are organized');
-    setTimeout(() => goToState('upload'), 450);
+    // Stay in local_preparing so the summary is clearly visible.
+    // The next click moves into Preparing Your Brand and calls the API/local understanding pipeline.
   } catch (err) {
     console.error('Local preparation failed:', err);
+    prepSummary.classList.remove('preparing-local');
+    prepSummary.innerHTML = `
+      <p class="prep-count">A little more is needed.</p>
+      <p class="prep-copy">I couldn’t organize these files cleanly yet. Add another asset or try again.</p>`;
+    prepSummary.classList.add('on');
+    document.body.classList.add('has-preparation');
     setPreparingLine('A little more is needed');
     btnMovein.disabled = false;
-    setTimeout(() => goToState('upload'), 450);
+    setMoveButtonLabel('Try Again');
   }
 }
 
@@ -1677,7 +1729,7 @@ window.addEventListener('drop', event => event.preventDefault());
 btnMovein.addEventListener('click', event => {
   event.preventDefault();
   event.stopPropagation();
-  if (!staged.length || appState !== 'upload') return;
+  if (!staged.length || !['upload', 'local_preparing'].includes(appState)) return;
   if (!preparationReport) {
     beginLocalPreparation(staged);
     return;
@@ -2368,6 +2420,7 @@ document.getElementById('backToMoveIn').addEventListener('click', event => {
   document.body.classList.remove('has-preparation');
   if (prepSummary) { prepSummary.classList.remove('on'); prepSummary.innerHTML = ''; }
   renderDeveloperFileTray(null);
+  setMoveButtonLabel('Move In');
   goToState('welcome');
 });
 </script>
