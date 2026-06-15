@@ -535,12 +535,7 @@ body.dragging .file-tags   { opacity: 0.22; }
 .s-txt { font-size:10px; font-weight:300; letter-spacing:0.07em; color: rgba(14,42,24,0.40); }
 
 /* LOCAL PREPARATION SUMMARY — customer-facing. No visible file manager rows. */
-body.has-preparation .upload-select-area,
-body.local-preparing .upload-select-area { display: none; }
-
-body.local-preparing .glass {
-  transform: translateY(-2px);
-}
+body.has-preparation .upload-select-area { display: none; }
 
 .prep-summary {
   width: 100%;
@@ -550,8 +545,6 @@ body.local-preparing .glass {
   margin-top: 0.25rem;
 }
 .prep-summary.on { display: block; animation: softIn .55s cubic-bezier(0.22,1,0.36,1) both; }
-.prep-summary.preparing-local .prep-grid { opacity: .48; }
-.prep-summary.preparing-local .prep-card strong { color: rgba(8,28,16,.44); }
 @keyframes softIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 .prep-count {
   font-size: 1.45rem;
@@ -1088,6 +1081,234 @@ pre.open { display: block; }
   .progress-step { border-right: 0; border-bottom: 1px solid rgba(44,90,60,.07); }
 }
 
+
+/* ═══════════════════════════════════════════════════════
+   FLOW REFINEMENT — local prep, dedicated preparing, quiet concierge/review
+═══════════════════════════════════════════════════════ */
+
+/* Local prep is readable and calm. It is not hidden behind the preparing overlay. */
+body.md-state-local_preparing .preparing { display: none !important; }
+body.md-state-local_preparing .glass {
+  max-width: 520px;
+  min-height: 520px;
+}
+body.md-state-local_preparing .prep-summary.on {
+  display: block;
+}
+body.md-state-local_preparing .btn-movein {
+  opacity: 1 !important;
+  pointer-events: auto;
+}
+body.md-state-local_preparing .prep-count {
+  color: rgba(8,28,16,.88);
+}
+body.md-state-local_preparing .prep-copy,
+body.md-state-local_preparing .prep-ready {
+  color: rgba(14,42,24,.66);
+}
+body.md-state-local_preparing .prep-card {
+  background: rgba(255,255,255,.68);
+  border-color: rgba(44,90,60,.15);
+}
+
+/* Preparing is now a focused environment, not a transparent overlay on busy content. */
+body.md-state-preparing .glass {
+  max-width: 520px;
+  min-height: 440px;
+}
+body.md-state-preparing .glass-inner {
+  opacity: .035;
+  filter: blur(14px);
+  pointer-events: none;
+}
+body.md-state-preparing .preparing {
+  background:
+    radial-gradient(ellipse 70% 48% at 50% 35%, rgba(255,255,255,.98), rgba(245,250,247,.98) 64%, rgba(239,247,243,.99)),
+    rgba(245,249,246,.99);
+  backdrop-filter: blur(34px) saturate(150%);
+  -webkit-backdrop-filter: blur(34px) saturate(150%);
+}
+body.md-state-preparing .p-head {
+  color: rgba(8,28,16,.84);
+}
+body.md-state-preparing .p-sub {
+  color: rgba(14,42,24,.46);
+}
+
+/* Concierge: calm brand director, not admin modal. */
+.concierge {
+  overflow: auto;
+}
+.concierge-shell {
+  width: min(760px, calc(100vw - 3rem));
+  max-height: none;
+  overflow: visible;
+  border-radius: 34px;
+  padding: 2.35rem;
+}
+.concierge-title {
+  max-width: 620px;
+  font-size: clamp(2.1rem, 4.4vw, 3.35rem);
+}
+.concierge-note {
+  max-width: 570px;
+  margin-bottom: 1.2rem;
+}
+.concierge-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.concierge-card {
+  min-height: 176px;
+  border-radius: 24px;
+  background: rgba(255,255,255,.54);
+}
+.concierge-preview {
+  height: 82px;
+}
+.concierge-actions button {
+  font-size: 8.5px;
+  letter-spacing: .11em;
+}
+
+/* Missing items are supporting notes, not big failure cards. */
+.concierge-missing {
+  margin: 1rem 0 0;
+  padding: .8rem 1rem;
+  border-radius: 18px;
+  background: rgba(255,255,255,.42);
+  border: .5px solid rgba(44,90,60,.10);
+  color: rgba(14,42,24,.48);
+  font-size: .76rem;
+  line-height: 1.55;
+}
+
+/* Customer Review replaces technical output unless Founder Mode is active. */
+.customer-review {
+  display: none;
+  margin-top: 18px;
+  border-radius: 30px;
+  padding: 2.2rem;
+  background: rgba(255,255,255,.58);
+  border: .5px solid rgba(255,255,255,.82);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.9),
+    0 24px 80px rgba(20,60,36,.075);
+  backdrop-filter: blur(34px) saturate(160%);
+  -webkit-backdrop-filter: blur(34px) saturate(160%);
+}
+.results-app.visible .customer-review { display: block; }
+.customer-review-kicker {
+  margin: 0 0 .65rem;
+  font-size: 10px;
+  font-weight: 560;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.42);
+}
+.customer-review-title {
+  margin: 0;
+  max-width: 680px;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 250;
+  line-height: 1.05;
+  letter-spacing: -.055em;
+  color: rgba(8,28,16,.86);
+}
+.customer-review-copy {
+  margin: 1rem 0 1.5rem;
+  max-width: 560px;
+  font-size: .95rem;
+  line-height: 1.7;
+  color: rgba(14,42,24,.58);
+}
+.review-reco-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+.review-reco-card {
+  min-height: 170px;
+  border-radius: 24px;
+  padding: 1.15rem;
+  background: rgba(255,255,255,.52);
+  border: .5px solid rgba(44,90,60,.12);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.78);
+}
+.review-reco-card span {
+  display: block;
+  margin-bottom: .8rem;
+  font-size: 9px;
+  font-weight: 560;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: rgba(22,74,42,.52);
+}
+.review-reco-card h3 {
+  margin: 0 0 .55rem;
+  font-size: 1rem;
+  font-weight: 430;
+  letter-spacing: -.025em;
+  color: rgba(8,28,16,.86);
+}
+.review-reco-card p {
+  margin: 0;
+  font-size: .78rem;
+  line-height: 1.58;
+  color: rgba(14,42,24,.54);
+}
+.customer-review-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.45rem;
+}
+.customer-review-micro {
+  margin: 0;
+  font-size: .76rem;
+  color: rgba(14,42,24,.42);
+}
+.prepare-home-btn {
+  border: 0;
+  border-radius: 999px;
+  padding: .92rem 1.7rem;
+  cursor: pointer;
+  background: rgba(20,48,32,.88);
+  color: rgba(255,255,255,.94);
+  font-size: .72rem;
+  font-weight: 520;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,.85),
+    0 0 0 1px rgba(44,90,60,.18),
+    inset 0 1px 0 rgba(255,255,255,.12),
+    0 16px 44px rgba(20,60,36,.16);
+}
+
+/* Hide internal machinery from customer mode. Keep it available with ?founder=1. */
+body:not(.founder-mode) .results-top,
+body:not(.founder-mode) .progress-strip,
+body:not(.founder-mode) .summary-bar,
+body:not(.founder-mode) #brandSection,
+body:not(.founder-mode) #assetsSection,
+body:not(.founder-mode) #variantsSection,
+body:not(.founder-mode) #jsonSection {
+  display: none !important;
+}
+body.founder-mode .customer-review {
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .concierge-shell { width: min(100%, calc(100vw - 1.5rem)); padding: 1.45rem; }
+  .concierge-grid,
+  .review-reco-grid { grid-template-columns: 1fr; }
+  .customer-review-footer { flex-direction: column; align-items: stretch; }
+  .prepare-home-btn { width: 100%; }
+}
+
 </style>
 </head>
 <body>
@@ -1240,6 +1461,20 @@ pre.open { display: block; }
       <button class="results-back" id="backToMoveIn" type="button">Move in another brand</button>
     </header>
 
+    <!-- CUSTOMER REVIEW: recommendations first. Technical output is Founder Mode only. -->
+    <section class="customer-review" id="customerReview" aria-label="Moving Day recommendations">
+      <p class="customer-review-kicker">Brand Concierge</p>
+      <h2 class="customer-review-title">I have three recommendations before we prepare your Brand Home.</h2>
+      <p class="customer-review-copy">
+        I’ve reviewed the foundation. These are the first decisions I recommend confirming before I arrange the final system.
+      </p>
+      <div class="review-reco-grid" id="reviewRecoGrid"></div>
+      <div class="customer-review-footer">
+        <p class="customer-review-micro">The full asset library, downloads, and variants will live inside Brand Home.</p>
+        <button class="prepare-home-btn" id="prepareHomeBtn" type="button">Prepare Brand Home</button>
+      </div>
+    </section>
+
     <div class="progress-strip" id="progressStrip">
       <div class="progress-steps">
         <div class="progress-step" id="ps1"><span class="step-dot"></span>Reading files</div>
@@ -1338,18 +1573,20 @@ window.pSub = pSub;
 function renderState(state) {
   appState = state;
   document.body.classList.remove('dragging');
+  APP_STATES.forEach(s => document.body.classList.remove(`md-state-${s}`));
+  document.body.classList.add(`md-state-${state}`);
+  document.body.dataset.mdState = state;
   dragDepth = 0;
 
   const onIntro = state === 'welcome' || state === 'movein';
   const onUpload = state === 'upload' || state === 'local_preparing' || state === 'preparing';
-  // LOCAL PREPARATION should show the customer-facing summary, not the full Preparing overlay.
-  // The Preparing overlay is reserved for the API / Brand Concierge understanding step.
+  // Preparing overlay is now reserved for the true brand-understanding step only.
+  // Local preparation remains visible as its own readable summary state.
   const onPreparing = state === 'preparing';
   const onConcierge = state === 'concierge';
   const onResults = state === 'review' || state === 'brand_home' || state === 'welcome_home';
 
   document.body.classList.toggle('show-results', onResults);
-  document.body.classList.toggle('local-preparing', state === 'local_preparing');
   intro.style.transition = 'opacity 0.45s ease';
   intro.style.opacity = onIntro ? '1' : '0';
   intro.style.pointerEvents = onIntro ? 'auto' : 'none';
@@ -1365,6 +1602,18 @@ function renderState(state) {
 
   const results = document.getElementById('resultsApp');
   if (results) results.classList.toggle('visible', onResults);
+
+  if (state === 'upload' && !preparationReport) setMoveButtonLabel('Move In');
+  if (state === 'local_preparing' && preparationReport) setMoveButtonLabel('Continue');
+}
+
+function setMoveButtonLabel(label) {
+  if (!btnMovein) return;
+  btnMovein.innerHTML = `${esc(label)}
+    <svg class="arrow" viewBox="0 0 24 24" aria-hidden="true">
+      <line x1="5" y1="12" x2="19" y2="12"/>
+      <polyline points="13 6 19 12 13 18"/>
+    </svg>`;
 }
 
 function goToState(state, options = {}) {
@@ -1558,35 +1807,6 @@ function renderDeveloperFileTray(report = preparationReport) {
     </div>`).join('');
 }
 
-function setMoveButtonLabel(label) {
-  if (!btnMovein) return;
-  const textNode = Array.from(btnMovein.childNodes).find(node => node.nodeType === Node.TEXT_NODE);
-  if (textNode) textNode.textContent = `${label} `;
-}
-
-function renderLocalPreparationPending(files) {
-  if (!prepSummary) return;
-  const count = Array.from(files || []).length;
-  const received = count === 1 ? '1 asset received.' : `${count} assets received.`;
-  prepSummary.classList.remove('preparing-local');
-  prepSummary.innerHTML = `
-    <p class="prep-count">${esc(received)}</p>
-    <p class="prep-copy">I’m organizing everything now. This stays here before the Brand Concierge begins understanding the brand.</p>
-    <div class="prep-grid">
-      <div class="prep-card"><strong>—</strong><span>Logos</span></div>
-      <div class="prep-card"><strong>—</strong><span>Icons</span></div>
-      <div class="prep-card"><strong>—</strong><span>Guidelines</span></div>
-      <div class="prep-card"><strong>—</strong><span>Typography</span></div>
-    </div>
-    <p class="prep-ready">Preparing a clean local report from your files.</p>`;
-  prepSummary.classList.add('on', 'preparing-local');
-  document.body.classList.add('has-preparation');
-  status.classList.add('on');
-  sTxt.textContent = 'Organizing locally';
-  btnMovein.disabled = true;
-  setMoveButtonLabel('Preparing');
-}
-
 function renderPreparationSummary(report) {
   if (!prepSummary) return;
   const c = report.categoryCounts || {};
@@ -1600,7 +1820,6 @@ function renderPreparationSummary(report) {
   const received = report.originalFileCount === 1 ? '1 asset received.' : `${report.originalFileCount} assets received.`;
   const prepared = report.preparedFileCount === 1 ? '1 asset prepared' : `${report.preparedFileCount} assets prepared`;
 
-  prepSummary.classList.remove('preparing-local');
   prepSummary.innerHTML = `
     <p class="prep-count">${esc(received)}</p>
     <p class="prep-copy">I’m organizing everything now. ${report.duplicateCount ? `${report.duplicateCount} exact duplicate${report.duplicateCount === 1 ? '' : 's'} removed.` : prepared + '.'}</p>
@@ -1614,7 +1833,6 @@ function renderPreparationSummary(report) {
   prepSummary.classList.add('on');
   document.body.classList.add('has-preparation');
   btnMovein.disabled = !report.preparedFileCount;
-  setMoveButtonLabel(report.preparedFileCount ? 'Continue' : 'Move In');
   status.classList.add('on');
   sTxt.textContent = `${report.preparedFileCount} prepared · ${report.duplicateCount} duplicate${report.duplicateCount === 1 ? '' : 's'} removed`;
   renderDeveloperFileTray(report);
@@ -1624,31 +1842,23 @@ function renderPreparationSummary(report) {
 }
 
 async function beginLocalPreparation(files) {
-  // LOCAL PREPARATION: this is intentionally visible to the customer.
-  // It does not call the API. It only builds the local preparation report.
   goToState('local_preparing');
-  renderLocalPreparationPending(files);
-  setPreparingLine('Organizing your files');
+  setMoveButtonLabel('Preparing');
   btnMovein.disabled = true;
-
+  status.classList.add('on');
+  sTxt.textContent = 'Organizing your assets';
   try {
     preparationReport = await prepareFilesLocally(files);
     staged = preparationReport.preparedFiles.slice();
     renderPreparationSummary(preparationReport);
-    setPreparingLine('Your assets are organized');
-    // Stay in local_preparing so the summary is clearly visible.
-    // The next click moves into Preparing Your Brand and calls the API/local understanding pipeline.
+    setMoveButtonLabel('Continue');
+    sTxt.textContent = `${preparationReport.preparedFileCount} prepared · ${preparationReport.duplicateCount} duplicate${preparationReport.duplicateCount === 1 ? '' : 's'} removed`;
+    // Stay in local_preparing so the customer can read the summary before continuing.
   } catch (err) {
     console.error('Local preparation failed:', err);
-    prepSummary.classList.remove('preparing-local');
-    prepSummary.innerHTML = `
-      <p class="prep-count">A little more is needed.</p>
-      <p class="prep-copy">I couldn’t organize these files cleanly yet. Add another asset or try again.</p>`;
-    prepSummary.classList.add('on');
-    document.body.classList.add('has-preparation');
-    setPreparingLine('A little more is needed');
+    sTxt.textContent = 'A little more is needed';
+    setMoveButtonLabel('Move In');
     btnMovein.disabled = false;
-    setMoveButtonLabel('Try Again');
   }
 }
 
@@ -1729,11 +1939,12 @@ window.addEventListener('drop', event => event.preventDefault());
 btnMovein.addEventListener('click', event => {
   event.preventDefault();
   event.stopPropagation();
-  if (!staged.length || !['upload', 'local_preparing'].includes(appState)) return;
+  if (!staged.length || !['upload','local_preparing'].includes(appState)) return;
   if (!preparationReport) {
     beginLocalPreparation(staged);
     return;
   }
+  setMoveButtonLabel('Continue');
   goToState('preparing');
   runBrandPipeline(preparationReport.preparedFiles, preparationReport);
 });
@@ -1847,6 +2058,7 @@ btnMovein.addEventListener('click', event => {
   }
 
   function revealResults() {
+    renderCustomerReview();
     goToState('review');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -2040,7 +2252,7 @@ btnMovein.addEventListener('click', event => {
     ['ps1','ps2','ps3','ps4','ps5'].forEach(id => { const el = $(id); el.classList.remove('done','active'); });
 
     try {
-      setPreparingLine('Reading your files');
+      setPreparingLine('Reviewing your assets');
       stepActive(1);
       const analyzable = allFiles
         .map((file, index) => ({ file, uploadId: `asset_${index + 1}` }))
@@ -2053,7 +2265,7 @@ btnMovein.addEventListener('click', event => {
       const dataUrls = await Promise.all(analyzable.map(item => fileToDataUrl(item.file)));
       stepDone(1);
 
-      setPreparingLine(ANALYSIS_MODE === 'local' ? 'Organizing locally' : 'Reviewing your assets');
+      setPreparingLine(ANALYSIS_MODE === 'local' ? 'Organizing your foundation' : 'Understanding your visual system');
       stepActive(2);
       try {
         if (ANALYSIS_MODE === 'local') throw new Error('Local organization requested.');
@@ -2061,24 +2273,24 @@ btnMovein.addEventListener('click', event => {
       } catch (apiErr) {
         if (ANALYSIS_MODE === 'ai') throw apiErr;
         console.warn('Brand Concierge route unavailable; using local organization:', apiErr);
-        setPreparingLine('Organizing locally');
+        setPreparingLine('Organizing your foundation');
         const palette = await extractLocalPalette(dataUrls);
         aiData = buildLocalReviewData(allFiles, analyzable, dataUrls, palette, report);
         aiData.localFallbackReason = String(apiErr?.message || apiErr || 'API route unavailable');
       }
       stepDone(2);
 
-      setPreparingLine('Organizing your brand home');
+      setPreparingLine('Organizing your foundation');
       stepActive(3);
       orgAssets = organizeOriginalAssets(allFiles, aiData);
       stepDone(3);
 
-      setPreparingLine('Preparing your color system');
+      setPreparingLine('Understanding your visual system');
       stepActive(4);
       await createColorVariantsForAssets();
       stepDone(4);
 
-      setPreparingLine('Arranging your review');
+      setPreparingLine('Preparing your Brand Home');
       stepActive(5);
       renderBrandSystem();
       renderAssets();
@@ -2199,40 +2411,73 @@ btnMovein.addEventListener('click', event => {
     if (!conciergeGrid || !report) return;
     const palette = (aiData?.palette || aiData?.colors || []).slice(0, 5);
     const foundation = report.foundation || {};
+    const missing = [];
+    const cards = [];
+
+    if (foundation.mainLogo) {
+      cards.push({
+        key: 'logo',
+        title: 'Primary Logo',
+        asset: foundation.mainLogo,
+        copy: 'I believe this is the primary identity asset.'
+      });
+    } else {
+      missing.push('I did not find a clear standalone primary logo yet.');
+    }
+
+    if (foundation.mainIcon && foundation.mainIcon !== foundation.mainLogo) {
+      cards.push({
+        key: 'icon',
+        title: 'Icon Mark',
+        asset: foundation.mainIcon,
+        copy: 'This appears to be the mark that can carry the brand at smaller sizes.'
+      });
+    }
+
+    if (foundation.mainWordmark && foundation.mainWordmark !== foundation.mainLogo) {
+      cards.push({
+        key: 'wordmark',
+        title: 'Wordmark',
+        asset: foundation.mainWordmark,
+        copy: 'This appears to be the wordmark or lockup.'
+      });
+    } else {
+      missing.push('I did not separate a wordmark yet. I can prepare one later.');
+    }
+
+    if (palette.length) {
+      cards.push({
+        key: 'colors',
+        title: 'Color System',
+        colors: palette,
+        copy: 'I found the first colors for the visual system.'
+      });
+    }
+
     const typographyDetected = (report.categoryCounts?.['Typography / Fonts'] || 0) > 0 || Boolean(aiData?.typography?.display || aiData?.typography?.displayFont);
     const guidelinesDetected = (report.categoryCounts?.['Brand Guidelines'] || 0) > 0;
 
-    const cards = [
-      {
-        key: 'logo', title: 'Main Logo', asset: foundation.mainLogo,
-        copy: foundation.mainLogo ? 'I believe this is your primary logo.' : 'I did not find a clear primary logo yet.',
-        actions: ['Approve', 'Replace']
-      },
-      {
-        key: 'icon', title: 'Icon Mark', asset: foundation.mainIcon,
-        copy: foundation.mainIcon ? 'This appears to be your icon mark.' : 'I can confirm the icon mark later if needed.',
-        actions: ['Approve', 'Replace']
-      },
-      {
-        key: 'wordmark', title: 'Wordmark', asset: foundation.mainWordmark,
-        copy: foundation.mainWordmark ? 'This appears to be your wordmark.' : 'I did not separate a wordmark from the logo yet.',
-        actions: ['Approve', 'Replace']
-      },
-      {
-        key: 'colors', title: 'Color System', colors: palette,
-        copy: palette.length ? 'I found your primary colors.' : 'I will prepare a starter color system from your assets.',
-        actions: ['Approve', 'Adjust']
-      }
-    ];
-
-    if (typographyDetected) {
-      cards.push({ key: 'type', title: 'Typography', asset: foundation.typography, copy: 'Typography materials were included or detected.', actions: ['Approve', 'Replace'] });
-    }
-    if (guidelinesDetected) {
-      cards.push({ key: 'guides', title: 'Guidelines', asset: foundation.guideline, copy: 'Brand guidance was included with your files.', actions: ['Approve', 'Replace'] });
+    if (typographyDetected && cards.length < 4) {
+      cards.push({
+        key: 'type',
+        title: 'Typography',
+        asset: foundation.typography,
+        copy: 'Typography materials were included or detected.'
+      });
+    } else if (!typographyDetected) {
+      missing.push('Typography was not included yet.');
     }
 
-    conciergeGrid.innerHTML = cards.map(card => `
+    if (guidelinesDetected && cards.length < 4) {
+      cards.push({
+        key: 'guides',
+        title: 'Brand Guidelines',
+        asset: foundation.guideline,
+        copy: 'Brand guidance was included with your files.'
+      });
+    }
+
+    conciergeGrid.innerHTML = cards.slice(0, 4).map(card => `
       <article class="concierge-card" data-key="${esc(card.key)}">
         <div class="concierge-preview">
           ${card.colors ? `<div class="color-dots">${card.colors.map(c => `<span class="color-dot" style="background:${esc(c.hex || c.value || c)}"></span>`).join('')}</div>` : assetPreviewHTML(card.asset)}
@@ -2240,9 +2485,16 @@ btnMovein.addEventListener('click', event => {
         <h3>${esc(card.title)}</h3>
         <p>${esc(card.copy)}</p>
         <div class="concierge-actions">
-          ${card.actions.map(action => `<button type="button" data-action="${esc(action.toLowerCase())}">${esc(action)}</button>`).join('')}
+          <button type="button" data-action="confirm">Confirm</button>
+          <button type="button" data-action="change">${card.key === 'colors' ? 'Adjust' : 'Change'}</button>
         </div>
       </article>`).join('');
+
+    conciergeGrid.parentElement.querySelectorAll('.concierge-missing').forEach(el => el.remove());
+    const note = missing.length
+      ? `<div class="concierge-missing">${missing.slice(0, 2).map(esc).join(' ')}</div>`
+      : '';
+    if (note) conciergeGrid.insertAdjacentHTML('afterend', note);
   }
 
   conciergeGrid?.addEventListener('click', event => {
@@ -2251,19 +2503,68 @@ btnMovein.addEventListener('click', event => {
     event.preventDefault();
     event.stopPropagation();
     const action = btn.dataset.action;
-    if (action === 'approve') {
+    if (action === 'confirm') {
       btn.classList.add('approved');
-      btn.textContent = 'Approved';
+      btn.textContent = 'Confirmed';
       return;
     }
-    showToast(action === 'adjust' ? 'Color adjustments will live inside Brand Home.' : 'Replacement controls will live inside Brand Home.');
+    showToast(action === 'adjust' ? 'Color adjustments will live inside Brand Home.' : 'Change controls will live inside Brand Home.');
   });
 
   conciergeContinue?.addEventListener('click', event => {
     event.preventDefault();
     event.stopPropagation();
+    renderCustomerReview();
     goToState('review');
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+
+  function renderCustomerReview(report = preparationReport) {
+    const grid = document.getElementById('reviewRecoGrid');
+    if (!grid) return;
+
+    const palette = aiData?.palette || aiData?.colors || [];
+    const fileCount = report?.preparedFileCount || orgAssets.length || 0;
+    const logoCount = report?.categoryCounts?.['Logos'] || 0;
+    const iconCount = report?.categoryCounts?.['Icons'] || 0;
+
+    const recommendations = [
+      {
+        n: '01',
+        title: 'Primary identity',
+        copy: logoCount || iconCount
+          ? `Confirm the primary logo and mark before I prepare the rest of the system.`
+          : `Add or confirm the main identity asset so the Brand Home starts from the right foundation.`
+      },
+      {
+        n: '02',
+        title: 'Color system',
+        copy: palette.length
+          ? `I found ${palette.length} colors. I recommend confirming the primary and supporting colors next.`
+          : `I can prepare a starter color system from the assets you moved in.`
+      },
+      {
+        n: '03',
+        title: 'Asset preparation',
+        copy: `${fileCount} asset${fileCount === 1 ? '' : 's'} can now be arranged into your Brand Home without showing every file at once.`
+      }
+    ];
+
+    grid.innerHTML = recommendations.map(item => `
+      <article class="review-reco-card">
+        <span>${esc(item.n)}</span>
+        <h3>${esc(item.title)}</h3>
+        <p>${esc(item.copy)}</p>
+      </article>
+    `).join('');
+  }
+
+  document.getElementById('prepareHomeBtn')?.addEventListener('click', event => {
+    event.preventDefault();
+    event.stopPropagation();
+    goToState('welcome_home');
+    showToast('Brand Home preparation started');
   });
 
   // ── RENDER BRAND SYSTEM ──
@@ -2420,7 +2721,6 @@ document.getElementById('backToMoveIn').addEventListener('click', event => {
   document.body.classList.remove('has-preparation');
   if (prepSummary) { prepSummary.classList.remove('on'); prepSummary.innerHTML = ''; }
   renderDeveloperFileTray(null);
-  setMoveButtonLabel('Move In');
   goToState('welcome');
 });
 </script>
