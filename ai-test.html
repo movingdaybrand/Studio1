@@ -4681,41 +4681,156 @@ if (aiRecommendations.length) {
       usage: i === 0 ? 'Primary brand presence' : i === 1 ? 'Supporting color' : 'System color'
     }));
   }
+function buildLocalReviewData(allFiles, analyzable, dataUrls, palette, report = preparationReport) {
+  const clientName = guessClientNameFromFiles(allFiles);
+  const files = Array.from(allFiles || []);
+  const filenames = files.map(file => file.name).filter(Boolean);
 
-  function buildLocalReviewData(allFiles, analyzable, dataUrls, palette, report = preparationReport) {
-    const clientName = guessClientNameFromFiles(allFiles);
-    return {
-      reviewMode: 'local',
-      guide: {
-        clientName,
-        category: 'Brand System',
-        description: 'A prepared brand package organized from the files provided.'
-      },
-      brand: {
-        name: clientName,
-        industry: 'Brand System',
-        tone: ['Clean', 'Organized', 'Ready']
-      },
-      palette,
-      typography: {
-        display: { name: 'Inter', weight: '300–500', usage: 'Clean display and interface typography' },
-        body: { name: 'Inter', weight: '300–400', usage: 'Readable supporting copy' }
-      },
-      assetAssignments: allFiles.map((file, index) => ({
-        fileId: `asset_${index + 1}`,
-        slot: guessRole(file.name),
-        rationale: 'Organized locally by filename and file type.'
-      })),
-      preflight: [{
-        severity: 'note',
-        issue: `${report?.preparedFileCount || allFiles.length} assets prepared locally.`,
-        suggestedFix: 'Confirm the foundation, then prepare the Brand Home.'
-      }],
-      copySuggestions: {
-        positioning: 'A cleaner, organized brand home prepared from the provided assets.'
-      }
-    };
+  const identityFiles = files.filter(file =>
+    /logo|mark|icon|symbol|wordmark|badge|identity/i.test(file.name)
+  );
+
+  const referenceFiles = files.filter(file =>
+    /guide|guideline|brand|pdf|deck|presentation|reference|manual|standard/i.test(file.name)
+  );
+
+  const visualFiles = files.filter(file => isAnalyzableFile(file));
+
+  const primaryIdentity =
+    identityFiles[0] ||
+    visualFiles[0] ||
+    files[0];
+
+  const iconCandidate =
+    identityFiles.find(file => /icon|mark|symbol|badge/i.test(file.name)) ||
+    identityFiles[1] ||
+    null;
+
+  const referenceFile = referenceFiles[0] || null;
+
+  const primaryColor =
+    palette?.[0]?.name ||
+    palette?.[0]?.hex ||
+    'the strongest visible color';
+
+  const preparedCount = report?.preparedFileCount || files.length;
+
+  const recommendations = [];
+
+  if (primaryIdentity) {
+    recommendations.push({
+      title: `Use ${primaryIdentity.name} as the starting identity.`,
+      summary: `${primaryIdentity.name} appears to be the clearest asset to anchor the first Brand Home.`,
+      reason: 'A single lead identity keeps the system from feeling like a collection of loose uploads.',
+      sourceFiles: [primaryIdentity.name],
+      nextAction: 'Confirm whether this should be the primary logo or lead visual.'
+    });
+  } else {
+    recommendations.push({
+      title: 'Confirm the lead identity asset.',
+      summary: 'The upload needs one clear logo or mark before the Brand Home is finalized.',
+      reason: 'A primary identity gives the guide structure and makes the final deliverable easier to trust.',
+      sourceFiles: filenames.slice(0, 2),
+      nextAction: 'Add or confirm the main logo.'
+    });
   }
+
+  if (iconCandidate) {
+    recommendations.push({
+      title: `Reserve ${iconCandidate.name} for small-space use.`,
+      summary: `${iconCandidate.name} looks better suited for avatars, favicons, or compact brand moments than full hero placement.`,
+      reason: 'Separating the full logo from the small-space mark makes the identity system feel more professional.',
+      sourceFiles: [iconCandidate.name],
+      nextAction: 'Confirm whether this file should become the icon mark.'
+    });
+  } else if (palette?.length) {
+    recommendations.push({
+      title: 'Confirm the primary color hierarchy.',
+      summary: `${primaryColor} should be treated as the first color anchor unless another brand color is preferred.`,
+      reason: 'A clear color hierarchy helps the Brand Home feel designed instead of automatically assembled.',
+      sourceFiles: filenames.slice(0, 3),
+      nextAction: 'Confirm the primary, secondary, and supporting colors.'
+    });
+  } else {
+    recommendations.push({
+      title: 'Build a starter color direction.',
+      summary: 'The upload does not include a complete color system yet, so the first palette should be treated as a starting point.',
+      reason: 'A starter palette gives the Brand Home enough structure to look polished while the final colors are confirmed.',
+      sourceFiles: filenames.slice(0, 3),
+      nextAction: 'Approve or adjust the starter palette.'
+    });
+  }
+
+  if (referenceFile) {
+    recommendations.push({
+      title: `Use ${referenceFile.name} as source material.`,
+      summary: `${referenceFile.name} should guide the system, but it should not be treated as a final visual asset.`,
+      reason: 'Reference files are useful for direction, while the Brand Home should highlight clean usable assets.',
+      sourceFiles: [referenceFile.name],
+      nextAction: 'Keep this file as a reference while organizing the final deliverables.'
+    });
+  } else {
+    recommendations.push({
+      title: 'Organize the upload before publishing.',
+      summary: `${preparedCount} file${preparedCount === 1 ? '' : 's'} can now be grouped into a cleaner Brand Home structure.`,
+      reason: 'The customer should see a finished system, not every raw file at once.',
+      sourceFiles: filenames.slice(0, 3),
+      nextAction: 'Prepare the first Brand Home layout.'
+    });
+  }
+
+  return {
+    reviewMode: 'local',
+    guide: {
+      clientName,
+      category: 'Brand System',
+      description: 'A prepared brand package organized from the files provided.',
+      assetCount: preparedCount
+    },
+    brand: {
+      name: clientName,
+      industry: 'Brand System',
+      tone: ['Clean', 'Organized', 'Ready']
+    },
+    palette,
+    colors: palette,
+    typography: {
+      displayFont: 'Inter',
+      bodyFont: 'Inter',
+      display: { name: 'Inter', weight: '300–500', usage: 'Clean display and interface typography' },
+      body: { name: 'Inter', weight: '300–400', usage: 'Readable supporting copy' }
+    },
+    selectedAssets: {
+      heroLogo: primaryIdentity?.name || '',
+      primaryLogo: primaryIdentity?.name || '',
+      iconMark: iconCandidate?.name || '',
+      iconVariant: '',
+      profileImage: iconCandidate?.name || primaryIdentity?.name || '',
+      websiteHeader: primaryIdentity?.name || ''
+    },
+    assetAssignments: files.map((file, index) => ({
+      fileId: `asset_${index + 1}`,
+      slot: guessRole(file.name),
+      reason: 'Organized locally by filename and file type.'
+    })),
+    assetReport: files.map((file, index) => ({
+      name: file.name,
+      assetRole: labelForRole(guessRole(file.name)),
+      placement: folderForRole(guessRole(file.name)),
+      reason: 'Prepared locally from the uploaded file set.',
+      qualityScore: isAnalyzableFile(file) ? 7 : 5
+    })),
+    preflight: [{
+      severity: 'note',
+      issue: `${preparedCount} assets prepared locally.`,
+      suggestedFix: 'Confirm the foundation, then prepare the Brand Home.'
+    }],
+    recommendations,
+    copySuggestions: {
+      positioning: 'A cleaner, organized brand home prepared from the provided assets.'
+    }
+  };
+}
 
   async function requestBrandConciergeReview(analyzable, dataUrls, report = preparationReport) {
     const res = await fetch('/api/analyze-brand-files', {
