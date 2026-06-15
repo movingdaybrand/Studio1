@@ -100,6 +100,21 @@ Return this exact shape:
     "elevatorPitch": "string — 1-2 sentence brand description"
   },
   "preflight": [
+  {
+    "severity": "string — warning, suggestion, or note",
+    "issue": "string",
+    "suggestedFix": "string"
+  }
+],
+"recommendations": [
+  {
+    "title": "string — specific recommendation based on the actual uploaded files",
+    "summary": "string — one concise customer-facing sentence",
+    "reason": "string — why this recommendation matters",
+    "sourceFiles": ["array of exact filenames that influenced this recommendation"],
+    "nextAction": "string — what the user should confirm or do next"
+  }
+]
     {
       "severity": "string — warning, suggestion, or note",
       "issue": "string",
