@@ -4460,6 +4460,20 @@ btnMovein.addEventListener('click', event => {
    function renderCustomerReview(report = preparationReport) {
   const grid = document.getElementById('reviewRecoGrid');
   if (!grid) return;
+     const aiRecommendations = Array.isArray(aiData?.recommendations)
+  ? aiData.recommendations
+  : [];
+
+if (aiRecommendations.length) {
+  grid.innerHTML = aiRecommendations.slice(0, 3).map((item, index) => `
+    <article class="review-reco-card">
+      <span>${esc(String(index + 1).padStart(2, '0'))}</span>
+      <h3>${esc(item.title || 'Review this recommendation')}</h3>
+      <p>${esc(item.summary || item.reason || item.nextAction || '')}</p>
+    </article>
+  `).join('');
+  return;
+}
 
   const guide = aiData?.guide || {};
   const palette = aiData?.palette || aiData?.colors || [];
