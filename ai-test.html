@@ -4456,13 +4456,142 @@ btnMovein.addEventListener('click', event => {
     setTimeout(() => { pSub.textContent = text; pSub.style.opacity = ''; }, 240);
   }
 
-  function revealResults() {
-   function renderCustomerReview(report = preparationReport) {
+function revealResults() {
+  renderCustomerReview();
+  goToState('review');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function renderCustomerReview(report = preparationReport) {
   const grid = document.getElementById('reviewRecoGrid');
   if (!grid) return;
-     const aiRecommendations = Array.isArray(aiData?.recommendations)
-  ? aiData.recommendations
-  : [];
+
+  const aiRecommendations = Array.isArray(aiData?.recommendations)
+    ? aiData.recommendations
+    : [];
+
+  if (aiRecommendations.length) {
+    grid.innerHTML = aiRecommendations.slice(0, 3).map((item, index) => `
+      <article class="review-reco-card">
+        <span>${esc(String(index + 1).padStart(2, '0'))}</span>
+        <h3>${esc(item.title || 'Review this recommendation')}</h3>
+        <p>${esc(item.summary || item.reason || item.nextAction || '')}</p>
+      </article>
+    `).join('');
+    return;
+  }
+
+  const guide = aiData?.guide || {};
+  const palette = aiData?.palette || aiData?.colors || [];
+  const selected = aiData?.selectedAssets || {};
+  const assetReport = Array.isArray(aiData?.assetReport) ? aiData.assetReport : [];
+  const preflight = Array.isArray(aiData?.preflight) ? aiData.preflight : [];
+  const typography = aiData?.typography || {};
+
+  const fileCount = report?.preparedFileCount || orgAssets.length || 0;
+  const logoCount = report?.categoryCounts?.['Logos'] || 0;
+  const iconCount = report?.categoryCounts?.['Icons'] || 0;
+  const guidelineCount = report?.categoryCounts?.['Brand Guidelines'] || 0;
+  const fontCount = report?.categoryCounts?.['Typography / Fonts'] || 0;
+
+  const brandName = guide.clientName || aiData?.brand?.name || 'this brand';
+
+  const primaryLogo =
+    selected.primaryLogo ||
+    selected.heroLogo ||
+    assetReport.find(a => /primary logo|logo/i.test(a.assetRole || ''))?.name ||
+    '';
+
+  const referenceFiles = assetReport.filter(a =>
+    /guideline|reference|document|presentation|print/i.test(
+      `${a.assetRole || ''} ${a.placement || ''} ${a.reason || ''}`
+    )
+  );
+
+  const visualAssets = assetReport.filter(a =>
+    /logo|icon|mark|avatar|header|visual/i.test(
+      `${a.assetRole || ''} ${a.placement || ''} ${a.reason || ''}`
+    )
+  );
+
+  const cards = [];
+
+  if (primaryLogo) {
+    cards.push({
+      n: '01',
+      title: `Confirm ${brandName}'s lead identity.`,
+      copy: `I found ${primaryLogo} as the strongest candidate for the primary logo. Confirm this before I build the rest of the Brand Home around it.`
+    });
+  } else if (logoCount || iconCount) {
+    cards.push({
+      n: '01',
+      title: 'Confirm the lead identity.',
+      copy: `I found ${logoCount + iconCount} identity asset${logoCount + iconCount === 1 ? '' : 's'}. The next step is choosing which one should lead the system.`
+    });
+  } else {
+    cards.push({
+      n: '01',
+      title: 'Add or confirm the main logo.',
+      copy: `I can organize these files, but the Brand Home will be stronger once the main logo is confirmed.`
+    });
+  }
+
+  if (palette.length) {
+    const primary = palette[0];
+    cards.push({
+      n: '02',
+      title: 'Confirm the color direction.',
+      copy: `I found ${palette.length} brand color${palette.length === 1 ? '' : 's'}, led by ${primary.name || primary.hex}. I recommend confirming the primary and supporting colors next.`
+    });
+  } else {
+    cards.push({
+      n: '02',
+      title: 'Prepare a starter color system.',
+      copy: `I did not find a clear color system yet, so I can build a starter palette from the strongest visual assets.`
+    });
+  }
+
+  if (preflight.length) {
+    const issue = preflight[0];
+    cards.push({
+      n: '03',
+      title: issue.issue || 'Review one item before publishing.',
+      copy: issue.suggestedFix || 'I found one item worth reviewing before the Brand Home is prepared.'
+    });
+  } else if (referenceFiles.length && visualAssets.length) {
+    cards.push({
+      n: '03',
+      title: 'Separate references from visual assets.',
+      copy: `I found both visual assets and reference materials. I recommend keeping logos, marks, and usable visuals separate from guidelines, documents, and support files.`
+    });
+  } else if (guidelineCount) {
+    cards.push({
+      n: '03',
+      title: 'Use the guideline files as source material.',
+      copy: `I found ${guidelineCount} guideline/reference file${guidelineCount === 1 ? '' : 's'}. I’ll use those as direction while arranging the visual system.`
+    });
+  } else if (fontCount || typography.displayFont || typography.bodyFont) {
+    cards.push({
+      n: '03',
+      title: 'Confirm the typography system.',
+      copy: `Typography appears to be included or detectable. I recommend confirming the display and body type before publishing the Brand Home.`
+    });
+  } else {
+    cards.push({
+      n: '03',
+      title: 'Organize the asset library.',
+      copy: `${fileCount} asset${fileCount === 1 ? '' : 's'} can now be arranged into a clean Brand Home without showing every file at once.`
+    });
+  }
+
+  grid.innerHTML = cards.slice(0, 3).map(item => `
+    <article class="review-reco-card">
+      <span>${esc(item.n)}</span>
+      <h3>${esc(item.title)}</h3>
+      <p>${esc(item.copy)}</p>
+    </article>
+  `).join('');
+}
 
 if (aiRecommendations.length) {
   grid.innerHTML = aiRecommendations.slice(0, 3).map((item, index) => `
