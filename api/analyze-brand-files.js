@@ -100,49 +100,184 @@ Return this exact shape:
     "elevatorPitch": "string — 1-2 sentence brand description"
   },
   "preflight": [
-  {
-    "severity": "string — warning, suggestion, or note",
-    "issue": "string",
-    "suggestedFix": "string"
-  }
-],
-"recommendations": [
-  {
-    "title": "string — specific recommendation based on the actual uploaded files",
-    "summary": "string — one concise customer-facing sentence",
-    "reason": "string — why this recommendation matters",
-    "sourceFiles": ["array of exact filenames that influenced this recommendation"],
-    "nextAction": "string — what the user should confirm or do next"
-  }
-]
     {
       "severity": "string — warning, suggestion, or note",
       "issue": "string",
       "suggestedFix": "string"
     }
+  ],
+  "recommendations": [
+    {
+      "title": "string — specific recommendation based on the actual uploaded files",
+      "summary": "string — one concise customer-facing sentence",
+      "reason": "string — why this recommendation matters",
+      "sourceFiles": ["array of exact filenames that influenced this recommendation"],
+      "nextAction": "string — what the user should confirm or do next"
+    }
   ]
 }
 
 Rules:
-- palette and colors must both be present and have 5 items each (they can be the same data)
-- selectedAssets values must be actual filenames from the uploaded files — use the exact name passed in
-- assetReport must include one entry per uploaded file in the prepared asset set
-- downloadCards should suggest 2-3 logical groupings e.g. Logo Package, Color Variants, Social Assets
-- usage.do and usage.dont must each have 3-5 plain string rules, no bullet characters
-- typography.displayFont and typography.bodyFont must be plain strings (font names only)
-- if you cannot detect a font name, make your best educated guess based on visual style
-- do not invent colors not visible in the uploaded files
-- qualityScore is 1-10 based on resolution, clarity, and usefulness of the asset
-- customer-facing language should feel calm, professional, and concierge-level
-- recommendations must include 3 items
-- recommendations must be specific to the uploaded files
-- do not use generic recommendation titles like "Primary identity", "Color system", or "Asset preparation" unless no better file-specific recommendation can be made
-- each recommendation should feel like it came from a senior brand director reviewing the actual assets
-- reference exact filenames when useful
-- good recommendations explain which asset should lead the system, which files are references, what should be cleaned or confirmed, what is missing, and what should happen next
-- avoid generic software language
-- avoid saying only "I found X colors" unless paired with a real recommendation
-- do not use words like processing, model, JSON, AI, or confidence score inside any customer-facing fields`;
+- palette and colors must both be present and have 5 items each. They can be the same data.
+- selectedAssets values must be actual filenames from the uploaded files. Use the exact names passed in.
+- assetReport must include one entry per uploaded file in the prepared asset set.
+- downloadCards should suggest 2-3 logical groupings, such as Logo Package, Color Variants, Social Assets, Reference Files, or Brand Home Files.
+- usage.do and usage.dont must each have 3-5 plain string rules. Do not use bullet characters.
+- typography.displayFont and typography.bodyFont must be plain strings with font names only.
+- If you cannot detect a font name, make your best educated guess based on visual style.
+- Do not invent colors not visible in the uploaded files.
+- qualityScore is 1-10 based on resolution, clarity, and usefulness of the asset.
+- customer-facing language should feel calm, professional, specific, and concierge-level.
+- recommendations must include exactly 3 items.
+- recommendations must be specific to the uploaded files.
+- Do not use generic recommendation titles like "Primary identity", "Color system", or "Asset preparation" unless no better file-specific recommendation can be made.
+- Each recommendation should feel like it came from a senior brand director reviewing the actual assets.
+- Reference exact filenames when useful.
+- Good recommendations explain which asset should lead the system, which files are references, what should be cleaned or confirmed, what is missing, and what should happen next.
+- Avoid generic software language.
+- Avoid saying only "I found X colors" unless paired with a real recommendation.
+- Do not use words like processing, model, JSON, AI, confidence score, or algorithm inside any customer-facing fields.
+`;
+
+function cleanModelJson(rawText) {
+  const cleaned = String(rawText || "")
+    .replace(/^```json\s*/i, "")
+    .replace(/^```\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch {
+    const firstBrace = cleaned.indexOf("{");
+    const lastBrace = cleaned.lastIndexOf("}");
+
+    if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+      return JSON.parse(cleaned.slice(firstBrace, lastBrace + 1));
+    }
+
+    throw new Error("Model response could not be parsed as JSON.");
+  }
+}
+
+function asArray(value) {
+  return Array.isArray(value) ? value : [];
+}
+
+function normalizeText(value, fallback = "") {
+  return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+function buildFallbackRecommendations(parsed, assets, preparationReport) {
+  const filenames = assets
+    .map(asset => asset?.name)
+    .filter(Boolean);
+
+  const selected = parsed?.selectedAssets || {};
+  const palette = asArray(parsed?.palette?.length ? parsed.palette : parsed?.colors);
+  const preflight = asArray(parsed?.preflight);
+
+  const primaryLogo =
+    selected.primaryLogo ||
+    selected.heroLogo ||
+    selected.iconMark ||
+    filenames.find(name => /logo|mark|icon|brand/i.test(name)) ||
+    "";
+
+  const referenceFile =
+    filenames.find(name => /guide|guideline|brand|pdf|deck|presentation|reference/i.test(name)) ||
+    "";
+
+  const preparedCount =
+    preparationReport?.preparedFileCount ||
+    preparationReport?.preparedCount ||
+    preparationReport?.totalReceived ||
+    assets.length;
+
+  const fallback = [];
+
+  if (primaryLogo) {
+    fallback.push({
+      title: `Confirm ${primaryLogo} as the lead identity.`,
+      summary: `${primaryLogo} appears to be the strongest starting point for the Brand Home.`,
+      reason: "The lead identity should anchor the rest of the system before colors, usage rules, and downloads are prepared.",
+      sourceFiles: [primaryLogo],
+      nextAction: "Confirm whether this file should lead the brand system."
+    });
+  } else {
+    fallback.push({
+      title: "Confirm the lead identity asset.",
+      summary: "The uploaded files need one clear logo or mark to anchor the Brand Home.",
+      reason: "A primary identity asset keeps the final system organized and prevents the guide from feeling like a file dump.",
+      sourceFiles: filenames.slice(0, 2),
+      nextAction: "Add or confirm the main logo before publishing."
+    });
+  }
+
+  if (palette.length) {
+    const primaryColor = palette[0]?.name || palette[0]?.hex || "the strongest visible color";
+    fallback.push({
+      title: "Confirm the primary color direction.",
+      summary: `${primaryColor} appears to be the strongest color anchor for this brand.`,
+      reason: "A confirmed color hierarchy helps separate primary brand moments from supporting backgrounds and accents.",
+      sourceFiles: filenames.slice(0, 3),
+      nextAction: "Confirm the primary, secondary, and supporting colors."
+    });
+  } else {
+    fallback.push({
+      title: "Build a starter color system.",
+      summary: "The upload does not show a complete color system yet.",
+      reason: "A starter palette will make the Brand Home feel polished even when the source files are incomplete.",
+      sourceFiles: filenames.slice(0, 3),
+      nextAction: "Approve a starter palette pulled from the strongest visual assets."
+    });
+  }
+
+  if (preflight.length) {
+    const item = preflight[0];
+    fallback.push({
+      title: normalizeText(item.issue, "Review one item before publishing."),
+      summary: normalizeText(item.suggestedFix, "One item should be reviewed before the Brand Home is prepared."),
+      reason: "Resolving this now will make the final deliverable cleaner and easier to trust.",
+      sourceFiles: filenames.slice(0, 3),
+      nextAction: "Review this item before preparing the Brand Home."
+    });
+  } else if (referenceFile) {
+    fallback.push({
+      title: `Use ${referenceFile} as source material.`,
+      summary: `${referenceFile} should guide the Brand Home, not compete with the primary visual assets.`,
+      reason: "Reference files are useful for direction, but the final Brand Home should prioritize usable logos, marks, colors, and downloads.",
+      sourceFiles: [referenceFile],
+      nextAction: "Keep this file as a reference while organizing the final visual assets."
+    });
+  } else {
+    fallback.push({
+      title: "Organize the asset library before publishing.",
+      summary: `${preparedCount} file${preparedCount === 1 ? "" : "s"} can now be arranged into a cleaner Brand Home.`,
+      reason: "The customer experience should show the system, not every raw upload at once.",
+      sourceFiles: filenames.slice(0, 3),
+      nextAction: "Prepare the first Brand Home layout."
+    });
+  }
+
+  return fallback;
+}
+
+function normalizeRecommendations(parsed, assets, preparationReport) {
+  const fallback = buildFallbackRecommendations(parsed, assets, preparationReport);
+  const incoming = asArray(parsed?.recommendations)
+    .filter(item => item && typeof item === "object");
+
+  const combined = [...incoming, ...fallback].slice(0, 3);
+
+  return combined.map((item, index) => ({
+    title: normalizeText(item.title, fallback[index]?.title || "Review this recommendation."),
+    summary: normalizeText(item.summary, fallback[index]?.summary || item.reason || item.nextAction || ""),
+    reason: normalizeText(item.reason, fallback[index]?.reason || ""),
+    sourceFiles: asArray(item.sourceFiles).filter(Boolean),
+    nextAction: normalizeText(item.nextAction, fallback[index]?.nextAction || "")
+  }));
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
@@ -150,22 +285,30 @@ export default async function handler(req, res) {
   }
 
   const apiKey = process.env.OPENAI_API_KEY;
+
   if (!apiKey) {
-    return res.status(500).json({ error: "OPENAI_API_KEY environment variable is not set." });
+    return res.status(500).json({
+      error: "OPENAI_API_KEY environment variable is not set."
+    });
   }
 
   let body;
+
   try {
     body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
   } catch {
-    return res.status(400).json({ error: "Invalid JSON body." });
+    return res.status(400).json({
+      error: "Invalid JSON body."
+    });
   }
 
   const preparationReport = body?.preparationReport || null;
   const assets = body?.assets;
 
   if (!Array.isArray(assets) || assets.length === 0) {
-    return res.status(400).json({ error: "No assets provided." });
+    return res.status(400).json({
+      error: "No assets provided."
+    });
   }
 
   const imageTypes = new Set([
@@ -189,7 +332,18 @@ export default async function handler(req, res) {
   }
 
   for (const asset of assets) {
-    const { id, name, type, dataUrl, category, extension, size, width, height } = asset;
+    const {
+      id,
+      name,
+      type,
+      dataUrl,
+      category,
+      extension,
+      size,
+      width,
+      height
+    } = asset || {};
+
     if (!name) continue;
 
     const safeName = String(name);
@@ -204,7 +358,9 @@ export default async function handler(req, res) {
       `Extension: ${extension || lowerName.split(".").pop() || "unknown"}`,
       size ? `Size: ${size}` : null,
       width && height ? `Dimensions: ${width}x${height}` : null
-    ].filter(Boolean).join("\n");
+    ]
+      .filter(Boolean)
+      .join("\n");
 
     if (safeType === "image/svg+xml" || lowerName.endsWith(".svg")) {
       content.push({
@@ -213,6 +369,7 @@ export default async function handler(req, res) {
           `[SVG asset]\n${metadataText}\n` +
           "SVG files are brand assets. Assign this file a role using its exact filename."
       });
+
       continue;
     }
 
@@ -252,26 +409,35 @@ export default async function handler(req, res) {
   });
 
   let openAiResponse;
+
   try {
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${apiKey}`
+        Authorization: `Bearer ${apiKey}`
       },
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || "gpt-4o",
+        temperature: 0.25,
         max_tokens: 3000,
         response_format: { type: "json_object" },
         messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content }
+          {
+            role: "system",
+            content: SYSTEM_PROMPT
+          },
+          {
+            role: "user",
+            content
+          }
         ]
       })
     });
 
     if (!response.ok) {
       const errorText = await response.text();
+
       return res.status(502).json({
         error: `OpenAI API error: ${response.status}`,
         detail: errorText
@@ -288,19 +454,14 @@ export default async function handler(req, res) {
 
   const rawText = openAiResponse?.choices?.[0]?.message?.content || "";
 
-  const cleaned = rawText
-    .replace(/^```json\s*/i, "")
-    .replace(/^```\s*/i, "")
-    .replace(/```\s*$/i, "")
-    .trim();
-
   let parsed;
+
   try {
-    parsed = JSON.parse(cleaned);
+    parsed = cleanModelJson(rawText);
   } catch {
     return res.status(422).json({
       error: "OpenAI returned non-JSON output.",
-      raw: cleaned
+      raw: rawText
     });
   }
 
@@ -312,11 +473,55 @@ export default async function handler(req, res) {
     parsed.palette = parsed.colors;
   }
 
-  if (parsed.guide) {
-    parsed.guide.assetCount =
-      preparationReport?.preparedCount ||
-      preparationReport?.totalReceived ||
-      assets.length;
+  if (!Array.isArray(parsed.colors)) {
+    parsed.colors = [];
+  }
+
+  if (!Array.isArray(parsed.palette)) {
+    parsed.palette = [];
+  }
+
+  if (!parsed.guide || typeof parsed.guide !== "object") {
+    parsed.guide = {};
+  }
+
+  parsed.guide.assetCount =
+    preparationReport?.preparedFileCount ||
+    preparationReport?.preparedCount ||
+    preparationReport?.totalReceived ||
+    assets.length;
+
+  parsed.recommendations = normalizeRecommendations(parsed, assets, preparationReport);
+
+  if (!Array.isArray(parsed.preflight)) {
+    parsed.preflight = [];
+  }
+
+  if (!Array.isArray(parsed.assetReport)) {
+    parsed.assetReport = [];
+  }
+
+  if (!Array.isArray(parsed.assetAssignments)) {
+    parsed.assetAssignments = [];
+  }
+
+  if (!Array.isArray(parsed.downloadCards)) {
+    parsed.downloadCards = [];
+  }
+
+  if (!parsed.usage || typeof parsed.usage !== "object") {
+    parsed.usage = {
+      do: [],
+      dont: []
+    };
+  }
+
+  if (!Array.isArray(parsed.usage.do)) {
+    parsed.usage.do = [];
+  }
+
+  if (!Array.isArray(parsed.usage.dont)) {
+    parsed.usage.dont = [];
   }
 
   return res.status(200).json(parsed);
