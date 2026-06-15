@@ -1,5 +1,28 @@
 <!DOCTYPE html>
 <html lang="en">
+
+<!-- ╔══════════════════════════════════════════════════════════════════════╗
+     ║                                                                      ║
+     ║   MOVING DAY  —  SINGLE-FILE APP                                      ║
+     ║                                                                      ║
+     ║   FILE MAP (search these tags to jump to a section):                 ║
+     ║                                                                      ║
+     ║     [SECTION 1]  HEAD — meta, title, fonts, script libs              ║
+     ║     [SECTION 2]  CSS  — all styles (sub-banners inside)              ║
+     ║     [SECTION 3]  HTML — page markup / screens                        ║
+     ║     [SECTION 4]  JS   — all behaviour (sub-banners inside)           ║
+     ║     [SECTION 5]  PATCH ZONE — safe area for small edits              ║
+     ║                                                                      ║
+     ║   Edit one section at a time. Each major block is wrapped in a       ║
+     ║   labelled BEGIN / END banner so you can copy/paste it safely.       ║
+     ║                                                                      ║
+     ╚══════════════════════════════════════════════════════════════════════╝ -->
+
+
+<!-- ████████████████████████████████████████████████████████████████████████
+     [SECTION 1]  HEAD  —  META, TITLE, FONTS, SCRIPT LIBRARIES
+     BEGIN
+     ████████████████████████████████████████████████████████████████████████ -->
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,6 +31,17 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,200;14..32,300;14..32,400;14..32,500&display=swap" rel="stylesheet" />
+<!-- ████████████████████████████████████████████████████████████████████████
+     [SECTION 1]  HEAD  —  END  (note: <head> stays open; CSS lives inside it)
+     ████████████████████████████████████████████████████████████████████████ -->
+
+
+<!-- ████████████████████████████████████████████████████████████████████████
+     [SECTION 2]  CSS  —  ALL STYLES
+     BEGIN
+     The original sub-section banners (ENVIRONMENT, STAGE, UPLOAD STATE, etc.)
+     are preserved below exactly as written. Use them to navigate within CSS.
+     ████████████████████████████████████████████████████████████████████████ -->
 <style>
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -3558,8 +3592,19 @@ body.md-state-concierge .concierge-missing {
 }
 
 </style>
+<!-- ████████████████████████████████████████████████████████████████████████
+     [SECTION 2]  CSS  —  END
+     ████████████████████████████████████████████████████████████████████████ -->
 </head>
 <body>
+
+<!-- ████████████████████████████████████████████████████████████████████████
+     [SECTION 3]  HTML  —  PAGE MARKUP / BODY
+     BEGIN
+     All visible structure lives here: environment layers, the experience
+     window, the Move In intro, the upload state, concierge mode, and the
+     review/results app. Existing ══ sub-banners mark each block.
+     ████████████████████████████████████████████████████████████████████████ -->
 
 <!-- ══ ENVIRONMENT ════════════════════════════════════ -->
 <div class="env" aria-hidden="true">
@@ -3777,7 +3822,32 @@ body.md-state-concierge .concierge-missing {
 
 </div><!-- /.experience-window -->
 
+<!-- ████████████████████████████████████████████████████████████████████████
+     [SECTION 3]  HTML  —  END
+     ████████████████████████████████████████████████████████████████████████ -->
+
+<!-- ████████████████████████████████████████████████████████████████████████
+     [SECTION 4]  JS  —  ALL SCRIPT / BEHAVIOUR
+     BEGIN
+     Single <script> block. Sub-banners below mark each logical unit:
+       4.1  Headline word animation
+       4.2  App state router (states, refs, renderState, goToState, history)
+       4.3  Move In → Upload
+       4.4  File categorization + local preparation
+       4.5  Upload stage preview + glow + addFiles
+       4.6  File picker + drag/drop handlers
+       4.7  Move In (preparing) button
+       4.8  Builder helpers + constants
+       4.9  Main brand pipeline (review / concierge / local fallback)
+       4.10 Apply to Builder + ZIP
+       4.11 Concierge render + handlers
+       4.12 Brand system / assets / variants render + download
+       4.13 Reset (back to Move In)
+     ████████████████████████████████████████████████████████████████████████ -->
 <script>
+/* ──────────────────────────────────────────────────────────────────────────
+   4.1  HEADLINE WORD ANIMATION
+   ────────────────────────────────────────────────────────────────────────── */
 /* ── Headline word animation ── */
 (function() {
   const el = document.getElementById('headline');
@@ -3801,6 +3871,9 @@ body.md-state-concierge .concierge-missing {
   el.appendChild(l2);
 })();
 
+/* ──────────────────────────────────────────────────────────────────────────
+   4.2  APP STATE ROUTER
+   ────────────────────────────────────────────────────────────────────────── */
 /* APP STATE ROUTER
    Internal states keep Moving Day feeling like one continuous product environment. */
 const APP_STATES = ['welcome', 'movein', 'upload', 'local_preparing', 'preparing', 'concierge', 'review', 'welcome_home', 'brand_home'];
@@ -3902,6 +3975,9 @@ window.addEventListener('popstate', event => {
   }
 });
 
+/* ──────────────────────────────────────────────────────────────────────────
+   4.3  MOVE IN → UPLOAD STATE
+   ────────────────────────────────────────────────────────────────────────── */
 /* ── Move In → Upload state ── */
 btnBegin.addEventListener('click', event => {
   event.preventDefault();
@@ -3909,6 +3985,9 @@ btnBegin.addEventListener('click', event => {
   goToState('upload');
 });
 
+/* ──────────────────────────────────────────────────────────────────────────
+   4.4  FILE CATEGORIZATION + LOCAL PREPARATION
+   ────────────────────────────────────────────────────────────────────────── */
 /* UPLOAD FIX */
 function categoryOrder() {
   return ['Logos', 'Icons', 'Wordmarks', 'Brand Guidelines', 'Typography / Fonts', 'Photography', 'Presentations', 'Documents', 'Video', 'Miscellaneous'];
@@ -4152,6 +4231,9 @@ function renderPreparationSummary(report) {
   }
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   4.5  UPLOAD STAGE PREVIEW + GLOW + addFiles
+   ────────────────────────────────────────────────────────────────────────── */
 function renderUploadStagePreview() {
   if (!uploadStage) return;
 
@@ -4274,6 +4356,9 @@ function addFiles(fileList) {
   activateUploadGlow();
 }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   4.6  FILE PICKER + DRAG / DROP HANDLERS
+   ────────────────────────────────────────────────────────────────────────── */
 /* FILE INPUT TRIGGER */
 function openFilePicker(event) {
   event.preventDefault();
@@ -4334,6 +4419,9 @@ document.addEventListener('drop', event => {
 window.addEventListener('dragover', event => event.preventDefault());
 window.addEventListener('drop', event => event.preventDefault());
 
+/* ──────────────────────────────────────────────────────────────────────────
+   4.7  MOVE IN (PREPARING) BUTTON
+   ────────────────────────────────────────────────────────────────────────── */
 /* PREPARING STATE HOOK */
 btnMovein.addEventListener('click', event => {
   event.preventDefault();
@@ -4348,7 +4436,9 @@ btnMovein.addEventListener('click', event => {
   runBrandPipeline(preparationReport.preparedFiles, preparationReport);
 });
 
-
+/* ──────────────────────────────────────────────────────────────────────────
+   4.8  BUILDER HELPERS + CONSTANTS
+   ────────────────────────────────────────────────────────────────────────── */
 
   const BUILDER_KEY = 'movingDayStudio_v3';
   let aiData = null;
@@ -4429,6 +4519,9 @@ btnMovein.addEventListener('click', event => {
     };
   }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   4.9  MAIN BRAND PIPELINE (review / concierge / local fallback)
+   ────────────────────────────────────────────────────────────────────────── */
 
   // ── MAIN PIPELINE — called by the Move In screen ──
   // Modes for testing:
@@ -4904,6 +4997,10 @@ btnMovein.addEventListener('click', event => {
     }
   }
 
+/* ──────────────────────────────────────────────────────────────────────────
+   4.10  APPLY TO BUILDER + ZIP PACKAGE
+   ────────────────────────────────────────────────────────────────────────── */
+
   // ── APPLY TO BUILDER ──
   $('applyBtn').addEventListener('click',()=>{
     if(!aiData){alert('Run an analysis first.');return;}
@@ -4981,6 +5078,10 @@ btnMovein.addEventListener('click', event => {
     showToast(`${brandName} package downloaded`);
     $('zipBtn').textContent='Download ZIP';$('zipBtn').disabled=false;
   });
+
+/* ──────────────────────────────────────────────────────────────────────────
+   4.11  CONCIERGE RENDER + HANDLERS
+   ────────────────────────────────────────────────────────────────────────── */
 
   function assetPreviewHTML(asset) {
     if (!asset?.file) return '<span class="concierge-placeholder">Not found</span>';
@@ -5108,6 +5209,10 @@ btnMovein.addEventListener('click', event => {
     goToState('welcome_home');
     showToast('Brand Home preparation started');
   });
+
+/* ──────────────────────────────────────────────────────────────────────────
+   4.12  RENDER BRAND SYSTEM / ASSETS / VARIANTS + DOWNLOAD
+   ────────────────────────────────────────────────────────────────────────── */
 
   // ── RENDER BRAND SYSTEM ──
   function renderBrandSystem(){
@@ -5254,6 +5359,9 @@ btnMovein.addEventListener('click', event => {
   });
 
 
+/* ──────────────────────────────────────────────────────────────────────────
+   4.13  RESET (BACK TO MOVE IN)
+   ────────────────────────────────────────────────────────────────────────── */
 /* APP STATE ROUTER: reset without a page refresh. */
 document.getElementById('backToMoveIn').addEventListener('click', event => {
   event.preventDefault();
@@ -5266,8 +5374,17 @@ document.getElementById('backToMoveIn').addEventListener('click', event => {
   goToState('welcome');
 });
 </script>
+<!-- ████████████████████████████████████████████████████████████████████████
+     [SECTION 4]  JS  —  END
+     ████████████████████████████████████████████████████████████████████████ -->
 </body>
 </html>
+
+<!-- ████████████████████████████████████████████████████████████████████████
+     [SECTION 5]  PATCH ZONE  —  SAFE EDIT AREA (after </html>)
+     BEGIN
+     Original patch comment + empty patch <style>/<script> hooks preserved.
+     ████████████████████████████████████████████████████████████████████████ -->
 <!-- =====================================================
 MOVING DAY PATCH ZONE
 Use this area for small safe edits only.
@@ -5281,3 +5398,6 @@ Do not edit the full file unless changing structure.
 <script id="moving-day-copy-patches">
   /* PATCH JS / COPY GOES HERE */
 </script>
+<!-- ████████████████████████████████████████████████████████████████████████
+     [SECTION 5]  PATCH ZONE  —  END
+     ████████████████████████████████████████████████████████████████████████ -->
