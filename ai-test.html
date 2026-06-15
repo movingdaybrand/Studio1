@@ -1830,267 +1830,1058 @@ body.dragging.md-state-upload .up-head {
 }
 
 
-
 /* ═══════════════════════════════════════════════════════
-   UPLOAD SCENE 2 CLEANUP — staged assets should feel like a reveal,
-   not a second card bolted onto the upload screen.
+   SCENE 2 SCALE + 20 SECOND UPLOAD GLOW
+   Scene 1 stays large and cinematic. Scene 2 becomes a smaller,
+   centered confirmation moment that fits cleanly on screen.
 ═══════════════════════════════════════════════════════ */
 body.md-state-upload.has-staged-assets .glass {
-  max-width: min(780px, 92vw);
-  min-height: min(680px, calc(100vh - 4.5rem));
-  background:
-    radial-gradient(circle at 50% 16%, rgba(255,255,255,.94), rgba(255,255,255,.20) 38%, transparent 68%),
-    radial-gradient(circle at 50% 66%, rgba(149,203,169,.18), transparent 42%),
-    linear-gradient(180deg, rgba(255,255,255,.76), rgba(247,252,249,.56)),
-    rgba(255,255,255,.52);
+  max-width: min(610px, 92vw);
+  min-height: min(560px, calc(100vh - 3rem));
+  border-radius: 38px;
 }
 
 body.md-state-upload.has-staged-assets .glass-inner {
-  min-height: min(680px, calc(100vh - 4.5rem));
+  min-height: min(560px, calc(100vh - 3rem));
   justify-content: center;
-  padding: clamp(2.5rem, 5vh, 4rem) clamp(1.4rem, 5vw, 4rem);
+  padding: clamp(1.65rem, 4vh, 2.65rem) clamp(1.35rem, 4vw, 2.6rem);
 }
 
+/* Scene 2 should not stack under the first upload pitch. */
 body.md-state-upload.has-staged-assets .upload-select-area,
-body.md-state-upload.has-staged-assets .up-micro {
-  display: none;
+body.md-state-upload.has-staged-assets .file-tags,
+body.md-state-upload.has-staged-assets .upload-journey,
+body.md-state-upload.has-staged-assets .up-icon,
+body.md-state-upload.has-staged-assets .normal-copy,
+body.md-state-upload.has-staged-assets .drag-copy {
+  display: none !important;
 }
 
 body.md-state-upload.has-staged-assets .upload-stage {
-  width: min(100%, 610px);
+  width: min(100%, 430px);
   margin: 0 auto;
 }
 
-body.md-state-upload.has-staged-assets .btn-movein {
-  margin-top: 1.45rem;
-  min-width: 210px;
-  animation: stagedContinueIn .8s cubic-bezier(.22,1,.36,1) .18s both;
-}
-
-@keyframes stagedContinueIn {
-  from { opacity: 0; transform: translateY(12px) scale(.985); filter: blur(6px); }
-  to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
-}
-
-.upload-stage-card.stage-arrival {
-  position: relative;
-  isolation: isolate;
-  overflow: visible;
-  border: 0;
-  padding: 0;
-  background: transparent;
-  box-shadow: none;
-  text-align: center;
-}
-
-.stage-arrival::before {
-  content: '';
-  position: absolute;
-  left: 50%;
-  top: 45%;
-  width: min(520px, 78vw);
-  height: min(360px, 48vh);
-  transform: translate(-50%, -50%);
-  border-radius: 999px;
+body.md-state-upload.has-staged-assets .upload-stage-card {
+  border-radius: 30px;
+  padding: 1.35rem 1.35rem 1.2rem;
   background:
-    radial-gradient(circle at 50% 50%, rgba(255,255,255,.86), rgba(255,255,255,.24) 36%, transparent 68%),
-    radial-gradient(circle at 50% 70%, rgba(125,187,150,.16), transparent 58%);
-  filter: blur(2px);
-  opacity: .92;
-  pointer-events: none;
-  z-index: -1;
+    radial-gradient(circle at 50% 4%, rgba(255,255,255,.82), transparent 62%),
+    radial-gradient(circle at 50% 24%, rgba(177,218,193,.20), transparent 50%),
+    linear-gradient(180deg, rgba(255,255,255,.68), rgba(247,252,249,.46));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.86),
+    0 16px 38px rgba(20,60,36,.06),
+    0 0 52px rgba(132,196,155,.08);
 }
 
-.stage-orb {
-  width: 86px;
-  height: 86px;
-  margin: 0 auto 1.45rem;
-  border-radius: 50%;
+.upload-stage-orb {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto .88rem;
+  border-radius: 999px;
   display: grid;
   place-items: center;
   position: relative;
   background:
-    radial-gradient(circle at 50% 24%, rgba(255,255,255,1), rgba(250,254,252,.72) 54%, rgba(217,237,224,.34)),
-    rgba(255,255,255,.68);
+    radial-gradient(circle at 50% 26%, rgba(255,255,255,1), rgba(249,254,251,.72) 58%, rgba(225,242,232,.34)),
+    rgba(255,255,255,.60);
   box-shadow:
     0 0 0 .5px rgba(255,255,255,1),
     0 0 0 1px rgba(44,90,60,.10),
     inset 0 1px 0 rgba(255,255,255,1),
-    0 18px 44px rgba(20,60,36,.10),
-    0 0 86px rgba(121,185,145,.22);
-  animation: stageOrbSettle 4.8s cubic-bezier(.22,1,.36,1) infinite alternate;
+    0 10px 30px rgba(20,60,36,.08),
+    0 0 42px rgba(124,190,150,.18);
 }
 
-.stage-orb::before,
-.stage-orb::after {
+.upload-stage-orb svg {
+  width: 32px;
+  height: 24px;
+  fill: rgba(20,41,31,.78);
+  filter: drop-shadow(0 1px 0 rgba(255,255,255,.58));
+}
+
+.upload-stage-orb::before,
+.upload-stage-orb::after {
   content: '';
   position: absolute;
+  inset: -8px;
   border-radius: inherit;
-  pointer-events: none;
+  border: 1px solid rgba(66,122,82,.10);
+  opacity: .45;
 }
 
-.stage-orb::before {
-  inset: -16px;
-  border: 1px solid rgba(44,90,60,.085);
-  animation: stageRing 5.2s ease-in-out infinite;
+.upload-stage-orb::after {
+  inset: -18px;
+  opacity: .22;
 }
 
-.stage-orb::after {
-  inset: -34px;
-  border: 1px solid rgba(44,90,60,.055);
-  animation: stageRing 5.2s ease-in-out 1.25s infinite;
+body.upload-glow-active .upload-stage-orb {
+  animation:
+    stageOrbGlow 2.4s ease-in-out infinite,
+    stageOrbFloat 7s cubic-bezier(.22,1,.36,1) infinite alternate;
 }
 
-.stage-orb svg {
-  width: 42px;
-  height: 30px;
-  fill: rgba(20,41,31,.78);
-  filter: drop-shadow(0 1px 0 rgba(255,255,255,.65));
+body.upload-glow-active .upload-stage-orb::before {
+  animation: stageOrbRing 2.9s ease-in-out infinite;
 }
 
-@keyframes stageOrbSettle {
+body.upload-glow-active .upload-stage-orb::after {
+  animation: stageOrbRing 3.6s ease-in-out infinite .45s;
+}
+
+@keyframes stageOrbGlow {
+  0%, 100% {
+    box-shadow:
+      0 0 0 .5px rgba(255,255,255,1),
+      0 0 0 1px rgba(44,90,60,.10),
+      inset 0 1px 0 rgba(255,255,255,1),
+      0 10px 30px rgba(20,60,36,.08),
+      0 0 38px rgba(124,190,150,.18);
+    filter: saturate(1);
+  }
+  50% {
+    box-shadow:
+      0 0 0 .5px rgba(255,255,255,1),
+      0 0 0 1px rgba(74,142,92,.22),
+      inset 0 1px 0 rgba(255,255,255,1),
+      0 16px 42px rgba(20,60,36,.10),
+      0 0 72px rgba(96,188,124,.34);
+    filter: saturate(1.08);
+  }
+}
+
+@keyframes stageOrbFloat {
   from { transform: translateY(0) scale(1); }
-  to { transform: translateY(-3px) scale(1.018); }
+  to   { transform: translateY(-3px) scale(1.018); }
 }
 
-@keyframes stageRing {
-  0%, 100% { transform: scale(.96); opacity: .20; }
-  50% { transform: scale(1.08); opacity: .62; }
+@keyframes stageOrbRing {
+  0%, 100% { transform: scale(.94); opacity: .18; }
+  50%      { transform: scale(1.12); opacity: .58; }
 }
 
-.stage-kicker {
-  margin: 0 0 .65rem;
-  font-size: 9px;
-  font-weight: 560;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: rgba(14,42,24,.40);
-  animation: stagedItemIn .65s cubic-bezier(.22,1,.36,1) .03s both;
+body.md-state-upload.has-staged-assets .upload-stage-kicker {
+  margin-bottom: .42rem;
+  font-size: 8.5px;
 }
 
-.stage-arrival h3 {
-  margin: 0;
-  font-size: clamp(2.4rem, 5.1vw, 4.6rem);
-  line-height: .98;
-  font-weight: 240;
-  letter-spacing: -.075em;
-  color: rgba(8,28,16,.91);
-  animation: stagedItemIn .7s cubic-bezier(.22,1,.36,1) .09s both;
+body.md-state-upload.has-staged-assets .upload-stage-card h3 {
+  font-size: clamp(1.32rem, 3.2vw, 1.85rem);
 }
 
-.stage-lede {
-  max-width: 520px;
-  margin: 1.05rem auto 1.35rem;
-  font-size: clamp(.95rem, 1.5vw, 1.08rem);
-  line-height: 1.72;
-  font-weight: 300;
-  letter-spacing: -.022em;
-  color: rgba(14,42,24,.58);
-  animation: stagedItemIn .7s cubic-bezier(.22,1,.36,1) .16s both;
+body.md-state-upload.has-staged-assets .upload-stage-card p:not(.upload-stage-kicker) {
+  max-width: 350px;
+  margin: .58rem auto .82rem;
+  font-size: .76rem;
+  line-height: 1.52;
 }
 
-.stage-count-line {
-  display: inline-flex;
+.upload-stage-steps {
+  display: flex;
   align-items: center;
-  gap: .5rem;
-  margin-bottom: 1.35rem;
-  font-size: 11px;
-  font-weight: 470;
-  letter-spacing: .08em;
-  color: rgba(14,42,24,.48);
-  text-transform: uppercase;
-  animation: stagedItemIn .7s cubic-bezier(.22,1,.36,1) .22s both;
-}
-
-.stage-count-line::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: rgba(86,150,105,.62);
-  box-shadow: 0 0 18px rgba(86,150,105,.38);
-}
-
-.stage-map {
-  width: min(100%, 560px);
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
-  animation: stagedItemIn .76s cubic-bezier(.22,1,.36,1) .30s both;
-}
-
-.stage-step {
-  min-height: 96px;
-  border-radius: 24px;
-  padding: 1rem .9rem .95rem;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(255,255,255,.74), transparent 72%),
-    linear-gradient(180deg, rgba(255,255,255,.56), rgba(248,253,250,.38));
-  border: .5px solid rgba(44,90,60,.105);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.82), 0 12px 28px rgba(20,60,36,.045);
-}
-
-.stage-step span {
-  display: block;
-  margin-bottom: .55rem;
-  font-size: 9px;
-  font-weight: 560;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: rgba(14,42,24,.38);
-}
-
-.stage-step strong {
-  display: block;
-  font-size: clamp(1.15rem, 2vw, 1.45rem);
-  line-height: 1.05;
-  font-weight: 290;
-  letter-spacing: -.045em;
-  color: rgba(8,28,16,.82);
-}
-
-.stage-step em {
-  display: block;
-  margin-top: .55rem;
-  font-style: normal;
-  font-size: 10px;
-  line-height: 1.35;
-  color: rgba(14,42,24,.45);
-}
-
-.stage-add-more {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  margin: 1.1rem auto 0;
-  padding: .35rem .6rem;
-  color: rgba(14,42,24,.46);
-  font-size: 10px;
+  justify-content: center;
+  gap: .48rem;
+  margin: 0 auto .82rem;
+  color: rgba(14,42,24,.42);
+  font-size: 8px;
   font-weight: 560;
   letter-spacing: .14em;
   text-transform: uppercase;
+}
+
+.upload-stage-steps i {
+  width: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(44,90,60,.20), transparent);
+}
+
+body.md-state-upload.has-staged-assets .upload-stage-pills {
+  gap: 5px;
+}
+
+body.md-state-upload.has-staged-assets .upload-stage-pills span {
+  padding: 4px 8px;
+  font-size: 9px;
+}
+
+body.md-state-upload.has-staged-assets .btn-movein {
+  margin-top: 1rem;
+}
+
+body.md-state-upload.has-staged-assets .up-micro {
+  margin-top: .55rem;
+  font-size: 9.5px;
+}
+
+body.md-state-upload.has-staged-assets .status {
+  display: none !important;
+}
+
+@media (max-height: 690px) {
+  body.md-state-upload.has-staged-assets .glass {
+    min-height: min(500px, calc(100vh - 1.5rem));
+  }
+  body.md-state-upload.has-staged-assets .glass-inner {
+    min-height: min(500px, calc(100vh - 1.5rem));
+    padding-top: 1.35rem;
+    padding-bottom: 1.35rem;
+  }
+  .upload-stage-orb {
+    width: 52px;
+    height: 52px;
+    margin-bottom: .68rem;
+  }
+  body.md-state-upload.has-staged-assets .upload-stage-card {
+    padding: 1.08rem 1.08rem 1rem;
+  }
+  body.md-state-upload.has-staged-assets .upload-stage-card p:not(.upload-stage-kicker) {
+    margin-bottom: .65rem;
+  }
+  .upload-stage-steps {
+    margin-bottom: .65rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.upload-glow-active .upload-stage-orb,
+  body.upload-glow-active .upload-stage-orb::before,
+  body.upload-glow-active .upload-stage-orb::after {
+    animation: none !important;
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   LOCAL PREP NEXT STEP — make the arrival checkpoint actionable
+   Adds a clear “Next” moment without changing upload/API logic.
+═══════════════════════════════════════════════════════ */
+body.md-state-local_preparing .glass {
+  width: min(92vw, 610px) !important;
+  max-width: 610px !important;
+  border-radius: 38px !important;
+}
+body.md-state-local_preparing .glass-inner {
+  min-height: min(590px, calc(100vh - 2.5rem)) !important;
+  padding: clamp(1.45rem, 3.5vh, 2.35rem) clamp(1.35rem, 4vw, 2.65rem) !important;
+}
+body.md-state-local_preparing .btn-movein {
+  display: none !important;
+}
+body.md-state-local_preparing .prep-summary {
+  max-width: 500px !important;
+}
+body.md-state-local_preparing .prep-arrival-orb {
+  width: 54px;
+  height: 54px;
+  margin-bottom: .82rem;
+}
+body.md-state-local_preparing .prep-arrival-orb svg {
+  width: 27px;
+  height: 19px;
+}
+body.md-state-local_preparing .prep-kicker {
+  margin-bottom: .55rem;
+}
+body.md-state-local_preparing .prep-title {
+  font-size: clamp(2rem, 4.5vw, 3.05rem);
+}
+body.md-state-local_preparing .prep-support {
+  max-width: 390px;
+  margin: .78rem auto .62rem;
+  font-size: .92rem;
+  line-height: 1.58;
+}
+body.md-state-local_preparing .prep-safe-line {
+  margin: .08rem auto 1rem;
+}
+body.md-state-local_preparing .prep-capsules {
+  max-width: 445px;
+  gap: 7px;
+  margin-bottom: 1rem;
+}
+body.md-state-local_preparing .prep-capsule {
+  min-height: 34px;
+  padding: .52rem .72rem;
+}
+body.md-state-local_preparing .prep-capsule-label {
+  font-size: 8.5px;
+}
+body.md-state-local_preparing .prep-capsule-value {
+  font-size: .78rem;
+}
+.prep-next-card {
+  width: min(100%, 420px);
+  margin: .1rem auto .9rem;
+  padding: .92rem 1rem;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255,255,255,.78), transparent 68%),
+    linear-gradient(180deg, rgba(255,255,255,.64), rgba(247,252,249,.46));
+  border: .5px solid rgba(44,90,60,.12);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.86),
+    0 14px 32px rgba(20,60,36,.055),
+    0 0 42px rgba(132,196,155,.07);
+  opacity: 0;
+  transform: translateY(7px);
+  animation: nextCardIn .78s cubic-bezier(.22,1,.36,1) .62s forwards;
+}
+@keyframes nextCardIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+.prep-next-kicker {
+  margin: 0 0 .34rem;
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: rgba(14,42,24,.38);
+}
+.prep-next-card h3 {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.12;
+  font-weight: 390;
+  letter-spacing: -.035em;
+  color: rgba(8,28,16,.82);
+}
+.prep-next-card p:not(.prep-next-kicker) {
+  margin: .44rem auto .72rem;
+  max-width: 330px;
+  font-size: .75rem;
+  line-height: 1.48;
+  font-weight: 300;
+  color: rgba(14,42,24,.54);
+}
+.prep-next-rail {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .42rem;
+  color: rgba(14,42,24,.42);
+  font-size: 8px;
+  font-weight: 570;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+.prep-next-rail i {
+  width: 18px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(44,90,60,.22), transparent);
+}
+.prep-ready {
+  font-size: .8rem !important;
+  max-width: 360px !important;
+  margin-bottom: .78rem !important;
+}
+.prep-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .7rem;
+  flex-wrap: wrap;
+}
+.prep-next-button {
+  display: inline-flex;
+  align-items: center;
+  gap: .52rem;
+  border: 0;
+  border-radius: 999px;
+  padding: .82rem 1.55rem;
   cursor: pointer;
-  transition: color .25s ease, transform .25s cubic-bezier(.22,1,.36,1);
-  animation: stagedItemIn .7s cubic-bezier(.22,1,.36,1) .38s both;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: .68rem;
+  font-weight: 540;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,.94);
+  background:
+    linear-gradient(180deg, rgba(33,65,45,.96), rgba(14,41,26,.92));
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,.86),
+    0 0 0 1px rgba(44,90,60,.18),
+    inset 0 1px 0 rgba(255,255,255,.16),
+    0 12px 30px rgba(20,60,36,.14),
+    0 0 46px rgba(100,180,125,.12);
+  opacity: 0;
+  transform: translateY(8px);
+  animation: nextButtonIn .75s cubic-bezier(.22,1,.36,1) .92s forwards;
 }
-
-.stage-add-more:hover {
-  color: rgba(8,28,16,.72);
+.prep-next-button:hover {
   transform: translateY(-1px);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,.9),
+    0 0 0 1px rgba(64,130,84,.24),
+    inset 0 1px 0 rgba(255,255,255,.18),
+    0 16px 40px rgba(20,60,36,.18),
+    0 0 58px rgba(100,180,125,.16);
+}
+.prep-next-button:active { transform: scale(.98); }
+.prep-next-button svg {
+  width: 12px;
+  height: 12px;
+  stroke: rgba(255,255,255,.72);
+  stroke-width: 1.7;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+@keyframes nextButtonIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+body.md-state-local_preparing .btn-add-more {
+  margin-top: 0;
+  padding: .78rem .85rem;
+  opacity: .62;
+}
+@media (max-height: 720px) {
+  body.md-state-local_preparing .glass-inner {
+    min-height: min(540px, calc(100vh - 1.5rem)) !important;
+    padding-top: 1.2rem !important;
+    padding-bottom: 1.2rem !important;
+  }
+  body.md-state-local_preparing .prep-arrival-orb {
+    width: 48px;
+    height: 48px;
+    margin-bottom: .62rem;
+  }
+  body.md-state-local_preparing .prep-title {
+    font-size: clamp(1.85rem, 4vw, 2.65rem);
+  }
+  body.md-state-local_preparing .prep-support {
+    margin-top: .58rem;
+    font-size: .84rem;
+  }
+  .prep-next-card {
+    padding: .75rem .86rem;
+    margin-bottom: .7rem;
+  }
+}
+@media (max-width: 520px) {
+  .prep-actions { flex-direction: column; gap: .45rem; }
+  .prep-next-button { width: min(100%, 280px); justify-content: center; }
 }
 
-@keyframes stagedItemIn {
-  from { opacity: 0; transform: translateY(10px); filter: blur(5px); }
-  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+
+
+/* ═══════════════════════════════════════════════════════
+   FIRST SCREEN VISIONOS STAGE WINDOW
+   Wraps the initial Move In screen in a large centered glass product environment.
+   Screen One content is preserved; only the containing stage is refined.
+═══════════════════════════════════════════════════════ */
+.stage {
+  padding: 32px;
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.stage::before,
+.stage::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(1560px, calc(100vw - 64px));
+  height: calc(100vh - 64px);
+  transform: translate(-50%, -50%);
+  border-radius: clamp(34px, 4.4vw, 62px);
+  pointer-events: none;
+}
+
+.stage::before {
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 88% 72% at 50% 0%, rgba(255,255,255,.72), rgba(255,255,255,.30) 58%, rgba(255,255,255,.12) 100%),
+    radial-gradient(ellipse 58% 42% at 50% 76%, rgba(183,221,202,.18), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,.54), rgba(247,252,249,.30)),
+    rgba(255,255,255,.34);
+  backdrop-filter: blur(46px) saturate(172%);
+  -webkit-backdrop-filter: blur(46px) saturate(172%);
+  border: .5px solid rgba(255,255,255,.78);
+  box-shadow:
+    0 0 0 1px rgba(44,90,60,.075),
+    inset 0 1px 0 rgba(255,255,255,.94),
+    inset 0 -1px 0 rgba(44,90,60,.045),
+    0 18px 56px rgba(20,60,36,.06),
+    0 48px 130px rgba(20,60,36,.11),
+    0 0 120px rgba(176,218,196,.10);
+}
+
+.stage::after {
+  z-index: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(115deg, transparent 0 24%, rgba(255,255,255,.18) 39%, transparent 54%),
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,255,255,.42), transparent 68%),
+    radial-gradient(ellipse 68% 28% at 50% 104%, rgba(136,188,158,.12), transparent 70%);
+  opacity: .72;
+  mix-blend-mode: screen;
+}
+
+.stage .intro {
+  z-index: 2;
+  max-width: 920px;
+  padding: clamp(1.45rem, 3vw, 2.6rem);
+  transform: scale(.94);
+  transform-origin: center;
+}
+
+.stage .logo-badge {
+  margin-bottom: .92rem;
+}
+
+.stage .wordmark {
+  margin-bottom: clamp(2.05rem, 4.4vh, 2.75rem);
+}
+
+.stage .headline {
+  font-size: clamp(2.65rem, 5vw, 4.1rem);
+}
+
+.stage .sub {
+  margin-bottom: clamp(2.35rem, 5.2vh, 3rem);
+}
+
+body.md-state-welcome .env::before,
+body.md-state-movein .env::before {
+  opacity: .34;
+}
+
+@media (min-width: 1500px) {
+  .stage .intro { transform: scale(.96); }
+}
+
+@media (max-height: 760px) {
+  .stage .intro { transform: scale(.88); }
+  .stage .wordmark { margin-bottom: 1.55rem; }
+  .stage .sub { margin-bottom: 2rem; }
 }
 
 @media (max-width: 720px) {
-  body.md-state-upload.has-staged-assets .glass-inner { padding: 2rem 1.25rem; }
-  .stage-orb { width: 72px; height: 72px; margin-bottom: 1.15rem; }
-  .stage-arrival h3 { font-size: clamp(2.2rem, 11vw, 3.5rem); }
-  .stage-map { grid-template-columns: 1fr; gap: 8px; }
-  .stage-step { min-height: 0; padding: .9rem .95rem; }
+  .stage { padding: 20px; }
+  .stage::before,
+  .stage::after {
+    width: calc(100vw - 40px);
+    height: calc(100vh - 40px);
+    border-radius: 34px;
+  }
+  .stage .intro {
+    transform: scale(.92);
+    padding: 1.25rem;
+  }
+  .stage .headline {
+    font-size: clamp(2.25rem, 11vw, 3.25rem);
+  }
+}
+
+@media (max-width: 420px) {
+  .stage { padding: 16px; }
+  .stage::before,
+  .stage::after {
+    width: calc(100vw - 32px);
+    height: calc(100vh - 32px);
+    border-radius: 30px;
+  }
+  .stage .intro { transform: scale(.88); }
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   EXPERIENCE WINDOW — ALL PHASES
+   Keeps every Moving Day screen inside one centered VisionOS product window.
+   The window stays constrained while each phase fades inside it.
+═══════════════════════════════════════════════════════ */
+:root {
+  --md-window-x: clamp(24px, 2vw, 32px);
+  --md-window-radius: clamp(34px, 4.2vw, 62px);
+}
+
+body {
+  background: #f3f7f3;
+  overflow: hidden;
+}
+
+.experience-window {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: min(1560px, calc(100vw - (var(--md-window-x) * 2)));
+  height: calc(100vh - (var(--md-window-x) * 2));
+  transform: translate(-50%, -50%);
+  border-radius: var(--md-window-radius);
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(ellipse 92% 76% at 50% 0%, rgba(255,255,255,.72), rgba(255,255,255,.30) 58%, rgba(255,255,255,.12) 100%),
+    radial-gradient(ellipse 64% 42% at 50% 78%, rgba(183,221,202,.18), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,.54), rgba(247,252,249,.30)),
+    rgba(255,255,255,.34);
+  border: .5px solid rgba(255,255,255,.78);
+  backdrop-filter: blur(48px) saturate(172%);
+  -webkit-backdrop-filter: blur(48px) saturate(172%);
+  box-shadow:
+    0 0 0 1px rgba(44,90,60,.075),
+    inset 0 1px 0 rgba(255,255,255,.94),
+    inset 0 -1px 0 rgba(44,90,60,.045),
+    0 18px 56px rgba(20,60,36,.06),
+    0 48px 130px rgba(20,60,36,.11),
+    0 0 120px rgba(176,218,196,.10);
+  transition:
+    opacity .72s cubic-bezier(.22,1,.36,1),
+    filter .9s cubic-bezier(.22,1,.36,1),
+    box-shadow .9s cubic-bezier(.22,1,.36,1),
+    transform .9s cubic-bezier(.22,1,.36,1);
+}
+
+.experience-window::before,
+.experience-window::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.experience-window::before {
+  background:
+    linear-gradient(115deg, transparent 0 24%, rgba(255,255,255,.18) 39%, transparent 54%),
+    radial-gradient(ellipse 58% 38% at 50% 0%, rgba(255,255,255,.42), transparent 70%),
+    radial-gradient(ellipse 68% 28% at 50% 104%, rgba(136,188,158,.12), transparent 70%);
+  opacity: .74;
+  mix-blend-mode: screen;
+}
+
+.experience-window::after {
+  inset: auto 8% 8% 8%;
+  height: 34%;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at center, rgba(156,206,178,.14), transparent 68%);
+  filter: blur(34px);
+  opacity: .62;
+}
+
+body.dragging .experience-window {
+  filter: brightness(1.018) saturate(1.045);
+  box-shadow:
+    0 0 0 1px rgba(44,130,78,.11),
+    inset 0 1px 0 rgba(255,255,255,.96),
+    inset 0 -1px 0 rgba(44,90,60,.045),
+    0 18px 56px rgba(20,60,36,.065),
+    0 50px 138px rgba(20,60,36,.13),
+    0 0 132px rgba(150,214,176,.15);
+}
+
+body.md-state-preparing .experience-window,
+body.md-state-concierge .experience-window,
+body.show-results .experience-window {
+  filter: brightness(1.01) saturate(1.025);
+}
+
+/* Every phase occupies the same product window instead of the browser viewport. */
+.experience-window > .stage,
+.experience-window > .upload,
+.experience-window > .concierge,
+.experience-window > .results-app {
+  position: absolute !important;
+  inset: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+}
+
+.experience-window > .stage,
+.experience-window > .upload,
+.experience-window > .concierge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(20px, 3vw, 42px);
+  overflow: hidden;
+  background: transparent;
+}
+
+.experience-window > .stage {
+  z-index: 1;
+}
+
+.experience-window > .upload {
+  z-index: 2;
+}
+
+.experience-window > .concierge {
+  z-index: 3;
+}
+
+/* The window is now the environment. Disable the old first-screen-only pseudo-window. */
+.experience-window .stage::before,
+.experience-window .stage::after {
+  display: none !important;
+}
+
+.experience-window .stage .intro {
+  position: relative;
+  z-index: 2;
+  transform: scale(.92);
+}
+
+.experience-window .glass {
+  position: relative;
+  z-index: 2;
+  max-width: min(760px, calc(100% - 48px));
+  max-height: calc(100% - 48px);
+}
+
+body.md-state-upload .experience-window .glass {
+  max-width: min(720px, calc(100% - 48px));
+}
+
+body.md-state-local_preparing .experience-window .glass {
+  width: min(900px, calc(100% - 56px));
+  max-width: min(900px, calc(100% - 56px));
+  max-height: calc(100% - 56px);
+}
+
+body.md-state-local_preparing .experience-window .glass-inner {
+  min-height: min(590px, calc(100vh - 144px)) !important;
+  max-height: calc(100vh - 144px);
+  padding-top: clamp(1.35rem, 3vh, 2.6rem) !important;
+  padding-bottom: clamp(1.35rem, 3vh, 2.6rem) !important;
+}
+
+body.md-state-preparing .experience-window .glass {
+  width: min(760px, calc(100% - 56px));
+  max-width: min(760px, calc(100% - 56px));
+}
+
+.experience-window > .concierge {
+  overflow: auto;
+}
+
+.experience-window .concierge-shell {
+  position: relative;
+  z-index: 2;
+  width: min(780px, calc(100% - 52px));
+  max-height: calc(100% - 52px);
+  overflow: auto;
+  scrollbar-width: none;
+}
+.experience-window .concierge-shell::-webkit-scrollbar { display: none; }
+
+/* Results/review also stays inside the same window and scrolls internally if needed. */
+.experience-window > .results-app {
+  z-index: 4;
+  overflow: auto;
+  padding: clamp(20px, 3vw, 42px) clamp(20px, 3.2vw, 48px) clamp(36px, 5vw, 72px) !important;
+  background: transparent !important;
+  scrollbar-width: thin;
+}
+
+body.show-results {
+  overflow: hidden !important;
+  background: #f3f7f3;
+}
+
+.experience-window .results-shell {
+  position: relative;
+  z-index: 2;
+  min-height: 100%;
+}
+
+.experience-window .customer-review {
+  margin-top: 0;
+}
+
+.experience-window .toast {
+  z-index: 20;
+}
+
+@media (min-width: 1500px) and (min-height: 850px) {
+  .experience-window .stage .intro { transform: scale(.94); }
+}
+
+@media (max-height: 760px) {
+  .experience-window .stage .intro { transform: scale(.84); }
+  body.md-state-local_preparing .experience-window .glass-inner {
+    min-height: min(510px, calc(100vh - 112px)) !important;
+    max-height: calc(100vh - 112px);
+  }
+}
+
+@media (max-width: 720px) {
+  :root { --md-window-x: 20px; --md-window-radius: 34px; }
+  .experience-window > .stage,
+  .experience-window > .upload,
+  .experience-window > .concierge {
+    padding: 18px;
+  }
+  .experience-window .stage .intro { transform: scale(.88); }
+  .experience-window .glass,
+  body.md-state-local_preparing .experience-window .glass,
+  body.md-state-preparing .experience-window .glass {
+    width: min(100%, calc(100vw - 56px));
+    max-width: min(100%, calc(100vw - 56px));
+    max-height: calc(100vh - 72px);
+  }
+  .experience-window .concierge-shell {
+    width: min(100%, calc(100vw - 56px));
+    max-height: calc(100vh - 72px);
+  }
+}
+
+@media (max-width: 420px) {
+  :root { --md-window-x: 16px; --md-window-radius: 30px; }
+  .experience-window .stage .intro { transform: scale(.84); }
+}
+
+
+
+/* ═══════════════════════════════════════════════════════
+   SEAMLESS EXPERIENCE WINDOW FIX
+   One persistent VisionOS window. Inner states no longer create stacked borders.
+   The frame evolves; content changes inside it.
+═══════════════════════════════════════════════════════ */
+
+/* The background should feel atmospheric, not like a second window behind the product. */
+.env::before {
+  border-color: transparent !important;
+  box-shadow: none !important;
+  opacity: .18 !important;
+  background:
+    radial-gradient(ellipse 70% 48% at 50% 38%, rgba(255,255,255,.30), transparent 68%),
+    radial-gradient(ellipse 70% 34% at 50% 72%, rgba(164,210,184,.12), transparent 72%) !important;
+}
+
+/* The experience window is the only large glass boundary. */
+.experience-window {
+  background:
+    radial-gradient(ellipse 86% 68% at 50% 0%, rgba(255,255,255,.78), rgba(255,255,255,.34) 58%, rgba(255,255,255,.16) 100%),
+    radial-gradient(ellipse 62% 42% at 50% 74%, rgba(183,221,202,.20), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,.56), rgba(247,252,249,.31)),
+    rgba(255,255,255,.35) !important;
+  border: .5px solid rgba(255,255,255,.82) !important;
+  box-shadow:
+    0 0 0 1px rgba(44,90,60,.070),
+    inset 0 1px 0 rgba(255,255,255,.95),
+    inset 0 -1px 0 rgba(44,90,60,.040),
+    0 22px 64px rgba(20,60,36,.065),
+    0 54px 142px rgba(20,60,36,.12),
+    0 0 132px rgba(176,218,196,.11) !important;
+}
+
+/* State shifts happen on the same frame instead of spawning new cards. */
+body.md-state-upload .experience-window {
+  filter: brightness(1.01) saturate(1.025);
+}
+body.md-state-upload.has-staged-assets .experience-window,
+body.md-state-local_preparing .experience-window {
+  filter: brightness(1.025) saturate(1.045);
+  box-shadow:
+    0 0 0 1px rgba(44,116,72,.085),
+    inset 0 1px 0 rgba(255,255,255,.96),
+    inset 0 -1px 0 rgba(44,90,60,.040),
+    0 22px 64px rgba(20,60,36,.070),
+    0 58px 150px rgba(20,60,36,.13),
+    0 0 150px rgba(150,214,176,.16) !important;
+}
+
+/* Kill the old inner upload/local/preparing panel visual.
+   .glass remains as a layout shell only. */
+.experience-window .glass,
+body.md-state-upload .experience-window .glass,
+body.md-state-upload.has-staged-assets .experience-window .glass,
+body.md-state-local_preparing .experience-window .glass,
+body.md-state-preparing .experience-window .glass {
+  width: min(1120px, calc(100% - 56px)) !important;
+  max-width: min(1120px, calc(100% - 56px)) !important;
+  max-height: calc(100% - 56px) !important;
+  min-height: 0 !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  animation: none !important;
+}
+
+.experience-window .glass::before,
+.experience-window .glass::after {
+  display: none !important;
+}
+
+.experience-window .glass-inner,
+body.md-state-local_preparing .experience-window .glass-inner {
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: clamp(1.6rem, 4vh, 3.2rem) clamp(1.25rem, 3.6vw, 3rem) !important;
+}
+
+/* Upload scene 1 stays immersive, but without a card inside the card. */
+body.md-state-upload:not(.has-staged-assets) .experience-window .glass-inner {
+  min-height: min(650px, calc(100vh - 120px)) !important;
+  justify-content: center;
+}
+
+body.md-state-upload:not(.has-staged-assets) .upload-select-area {
+  max-width: 980px;
+}
+
+body.md-state-upload:not(.has-staged-assets) .up-icon {
+  width: 74px;
+  height: 74px;
+  margin-bottom: clamp(1.2rem, 3vh, 2rem);
+  box-shadow:
+    0 0 0 .5px rgba(255,255,255,.98),
+    0 0 0 1px rgba(44,90,60,.10),
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 18px 44px rgba(20,60,36,.09),
+    0 0 74px rgba(150,210,176,.16);
+}
+body.md-state-upload:not(.has-staged-assets) .up-icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+body.md-state-upload:not(.has-staged-assets) .up-head {
+  font-size: clamp(3.1rem, 6.1vw, 5.45rem);
+  line-height: .98;
+  letter-spacing: -.078em;
+  max-width: 900px;
+  margin-bottom: 1.35rem;
+}
+
+body.md-state-upload:not(.has-staged-assets) .up-sub {
+  max-width: 820px;
+  font-size: clamp(1.05rem, 1.6vw, 1.34rem);
+  line-height: 1.62;
+  margin-bottom: 1.8rem;
+}
+
+body.md-state-upload:not(.has-staged-assets) .file-tags {
+  max-width: 760px;
+  margin-bottom: clamp(1.8rem, 4.6vh, 3.5rem);
+}
+
+/* Scene 2 becomes a focused state inside the same glass window. No second window. */
+body.md-state-upload.has-staged-assets .glass-inner {
+  min-height: min(620px, calc(100vh - 120px)) !important;
+  justify-content: center;
+}
+
+body.md-state-upload.has-staged-assets .upload-stage-card {
+  width: min(880px, 100%);
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+body.md-state-upload.has-staged-assets .upload-stage-card h3 {
+  font-size: clamp(2.65rem, 5.2vw, 4.7rem);
+  line-height: 1.02;
+  margin-bottom: .8rem;
+}
+
+body.md-state-upload.has-staged-assets .upload-stage-card p:not(.upload-stage-kicker) {
+  max-width: 640px;
+}
+
+/* Local arrival screen also shares the frame, not a nested card. */
+body.md-state-local_preparing .prep-summary,
+body.md-state-upload.has-staged-assets .upload-stage {
+  max-width: 880px;
+}
+body.md-state-local_preparing .prep-arrival {
+  max-width: 820px;
+  margin: 0 auto;
+}
+body.md-state-local_preparing .prep-title {
+  font-size: clamp(2.6rem, 5vw, 4.7rem);
+}
+
+/* Concierge/review are content inside the product window, not new admin panes. */
+.experience-window .concierge-shell,
+.experience-window .customer-review {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.experience-window .concierge-shell {
+  width: min(980px, calc(100% - 56px));
+  max-height: calc(100% - 56px);
+  padding: clamp(1.2rem, 3.2vw, 2.4rem);
+}
+
+.experience-window .customer-review {
+  padding: clamp(1.2rem, 3.2vw, 2.4rem);
+}
+
+/* Small cards/capsules can still exist, but they should feel like objects in the window,
+   not another large bordered container. */
+.upload-stage-pills span,
+.prep-pill,
+.prep-next-card,
+.concierge-card,
+.review-reco-card {
+  background: rgba(255,255,255,.42) !important;
+  border-color: rgba(44,90,60,.10) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.72),
+    0 10px 26px rgba(20,60,36,.035) !important;
+}
+
+/* Keep constraints on small screens without creating cropped nested frames. */
+@media (max-width: 900px) {
+  .experience-window .glass,
+  body.md-state-upload .experience-window .glass,
+  body.md-state-local_preparing .experience-window .glass,
+  body.md-state-preparing .experience-window .glass {
+    width: min(100%, calc(100vw - 56px)) !important;
+    max-width: min(100%, calc(100vw - 56px)) !important;
+  }
+
+  body.md-state-upload:not(.has-staged-assets) .up-head,
+  body.md-state-upload.has-staged-assets .upload-stage-card h3,
+  body.md-state-local_preparing .prep-title {
+    font-size: clamp(2.35rem, 11vw, 3.75rem);
+  }
+}
+
+@media (max-height: 760px) {
+  body.md-state-upload:not(.has-staged-assets) .experience-window .glass-inner,
+  body.md-state-upload.has-staged-assets .glass-inner {
+    min-height: 0 !important;
+    padding-top: 1.05rem !important;
+    padding-bottom: 1.05rem !important;
+  }
+
+  body.md-state-upload:not(.has-staged-assets) .up-icon {
+    width: 58px;
+    height: 58px;
+    margin-bottom: .9rem;
+  }
+
+  body.md-state-upload:not(.has-staged-assets) .up-head {
+    font-size: clamp(2.45rem, 5vw, 4.1rem);
+    margin-bottom: .85rem;
+  }
+
+  body.md-state-upload:not(.has-staged-assets) .up-sub {
+    margin-bottom: 1.1rem;
+  }
+
+  body.md-state-upload:not(.has-staged-assets) .file-tags {
+    margin-bottom: 1.25rem;
+  }
 }
 
 </style>
@@ -2105,6 +2896,8 @@ body.md-state-upload.has-staged-assets .btn-movein {
   <div class="env-glow"></div>
   <div class="env-v"></div>
 </div>
+
+<div class="experience-window" id="experienceWindow" aria-label="Moving Day experience">
 
 <!-- ══ MOVE IN INTRO ══════════════════════════════════ -->
 <div class="stage" id="intro" role="main" aria-label="Moving Day">
@@ -2309,6 +3102,8 @@ body.md-state-upload.has-staged-assets .btn-movein {
   </div>
 </main>
 
+</div><!-- /.experience-window -->
+
 <script>
 /* ── Headline word animation ── */
 (function() {
@@ -2340,6 +3135,7 @@ let appState = 'welcome';
 let staged = [];
 let preparationReport = null;
 let dragDepth = 0;
+let uploadGlowTimer = null;
 
 const intro       = document.getElementById('intro');
 const upload      = document.getElementById('upload');
@@ -2399,7 +3195,7 @@ function renderState(state) {
     if (btnMovein) btnMovein.disabled = staged.length === 0;
     renderUploadStagePreview();
   }
-  if (state === 'local_preparing' && preparationReport) setMoveButtonLabel('Continue');
+  if (state === 'local_preparing' && preparationReport) setMoveButtonLabel('Next');
 }
 
 function setMoveButtonLabel(label) {
@@ -2634,15 +3430,32 @@ function renderPreparationSummary(report) {
           <path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/>
         </svg>
       </div>
-      <p class="prep-kicker">Move In Complete</p>
-      <h2 class="prep-title">Your brand has arrived.</h2>
-      <p class="prep-support">I’ve received your assets and started organizing the foundation.</p>
+      <p class="prep-kicker">Arrival Check</p>
+      <h2 class="prep-title">Everything made it in.</h2>
+      <p class="prep-support">I’ve received your files and separated the first layer.</p>
       <p class="prep-safe-line">${esc(safeLine)}</p>
       <div class="prep-capsules" aria-label="Preparation summary">
         ${capsuleHTML}
       </div>
+      <div class="prep-next-card" aria-label="Next step">
+        <p class="prep-next-kicker">Next</p>
+        <h3>Brand Review</h3>
+        <p>I’ll review logos, identify likely names, and separate reference files from visual assets.</p>
+        <div class="prep-next-rail" aria-hidden="true">
+          <span>Logos</span><i></i><span>Names</span><i></i><span>References</span>
+        </div>
+      </div>
       <p class="prep-ready">${esc(enoughLine)}</p>
-      <button class="btn-add-more" id="addMoreBtn" type="button">Add more assets</button>
+      <div class="prep-actions">
+        <button class="prep-next-button" id="prepNextBtn" type="button" aria-label="Next: Brand Review">
+          Next
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <line x1="5" y1="12" x2="19" y2="12"/>
+            <polyline points="13 6 19 12 13 18"/>
+          </svg>
+        </button>
+        <button class="btn-add-more" id="addMoreBtn" type="button">Add more assets</button>
+      </div>
     </div>`;
   prepSummary.classList.add('on');
   document.body.classList.add('has-preparation');
@@ -2653,6 +3466,17 @@ function renderPreparationSummary(report) {
 
   const addMoreBtn = document.getElementById('addMoreBtn');
   if (addMoreBtn) addMoreBtn.addEventListener('click', openFilePicker);
+
+  const prepNextBtn = document.getElementById('prepNextBtn');
+  if (prepNextBtn) {
+    prepNextBtn.addEventListener('click', event => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (!preparationReport?.preparedFileCount) return;
+      goToState('preparing');
+      runBrandPipeline(preparationReport.preparedFiles, preparationReport);
+    });
+  }
 }
 
 function renderUploadStagePreview() {
@@ -2686,47 +3510,21 @@ function renderUploadStagePreview() {
     ? highlights.map(([label, count]) => `<span>${esc(label)} · ${count}</span>`).join('')
     : '<span>Ready to organize</span>';
 
-  const logoCount = counts['Logos'] || 0;
-  const iconCount = counts['Icons'] || 0;
-  const wordmarkCount = counts['Wordmarks'] || 0;
-  const visualCount = (counts['Photography'] || 0) + iconCount + wordmarkCount + logoCount;
-  const referenceCount = (counts['Documents'] || 0) + (counts['Presentations'] || 0) + (counts['Brand Guidelines'] || 0);
-  const identityCount = logoCount + iconCount + wordmarkCount;
-
-  const visualLabel = visualCount ? `${visualCount} found` : 'Ready to sort';
-  const referenceLabel = referenceCount ? `${referenceCount} found` : 'None yet';
-  const identityLabel = identityCount ? `${identityCount} candidates` : 'Looking next';
-
   uploadStage.innerHTML = `
-    <div class="upload-stage-card stage-arrival">
-      <div class="stage-orb" aria-hidden="true">
+    <div class="upload-stage-card">
+      <div class="upload-stage-orb" aria-hidden="true">
         <svg viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg">
           <path d="M769.4,89.65v111.85h-39.04c.07-25.79-35.02-31.29-50.28-36.68-16.18-5.71,0-14.05,0-14.05l89.32-61.11Z"/>
           <path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/>
         </svg>
       </div>
-      <p class="stage-kicker">Assets received</p>
-      <h3>Everything is in.</h3>
-      <p class="stage-lede">${total} ${fileWord} are ready. Next I’ll separate reference files from visual assets, identify the likely logo system, and prepare the first brand review.</p>
-      <div class="stage-count-line">${total} ${fileWord} ready to move in</div>
-      <div class="stage-map" aria-label="What Moving Day will prepare next">
-        <div class="stage-step">
-          <span>Visual assets</span>
-          <strong>${esc(visualLabel)}</strong>
-          <em>logos, marks, photos, graphics</em>
-        </div>
-        <div class="stage-step">
-          <span>Reference files</span>
-          <strong>${esc(referenceLabel)}</strong>
-          <em>guidelines, decks, PDFs, notes</em>
-        </div>
-        <div class="stage-step">
-          <span>Identity system</span>
-          <strong>${esc(identityLabel)}</strong>
-          <em>name, logo, color, typography</em>
-        </div>
+      <p class="upload-stage-kicker">Everything is in</p>
+      <h3>${total} ${fileWord} at the door.</h3>
+      <p>Next I’ll identify likely logos, read visible names, and separate reference files from visual assets before the first brand review.</p>
+      <div class="upload-stage-steps" aria-hidden="true">
+        <span>Logos</span><i></i><span>Names</span><i></i><span>References</span>
       </div>
-      <button class="stage-add-more" id="stageAddMoreBtn" type="button">Add more assets</button>
+      <div class="upload-stage-pills">${highlightHTML}</div>
     </div>`;
 
   uploadStage.classList.add('on');
@@ -2739,9 +3537,6 @@ function renderUploadStagePreview() {
     status.classList.add('on');
     sTxt.textContent = `${total} ${fileWord} ready`;
   }
-
-  const stageAddMoreBtn = document.getElementById('stageAddMoreBtn');
-  if (stageAddMoreBtn) stageAddMoreBtn.addEventListener('click', openFilePicker);
 }
 
 async function beginLocalPreparation(files) {
@@ -2749,7 +3544,8 @@ async function beginLocalPreparation(files) {
     uploadStage.classList.remove('on');
     uploadStage.innerHTML = '';
   }
-  document.body.classList.remove('has-staged-assets');
+  document.body.classList.remove('has-staged-assets', 'upload-glow-active');
+  clearTimeout(uploadGlowTimer);
   goToState('local_preparing');
   setMoveButtonLabel('Preparing');
   btnMovein.disabled = true;
@@ -2759,7 +3555,7 @@ async function beginLocalPreparation(files) {
     preparationReport = await prepareFilesLocally(files);
     staged = preparationReport.preparedFiles.slice();
     renderPreparationSummary(preparationReport);
-    setMoveButtonLabel('Continue');
+    setMoveButtonLabel('Next');
     sTxt.textContent = `${preparationReport.preparedFileCount} prepared · ${preparationReport.duplicateCount} duplicate${preparationReport.duplicateCount === 1 ? '' : 's'} removed`;
     // Stay in local_preparing so the customer can read the summary before continuing.
   } catch (err) {
@@ -2768,6 +3564,18 @@ async function beginLocalPreparation(files) {
     setMoveButtonLabel('Move In');
     btnMovein.disabled = false;
   }
+}
+
+
+function activateUploadGlow() {
+  clearTimeout(uploadGlowTimer);
+  document.body.classList.remove('upload-glow-active');
+  // Restart the 20-second glow every time a new batch arrives.
+  void document.body.offsetWidth;
+  document.body.classList.add('upload-glow-active');
+  uploadGlowTimer = setTimeout(() => {
+    document.body.classList.remove('upload-glow-active');
+  }, 20000);
 }
 
 function addFiles(fileList) {
@@ -2790,6 +3598,7 @@ function addFiles(fileList) {
 
   if (appState !== 'upload') goToState('upload');
   renderUploadStagePreview();
+  activateUploadGlow();
 }
 
 /* FILE INPUT TRIGGER */
