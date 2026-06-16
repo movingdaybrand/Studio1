@@ -7590,10 +7590,10 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
   // open a focused room: reveal only its sections, rename the header, return home on close
   function openRoom(roomKey){
     var room=WS_ROOMS[roomKey]; if(!room)return;
-    document.body.classList.remove('md-home','md-deliv','md-guide-room','mdx-done','mdx-active');
+    document.body.classList.remove('md-home','md-deliv','md-guide-room','mdx-done','mdx-active','ws-expanded');
     document.body.classList.add('mdx-workspace'); wsFromHome=true;
     var pv=$('#previewBtn'); if(pv)pv.click();
-    var win=$('#mdxWorkspace'); if(win){ win.classList.remove('on'); void win.offsetWidth; win.classList.add('on'); }
+    var win=$('#mdxWorkspace'); if(win){ win.style.left=win.style.top=win.style.right=win.style.bottom=win.style.transform=win.style.width=win.style.height=''; win.classList.remove('on'); void win.offsetWidth; win.classList.add('on'); }
     var t=$('#mdxWsTitle'); if(t)t.textContent=room.title;
     var s=$('#mdxWsSub'); if(s)s.textContent=room.sub;
     $all('.mdx-ws-tab').forEach(function(tab){ tab.style.display = room.sections.indexOf(tab.getAttribute('data-ws-go'))>=0 ? '' : 'none'; });
@@ -7671,10 +7671,10 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
   }
   // open the live guide as the backdrop, float the controls window over it
   function openControls(){
-    document.body.classList.remove('mdx-active','mdx-done');
+    document.body.classList.remove('mdx-active','mdx-done','ws-expanded','md-home','md-deliv','md-guide-room');
     document.body.classList.add('mdx-workspace');
     var pv=$('#previewBtn'); if(pv)pv.click();          // reveal + live-update the guide
-    var win=$('#mdxWorkspace'); if(win){ win.classList.remove('on'); void win.offsetWidth; win.classList.add('on'); }
+    var win=$('#mdxWorkspace'); if(win){ win.style.left=win.style.top=win.style.right=win.style.bottom=win.style.transform=win.style.width=win.style.height=''; win.classList.remove('on'); void win.offsetWidth; win.classList.add('on'); }
     setTimeout(function(){ showWsSection('brandhome', true); }, 60);
   }
   function closeWorkspace(){
@@ -7826,6 +7826,40 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
   if(host && window.MutationObserver){ new MutationObserver(schedule).observe(host,{childList:true,subtree:true,attributes:true,attributeFilter:['src','class']}); }
 })();
 </script>
+
+
+<style id="md-workspace-layout-fix">
+/* ── AUTHORITATIVE workspace layout (last word; beats all earlier #mdxWorkspace/#previewShell blocks) ── */
+@media (min-width:901px){
+  body.mdx-workspace:not(.ws-expanded) #mdxWorkspace{
+    position:fixed!important;top:24px!important;left:24px!important;bottom:24px!important;right:auto!important;
+    width:min(460px,38vw)!important;height:auto!important;max-height:none!important;
+    border-radius:28px!important;z-index:80!important;display:flex!important;
+  }
+  body.mdx-workspace:not(.ws-expanded) #previewShell{
+    position:fixed!important;top:24px!important;bottom:24px!important;right:24px!important;
+    left:calc(24px + min(460px,38vw) + 18px)!important;width:auto!important;height:auto!important;min-height:0!important;
+    padding-left:0!important;padding-bottom:0!important;overflow-y:auto!important;overflow-x:hidden!important;
+    border-radius:28px!important;display:block!important;z-index:70!important;
+  }
+}
+/* full-screen editor mode: workspace fills the stage, preview steps fully aside */
+body.mdx-workspace.ws-expanded #mdxWorkspace{
+  position:fixed!important;top:24px!important;left:24px!important;right:24px!important;bottom:24px!important;
+  width:auto!important;height:auto!important;max-height:none!important;border-radius:28px!important;z-index:80!important;display:flex!important;
+}
+body.mdx-workspace.ws-expanded #previewShell{display:none!important;}
+/* narrow screens: workspace takes the window, preview hidden */
+@media (max-width:900px){
+  body.mdx-workspace:not(.ws-expanded) #mdxWorkspace,
+  body.mdx-workspace.ws-expanded #mdxWorkspace{
+    position:fixed!important;top:16px!important;left:16px!important;right:16px!important;bottom:16px!important;
+    width:auto!important;height:auto!important;max-height:none!important;border-radius:24px!important;z-index:80!important;display:flex!important;
+  }
+  body.mdx-workspace:not(.ws-expanded) #previewShell,
+  body.mdx-workspace.ws-expanded #previewShell{display:none!important;}
+}
+</style>
 
 </body>
 </html>
