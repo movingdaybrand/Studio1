@@ -2667,6 +2667,13 @@ body.mdx-done #mdxExperience{display:none!important;}
 
     <!-- ───────────────────────── ARRIVAL · hope ───────────────────────── -->
     <section class="mdx-step door-step xp-arrival" data-step="arrival">
+      <div class="mdx-ai-toggle at-top" id="mdxAiToggle" role="button" tabindex="0" aria-pressed="false" aria-label="Toggle Brand Concierge AI">
+        <span class="mdx-ai-switch" aria-hidden="true"><i></i></span>
+        <span class="mdx-ai-copy">
+          <b>Brand Concierge AI</b>
+          <em id="mdxAiStatus">Off — analyzes locally. Turn on to use AI on upload.</em>
+        </span>
+      </div>
       <div class="xp-intro">
         <div class="logo-badge" aria-hidden="true">
           <svg class="logo-mark" viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg">
@@ -3548,6 +3555,139 @@ body.mdx-workspace #previewShell{transition:padding-left .5s cubic-bezier(.22,1,
 
 /* deliverables / guide-room back button arrive softly */
 #mdhBackHome{transition:opacity .4s ease,transform .18s ease;}
+</style>
+
+<style id="one-window-app">
+/* ════════════════════════════════════════════════════════════════
+   ONE PRODUCT WINDOW — no page scroll; the brand's guide becomes the
+   centered glass object, scrolling inside the window (never the page).
+   Matches the Move In screen's single-window language.
+   ════════════════════════════════════════════════════════════════ */
+
+/* lock page-level scroll in every app state; inner panels scroll instead */
+html,body{height:100%;}
+body.mdx-active,body.md-home,body.md-deliv,body.md-guide-room{overflow:hidden!important;}
+
+/* ── BRAND GUIDE room: the guide as the centered object in the glass window ── */
+body.md-guide-room #previewShell{
+  position:fixed!important;left:50%!important;top:50%!important;
+  transform:translate(-50%,-50%)!important;
+  width:min(1560px,calc(100vw - 64px))!important;
+  height:calc(100dvh - 64px)!important;min-height:0!important;
+  border-radius:clamp(34px,4.4vw,62px)!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  padding-left:0!important;padding-bottom:0!important;
+  box-shadow:
+    0 0 0 1px rgba(44,90,60,.085),
+    inset 0 1px 0 rgba(255,255,255,.6),
+    0 18px 56px rgba(20,60,36,.07),
+    0 48px 130px rgba(20,60,36,.13)!important;
+  -webkit-overflow-scrolling:touch;
+}
+/* the guide's own toolbar stays pinned to the top of the window */
+body.md-guide-room #previewShell .preview-toolbar{border-radius:clamp(34px,4.4vw,62px) clamp(34px,4.4vw,62px) 0 0;}
+
+@media (max-width:720px){
+  body.md-guide-room #previewShell{
+    width:calc(100vw - 40px)!important;height:calc(100dvh - 40px)!important;border-radius:30px!important;
+  }
+}
+</style>
+
+<style id="workspace-window">
+/* ════════════════════════════════════════════════════════════════
+   WORKSPACE IN THE WINDOW — the editing surface now lives inside the
+   same centered glass product window as the Move In screen: a quiet
+   controls rail + the live preview, both floating in the window.
+   ════════════════════════════════════════════════════════════════ */
+
+/* no page scroll while editing — the rail and preview scroll internally */
+body.mdx-workspace{overflow:hidden!important;}
+
+/* the floating product window (identical to the intro / home) */
+body.mdx-workspace:not(.ws-expanded)::before,
+body.mdx-workspace:not(.ws-expanded)::after{
+  content:'';position:fixed;left:50%;top:50%;
+  width:min(1560px,calc(100vw - 64px));height:calc(100dvh - 64px);
+  transform:translate(-50%,-50%);border-radius:clamp(34px,4.4vw,62px);
+  pointer-events:none;z-index:0;
+}
+body.mdx-workspace:not(.ws-expanded)::before{
+  background:
+    radial-gradient(ellipse 88% 72% at 50% 0%, rgba(255,255,255,.72), rgba(255,255,255,.30) 58%, rgba(255,255,255,.12) 100%),
+    radial-gradient(ellipse 58% 42% at 50% 76%, rgba(183,221,202,.18), transparent 72%),
+    linear-gradient(180deg, rgba(255,255,255,.54), rgba(247,252,249,.30)),
+    rgba(255,255,255,.34);
+  backdrop-filter:blur(46px) saturate(172%);-webkit-backdrop-filter:blur(46px) saturate(172%);
+  border:.5px solid rgba(255,255,255,.78);
+  box-shadow:0 0 0 1px rgba(44,90,60,.075),inset 0 1px 0 rgba(255,255,255,.94),inset 0 -1px 0 rgba(44,90,60,.045),0 18px 56px rgba(20,60,36,.06),0 48px 130px rgba(20,60,36,.11),0 0 120px rgba(176,218,196,.10);
+}
+body.mdx-workspace:not(.ws-expanded)::after{
+  background:
+    linear-gradient(115deg, transparent 0 24%, rgba(255,255,255,.18) 39%, transparent 54%),
+    radial-gradient(ellipse 60% 40% at 50% 0%, rgba(255,255,255,.42), transparent 68%),
+    radial-gradient(ellipse 68% 28% at 50% 104%, rgba(136,188,158,.12), transparent 70%);
+  opacity:.72;mix-blend-mode:screen;
+}
+
+/* quiet controls rail — floats inside the window's left side */
+body.mdx-workspace:not(.ws-expanded) #mdxWorkspace{
+  position:fixed!important;
+  left:max(32px,calc((100vw - 1560px)/2 + 22px))!important;
+  top:max(32px,calc((100dvh - (100dvh - 64px))/2 + 22px))!important;
+  bottom:auto!important;right:auto!important;
+  width:clamp(330px,34vw,460px)!important;
+  height:calc(100dvh - 108px)!important;max-height:calc(100dvh - 108px)!important;
+  border-radius:28px!important;
+  background:rgba(255,255,255,.46)!important;
+  backdrop-filter:blur(36px) saturate(172%)!important;-webkit-backdrop-filter:blur(36px) saturate(172%)!important;
+  box-shadow:0 0 0 .5px rgba(255,255,255,.9),0 0 0 1px rgba(44,90,60,.1),inset 0 1px 0 rgba(255,255,255,.95),0 26px 70px rgba(20,60,36,.1)!important;
+  overflow:hidden!important;z-index:2!important;
+}
+
+/* live preview — floats inside the window's right side, scrolls internally */
+body.mdx-workspace:not(.ws-expanded) #previewShell{
+  position:fixed!important;
+  top:max(32px,calc((100dvh - (100dvh - 64px))/2 + 22px))!important;
+  height:calc(100dvh - 108px)!important;min-height:0!important;
+  left:calc(max(32px,calc((100vw - 1560px)/2 + 22px)) + clamp(330px,34vw,460px) + 18px)!important;
+  right:max(32px,calc((100vw - 1560px)/2 + 22px))!important;
+  padding-left:0!important;padding-bottom:0!important;
+  border-radius:28px!important;overflow-y:auto!important;overflow-x:hidden!important;
+  box-shadow:0 0 0 1px rgba(44,90,60,.085),0 26px 70px rgba(20,60,36,.1)!important;
+  z-index:2!important;
+}
+body.mdx-workspace:not(.ws-expanded) #previewShell .preview-toolbar{border-radius:28px 28px 0 0;}
+
+/* on narrow screens the rail sits over the preview full-window (existing behaviour) */
+@media (max-width:900px){
+  body.mdx-workspace:not(.ws-expanded)::before,
+  body.mdx-workspace:not(.ws-expanded)::after{width:calc(100vw - 32px);height:calc(100dvh - 32px);border-radius:28px;}
+  body.mdx-workspace:not(.ws-expanded) #mdxWorkspace{left:24px!important;right:24px!important;width:auto!important;height:calc(100dvh - 90px)!important;top:24px!important;}
+  body.mdx-workspace:not(.ws-expanded) #previewShell{display:none!important;}
+}
+</style>
+
+<style id="mdx-ai-toggle-style">
+.mdx-ai-toggle{display:flex;align-items:center;gap:12px;margin-top:24px;padding:12px 15px;border-radius:16px;cursor:pointer;max-width:460px;text-align:left;
+  background:rgba(255,255,255,.42);border:1px solid rgba(44,90,60,.12);
+  backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.9);transition:background .25s ease,box-shadow .25s ease;}
+.mdx-ai-toggle:hover{background:rgba(255,255,255,.62);}
+.mdx-ai-switch{flex:0 0 auto;width:38px;height:22px;border-radius:100px;position:relative;
+  background:rgba(44,90,60,.18);box-shadow:inset 0 0 0 1px rgba(44,90,60,.12);
+  transition:background .28s cubic-bezier(.22,1,.36,1);}
+.mdx-ai-switch i{position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;
+  box-shadow:0 2px 6px rgba(20,60,36,.22);transition:transform .28s cubic-bezier(.22,1,.36,1);}
+.mdx-ai-toggle.is-on .mdx-ai-switch{background:linear-gradient(180deg,#2f6a48,#1f4a33);box-shadow:inset 0 0 0 1px rgba(20,60,36,.2);}
+.mdx-ai-toggle.is-on .mdx-ai-switch i{transform:translateX(16px);}
+.mdx-ai-copy{display:flex;flex-direction:column;gap:2px;min-width:0;}
+.mdx-ai-copy b{font-size:12.5px;font-weight:500;color:rgba(8,30,18,.9);letter-spacing:-.01em;}
+.mdx-ai-copy em{font-style:normal;font-size:11px;font-weight:300;line-height:1.45;color:rgba(14,40,22,.55);}
+/* welcome-screen placement: a quiet glass pill pinned at the top */
+.mdx-ai-toggle.at-top{position:fixed;top:14px;left:50%;transform:translateX(-50%);z-index:6;margin:0;max-width:min(460px,calc(100vw - 28px));}
+.mdx-ai-toggle.at-top:hover{transform:translateX(-50%) translateY(-1px);}
+@media (max-width:560px){.mdx-ai-toggle.at-top{top:10px;}.mdx-ai-toggle.at-top .mdx-ai-copy em{display:none;}}
 </style>
 
 <div id="mdxWorkspace" aria-label="Brand Home Workspace">
@@ -6893,6 +7033,7 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     wireIntake();
     setupWorkspace();
     wireBrandHome();
+    wireAiToggle();
     // open on first step (the front door)
     var first=stepEl(0); if(first){first.classList.add('is-active');} updateDots(); updateBack(first); updateChrome();
   }
@@ -7165,6 +7306,72 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     });
     return c;
   }
+  /* ─── BRAND CONCIERGE AI (opt-in) — ports experience.html /api/analyze-brand-files ─── */
+  var MD_AI_KEY='mdUseBrandAI';
+  var mdLastIntakeFiles=null;
+  function mdAiAllowed(){
+    try{
+      var p=new URLSearchParams(location.search), m=(p.get('mode')||'').toLowerCase();
+      if(m==='ai'||p.get('ai')==='1')return true;
+      if(m==='local')return false;
+      return localStorage.getItem(MD_AI_KEY)==='1';
+    }catch(e){return false;}
+  }
+  function mdSetAiAllowed(on){try{localStorage.setItem(MD_AI_KEY,on?'1':'0');}catch(e){}syncAiToggle();}
+  function aiStatus(msg){var s=$('#mdxAiStatus');if(s&&msg!=null)s.textContent=msg;}
+  function aiGuessCat(name){var n=(name||'').toLowerCase(),e=(n.split('.').pop()||'');
+    if(['otf','ttf','woff','woff2'].indexOf(e)>=0||/font|type/.test(n))return 'Fonts';
+    if(/guide|brandbook|standard|rule/.test(n))return 'Guidelines';
+    if(/logo|wordmark|lockup|icon|mark/.test(n)||e==='svg')return 'Logos';
+    if(['jpg','jpeg','png','webp','gif'].indexOf(e)>=0||/photo|image|cover|hero|social/.test(n))return 'Photography';
+    return 'Documents';}
+  function aiIsImg(f){var n=(f.name||'').toLowerCase(),e=n.split('.').pop();return (f.type||'').indexOf('image/')===0||['svg','png','jpg','jpeg','webp'].indexOf(e)>=0;}
+  function aiToDataUrl(f){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result);};r.onerror=rej;r.readAsDataURL(f);});}
+  function aiHex(h){h=String(h||'').trim();if(!h)return '';if(h[0]!=='#')h='#'+h;return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(h)?h:'';}
+  function applyAiBrand(json){
+    if(!json)return;
+    var g=json.guide||json.brand||json||{};
+    var name=g.clientName||g.name||json.clientName||json.name;
+    if(name){var ci=$('#mdxClientName');if(ci){ci.value=String(name);ci.dispatchEvent(new Event('input',{bubbles:true}));}setField('clientName',String(name));}
+    var cat=g.category||json.category||json.industry;
+    if(cat){var ce=$('#mdxCategory');if(ce){ce.value=String(cat);ce.dispatchEvent(new Event('input',{bubbles:true}));}setField('category',String(cat));}
+    var tag=g.tagline||json.tagline;if(tag)setField('tagline',String(tag));
+    var pal=json.palette||json.colors||g.palette||g.colors||[];
+    if(Array.isArray(pal)){
+      var hexes=pal.map(function(c){return aiHex(typeof c==='string'?c:(c&&(c.hex||c.value||c.color)));}).filter(Boolean);
+      for(var i=0;i<5&&hexes.length;i++){setColor(i,hexes[i]||hexes[hexes.length-1]);}
+    }
+    if(typeof refreshArrive==='function')refreshArrive();
+    setTimeout(function(){if(typeof syncSwatches==='function')syncSwatches();},150);
+  }
+  async function analyzeBrandWithAI(files){
+    var imgs=Array.prototype.slice.call(files||[]).filter(aiIsImg);
+    if(!imgs.length){aiStatus('Add a logo or image for AI to read.');return false;}
+    aiStatus('Brand Concierge is reading your brand…');
+    try{
+      var urls=await Promise.all(imgs.map(aiToDataUrl));
+      var res=await fetch('/api/analyze-brand-files',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          preparationReport:{assets:imgs.map(function(f,i){return {id:'asset_'+(i+1),name:f.name,type:f.type,category:aiGuessCat(f.name)};})},
+          assets:urls.map(function(u,i){return {id:'asset_'+(i+1),name:imgs[i].name,type:imgs[i].type,category:aiGuessCat(imgs[i].name),dataUrl:u};})
+        })});
+      if(!res.ok)throw new Error('status '+res.status);
+      var json=await res.json();
+      applyAiBrand(json);
+      aiStatus('Brand Concierge read your brand with AI.');
+      return true;
+    }catch(err){console.warn('Brand Concierge AI unavailable:',err);aiStatus('AI unavailable — used local read.');return false;}
+  }
+  function syncAiToggle(){var t=$('#mdxAiToggle');if(!t)return;var on=mdAiAllowed();t.classList.toggle('is-on',on);t.setAttribute('aria-pressed',on?'true':'false');
+    var s=$('#mdxAiStatus'); if(s&&/^Off/.test(s.textContent||'')&&on)aiStatus('On — AI reads your brand from the files.');
+    if(!on&&s&&!/^Off/.test(s.textContent||''))aiStatus('Off — read locally. Turn on to let AI read your brand.');}
+  function wireAiToggle(){var t=$('#mdxAiToggle');if(!t||t.dataset.wired)return;t.dataset.wired='1';syncAiToggle();
+    function toggle(){var on=!mdAiAllowed();mdSetAiAllowed(on);
+      if(on){if(mdLastIntakeFiles){analyzeBrandWithAI(mdLastIntakeFiles);}else{aiStatus('On — it will read your next upload with AI.');}}
+      else{aiStatus('Off — everything stays local.');}}
+    t.addEventListener('click',toggle);
+    t.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
+  }
   function processIntake(fileList){
     var files=Array.prototype.slice.call(fileList||[]); if(!files.length)return;
     var logo=pickPrimaryLogo(files);
@@ -7173,7 +7380,12 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     if(logo){ assignSlot('primaryLogo',logo); assignSlot('heroLogo',logo); showConfirmLogo(logo); }
     maybeSuggestName(files,logo);
     intakeReceived=true; intakeCount=files.length;
-    setTimeout(function(){ var b=document.querySelector('#analyzePaletteBtn'); if(b)b.click(); setTimeout(syncSwatches,1100); },800);
+    mdLastIntakeFiles=files;
+    if(mdAiAllowed()){
+      analyzeBrandWithAI(files).then(function(ok){ if(!ok){ var b=document.querySelector('#analyzePaletteBtn'); if(b)b.click(); setTimeout(syncSwatches,1100); } });
+    } else {
+      setTimeout(function(){ var b=document.querySelector('#analyzePaletteBtn'); if(b)b.click(); setTimeout(syncSwatches,1100); },800);
+    }
     renderIntakeSummary(files,logo);
     if(STEPS[idx]==='receiving'){ setTimeout(function(){ if(STEPS[idx]==='receiving' && !busy) go(idx+1,1); }, 1300); }
   }
