@@ -3596,7 +3596,7 @@ body.md-state-concierge .concierge-missing {
      [SECTION 2]  CSS  —  END
      ████████████████████████████████████████████████████████████████████████ -->
 </head>
-<body>
+<body class="md-state-welcome">
 
 <!-- ████████████████████████████████████████████████████████████████████████
      [SECTION 3]  HTML  —  PAGE MARKUP / BODY
@@ -4512,6 +4512,31 @@ btnMovein.addEventListener('click', event => {
   function fileToDataUrl(file) {
     return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});
   }
+  /* Prepare an asset for the vision model: rasterize SVGs and flatten transparency
+     onto a neutral gray so the AI actually SEES the artwork (a raw SVG is invisible
+     to it, and transparent logos get mangled by the model's own flattening).
+     Falls back to the raw data URL on any failure so the pipeline never breaks. */
+  async function prepForVision(file){
+    try{
+      if(!file) return null;
+      const isSvg=(file.type==='image/svg+xml')||/\.svg$/i.test(file.name||'');
+      const isImage=isSvg||/^image\//.test(file.type||'');
+      if(!isImage) return await fileToDataUrl(file);          // non-visual: send as-is
+      const srcUrl=await fileToDataUrl(file);
+      const img=new Image(); img.crossOrigin='anonymous';
+      await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=srcUrl; });
+      let w=img.naturalWidth||img.width||0, h=img.naturalHeight||img.height||0;
+      if(!w||!h){ w=512; h=512; }                             // some SVGs report no size
+      const MAX=1024, scale=Math.min(1,MAX/Math.max(w,h));
+      w=Math.round(w*scale); h=Math.round(h*scale);
+      const c=document.createElement('canvas'); c.width=w; c.height=h;
+      const ctx=c.getContext('2d');
+      ctx.fillStyle='#808080';                                // neutral gray: dark AND light logos stay visible
+      ctx.fillRect(0,0,w,h);
+      ctx.drawImage(img,0,0,w,h);
+      return c.toDataURL('image/png');
+    }catch(e){ return await fileToDataUrl(file); }             // any failure: don't break the pipeline
+  }
   function downloadBlob(blob, name) {
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
   }
@@ -4897,7 +4922,9 @@ btnMovein.addEventListener('click', event => {
           assets: dataUrls.map((url, i) => ({
             id: analyzable[i].uploadId,
             name: analyzable[i].file.name,
-            type: analyzable[i].file.type,
+            // Report the type of what we actually send: prepForVision rasterizes
+            // SVGs to PNG, so trust the data URL's real mime, not the original file's.
+            type: (/^data:([^;,]+)/.exec(url || '') || [])[1] || analyzable[i].file.type,
             category: report?.assets?.find(a => a.uploadId === analyzable[i].uploadId)?.category,
             dataUrl: url
           }))
@@ -4977,7 +5004,7 @@ btnMovein.addEventListener('click', event => {
         throw new Error('Please include at least one PNG, JPG, WEBP, or SVG so Moving Day can prepare a visual review.');
       }
 
-      const dataUrls = await Promise.all(analyzable.map(item => fileToDataUrl(item.file)));
+      const dataUrls = await Promise.all(analyzable.map(item => prepForVision(item.file)));
       stepDone(1);
 
       setPreparingLine(ANALYSIS_MODE === 'local' ? 'Organizing your foundation' : 'Understanding your visual system');
