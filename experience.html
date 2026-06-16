@@ -5203,11 +5203,82 @@ btnMovein.addEventListener('click', event => {
   });
 
 
-  document.getElementById('prepareHomeBtn')?.addEventListener('click', event => {
+  /* ════════════════════ EXPERIENCE TO BRAND HOME BRIDGE ════════════════════ */
+  /* ════════════════════ BRAND DNA SAVE ════════════════════ */
+  const BRAND_DNA_KEY = 'movingDay_brandDNA_v1';
+  function dnaFileToDataURL(file){
+    return new Promise((res)=>{ if(!file) return res(null); const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>res(null); r.readAsDataURL(file); });
+  }
+  function dnaFindAsset(re){
+    return (typeof orgAssets!=='undefined' ? orgAssets : []).find(a =>
+      re.test(String(a.role||'')+' '+String(a.label||'')+' '+String(a.folder||'')+' '+String(a.originalName||'')));
+  }
+  async function saveBrandDNA(){
+    const d = (typeof aiData!=='undefined' && aiData) ? aiData : {};
+    const guide = d.guide || {}; const brand = d.brand || {};
+    const rawPalette = d.palette || d.colors || [];
+    const colors = rawPalette.slice(0,5).map(c => ({
+      hex: (typeof normalizeHex==='function' ? normalizeHex(c.hex||c.value||c) : (c.hex||c.value||c)) || '#15140F',
+      name: c.name || 'Color'
+    }));
+    const typo = d.typography || {};
+    const report = (typeof preparationReport!=='undefined' && preparationReport) ? preparationReport : {};
+
+    const primaryAsset  = dnaFindAsset(/PrimaryLogo|Primary|Logo/i) || null;
+    const iconAsset     = dnaFindAsset(/Icon|Mark/i) || null;
+    const wordmarkAsset = dnaFindAsset(/Wordmark|Logotype/i) || null;
+    const [primaryLogo, iconMark, wordmark] = await Promise.all([
+      primaryAsset  ? dnaFileToDataURL(primaryAsset.file)  : null,
+      iconAsset     ? dnaFileToDataURL(iconAsset.file)     : null,
+      wordmarkAsset ? dnaFileToDataURL(wordmarkAsset.file) : null,
+    ]);
+
+    const assetsSummary = (typeof orgAssets!=='undefined' ? orgAssets : []).map(a => ({
+      name: a.originalName, role: a.role, label: a.label, folder: a.folder,
+      category: ((report.assets||[]).find(x => x.uploadId === a.uploadId)||{}).category || a.folder || ''
+    }));
+
+    const dna = {
+      version: 1,
+      createdAt: new Date().toISOString(),
+      brandName: guide.clientName || brand.name || '',
+      tagline: guide.description || (d.copySuggestions && d.copySuggestions.tagline) || brand.positioning || '',
+      category: guide.category || brand.industry || '',
+      primaryLogo: primaryLogo ? { name: primaryAsset.originalName,  dataUrl: primaryLogo } : null,
+      iconMark:    iconMark    ? { name: iconAsset.originalName,     dataUrl: iconMark    } : null,
+      wordmark:    wordmark    ? { name: wordmarkAsset.originalName, dataUrl: wordmark    } : null,
+      colors: colors,
+      typography: {
+        display: { name: typo.displayFont || (typo.display&&typo.display.name) || '', usage: (typo.display&&typo.display.usage) || '' },
+        body:    { name: typo.bodyFont    || (typo.body&&typo.body.name)    || '', usage: (typo.body&&typo.body.usage)    || '' }
+      },
+      assets: assetsSummary,
+      recommendations: Array.isArray(d.recommendations) ? d.recommendations : [],
+      sourceFiles: {
+        count: report.preparedFileCount || report.preparedCount || assetsSummary.length || 0,
+        names: assetsSummary.map(a => a.name).slice(0,60),
+        categories: assetsSummary.reduce((m,a)=>{ const k=a.category||'Other'; m[k]=(m[k]||0)+1; return m; },{})
+      }
+    };
+
+    try { localStorage.setItem(BRAND_DNA_KEY, JSON.stringify(dna)); }
+    catch(e){
+      // storage too small for embedded logos — keep the essentials, drop heavy data URLs
+      dna.primaryLogo = primaryAsset ? { name: primaryAsset.originalName } : null;
+      dna.iconMark = null; dna.wordmark = null;
+      try { localStorage.setItem(BRAND_DNA_KEY, JSON.stringify(dna)); }
+      catch(e2){ console.warn('Brand DNA could not be saved:', e2); }
+    }
+    return dna;
+  }
+
+  // Prepare Brand Home → save Brand DNA, then cross to the Brand Home Workspace.
+  document.getElementById('prepareHomeBtn')?.addEventListener('click', async event => {
     event.preventDefault();
     event.stopPropagation();
-    goToState('welcome_home');
-    showToast('Brand Home preparation started');
+    showToast('Preparing your Brand Home…');
+    try { await saveBrandDNA(); } catch(e){ console.warn('Brand DNA save failed:', e); }
+    window.location.href = 'index.html';
   });
 
 /* ──────────────────────────────────────────────────────────────────────────
