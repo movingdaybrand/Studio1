@@ -7497,8 +7497,45 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     }, function(){ assignLogosFromDNA().then(enterHome, enterHome); });
   }
 
-  function processIntake(fileList){
-    var files=Array.prototype.slice.call(fileList||[]); if(!files.length)return;
+  /* ── ZIP intake: load JSZip on demand, expand archives into real Files ── */
+  function ensureJSZip(){
+    if(window.JSZip)return Promise.resolve(window.JSZip);
+    if(window.__jszipPromise)return window.__jszipPromise;
+    window.__jszipPromise=new Promise(function(resolve,reject){
+      var s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      s.onload=function(){resolve(window.JSZip);};
+      s.onerror=function(){reject(new Error('JSZip failed to load'));};
+      document.head.appendChild(s);
+    });
+    return window.__jszipPromise;
+  }
+  async function expandZips(fileList){
+    var files=Array.prototype.slice.call(fileList||[]);
+    if(!files.some(function(f){return /\.zip$/i.test(f.name||'');}))return files;
+    var JSZipLib; try{ JSZipLib=await ensureJSZip(); }catch(e){ return files; } /* offline: keep zip as-is */
+    var out=[];
+    for(var i=0;i<files.length;i++){
+      var f=files[i];
+      if(!/\.zip$/i.test(f.name||'')){ out.push(f); continue; }
+      try{
+        var zip=await JSZipLib.loadAsync(f);
+        var names=Object.keys(zip.files);
+        for(var j=0;j<names.length;j++){
+          var entry=zip.files[names[j]];
+          if(entry.dir)continue;
+          if(/__MACOSX/.test(names[j]))continue;        /* mac resource forks */
+          var base=names[j].split('/').pop();
+          if(!base||/^\./.test(base))continue;          /* folders, .DS_Store, dotfiles */
+          var blob=await entry.async('blob');
+          out.push(new File([blob],base,{type:blob.type||''}));
+        }
+      }catch(err){ out.push(f); }                        /* unreadable zip: keep original */
+    }
+    return out;
+  }
+  async function processIntake(fileList){
+    var files=await expandZips(fileList); if(!files.length)return;
     var logo=pickPrimaryLogo(files);
     var others=files.filter(function(f){return f!==logo;});
     forwardToEngine(others);
