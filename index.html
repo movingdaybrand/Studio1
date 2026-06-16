@@ -2356,9 +2356,9 @@ body.mdx-done #mdxExperience{display:none!important;}
 .mdx-bar-btn.ghost:hover{color:rgba(10,32,18,.86);box-shadow:none;}
 
 /* ── stage ─────────────────────────────────────────────────────── */
-.mdx-stage{position:relative;z-index:2;flex:1 1 auto;display:flex;align-items:center;justify-content:center;padding:clamp(20px,4vw,48px);overflow-y:auto;}
+.mdx-stage{position:relative;z-index:2;flex:1 1 auto;min-height:0;display:flex;flex-direction:column;padding:clamp(20px,4vw,48px);overflow-y:auto;}
 .mdx-step{
-  width:100%;max-width:560px;display:none;flex-direction:column;align-items:center;text-align:center;
+  width:100%;max-width:560px;margin:auto;display:none;flex-direction:column;align-items:center;text-align:center;
 }
 .mdx-step.is-active{display:flex;}
 .mdx-step.is-enter{animation:mdxRise .85s cubic-bezier(.22,1,.36,1) both;}
@@ -2484,8 +2484,164 @@ body.mdx-done #mdxExperience{display:none!important;}
   .mdx-bar i{display:none;}
   .mdx-bar-btn.ghost{display:none;}
 }
+/* ── front door ───────────────────────────────────────────────── */
+.mdx-door-badge{width:62px;height:62px;border-radius:19px;display:grid;place-items:center;margin:0 auto 1.25rem;background:rgba(255,255,255,.55);backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);box-shadow:0 0 0 .5px rgba(255,255,255,.95),0 0 0 1px rgba(44,90,60,.12),inset 0 1px 0 rgba(255,255,255,1),0 14px 40px rgba(20,60,36,.10);}
+.mdx-door-badge svg{width:30px;height:21px;fill:rgba(20,41,31,.9);}
+.mdx-door-wordmark{font-size:10.5px;font-weight:500;letter-spacing:.34em;text-transform:uppercase;color:rgba(18,46,28,.5);margin-bottom:1.5rem;}
+.mdx-headline.door{font-size:clamp(2.3rem,5.4vw,3.6rem);margin-bottom:1rem;}
+.mdx-bar{transition:opacity .5s cubic-bezier(.22,1,.36,1),transform .5s cubic-bezier(.22,1,.36,1);}
+#mdxExperience.at-door .mdx-bar{opacity:0;transform:translateY(-10px);pointer-events:none;}
+
+/* ── intake drop ──────────────────────────────────────────────── */
+.mdx-drop{display:flex;flex-direction:column;align-items:center;gap:14px;cursor:pointer;text-align:center;border:1px dashed rgba(44,90,60,.28);transition:border-color .2s ease,background .2s ease,transform .18s ease;}
+.mdx-drop:hover{border-color:rgba(44,110,70,.5);background:rgba(255,255,255,.72);transform:translateY(-1px);}
+.mdx-drop.is-over{border-style:solid;border-color:rgba(44,140,84,.6);background:rgba(236,250,242,.82);}
+.mdx-drop-ico{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;background:rgba(255,255,255,.65);box-shadow:inset 0 0 0 1px rgba(44,90,60,.1),0 8px 20px rgba(20,60,36,.07);transition:transform .25s cubic-bezier(.22,1,.36,1);}
+.mdx-drop.is-over .mdx-drop-ico{transform:translateY(-3px) scale(1.04);}
+.mdx-drop-ico svg{width:23px;height:23px;stroke:rgba(20,60,36,.55);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.mdx-drop-head{font-size:1.02rem;font-weight:300;color:rgba(8,30,18,.82);}
+.mdx-drop-sub{font-size:.78rem;font-weight:300;color:rgba(14,40,22,.5);margin-top:3px;}
+.mdx-tags{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;}
+.mdx-tags span{font-size:9px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:rgba(14,40,22,.5);background:rgba(255,255,255,.55);border:1px solid rgba(44,90,60,.12);border-radius:100px;padding:4px 10px;}
+.mdx-intake-summary{margin-top:14px;width:100%;text-align:left;font-size:.82rem;font-weight:300;line-height:1.55;color:rgba(20,64,38,.82);background:rgba(236,250,242,.6);border:1px solid rgba(44,110,70,.18);border-radius:16px;padding:13px 16px;animation:mdxFade .5s ease both;}
+.mdx-intake-summary b{font-weight:500;color:rgba(14,50,28,.92);}
+.mdx-intake-summary .row{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px;}
+.mdx-intake-summary .pill{font-size:9px;letter-spacing:.05em;text-transform:uppercase;background:rgba(255,255,255,.72);border:1px solid rgba(44,90,60,.14);border-radius:100px;padding:4px 9px;color:rgba(14,50,28,.72);}
+
+/* ── conversational layout (Concierge onward) ─────────────────── */
+.mdx-step.wide{max-width:880px;}
+.mdx-split{display:grid;grid-template-columns:1fr 1.05fr;gap:clamp(20px,3vw,42px);align-items:start;text-align:left;width:100%;}
+.mdx-split-left{position:sticky;top:0;padding-top:4px;}
+.mdx-headline.left,.mdx-sub.left{text-align:left;margin-left:0;margin-right:0;}
+.mdx-sub.left{max-width:none;margin-bottom:0;}
+.mdx-split-right{display:flex;flex-direction:column;gap:12px;}
+.mdx-confirm-card{background:rgba(255,255,255,.55);border:1px solid rgba(44,90,60,.12);border-radius:16px;padding:13px 15px;backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);box-shadow:inset 0 1px 0 rgba(255,255,255,.9);}
+.mdx-confirm-card>label{display:block;font-size:8.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:rgba(14,40,22,.44);margin-bottom:7px;}
+.mdx-confirm-row{display:grid;grid-template-columns:1.4fr 1fr;gap:12px;}
+.mdx-confirm-card .mdx-swatches{gap:7px;}
+.mdx-confirm-card .mdx-chips{margin-top:8px;}
+.mdx-concierge-logo{display:flex;align-items:center;gap:12px;margin-top:22px;}
+.mdx-confirm-logo{width:46px;height:46px;border-radius:13px;background:rgba(255,255,255,.7) center/contain no-repeat;box-shadow:inset 0 0 0 1px rgba(44,90,60,.12);flex:0 0 auto;}
+.mdx-confirm-logo.is-set{background-color:#fff;}
+.mdx-confirm-logo-state{font-size:11px;font-weight:300;color:rgba(14,40,22,.55);}
+
+/* ── arrival-check (relief) ───────────────────────────────────── */
+.mdx-check-glyph{width:64px;height:64px;border-radius:50%;display:grid;place-items:center;margin:0 auto 1.3rem;background:rgba(236,250,242,.7);box-shadow:inset 0 0 0 1px rgba(44,110,70,.2),0 12px 34px rgba(20,90,50,.12);animation:mdxCheckIn .7s cubic-bezier(.22,1,.36,1) both;}
+.mdx-check-glyph svg{width:28px;height:28px;stroke:rgba(30,120,72,.9);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;animation:mdxDraw .6s .2s cubic-bezier(.22,1,.36,1) forwards;}
+@keyframes mdxCheckIn{from{opacity:0;transform:scale(.86);}to{opacity:1;transform:none;}}
+@keyframes mdxDraw{to{stroke-dashoffset:0;}}
+
+/* ── preparing (trust) ────────────────────────────────────────── */
+.mdx-prep-ring.big{width:46px;height:46px;border-width:2px;margin:0 auto 1.4rem;}
+
+/* ── recommendations (confidence) ─────────────────────────────── */
+.mdx-recos{display:flex;flex-direction:column;gap:10px;}
+.mdx-reco{display:flex;gap:13px;align-items:flex-start;cursor:pointer;background:rgba(255,255,255,.5);border:1px solid rgba(44,90,60,.12);border-radius:16px;padding:14px 15px;transition:border-color .2s ease,background .2s ease,transform .18s ease;}
+.mdx-reco:hover{border-color:rgba(44,110,70,.4);background:rgba(255,255,255,.72);transform:translateY(-1px);}
+.mdx-reco-tick{width:24px;height:24px;border-radius:50%;flex:0 0 auto;display:grid;place-items:center;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px rgba(44,90,60,.18);transition:.2s;}
+.mdx-reco-tick svg{width:13px;height:13px;stroke:transparent;stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:.2s;}
+.mdx-reco.is-noted{background:rgba(236,250,242,.7);border-color:rgba(44,140,84,.4);}
+.mdx-reco.is-noted .mdx-reco-tick{background:rgba(44,130,80,.92);box-shadow:none;}
+.mdx-reco.is-noted .mdx-reco-tick svg{stroke:#fff;}
+.mdx-reco-title{font-size:13px;font-weight:500;color:rgba(10,32,18,.84);}
+.mdx-reco-note{font-size:11.5px;font-weight:300;line-height:1.5;color:rgba(14,40,22,.55);margin-top:3px;}
+
+/* Brand Home (full builder) opens after Welcome Home, not during the flow */
+#mdxExperience .mdx-bar #mdxControlsBtn{display:none;}
+
+@media(max-width:720px){
+  .mdx-split{grid-template-columns:1fr;gap:18px;}
+  .mdx-split-left{position:static;}
+  .mdx-step.wide{max-width:560px;}
+  .mdx-confirm-row{grid-template-columns:1fr;}
+}
+
+/* ── experience.html intro choreography (exact) ───────────────── */
+@keyframes mdxWordRise{to{opacity:1;transform:translateY(0);}}
+.mdx-headline .w{display:inline-block;opacity:0;transform:translateY(8px);animation:mdxWordRise .9s cubic-bezier(.22,1,.36,1) forwards;}
+/* the arrival door matches experience.html exactly: big 300-weight headline, staggered rise */
+.mdx-headline.door{font-size:clamp(2.95rem,5.9vw,4.45rem);font-weight:300;line-height:1.105;letter-spacing:-.052em;margin-bottom:1.15rem;}
+.mdx-headline.door .soft{color:rgba(10,30,18,.52);}
+.mdx-step[data-step="arrival"].is-enter{animation:none;}
+.mdx-step[data-step="arrival"] .mdx-door-badge{opacity:0;transform:translateY(8px);animation:mdxWordRise 1.1s cubic-bezier(.22,1,.36,1) .15s forwards;}
+.mdx-step[data-step="arrival"] .mdx-door-wordmark{opacity:0;transform:translateY(8px);animation:mdxWordRise 1s cubic-bezier(.22,1,.36,1) .38s forwards;}
+.mdx-step[data-step="arrival"] .mdx-sub{opacity:0;transform:translateY(8px);animation:mdxWordRise .9s cubic-bezier(.22,1,.36,1) 1.18s forwards;}
+.mdx-step[data-step="arrival"] .mdx-actions{opacity:0;transform:translateY(8px);animation:mdxWordRise .9s cubic-bezier(.22,1,.36,1) 1.46s forwards;}
+
+/* ── the CTA is experience.html's floating glass pill (with shimmer sweep) ── */
+.mdx-cta{padding:.88rem 2.28rem;font-weight:450;letter-spacing:.09em;}
+.mdx-cta::after{content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.30),transparent);transition:left .7s ease;pointer-events:none;}
+.mdx-cta:hover::after{left:160%;}
+
+/* ── preparing ring matches experience.html's calm 2s ring ────── */
+.mdx-prep-ring.big{width:34px;height:34px;border:1px solid rgba(16,52,28,.10);border-top-color:rgba(16,52,28,.38);animation:mdxSpin 2s linear infinite;margin:0 auto 1.5rem;}
+.mdx-step[data-step="preparing"] .mdx-headline{font-weight:200;}
+
+/* ── fit to viewport height (no zoom needed on short screens) ──── */
+@media (max-height:780px){
+  .mdx-stage{padding:clamp(12px,2.2vh,30px) clamp(20px,4vw,48px);}
+  .mdx-headline{font-size:clamp(1.6rem,3.4vw,2.3rem);}
+  .mdx-headline.door{font-size:clamp(2rem,5vw,3.1rem);}
+  .mdx-headline.left{font-size:clamp(1.5rem,2.6vw,2rem);margin-bottom:.5rem;}
+  .mdx-sub,.mdx-sub.left{font-size:.82rem;line-height:1.5;margin-bottom:1.4rem;}
+  .mdx-sub.left{margin-bottom:0;}
+  .mdx-card{padding:clamp(16px,2.4vw,26px);}
+  .mdx-confirm-card{padding:10px 12px;}
+  .mdx-confirm-card .mdx-swatch-well{height:36px!important;}
+  .mdx-split{gap:22px;}
+  .mdx-concierge-logo{margin-top:12px;}
+  .mdx-actions{margin-top:1.1rem;}
+  .mdx-recos{gap:8px;}.mdx-reco{padding:10px 12px;}
+  .mdx-drop{padding:18px;gap:9px;}.mdx-drop-ico{width:42px;height:42px;}
+  .mdx-door-badge{width:54px;height:54px;margin-bottom:.9rem;}
+  .mdx-door-wordmark{margin-bottom:1rem;}
+}
+@media (max-height:620px){
+  .mdx-headline.left{font-size:1.35rem;}
+  .mdx-sub.left{font-size:.76rem;}
+  .mdx-confirm-card .mdx-swatch-well{height:30px!important;}
+  .mdx-concierge-logo{display:none;}
+  .mdx-split{gap:16px;}
+  .mdx-confirm-card .mdx-swatch input[type=text]{display:none;}
+  .mdx-door-badge{width:46px;height:46px;}
+}
+/* ── force-compact Concierge so it always centers ─────────────── */
+.mdx-confirm-card .mdx-swatch-well{aspect-ratio:auto!important;height:42px!important;border-radius:11px!important;}
+.mdx-confirm-card .mdx-swatch{gap:5px!important;}
+.mdx-confirm-card .mdx-swatch-role{font-size:8px!important;}
+.mdx-confirm-card .mdx-swatch input[type=text]{height:24px!important;font-size:9px!important;}
+.mdx-confirm-card .mdx-chips{margin-top:7px!important;}
+.mdx-confirm-card #mdxExtractColors{padding:6px 12px!important;font-size:10.5px!important;}
+.mdx-split-right{gap:9px!important;}
+/* ── compact rooms so they center on one screen (no bottom clipping) ── */
+.mdx-step.wide{max-width:820px;}
+.mdx-split{gap:clamp(16px,2.2vw,32px);align-items:center;}
+.mdx-headline.left{font-size:clamp(1.8rem,3.2vw,2.5rem);margin-bottom:.7rem;}
+.mdx-sub.left{font-size:.86rem;line-height:1.55;margin-bottom:0;}
+.mdx-split-right{gap:10px;}
+.mdx-confirm-card{padding:12px 14px;}
+.mdx-confirm-card>label{margin-bottom:6px;}
+.mdx-confirm-card .mdx-input,.mdx-confirm-card .mdx-textarea{padding:9px 12px;font-size:13.5px;}
+.mdx-confirm-card .mdx-textarea{min-height:50px;}
+/* palette wells render as small bars, not large squares */
+.mdx-confirm-card .mdx-swatch-well{aspect-ratio:auto;height:48px;}
+.mdx-confirm-card .mdx-swatches{gap:6px;}
+.mdx-concierge-logo{margin-top:16px;}
+.mdx-actions{margin-top:1.5rem;}
+/* receiving drop: smaller + centered */
+.mdx-drop{padding:22px;gap:11px;}
+.mdx-drop-ico{width:46px;height:46px;}
+.mdx-drop-ico svg{width:21px;height:21px;}
+.mdx-tags{margin-top:2px;}
+.mdx-intake-summary{margin-top:11px;padding:11px 14px;}
+/* recommendations: tighter cards */
+.mdx-reco{padding:12px 13px;}
+.mdx-reco-note{font-size:11px;}
+
 @media(prefers-reduced-motion:reduce){
-  .mdx-step.is-enter,.mdx-step.is-leave,.mdx-prep.on,.mdx-prep-ring{animation:none!important;}
+  .mdx-step.is-enter,.mdx-step.is-leave,.mdx-prep.on,.mdx-prep-ring,.mdx-check-glyph,.mdx-check-glyph svg,
+  .mdx-headline .w,.mdx-step[data-step="arrival"] .mdx-door-badge,.mdx-step[data-step="arrival"] .mdx-door-wordmark,
+  .mdx-step[data-step="arrival"] .mdx-sub,.mdx-step[data-step="arrival"] .mdx-actions{animation:none!important;opacity:1!important;transform:none!important;stroke-dashoffset:0!important;}
 }
 </style>
 
@@ -2493,12 +2649,12 @@ body.mdx-done #mdxExperience{display:none!important;}
   <header class="mdx-bar">
     <div class="mdx-bar-brand">
       <svg viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M769.4,89.65v111.85h-39.04c.07-25.79-35.02-31.29-50.28-36.68-16.18-5.71,0-14.05,0-14.05l89.32-61.11Z"/><path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/></svg>
-      <b>Moving Day</b><i>Brand Home setup</i>
+      <b>Moving Day</b><i id="mdxChapter">Arrival</i>
     </div>
     <div class="mdx-bar-progress" id="mdxProgress" aria-hidden="true"></div>
     <div class="mdx-bar-actions">
-      <button class="mdx-bar-btn" id="mdxControlsBtn" type="button">Full controls</button>
-      <button class="mdx-bar-btn ghost" id="mdxSkipBtn" type="button">Skip to guide</button>
+      <button class="mdx-bar-btn" id="mdxControlsBtn" type="button">Open workspace</button>
+      <button class="mdx-bar-btn ghost" id="mdxSkipBtn" type="button">Skip setup</button>
     </div>
   </header>
 
@@ -2509,142 +2665,484 @@ body.mdx-done #mdxExperience{display:none!important;}
       <div class="mdx-prep-text" id="mdxPrepText">Preparing the next room…</div>
     </div>
 
-    <!-- 1 · WELCOME -->
-    <section class="mdx-step" data-step="welcome">
+    <!-- ───────────────────────── ARRIVAL · hope ───────────────────────── -->
+    <section class="mdx-step door-step" data-step="arrival">
+      <div class="mdx-door-badge" aria-hidden="true">
+        <svg viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg"><path d="M769.4,89.65v111.85h-39.04c.07-25.79-35.02-31.29-50.28-36.68-16.18-5.71,0-14.05,0-14.05l89.32-61.11Z"/><path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/></svg>
+      </div>
+      <p class="mdx-door-wordmark">Moving Day</p>
+      <h1 class="mdx-headline door" aria-label="Every brand deserves a home."><span class="w" style="animation-delay:.55s">Every&nbsp;</span><span class="w" style="animation-delay:.67s">brand&nbsp;</span><span class="w" style="animation-delay:.83s">deserves&nbsp;</span><span class="w" style="animation-delay:.95s">a&nbsp;</span><span class="w soft" style="animation-delay:1.05s">home.</span></h1>
+      <p class="mdx-sub">Move everything in. We'll prepare the rest.</p>
+      <div class="mdx-actions">
+        <button class="mdx-cta" data-mdx-next type="button">Move a brand in<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+    </section>
+
+    <!-- ──────────────────────── RECEIVING · the drop ───────────────────── -->
+    <section class="mdx-step intake-step" data-step="receiving">
+      <p class="mdx-kicker">Receiving</p>
+      <h1 class="mdx-headline">Bring the <span class="soft">whole brand</span> over.</h1>
+      <p class="mdx-sub">Drop the messy folder — logos, fonts, guidelines, photos, decks, PDFs, old files. I'll sort the rest and find the foundation.</p>
+      <label class="mdx-card mdx-drop" id="mdxDrop">
+        <input type="file" id="mdxDropInput" multiple hidden
+          accept=".pdf,.png,.jpg,.jpeg,.svg,.gif,.webp,.ai,.eps,.zip,.ttf,.otf,.woff,.woff2,.pptx,.docx,.xlsx,.mp4,.mov,.sketch,.fig,image/*">
+        <div class="mdx-drop-ico"><svg viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg></div>
+        <div class="mdx-drop-copy">
+          <p class="mdx-drop-head">Drop it all here</p>
+          <p class="mdx-drop-sub">or click to choose files — your assets stay private</p>
+        </div>
+        <div class="mdx-tags" aria-hidden="true"><span>Logos</span><span>Fonts</span><span>Guidelines</span><span>Photography</span><span>PDFs</span><span>Decks</span></div>
+      </label>
+      <div class="mdx-intake-summary" id="mdxIntakeSummary" aria-live="polite" hidden></div>
+      <div class="mdx-actions">
+        <button class="mdx-back" data-mdx-back type="button">Back</button>
+        <button class="mdx-cta" id="mdxIntakeNext" data-mdx-next type="button">I'll add later<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+    </section>
+
+    <!-- ──────────────────── ARRIVAL CHECK · relief ─────────────────────── -->
+    <section class="mdx-step" data-step="check">
+      <div class="mdx-check-glyph" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><polyline points="5 13 10 18 19 7"/></svg>
+      </div>
+      <p class="mdx-kicker">Receiving</p>
+      <h1 class="mdx-headline">Everything made it <span class="soft">in.</span></h1>
+      <p class="mdx-sub" id="mdxCheckSub">Your brand is in, sorted, and secure. Nothing else to do — I'll take it from here.</p>
+      <div class="mdx-actions">
+        <button class="mdx-back" data-mdx-back type="button">Back</button>
+        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+    </section>
+
+    <!-- ─────────────────── QUIET ORGANIZATION · trust ──────────────────── -->
+    <section class="mdx-step" data-step="preparing">
+      <div class="mdx-prep-ring big" aria-hidden="true"></div>
+      <p class="mdx-kicker">Preparing</p>
+      <h1 class="mdx-headline">Preparing your <span class="soft">brand…</span></h1>
+      <p class="mdx-sub" id="mdxPreparingSub">Arranging the foundation of your visual identity.</p>
+    </section>
+
+    <!-- ─────────────────── BRAND CONCIERGE · conversation ───────────────── -->
+    <section class="mdx-step wide" data-step="concierge">
+      <div class="mdx-split">
+        <div class="mdx-split-left">
+          <p class="mdx-kicker">Brand Concierge</p>
+          <h1 class="mdx-headline left">I've found your <span class="soft">foundation.</span></h1>
+          <p class="mdx-sub left">I've organized everything and pulled the essentials of your visual identity. Confirm a few details and I'll prepare your Brand Home.</p>
+          <div class="mdx-concierge-logo">
+            <span class="mdx-confirm-logo" id="mdxConfirmLogo" aria-hidden="true"></span>
+            <span class="mdx-confirm-logo-state" id="mdxConfirmLogoState">Logo will be set inside Brand Home</span>
+          </div>
+        </div>
+        <div class="mdx-split-right">
+          <div class="mdx-confirm-card">
+            <label>Brand name</label>
+            <input class="mdx-input" id="mdxClientName" type="text" placeholder="Brand name" autocomplete="off">
+          </div>
+          <div class="mdx-confirm-row">
+            <div class="mdx-confirm-card">
+              <label>What they do</label>
+              <input class="mdx-input" id="mdxCategory" type="text" placeholder="e.g. Law firm">
+            </div>
+            <div class="mdx-confirm-card">
+              <label>Delivered</label>
+              <input class="mdx-input" id="mdxDate" type="text" placeholder="Month Year">
+            </div>
+          </div>
+          <div class="mdx-confirm-card">
+            <label>Palette</label>
+            <div class="mdx-swatches" id="mdxSwatches"></div>
+            <div class="mdx-chips"><button class="mdx-chip" id="mdxExtractColors" type="button" hidden>Re-read from the logo</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="mdx-actions">
+        <button class="mdx-back" data-mdx-back type="button">Back</button>
+        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+    </section>
+
+    <!-- ───────────────────── RECOMMENDATIONS · confidence ──────────────── -->
+    <section class="mdx-step wide" data-step="recommendations">
+      <div class="mdx-split">
+        <div class="mdx-split-left">
+          <p class="mdx-kicker">Review</p>
+          <h1 class="mdx-headline left">A few small <span class="soft">recommendations.</span></h1>
+          <p class="mdx-sub left">Before we continue, there are three small recommendations I'd make before preparing your Brand Home. None are required — you can handle them now or later, inside.</p>
+        </div>
+        <div class="mdx-split-right">
+          <div class="mdx-recos" id="mdxRecos"></div>
+        </div>
+      </div>
+      <div class="mdx-actions">
+        <button class="mdx-back" data-mdx-back type="button">Back</button>
+        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+    </section>
+
+    <!-- ───────────────────── WELCOME HOME · belonging ──────────────────── -->
+    <section class="mdx-step door-step" data-step="home">
+      <div class="mdx-door-badge" aria-hidden="true">
+        <svg viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg"><path d="M769.4,89.65v111.85h-39.04c.07-25.79-35.02-31.29-50.28-36.68-16.18-5.71,0-14.05,0-14.05l89.32-61.11Z"/><path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/></svg>
+      </div>
       <p class="mdx-kicker">Welcome home</p>
-      <h1 class="mdx-headline">Let's move <span class="soft">a brand in.</span></h1>
-      <p class="mdx-sub">Start with the name. Everything else arrives one calm step at a time.</p>
-      <div class="mdx-card">
-        <input class="mdx-name-field" id="mdxClientName" type="text" placeholder="Brand name" autocomplete="off" aria-label="Brand name">
-        <div class="mdx-mini-grid">
-          <div class="mdx-field"><label>What they do</label><input class="mdx-input" id="mdxCategory" type="text" placeholder="e.g. Law firm"></div>
-          <div class="mdx-field"><label>Delivered</label><input class="mdx-input" id="mdxDate" type="text" placeholder="Month Year"></div>
-          <div class="mdx-field full"><label>One-line brand message</label><textarea class="mdx-textarea" id="mdxTagline" placeholder="A short, clear statement for the guide's opening."></textarea></div>
-        </div>
-      </div>
+      <h1 class="mdx-headline door" id="mdxArriveHead">Welcome <span class="soft">home.</span></h1>
+      <p class="mdx-sub">Everything's arranged and ready. Step inside your Brand Home to review, refine, or share it.</p>
       <div class="mdx-actions">
-        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
-      </div>
-    </section>
-
-    <!-- 2 · LOGOS -->
-    <section class="mdx-step" data-step="logos">
-      <p class="mdx-kicker">Step 02 · Logo system</p>
-      <h1 class="mdx-headline">Bring the <span class="soft">logos</span> over.</h1>
-      <p class="mdx-sub">Drop the primary lockup, the icon, and an alternate colourway. They land straight into the guide.</p>
-      <div class="mdx-card">
-        <div class="mdx-tiles cols-3">
-          <label class="mdx-tile" data-mdx-tile="primaryLogo">
-            <span class="mdx-tile-thumb"></span>
-            <svg class="mdx-tile-ico" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-            <span class="mdx-tile-name">Primary logo</span><span class="mdx-tile-hint">SVG / PNG</span>
-            <input type="file" accept="image/*,.svg,.pdf" hidden>
-          </label>
-          <label class="mdx-tile dark" data-mdx-tile="iconMark">
-            <span class="mdx-tile-thumb"></span>
-            <svg class="mdx-tile-ico" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-            <span class="mdx-tile-name">Icon mark</span><span class="mdx-tile-hint">SVG / PNG</span>
-            <input type="file" accept="image/*,.svg,.pdf" hidden>
-          </label>
-          <label class="mdx-tile" data-mdx-tile="iconVariant">
-            <span class="mdx-tile-thumb"></span>
-            <svg class="mdx-tile-ico" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
-            <span class="mdx-tile-name">Brand variant</span><span class="mdx-tile-hint">Alt colourway</span>
-            <input type="file" accept="image/*,.svg,.pdf" hidden>
-          </label>
-        </div>
-      </div>
-      <div class="mdx-actions">
-        <button class="mdx-back" data-mdx-back type="button">Back</button>
-        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
-      </div>
-    </section>
-
-    <!-- 3 · COLOURS -->
-    <section class="mdx-step" data-step="colors">
-      <p class="mdx-kicker">Step 03 · Colour</p>
-      <h1 class="mdx-headline">Set the <span class="soft">palette.</span></h1>
-      <p class="mdx-sub">Five roles carry the whole system. Tap a swatch to choose, or type a hex.</p>
-      <div class="mdx-card">
-        <div class="mdx-swatches" id="mdxSwatches"></div>
-        <div class="mdx-chips"><button class="mdx-chip" id="mdxExtractColors" type="button" hidden>Auto-extract from a logo</button></div>
-      </div>
-      <div class="mdx-actions">
-        <button class="mdx-back" data-mdx-back type="button">Back</button>
-        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
-      </div>
-    </section>
-
-    <!-- 4 · TYPOGRAPHY -->
-    <section class="mdx-step" data-step="type">
-      <p class="mdx-kicker">Step 04 · Typography</p>
-      <h1 class="mdx-headline">Choose the <span class="soft">type.</span></h1>
-      <p class="mdx-sub">A display face for headlines, a body face for everything else.</p>
-      <div class="mdx-card">
-        <div class="mdx-mini-grid">
-          <div class="mdx-field"><label>Display</label><input class="mdx-input" id="mdxDisplayFont" type="text" placeholder="Instrument Serif">
-            <div class="mdx-chips" data-mdx-fontchips="display"><button class="mdx-chip" type="button">Instrument Serif</button><button class="mdx-chip" type="button">Playfair Display</button><button class="mdx-chip" type="button">Fraunces</button></div>
-          </div>
-          <div class="mdx-field"><label>Body</label><input class="mdx-input" id="mdxBodyFont" type="text" placeholder="Geist">
-            <div class="mdx-chips" data-mdx-fontchips="body"><button class="mdx-chip" type="button">Geist</button><button class="mdx-chip" type="button">Inter</button><button class="mdx-chip" type="button">Söhne</button></div>
-          </div>
-        </div>
-      </div>
-      <div class="mdx-actions">
-        <button class="mdx-back" data-mdx-back type="button">Back</button>
-        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
-      </div>
-    </section>
-
-    <!-- 5 · IN USE -->
-    <section class="mdx-step" data-step="use">
-      <p class="mdx-kicker">Step 05 · In use</p>
-      <h1 class="mdx-headline">Show it in the <span class="soft">world.</span></h1>
-      <p class="mdx-sub">Add a few applications. Skip any you don't have yet — you can add them later.</p>
-      <div class="mdx-card">
-        <div class="mdx-tiles cols-2">
-          <label class="mdx-tile" data-mdx-tile="profileImage"><span class="mdx-tile-thumb"></span><svg class="mdx-tile-ico" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg><span class="mdx-tile-name">Profile</span><span class="mdx-tile-hint">Square image</span><input type="file" accept="image/*,.svg,.pdf" hidden></label>
-          <label class="mdx-tile" data-mdx-tile="websiteHeader"><span class="mdx-tile-thumb"></span><svg class="mdx-tile-ico" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg><span class="mdx-tile-name">Digital</span><span class="mdx-tile-hint">Web / screen</span><input type="file" accept="image/*,.svg,.pdf" hidden></label>
-          <label class="mdx-tile" data-mdx-tile="businessCard"><span class="mdx-tile-thumb"></span><svg class="mdx-tile-ico" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg><span class="mdx-tile-name">Print</span><span class="mdx-tile-hint">Card / stationery</span><input type="file" accept="image/*,.svg,.pdf" hidden></label>
-          <label class="mdx-tile" data-mdx-tile="socialPost"><span class="mdx-tile-thumb"></span><svg class="mdx-tile-ico" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg><span class="mdx-tile-name">Social</span><span class="mdx-tile-hint">Post / story</span><input type="file" accept="image/*,.svg,.pdf" hidden></label>
-        </div>
-      </div>
-      <div class="mdx-actions">
-        <button class="mdx-back" data-mdx-back type="button">Back</button>
-        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
-      </div>
-    </section>
-
-    <!-- 6 · USAGE -->
-    <section class="mdx-step" data-step="usage">
-      <p class="mdx-kicker">Step 06 · Usage</p>
-      <h1 class="mdx-headline">Set the <span class="soft">rules.</span></h1>
-      <p class="mdx-sub">A short do / don't keeps the brand intact after handoff. Edit or keep the defaults.</p>
-      <div class="mdx-card">
-        <div class="mdx-usage">
-          <div class="do"><h4>Do</h4><div id="mdxUsageDo"></div></div>
-          <div class="dont"><h4>Don't</h4><div id="mdxUsageDont"></div></div>
-        </div>
-      </div>
-      <div class="mdx-actions">
-        <button class="mdx-back" data-mdx-back type="button">Back</button>
-        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
-      </div>
-    </section>
-
-    <!-- 7 · ARRIVE -->
-    <section class="mdx-step" data-step="arrive">
-      <p class="mdx-kicker">All moved in</p>
-      <h1 class="mdx-headline" id="mdxArriveHead">The brand has a <span class="soft">home.</span></h1>
-      <p class="mdx-sub">Everything you added is laid out and ready. Open the Brand Home to review, publish, or download.</p>
-      <div class="mdx-actions">
-        <button class="mdx-back" data-mdx-back type="button">Back</button>
-        <button class="mdx-cta" id="mdxFinish" type="button">Open Brand Home<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
+        <button class="mdx-cta" id="mdxFinish" type="button">Welcome Home<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
       </div>
     </section>
   </div>
 </div>
 
+<!-- ████████████████████████████████████████████████████████████████████████
+     BRAND HOME WORKSPACE  —  floating glass control window over the live guide
+     Holds the existing builder console (reparented at runtime) so every control
+     keeps working and edits update the guide live behind it.
+     ████████████████████████████████████████████████████████████████████████ -->
+<style id="mdx-workspace-styles">
+/* show the live guide as the backdrop; hide dashboard + setup overlay */
+body.mdx-workspace .builder-app,
+body.mdx-workspace #mdxExperience{display:none!important;}
+
+#mdxWorkspace{
+  display:none;position:fixed;z-index:70;
+  top:clamp(16px,8vh,90px);right:clamp(16px,3vw,46px);
+  width:clamp(340px,33vw,500px);max-height:min(84vh,820px);
+  flex-direction:column;overflow:hidden;border-radius:24px;
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  background:rgba(255,255,255,.66);
+  backdrop-filter:blur(48px) saturate(180%);
+  -webkit-backdrop-filter:blur(48px) saturate(180%);
+  box-shadow:0 0 0 .5px rgba(255,255,255,.96),0 0 0 1px rgba(44,90,60,.13),inset 0 1px 0 rgba(255,255,255,1),0 16px 48px rgba(20,60,36,.12),0 44px 96px rgba(20,60,36,.14);
+}
+#mdxWorkspace.on{display:flex;animation:mdxWsIn .6s cubic-bezier(.22,1,.36,1) both;}
+#mdxWorkspace.is-dragging{animation:none!important;}
+@keyframes mdxWsIn{from{opacity:0;transform:translateY(16px) scale(.985);}to{opacity:1;transform:none;}}
+
+.mdx-ws-head{
+  flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:15px 18px;cursor:grab;user-select:none;touch-action:none;
+  border-bottom:.5px solid rgba(44,90,60,.10);
+  background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.18));
+}
+#mdxWorkspace.is-dragging .mdx-ws-head{cursor:grabbing;}
+.mdx-ws-title{display:flex;align-items:center;gap:11px;min-width:0;}
+.mdx-ws-title svg{width:20px;height:14px;fill:rgba(20,41,31,.84);flex:0 0 auto;}
+.mdx-ws-title b{display:block;font-size:13px;font-weight:500;letter-spacing:-.01em;color:rgba(10,32,18,.88);}
+.mdx-ws-title span{display:block;font-size:9.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(14,40,22,.42);margin-top:2px;}
+.mdx-ws-close{
+  flex:0 0 auto;width:30px;height:30px;border:none;border-radius:50%;cursor:pointer;
+  font-size:18px;line-height:1;color:rgba(14,40,22,.55);
+  background:rgba(255,255,255,.7);box-shadow:0 0 0 1px rgba(44,92,62,.14),inset 0 1px 0 rgba(255,255,255,1);
+  transition:transform .18s ease,color .2s ease;
+}
+.mdx-ws-close:hover{transform:translateY(-1px);color:rgba(10,32,18,.9);}
+.mdx-ws-body{flex:1 1 auto;overflow-y:auto;padding:18px;}
+.mdx-ws-body::-webkit-scrollbar{width:9px;}
+.mdx-ws-body::-webkit-scrollbar-thumb{background:rgba(44,90,60,.18);border-radius:9px;border:3px solid transparent;background-clip:content-box;}
+
+/* ── reskin the existing console into calm glass when inside the window ── */
+.mdx-in-workspace.console{background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important;padding:0!important;margin:0!important;max-width:none!important;}
+.mdx-in-workspace .console-top,
+.mdx-in-workspace .workflow-strip{display:none!important;}
+.mdx-in-workspace .grid{grid-template-columns:1fr!important;gap:14px!important;}
+.mdx-in-workspace .card,
+.mdx-in-workspace .card.wide{background:rgba(255,255,255,.5)!important;border:1px solid rgba(44,90,60,.12)!important;box-shadow:none!important;border-radius:18px!important;padding:16px!important;}
+.mdx-in-workspace .card-head{margin-bottom:14px!important;}
+.mdx-in-workspace .card h3{color:rgba(18,46,28,.72)!important;letter-spacing:.16em!important;}
+.mdx-in-workspace .note{color:rgba(14,40,22,.42)!important;}
+.mdx-in-workspace .field label{color:rgba(14,40,22,.5)!important;}
+.mdx-in-workspace .field input,
+.mdx-in-workspace .field textarea,
+.mdx-in-workspace .field select,
+.mdx-in-workspace .slot-card select,
+.mdx-in-workspace .slot-card input,
+.mdx-in-workspace .color input[type=text],
+.mdx-in-workspace .asset-recolor-panel input,
+.mdx-in-workspace .asset-recolor-panel select,
+.mdx-in-workspace .palette-extract-panel input,
+.mdx-in-workspace .palette-extract-panel textarea,
+.mdx-in-workspace .simple-box-builder input,
+.mdx-in-workspace .simple-box-builder select{
+  background:rgba(255,255,255,.62)!important;border:1px solid rgba(44,90,60,.16)!important;color:rgba(8,30,18,.9)!important;border-radius:11px!important;
+}
+.mdx-in-workspace .field input:focus,
+.mdx-in-workspace .field textarea:focus,
+.mdx-in-workspace .field select:focus{border-color:rgba(44,110,70,.5)!important;background:rgba(255,255,255,.85)!important;}
+.mdx-in-workspace .colors{grid-template-columns:repeat(5,1fr)!important;gap:8px!important;}
+.mdx-in-workspace .color{background:rgba(255,255,255,.5)!important;border:1px solid rgba(44,90,60,.1)!important;border-radius:13px!important;}
+.mdx-in-workspace .color b{color:rgba(18,46,28,.7)!important;}
+.mdx-in-workspace .color span{color:rgba(14,40,22,.42)!important;}
+.mdx-in-workspace .slot-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;}
+.mdx-in-workspace .slot-card{background:rgba(255,255,255,.55)!important;border:1px solid rgba(44,90,60,.1)!important;border-radius:14px!important;}
+.mdx-in-workspace .slot-card h4{color:rgba(18,46,28,.7)!important;}
+.mdx-in-workspace .upload-zone{background:rgba(255,255,255,.45)!important;border:1px dashed rgba(44,90,60,.24)!important;border-radius:14px!important;}
+.mdx-in-workspace .upload-zone strong{color:rgba(18,46,28,.78)!important;}
+.mdx-in-workspace .upload-zone p{color:rgba(14,40,22,.55)!important;}
+.mdx-in-workspace .builder-btn{
+  background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(248,253,250,.78))!important;color:rgba(8,28,16,.85)!important;border:0!important;
+  box-shadow:0 0 0 1px rgba(44,92,62,.18),inset 0 1px 0 rgba(255,255,255,1),0 4px 12px rgba(20,60,36,.06)!important;
+}
+.mdx-in-workspace .builder-btn:hover{transform:translateY(-1px)!important;background:linear-gradient(180deg,#fff,rgba(250,255,252,.9))!important;color:rgba(8,28,16,.92)!important;}
+.mdx-in-workspace .builder-btn.primary,
+.mdx-in-workspace .builder-btn.publish{background:linear-gradient(180deg,#244a36,#1b3a2a)!important;color:#f1ecdf!important;box-shadow:0 8px 20px rgba(20,60,36,.2)!important;}
+.mdx-in-workspace .builder-btn.danger{background:transparent!important;color:rgba(156,60,60,.85)!important;box-shadow:0 0 0 1px rgba(156,60,60,.22)!important;}
+.mdx-in-workspace .founder-tools-inline{border:0!important;background:transparent!important;}
+.mdx-in-workspace .founder-tools-inline>summary{
+  list-style:none;cursor:pointer;color:rgba(14,40,22,.55)!important;font-weight:500;font-size:11px;letter-spacing:.14em;text-transform:uppercase;
+  padding:11px 13px;border-radius:12px;background:rgba(255,255,255,.4);border:1px solid rgba(44,90,60,.12);
+}
+.mdx-in-workspace .founder-tools-inline>summary::-webkit-details-marker{display:none;}
+.mdx-in-workspace .asset-recolor-panel,
+.mdx-in-workspace .palette-extract-panel,
+.mdx-in-workspace .simple-box-builder{background:rgba(255,255,255,.42)!important;border:1px solid rgba(44,90,60,.1)!important;border-radius:14px!important;}
+
+@media(max-width:640px){
+  #mdxWorkspace{top:auto;bottom:0;right:0;left:0;width:100%;max-height:78vh;border-radius:24px 24px 0 0;}
+}
+@media(prefers-reduced-motion:reduce){#mdxWorkspace.on{animation:none!important;}}
+</style>
+
+<!-- fluid fixes: make the reparented console fit the narrow glass window (beats competing !important rules) -->
+<style id="mdx-workspace-fit">
+.mdx-in-workspace,.mdx-in-workspace *{min-width:0!important;box-sizing:border-box!important;}
+.mdx-in-workspace input,.mdx-in-workspace select,.mdx-in-workspace textarea,.mdx-in-workspace button{max-width:100%!important;}
+/* one calm column for asset slots; no forced tall cards */
+.mdx-in-workspace .slot-grid{grid-template-columns:1fr!important;gap:12px!important;}
+.mdx-in-workspace .slot-card{min-height:0!important;padding:14px!important;border-radius:16px!important;background:rgba(255,255,255,.55)!important;box-shadow:none!important;border:1px solid rgba(44,90,60,.1)!important;display:grid!important;gap:9px!important;}
+.mdx-in-workspace .slot-card select,
+.mdx-in-workspace .slot-file-btn{width:100%!important;height:auto!important;min-height:34px!important;padding:9px 12px!important;font-size:11px!important;white-space:normal!important;}
+.mdx-in-workspace .slot-card label,
+.mdx-in-workspace .slot-card h4,
+.mdx-in-workspace .slot-card p,
+.mdx-in-workspace .slot-card span{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;}
+/* palette: five small fluid swatches, no horizontal scroll */
+.mdx-in-workspace .colors{grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:8px!important;overflow:visible!important;padding-bottom:0!important;}
+.mdx-in-workspace .color{min-width:0!important;min-height:0!important;padding:8px!important;border-radius:13px!important;grid-template-rows:auto auto auto!important;}
+.mdx-in-workspace .color input[type=color]{height:42px!important;min-height:42px!important;border-radius:9px!important;}
+.mdx-in-workspace .color input[type=text]{height:26px!important;font-size:9px!important;}
+.mdx-in-workspace .color b,.mdx-in-workspace .color span{font-size:8px!important;letter-spacing:.08em!important;white-space:normal!important;line-height:1.2!important;}
+/* typography + general fields read calmly, not oversized */
+.mdx-in-workspace .field input,.mdx-in-workspace .field textarea,.mdx-in-workspace .field select{font-size:14px!important;font-weight:400!important;height:auto!important;padding:11px 13px!important;}
+.mdx-in-workspace .builder-btn{width:auto!important;white-space:nowrap!important;}
+.mdx-in-workspace .card{overflow:hidden!important;}
+@media(max-width:640px){
+  .mdx-in-workspace .colors{grid-template-columns:repeat(5,minmax(0,1fr))!important;}
+}
+</style>
+
+<!-- dock the workspace as a calm full-height editing rail (feels built-in, not a floating popup) -->
+<style id="mdx-workspace-dock">
+#mdxWorkspace{
+  top:0!important;right:0!important;bottom:0!important;left:auto!important;
+  height:100vh!important;max-height:100vh!important;
+  width:clamp(340px,32vw,460px)!important;
+  border-radius:24px 0 0 24px!important;transform:none!important;
+}
+#mdxWorkspace.on{animation:mdxWsSlide .55s cubic-bezier(.22,1,.36,1) both!important;}
+#mdxWorkspace.is-dragging{animation:none!important;}
+@keyframes mdxWsSlide{from{opacity:0;transform:translateX(28px);}to{opacity:1;transform:none;}}
+.mdx-ws-head{cursor:default!important;}
+.mdx-ws-body{max-height:calc(100vh - 64px)!important;}
+@media(max-width:640px){
+  #mdxWorkspace{top:auto!important;bottom:0!important;height:82vh!important;max-height:82vh!important;width:100%!important;border-radius:24px 24px 0 0!important;}
+  #mdxWorkspace.on{animation:mdxWsSlide .5s cubic-bezier(.22,1,.36,1) both!important;}
+  @keyframes mdxWsSlide{from{opacity:0;transform:translateY(28px);}to{opacity:1;transform:none;}}
+}
+</style>
+
+<!-- full-screen editor: a calm glass workspace where every tool is visible at once -->
+<style id="mdx-workspace-full">
+#mdxWorkspace{
+  inset:clamp(14px,2.4vh,30px) clamp(14px,2.4vw,30px)!important;
+  width:auto!important;height:auto!important;max-height:none!important;
+  border-radius:28px!important;transform:none!important;
+}
+#mdxWorkspace.on{animation:mdxWsEmerge .6s cubic-bezier(.22,1,.36,1) both!important;}
+@keyframes mdxWsEmerge{from{opacity:0;transform:translateY(12px) scale(.99);}to{opacity:1;transform:none;}}
+.mdx-ws-head{padding:18px clamp(20px,2.4vw,32px)!important;cursor:default!important;}
+.mdx-ws-body{max-height:none!important;flex:1 1 auto!important;overflow-y:auto!important;padding:clamp(18px,2vw,32px)!important;}
+
+/* lay the tools out in calm masonry columns — everything visible, no cramped single file */
+.mdx-in-workspace .grid{display:block!important;column-count:3;column-gap:20px!important;grid-template-columns:none!important;}
+.mdx-in-workspace .card,
+.mdx-in-workspace .card.wide{break-inside:avoid!important;-webkit-column-break-inside:avoid!important;margin:0 0 20px!important;display:block!important;width:100%!important;}
+.mdx-in-workspace .slot-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+.mdx-in-workspace .colors{grid-template-columns:repeat(5,minmax(0,1fr))!important;}
+.mdx-in-workspace .card h3{margin-bottom:12px!important;}
+@media(max-width:1180px){.mdx-in-workspace .grid{column-count:2;}}
+@media(max-width:760px){
+  #mdxWorkspace{inset:0!important;border-radius:0!important;}
+  .mdx-in-workspace .grid{column-count:1;}
+}
+@media(min-width:1800px){.mdx-in-workspace .grid{column-count:4;}}
+</style>
+
+<!-- sectioned editor: a calm left rail that steps through sections while the live guide previews on the right -->
+<style id="mdx-workspace-sections">
+#mdxWorkspace{
+  inset:auto!important;left:0!important;right:auto!important;top:0!important;bottom:0!important;
+  width:clamp(400px,42vw,600px)!important;height:100vh!important;max-height:100vh!important;
+  border-radius:0 26px 26px 0!important;transform:none!important;
+}
+body.mdx-workspace #previewShell{padding-left:clamp(400px,42vw,600px)!important;transition:padding-left .55s cubic-bezier(.22,1,.36,1);}
+#mdxWorkspace.on{animation:mdxWsEmerge .55s cubic-bezier(.22,1,.36,1) both!important;}
+@keyframes mdxWsEmerge{from{opacity:0;transform:translateX(-18px);}to{opacity:1;transform:none;}}
+.mdx-ws-body{padding:clamp(18px,2vw,30px)!important;}
+
+/* section nav (sticky) */
+.mdx-ws-nav{position:sticky;top:0;z-index:3;display:flex;flex-wrap:wrap;gap:6px;padding-bottom:14px;margin-bottom:6px;}
+.mdx-ws-tab{display:inline-flex;align-items:center;gap:7px;border:none;cursor:pointer;border-radius:100px;padding:7px 13px 7px 8px;font-family:inherit;font-size:11.5px;font-weight:500;color:rgba(14,40,22,.52);background:rgba(255,255,255,.5);box-shadow:inset 0 0 0 1px rgba(44,90,60,.1);transition:.2s;}
+.mdx-ws-tab i{font-style:normal;font-size:8.5px;font-weight:600;color:rgba(14,40,22,.36);background:rgba(255,255,255,.72);border-radius:50%;width:18px;height:18px;display:grid;place-items:center;flex:0 0 auto;}
+.mdx-ws-tab:hover{color:rgba(8,30,18,.84);background:rgba(255,255,255,.74);}
+.mdx-ws-tab.is-active{color:#f1ecdf;background:linear-gradient(180deg,#244a36,#1b3a2a);box-shadow:0 6px 16px rgba(20,60,36,.18);}
+.mdx-ws-tab.is-active i{color:#244a36;background:rgba(255,255,255,.94);}
+
+/* one section card at a time */
+.mdx-in-workspace .grid{display:block!important;column-count:1!important;column-gap:0!important;}
+.mdx-in-workspace .card{width:100%!important;margin:0!important;}
+.mdx-in-workspace .card.ws-hidden{display:none!important;}
+.mdx-in-workspace .card.ws-in{animation:mdxWsCardIn .5s cubic-bezier(.22,1,.36,1) both;}
+@keyframes mdxWsCardIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.mdx-in-workspace .slot-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+.mdx-in-workspace .colors{grid-template-columns:repeat(5,minmax(0,1fr))!important;}
+.ws-note{margin-top:13px;font-size:11px;font-weight:300;line-height:1.55;color:rgba(14,50,28,.62);padding:11px 13px;background:rgba(236,250,242,.55);border:1px solid rgba(44,110,70,.16);border-radius:12px;}
+
+@media(max-width:820px){
+  #mdxWorkspace{inset:0!important;width:100%!important;border-radius:0!important;}
+  body.mdx-workspace #previewShell{padding-left:0!important;}
+}
+</style>
+
+<!-- calmer, airier sections — spacing instead of chrome -->
+<style id="mdx-workspace-air">
+#mdxWorkspace{width:clamp(440px,46vw,700px)!important;}
+body.mdx-workspace #previewShell{padding-left:clamp(440px,46vw,700px)!important;}
+.mdx-ws-body{padding:clamp(22px,2.6vw,40px)!important;}
+.mdx-ws-nav{gap:7px;padding-bottom:20px;margin-bottom:10px;}
+
+/* sections breathe: more padding, lighter edges, calmer heads */
+.mdx-in-workspace .card{padding:clamp(20px,2.4vw,30px)!important;background:rgba(255,255,255,.4)!important;border-color:rgba(44,90,60,.08)!important;}
+.mdx-in-workspace .card-head{margin-bottom:20px!important;}
+.mdx-in-workspace .card h3{font-size:11px!important;letter-spacing:.2em!important;}
+.mdx-in-workspace .fields{display:grid!important;gap:18px!important;}
+.mdx-in-workspace .field{gap:9px!important;}
+.mdx-in-workspace .field label{font-size:9px!important;letter-spacing:.16em!important;}
+
+/* Logo: calm tiles — drop the duplicate initials + spec, give each one room */
+.mdx-in-workspace .slot-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:18px!important;}
+.mdx-in-workspace .slot-card{padding:16px!important;gap:14px!important;background:rgba(255,255,255,.58)!important;border-color:rgba(44,90,60,.1)!important;}
+.mdx-in-workspace .slot-topline span{display:none!important;}
+.mdx-in-workspace .slot-topline h4{font-size:12px!important;font-weight:500!important;letter-spacing:.02em!important;}
+.mdx-in-workspace .slot-spec{display:none!important;}
+.mdx-in-workspace .slot-thumb{height:104px!important;min-height:0!important;border-radius:14px!important;}
+.mdx-in-workspace .slot-actions{display:flex!important;flex-direction:column!important;gap:9px!important;}
+.mdx-in-workspace .slot-card select,
+.mdx-in-workspace .slot-file-btn{font-size:11px!important;height:auto!important;min-height:36px!important;}
+.mdx-in-workspace .slot-bg-control{font-size:10px!important;}
+
+/* Colors: roomier swatches */
+.mdx-in-workspace .colors{gap:11px!important;}
+.mdx-in-workspace .color{padding:11px!important;}
+.mdx-in-workspace .color input[type=color]{height:70px!important;}
+
+/* gentler founder disclosure */
+.mdx-in-workspace .founder-tools-inline{margin-top:18px!important;}
+</style>
+
+<!-- expand-to-full-screen toggle + calmer Sections controls -->
+<style id="mdx-workspace-expand">
+.mdx-ws-expand{flex:0 0 auto;width:30px;height:30px;border:none;border-radius:50%;cursor:pointer;display:grid;place-items:center;margin-right:6px;background:rgba(255,255,255,.7);box-shadow:0 0 0 1px rgba(44,92,62,.14),inset 0 1px 0 rgba(255,255,255,1);transition:transform .18s ease,background .2s ease;}
+.mdx-ws-expand svg{width:13px;height:13px;stroke:rgba(14,40,22,.55);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.mdx-ws-expand:hover{transform:translateY(-1px);}
+.mdx-ws-expand.is-on{background:linear-gradient(180deg,#244a36,#1b3a2a);box-shadow:0 6px 16px rgba(20,60,36,.2);}
+.mdx-ws-expand.is-on svg{stroke:#f1ecdf;}
+
+/* full-screen mode: the editor takes the whole stage; the live preview steps aside */
+body.ws-expanded #mdxWorkspace{
+  inset:clamp(14px,2.4vh,30px) clamp(14px,2.4vw,30px)!important;
+  left:auto!important;right:auto!important;width:auto!important;
+  border-radius:28px!important;
+  transition:inset .5s cubic-bezier(.22,1,.36,1),width .5s cubic-bezier(.22,1,.36,1);
+}
+body.mdx-workspace.ws-expanded #previewShell{padding-left:0!important;}
+/* in full screen, give the active section room: center it and let inner grids widen */
+body.ws-expanded .mdx-ws-body{max-width:980px;margin:0 auto;}
+body.ws-expanded .mdx-in-workspace .slot-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;}
+body.ws-expanded .mdx-in-workspace .colors{grid-template-columns:repeat(5,minmax(0,1fr))!important;}
+body.ws-expanded .mdx-in-workspace .fields{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+body.ws-expanded .mdx-in-workspace .field.full{grid-column:1/-1!important;}
+body.ws-expanded .mdx-in-workspace .simple-box-buttons{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
+
+/* ── calmer Sections (06) controls ───────────────────────────── */
+.mdx-in-workspace .simple-box-builder,
+.mdx-in-workspace .simple-box-editor{background:rgba(255,255,255,.42)!important;border:1px solid rgba(44,90,60,.1)!important;border-radius:16px!important;padding:16px!important;margin-bottom:14px!important;box-shadow:none!important;}
+.mdx-in-workspace .simple-step-label{font-size:9px!important;letter-spacing:.18em!important;text-transform:uppercase!important;color:rgba(14,40,22,.42)!important;margin-bottom:13px!important;}
+.mdx-in-workspace .simple-field{display:flex!important;flex-direction:column!important;gap:7px!important;font-size:9px!important;letter-spacing:.14em!important;text-transform:uppercase!important;color:rgba(14,40,22,.46)!important;margin-bottom:14px!important;}
+.mdx-in-workspace .simple-field select,
+.mdx-in-workspace .simple-field input{background:rgba(255,255,255,.62)!important;border:1px solid rgba(44,90,60,.16)!important;border-radius:11px!important;padding:10px 12px!important;font-size:13px!important;font-weight:400!important;text-transform:none!important;letter-spacing:0!important;color:rgba(8,30,18,.9)!important;}
+.mdx-in-workspace .simple-box-buttons{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important;margin-bottom:14px!important;}
+.mdx-in-workspace .simple-box-btn{border:1px solid rgba(44,90,60,.16)!important;background:rgba(255,255,255,.55)!important;border-radius:12px!important;padding:11px 12px!important;font-size:11px!important;font-weight:500!important;letter-spacing:0!important;text-transform:none!important;color:rgba(14,40,22,.74)!important;cursor:pointer;transition:.18s;box-shadow:none!important;}
+.mdx-in-workspace .simple-box-btn:hover{border-color:rgba(44,110,70,.45)!important;background:rgba(255,255,255,.82)!important;transform:translateY(-1px);}
+.mdx-in-workspace .simple-box-btn.dark{background:linear-gradient(180deg,#244a36,#1b3a2a)!important;color:#eef3ee!important;border-color:transparent!important;}
+.mdx-in-workspace .simple-box-btn.brand{background:rgba(196,217,203,.5)!important;color:rgba(14,50,28,.8)!important;}
+.mdx-in-workspace .simple-help{font-size:10.5px!important;line-height:1.55!important;color:rgba(14,40,22,.45)!important;}
+.mdx-in-workspace .simple-selected-title{font-size:13px!important;font-weight:500!important;color:rgba(10,32,18,.8)!important;margin-bottom:11px!important;}
+.mdx-in-workspace .simple-section-manager{margin-top:4px!important;}
+.mdx-in-workspace .simple-section-manager>summary{list-style:none;cursor:pointer;font-size:10px!important;letter-spacing:.16em!important;text-transform:uppercase!important;color:rgba(14,40,22,.5)!important;padding:11px 13px!important;border-radius:12px!important;background:rgba(255,255,255,.4)!important;border:1px solid rgba(44,90,60,.1)!important;}
+.mdx-in-workspace .simple-section-manager>summary::-webkit-details-marker{display:none;}
+.mdx-in-workspace .simple-manager-inner{padding-top:13px!important;}
+</style>
+
+<div id="mdxWorkspace" aria-label="Brand Home Workspace">
+  <div class="mdx-ws-head" id="mdxWsHandle">
+    <div class="mdx-ws-title">
+      <svg viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M769.4,89.65v111.85h-39.04c.07-25.79-35.02-31.29-50.28-36.68-16.18-5.71,0-14.05,0-14.05l89.32-61.11Z"/><path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/></svg>
+      <div><b>Brand Home Workspace</b><span>Everything that builds your guide</span></div>
+    </div>
+    <button class="mdx-ws-expand" id="mdxWsExpand" type="button" aria-label="Expand to full screen" title="Expand">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 4 4 4 4 9"/><polyline points="15 4 20 4 20 9"/><polyline points="15 20 20 20 20 15"/><polyline points="9 20 4 20 4 15"/></svg>
+    </button>
+    <button class="mdx-ws-close" id="mdxWsClose" type="button" aria-label="Close workspace">&times;</button>
+  </div>
+  <div class="mdx-ws-body" id="mdxWorkspaceBody"></div>
+</div>
+
+<!-- ████████████████████████████████████████████████████████████████████████
+     STAGE SKIN  —  the live guide sits on the same icy glass field as experience.html
+     (frame/background/toolbar only; the guide's editorial interior is untouched)
+     ████████████████████████████████████████████████████████████████████████ -->
+<style id="mdx-stage-skin">
+.preview-shell{
+  position:relative;z-index:1;
+  background:#f3f7f3 !important;
+  background-image:
+    radial-gradient(120% 78% at 50% -12%, rgba(255,255,255,.92), rgba(255,255,255,0) 60%),
+    radial-gradient(80% 60% at 10% 6%, rgba(196,217,203,.34), rgba(196,217,203,0) 55%),
+    radial-gradient(72% 58% at 92% 2%, rgba(212,229,220,.40), rgba(212,229,220,0) 55%) !important;
+  padding-bottom:80px !important;
+}
+.preview-toolbar{
+  background:rgba(255,255,255,.60) !important;
+  backdrop-filter:blur(30px) saturate(180%);-webkit-backdrop-filter:blur(30px) saturate(180%);
+  border-bottom:.5px solid rgba(44,90,60,.10) !important;
+  box-shadow:0 1px 0 rgba(255,255,255,.7),0 8px 30px rgba(20,60,36,.05) !important;
+}
+.preview-brand{font-family:'Inter',system-ui,sans-serif !important;font-weight:300 !important;letter-spacing:-.02em !important;color:rgba(20,41,31,.92) !important;}
+#guidePreview{
+  margin:clamp(28px,5vw,56px) auto 0 !important;
+  box-shadow:0 0 0 1px rgba(44,90,60,.08),0 40px 120px rgba(20,60,36,.16),0 12px 40px rgba(20,60,36,.08) !important;
+}
+.preview-toolbar .builder-btn{
+  font-family:'Inter',system-ui,sans-serif !important;text-transform:none !important;letter-spacing:.01em !important;
+  font-weight:500 !important;font-size:11px !important;border-radius:100px !important;
+  background:rgba(255,255,255,.6) !important;color:rgba(8,28,16,.82) !important;border:1px solid rgba(44,92,62,.16) !important;
+}
+.preview-toolbar .builder-btn:hover{background:rgba(255,255,255,.88) !important;color:rgba(8,28,16,.95) !important;transform:translateY(-1px);}
+.preview-toolbar .builder-btn.primary,.preview-toolbar .builder-btn.publish{background:linear-gradient(180deg,#244a36,#1b3a2a) !important;color:#f1ecdf !important;border-color:transparent !important;}
+.preview-toolbar .builder-btn.danger{background:transparent !important;color:rgba(156,60,60,.85) !important;border-color:rgba(156,60,60,.22) !important;}
+</style>
 <div class="builder-app" id="builderApp">
   <div class="builder-shell">
     <nav class="studio-nav">
@@ -4014,20 +4512,20 @@ body{
   content:'';
   position:absolute;
   left:50%;
-  top:46%;
-  width:min(1040px,78vw);
-  height:min(680px,66vh);
+  top:47%;
+  width:min(980px,76vw);
+  height:min(620px,62vh);
   transform:translate(-50%,-50%);
-  border-radius:58px;
+  border-radius:54px;
   background:
-    linear-gradient(180deg,rgba(255,255,255,.36),rgba(255,255,255,.08)),
-    radial-gradient(ellipse at 50% 0%,rgba(255,255,255,.50),transparent 62%);
-  border:.5px solid rgba(255,255,255,.52);
+    linear-gradient(180deg,rgba(255,255,255,.34),rgba(255,255,255,.09)),
+    radial-gradient(ellipse at 50% 0%,rgba(255,255,255,.46),transparent 62%);
+  border:.5px solid rgba(255,255,255,.48);
   box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.72),
+    inset 0 1px 0 rgba(255,255,255,.70),
     inset 0 -1px 0 rgba(55,95,70,.035),
-    0 44px 130px rgba(42,82,58,.06);
-  opacity:.54;
+    0 40px 120px rgba(42,82,58,.055);
+  opacity:.46;
 }
 .md-env::after{
   content:'';
@@ -5752,12 +6250,14 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
 
 <script id="mdx-experience-script">
 (function(){
-  var STEPS=['welcome','logos','colors','type','use','usage','arrive'];
+  var STEPS=['arrival','receiving','check','preparing','concierge','recommendations','home'];
+  var CHAPTER={arrival:'Arrival',receiving:'Receiving',check:'Receiving',preparing:'Preparing',concierge:'Brand Concierge',recommendations:'Review',home:'Welcome Home'};
   var ROLES=['Primary','Secondary','Accent','Light','Dark'];
   var FALLBACK_COLORS=['#1F3D2E','#2D5642','#C4D9CB','#F1ECDF','#15140F'];
-  var PREP={logos:'Opening the logo room…',colors:'Mixing the palette…',type:'Setting the type…',use:'Laying out applications…',usage:'Writing the rules…',arrive:'Preparing your Brand Home…'};
+  var PREP={};
   var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches);
   var idx=0, busy=false, usageBuilt=false;
+  var conciergeLine='', intakeReceived=false, intakeCount=0, recosBuilt=false, lastDir=1;
 
   function $(s,r){return (r||document).querySelector(s);}
   function $all(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
@@ -5785,8 +6285,10 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     wireFonts();
     wireExtract();
     wireNav();
-    // open on first step
-    var first=stepEl(0); if(first){first.classList.add('is-active');} updateDots(); updateBack(first);
+    wireIntake();
+    setupWorkspace();
+    // open on first step (the front door)
+    var first=stepEl(0); if(first){first.classList.add('is-active');} updateDots(); updateBack(first); updateChrome();
   }
 
   /* ── progress dots ────────────────────────────────────────────── */
@@ -5814,7 +6316,7 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
   function refreshArrive(){
     var h=$('#mdxArriveHead'); if(!h)return;
     var name=(($('#mdxClientName')||{}).value||'').trim();
-    h.innerHTML = name ? (esc(name)+' has a <span class="soft">home.</span>') : 'The brand has a <span class="soft">home.</span>';
+    h.innerHTML = name ? (esc(name)+' is <span class="soft">home.</span>') : 'Welcome <span class="soft">home.</span>';
   }
 
   /* ── colours ──────────────────────────────────────────────────── */
@@ -5932,18 +6434,20 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     var fin=$('#mdxFinish'); if(fin)fin.addEventListener('click',finish);
     var skip=$('#mdxSkipBtn'); if(skip)skip.addEventListener('click',finish);
     var ctrl=$('#mdxControlsBtn'); if(ctrl)ctrl.addEventListener('click',openControls);
-    // make the live guide's "Controls" buttons reveal the full console when in done state
+    // the live guide's "Controls" buttons re-open the floating workspace
     ['#backToEditorBtn','#backToEditorBtnTop'].forEach(function(sel){
       var b=document.querySelector(sel);
-      if(b)b.addEventListener('click',function(){ if(document.body.classList.contains('mdx-done')){ document.body.classList.remove('mdx-done'); var ed=$('#editorPanel'); if(ed)setTimeout(function(){ed.scrollIntoView({behavior:'smooth',block:'start'});},60);} });
+      if(b)b.addEventListener('click',function(e){ e.preventDefault(); e.stopImmediatePropagation(); openControls(); });
     });
   }
 
   function go(to,dir){
-    if(busy||to<0||to>=STEPS.length)return;
-    busy=true;
+    if(busy)return;
+    if(dir<0 && STEPS[to]==='preparing') to=to-1;   // never rest on the auto room when stepping back
+    if(to<0||to>=STEPS.length)return;
+    busy=true; lastDir=dir;
     var cur=stepEl(idx), nxt=stepEl(to);
-    if(STEPS[to]==='colors') setTimeout(syncSwatches,0);
+    if(STEPS[to]==='concierge') setTimeout(syncSwatches,0);
     if(STEPS[to]==='usage') buildUsage();
     if(STEPS[to]==='arrive') refreshArrive();
 
@@ -5951,19 +6455,25 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
       cur.classList.remove('is-active','is-leave','is-enter');
       idx=to;
       nxt.classList.add('is-active','is-enter');
-      updateDots(); updateBack(nxt);
+      updateDots(); updateBack(nxt); updateChrome();
       var stage=$('#mdxStage'); if(stage)stage.scrollTop=0;
       setTimeout(function(){ nxt.classList.remove('is-enter'); busy=false; }, reduce?0:860);
     }
 
+    if(STEPS[to]==='check') updateCheck();
+    if(STEPS[to]==='recommendations') buildRecos();
+    if(STEPS[to]==='home') refreshArrive();
+
     if(reduce){ cur.classList.remove('is-active'); enter(); return; }
     cur.classList.add('is-leave');
-    setTimeout(function(){
-      if(dir>0 && PREP[STEPS[to]]){
-        showPrep(PREP[STEPS[to]]);
-        setTimeout(function(){ hidePrep(); enter(); }, 600);
-      } else { enter(); }
-    }, 420);
+    setTimeout(enter, 420);
+  }
+
+  function updateChrome(){
+    var exp=$('#mdxExperience'); if(exp){ exp.classList.toggle('at-door', STEPS[idx]==='arrival' || STEPS[idx]==='home'); }
+    var ch=$('#mdxChapter'); if(ch)ch.textContent=CHAPTER[STEPS[idx]]||'';
+    // 'Preparing' is a quiet room that arranges, then opens the Concierge on its own
+    if(STEPS[idx]==='preparing' && lastDir>0){ var d=reduce?600:2100; setTimeout(function(){ if(STEPS[idx]==='preparing') go(idx+1,1); }, d); }
   }
 
   function showPrep(text){var p=$('#mdxPrep'),t=$('#mdxPrepText'); if(t)t.textContent=text; if(p)p.classList.add('on');}
@@ -5976,9 +6486,197 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     var pv=$('#previewBtn'); if(pv)pv.click();
     window.scrollTo({top:0,behavior:'auto'});
   }
+  /* ── room helpers: confirmation logo, arrival check, recommendations ── */
+  function showConfirmLogo(file){
+    var t=$('#mdxConfirmLogo'); if(!t||!file)return;
+    var r=new FileReader();
+    r.onload=function(){ t.style.backgroundImage='url("'+r.result+'")'; t.classList.add('is-set'); var s=$('#mdxConfirmLogoState'); if(s)s.textContent='Primary logo set'; };
+    r.readAsDataURL(file);
+  }
+  function updateCheck(){
+    var sub=$('#mdxCheckSub'); if(!sub)return;
+    if(intakeReceived && intakeCount){
+      sub.textContent = intakeCount+' file'+(intakeCount>1?'s are':' is')+' in, sorted, and secure. Nothing else to do — I\'ll take it from here.';
+    } else {
+      sub.textContent = 'We\'ll start with a clean room. You can bring assets in anytime inside Brand Home.';
+    }
+  }
+  var RECOS=[
+    {t:'Add an icon mark',d:'A compact symbol for favicons, app icons, and tight spaces where the full logo won\'t fit.'},
+    {t:'Set your typography',d:'Choose a display and a body typeface so the guide reads in the brand\'s own voice.'},
+    {t:'Show it in the world',d:'Add one real application — a card, a post, a screen — so the brand is shown in use.'}
+  ];
+  function buildRecos(){
+    var host=$('#mdxRecos'); if(!host||recosBuilt)return; recosBuilt=true;
+    host.innerHTML=RECOS.map(function(r){
+      return '<div class="mdx-reco" role="button" tabindex="0">'+
+        '<div class="mdx-reco-tick" aria-hidden="true"><svg viewBox="0 0 24 24"><polyline points="5 13 10 18 19 7"/></svg></div>'+
+        '<div class="mdx-reco-body"><p class="mdx-reco-title">'+esc(r.t)+'</p><p class="mdx-reco-note">'+esc(r.d)+'</p></div>'+
+        '</div>';
+    }).join('');
+    host.addEventListener('click',function(e){var c=e.target.closest('.mdx-reco');if(c)c.classList.toggle('is-noted');});
+    host.addEventListener('keydown',function(e){if((e.key==='Enter'||e.key===' ')&&e.target.classList.contains('mdx-reco')){e.preventDefault();e.target.classList.toggle('is-noted');}});
+  }
+
+  /* ── front door + intake (hidden Brand Concierge assists) ─────── */
+  function wireIntake(){
+    var drop=$('#mdxDrop'), input=$('#mdxDropInput');
+    if(!drop||!input)return;
+    input.addEventListener('change',function(){ if(input.files&&input.files.length){ processIntake(input.files); input.value=''; } });
+    ['dragenter','dragover'].forEach(function(ev){drop.addEventListener(ev,function(e){e.preventDefault();drop.classList.add('is-over');});});
+    ['dragleave','dragend'].forEach(function(ev){drop.addEventListener(ev,function(){drop.classList.remove('is-over');});});
+    drop.addEventListener('drop',function(e){ e.preventDefault(); drop.classList.remove('is-over'); var fs=e.dataTransfer&&e.dataTransfer.files; if(fs&&fs.length){ processIntake(fs); } });
+  }
+  function isImgFile(f){return /image\//.test(f.type||'')||/\.(svg|png|jpe?g|webp|gif)$/i.test(f.name||'');}
+  function pickPrimaryLogo(files){
+    var imgs=files.filter(isImgFile); if(!imgs.length)return null;
+    var named=imgs.filter(function(f){return /logo|wordmark|lockup|primary|mark|brand/i.test(f.name||'');});
+    var pool=named.length?named:imgs;
+    var svg=pool.filter(function(f){return /\.svg$/i.test(f.name||'');});
+    return svg[0]||pool[0];
+  }
+  function forwardToEngine(files){
+    if(!files.length)return;
+    var inp=document.querySelector('#assetInput'); if(!inp)return;
+    try{var dt=new DataTransfer();files.forEach(function(f){dt.items.add(f);});inp.files=dt.files;}catch(e){return;}
+    inp.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  function prettyName(name){return String(name||'').replace(/\.[^.]+$/,'').replace(/[_\-]+/g,' ').replace(/\s+/g,' ').trim();}
+  function maybeSuggestName(files,logo){
+    var f=$('#mdxClientName'); if(!f||f.value.trim())return;
+    var base=prettyName((logo&&logo.name)||(files[0]&&files[0].name)||'');
+    base=base.replace(/\b(logo|wordmark|lockup|primary|secondary|mark|brand|final|draft|copy|guidelines?|icon|v\d+)\b/gi,' ').replace(/\s+/g,' ').trim();
+    base=base.replace(/\b\w/g,function(c){return c.toUpperCase();});
+    if(base.length>=2){ f.value=base; setField('clientName',base); refreshArrive(); }
+  }
+  function categorize(files){
+    var c={Logos:0,Fonts:0,Photography:0,Guidelines:0,Documents:0};
+    files.forEach(function(f){
+      var n=(f.name||'').toLowerCase(), e=(n.split('.').pop()||'');
+      if(['otf','ttf','woff','woff2'].indexOf(e)>=0||/font|type/.test(n))c.Fonts++;
+      else if(/guide|brandbook|standard|rule/.test(n))c.Guidelines++;
+      else if(/logo|wordmark|lockup|icon|mark/.test(n)||e==='svg')c.Logos++;
+      else if(['jpg','jpeg','png','webp','gif'].indexOf(e)>=0||/photo|image|cover|hero|social/.test(n))c.Photography++;
+      else c.Documents++;
+    });
+    return c;
+  }
+  function processIntake(fileList){
+    var files=Array.prototype.slice.call(fileList||[]); if(!files.length)return;
+    var logo=pickPrimaryLogo(files);
+    var others=files.filter(function(f){return f!==logo;});
+    forwardToEngine(others);
+    if(logo){ assignSlot('primaryLogo',logo); assignSlot('heroLogo',logo); showConfirmLogo(logo); }
+    maybeSuggestName(files,logo);
+    intakeReceived=true; intakeCount=files.length;
+    setTimeout(function(){ var b=document.querySelector('#analyzePaletteBtn'); if(b)b.click(); setTimeout(syncSwatches,1100); },800);
+    renderIntakeSummary(files,logo);
+    if(STEPS[idx]==='receiving'){ setTimeout(function(){ if(STEPS[idx]==='receiving' && !busy) go(idx+1,1); }, 1300); }
+  }
+  function renderIntakeSummary(files,logo){
+    var box=$('#mdxIntakeSummary'); if(!box)return;
+    var cats=categorize(files);
+    var pills=Object.keys(cats).filter(function(k){return cats[k];}).map(function(k){return '<span class="pill">'+cats[k]+' '+k+'</span>';}).join('');
+    box.hidden=false;
+    box.innerHTML='<b>I received '+files.length+' file'+(files.length>1?'s':'')+'.</b> '+
+      (logo?('Set <b>'+esc(prettyName(logo.name))+'</b> as the primary logo and read the colours from it.'):'Read the colours from your images.')+
+      (pills?('<div class="row">'+pills+'</div>'):'');
+    var next=$('#mdxIntakeNext'); if(next&&next.childNodes[0]) next.childNodes[0].nodeValue='Move in';
+    conciergeLine='Sorted '+files.length+' file'+(files.length>1?'s':'')+(logo?', set your logo, and pulled your colours.':' and pulled your colours.');
+  }
+
+  /* ── floating Brand Home Workspace ────────────────────────────── */
+  var WS_SECTIONS=[
+    {key:'brandhome',label:'Brand Home',h3:'brand home',preview:'hero'},
+    {key:'assets',   label:'Assets',    h3:'assets',    preview:'use'},
+    {key:'logo',     label:'Logo',      h3:'logo',      preview:'logo'},
+    {key:'colors',   label:'Colors',    h3:'colors',    preview:'colour'},
+    {key:'type',     label:'Typography',h3:'typography',preview:'type'},
+    {key:'sections', label:'Sections',  h3:'sections',  preview:'usage'}
+  ];
+  function setupWorkspace(){
+    var win=$('#mdxWorkspace'), body=$('#mdxWorkspaceBody'), ed=$('#editorPanel');
+    if(win&&body&&ed&&ed.parentNode!==body){ body.appendChild(ed); ed.classList.add('mdx-in-workspace'); }
+    var close=$('#mdxWsClose'); if(close)close.addEventListener('click',closeWorkspace);
+    var cb=$('#mdxControlsBtn'); if(cb)cb.textContent='Open workspace';
+    var ex=$('#mdxWsExpand');
+    if(ex)ex.addEventListener('click',function(){
+      var on=document.body.classList.toggle('ws-expanded');
+      ex.setAttribute('title', on?'Exit full screen':'Expand');
+      ex.classList.toggle('is-on', on);
+    });
+    setupWorkspaceSections();
+  }
+  function setupWorkspaceSections(){
+    var body=$('#mdxWorkspaceBody'); if(!body||body.querySelector('.mdx-ws-nav'))return;
+    // tag each console card by its heading so it belongs to a section
+    $all('.mdx-in-workspace .card').forEach(function(card){
+      var h=card.querySelector('.card-head h3'); if(!h)return;
+      var t=h.textContent.trim().toLowerCase();
+      for(var i=0;i<WS_SECTIONS.length;i++){ if(WS_SECTIONS[i].h3===t){ card.setAttribute('data-ws-section',WS_SECTIONS[i].key); break; } }
+    });
+    // typography guidance the founder asked for
+    var typo=document.querySelector('.mdx-in-workspace .typography-card .fields, .mdx-in-workspace .typography-card');
+    if(typo){ var note=document.createElement('p'); note.className='ws-note'; note.textContent='Uploaded display font updates guide subheadings only. The Moving Day hero stays locked.'; typo.appendChild(note); }
+    // build the section nav (in the chosen order)
+    var nav=document.createElement('div'); nav.className='mdx-ws-nav';
+    nav.innerHTML=WS_SECTIONS.map(function(s,i){return '<button class="mdx-ws-tab" type="button" data-ws-go="'+s.key+'"><i>'+('0'+(i+1)).slice(-2)+'</i><span>'+s.label+'</span></button>';}).join('');
+    body.insertBefore(nav, body.firstChild);
+    nav.addEventListener('click',function(e){ var b=e.target.closest('[data-ws-go]'); if(b)showWsSection(b.getAttribute('data-ws-go')); });
+    showWsSection('brandhome', true);
+  }
+  function showWsSection(key, instant){
+    $all('.mdx-ws-tab').forEach(function(t){ t.classList.toggle('is-active', t.getAttribute('data-ws-go')===key); });
+    $all('.mdx-in-workspace .card').forEach(function(card){
+      var match=card.getAttribute('data-ws-section')===key;
+      card.classList.toggle('ws-hidden', !match);
+      if(match && !instant){ card.classList.remove('ws-in'); void card.offsetWidth; card.classList.add('ws-in'); }
+    });
+    var body=$('#mdxWorkspaceBody'); if(body)body.scrollTop=0;
+    scrollGuideTo(key);
+  }
+  function scrollGuideTo(key){
+    var sec; for(var i=0;i<WS_SECTIONS.length;i++){ if(WS_SECTIONS[i].key===key){sec=WS_SECTIONS[i];break;} }
+    if(!sec)return;
+    var g=document.querySelector('#guidePreview'); if(!g)return;
+    var target=null;
+    if(sec.preview==='hero'){ target=g.querySelector('.guide-hero'); }
+    else { target=$all('#guidePreview .guide-section').filter(function(s){ var l=s.querySelector('.section-label'); return l && l.textContent.toLowerCase().indexOf(sec.preview)>=0; })[0]; }
+    if(target) try{ target.scrollIntoView({behavior:'smooth',block:'start'}); }catch(e){}
+  }
+  // open the live guide as the backdrop, float the controls window over it
   function openControls(){
     document.body.classList.remove('mdx-active','mdx-done');
-    var ed=$('#editorPanel'); if(ed)setTimeout(function(){ed.scrollIntoView({behavior:'smooth',block:'start'});},80);
+    document.body.classList.add('mdx-workspace');
+    var pv=$('#previewBtn'); if(pv)pv.click();          // reveal + live-update the guide
+    var win=$('#mdxWorkspace'); if(win){ win.classList.remove('on'); void win.offsetWidth; win.classList.add('on'); }
+    setTimeout(function(){ showWsSection('brandhome', true); }, 60);
+  }
+  function closeWorkspace(){
+    var win=$('#mdxWorkspace'); if(win)win.classList.remove('on');
+    document.body.classList.remove('mdx-workspace','ws-expanded');
+    var ex=$('#mdxWsExpand'); if(ex){ex.classList.remove('is-on');ex.setAttribute('title','Expand');}
+    document.body.classList.add('mdx-done');           // guide stays; toolbar re-opens workspace
+  }
+  function makeDraggable(win, handle){
+    if(!win||!handle)return;
+    var sx,sy,ox,oy,drag=false;
+    handle.addEventListener('pointerdown',function(e){
+      if(e.target.closest('button'))return;
+      drag=true; win.classList.add('is-dragging');
+      var r=win.getBoundingClientRect();
+      win.style.left=r.left+'px'; win.style.top=r.top+'px';
+      win.style.right='auto'; win.style.bottom='auto'; win.style.transform='none';
+      sx=e.clientX; sy=e.clientY; ox=r.left; oy=r.top;
+      try{handle.setPointerCapture(e.pointerId);}catch(_){}
+    });
+    handle.addEventListener('pointermove',function(e){
+      if(!drag)return;
+      var nx=Math.min(Math.max(8,ox+(e.clientX-sx)),window.innerWidth-win.offsetWidth-8);
+      var ny=Math.min(Math.max(8,oy+(e.clientY-sy)),window.innerHeight-60);
+      win.style.left=nx+'px'; win.style.top=ny+'px';
+    });
+    ['pointerup','pointercancel'].forEach(function(ev){handle.addEventListener(ev,function(){drag=false;win.classList.remove('is-dragging');});});
   }
 })();
 </script>
