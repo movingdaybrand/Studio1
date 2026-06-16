@@ -7036,6 +7036,8 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     wireAiToggle();
     // open on first step (the front door)
     var first=stepEl(0); if(first){first.classList.add('is-active');} updateDots(); updateBack(first); updateChrome();
+    // EXPERIENCE TO BRAND HOME BRIDGE — if experience.html handed off Brand DNA, prefill + land in Brand Home
+    loadBrandDNA();
   }
 
   /* ── progress dots ────────────────────────────────────────────── */
@@ -7372,6 +7374,63 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     t.addEventListener('click',toggle);
     t.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();}});
   }
+  /* ════════════════════ EXPERIENCE TO BRAND HOME BRIDGE ════════════════════ */
+  /* ════════════════════ BRAND DNA LOAD ════════════════════ */
+  var BRAND_DNA_KEY='movingDay_brandDNA_v1';
+  var dnaRecommendations=null;   // stashed for the recommendations room
+  function dnaReadFile(dataUrl,name){
+    return fetch(dataUrl).then(function(r){return r.blob();})
+      .then(function(b){return new File([b], name||'logo.png', {type:b.type||'image/png'});});
+  }
+  /* ════════════════════ INDEX PREFILL FROM BRAND DNA ════════════════════ */
+  function loadBrandDNA(){
+    var raw;
+    try{ raw=localStorage.getItem(BRAND_DNA_KEY); }catch(e){ return; }
+    if(!raw) return;                                  // no DNA → index works manually as today
+    var dna; try{ dna=JSON.parse(raw); }catch(e){ return; }
+    if(!dna||typeof dna!=='object') return;
+    try{ localStorage.removeItem(BRAND_DNA_KEY); }catch(e){}   // one-time handoff; refreshes stay manual
+
+    // brand name / category / guide copy
+    if(dna.brandName){ var ci=$('#mdxClientName'); if(ci){ci.value=dna.brandName;ci.dispatchEvent(new Event('input',{bubbles:true}));} setField('clientName',dna.brandName); }
+    if(dna.category){ var ce=$('#mdxCategory'); if(ce){ce.value=dna.category;ce.dispatchEvent(new Event('input',{bubbles:true}));} setField('category',dna.category); }
+    if(dna.tagline){ var tg=$('#mdxTagline'); if(tg){tg.value=dna.tagline;tg.dispatchEvent(new Event('input',{bubbles:true}));} setField('tagline',dna.tagline); }
+
+    // colors
+    if(Array.isArray(dna.colors)){
+      for(var i=0;i<5&&i<dna.colors.length;i++){
+        var c=dna.colors[i]; var hx=c&&(c.hex||c.value||(typeof c==='string'?c:''));
+        if(hx) setColor(i,hx);
+      }
+    }
+
+    // typography
+    var ty=dna.typography||{};
+    if(ty.display&&ty.display.name) setField('displayFont',ty.display.name);
+    if(ty.body&&ty.body.name) setField('bodyFont',ty.body.name);
+
+    // recommendations (kept for the recommendations room)
+    if(Array.isArray(dna.recommendations)) dnaRecommendations=dna.recommendations;
+
+    // logos / selected assets → assign into existing slots via the engine's own pipeline
+    var jobs=[];
+    if(dna.primaryLogo&&dna.primaryLogo.dataUrl)
+      jobs.push(dnaReadFile(dna.primaryLogo.dataUrl,dna.primaryLogo.name).then(function(f){ if(typeof assignSlot==='function'){ assignSlot('primaryLogo',f); assignSlot('heroLogo',f); } }).catch(function(){}));
+    if(dna.iconMark&&dna.iconMark.dataUrl)
+      jobs.push(dnaReadFile(dna.iconMark.dataUrl,dna.iconMark.name).then(function(f){ if(typeof assignSlot==='function') assignSlot('iconMark',f); }).catch(function(){}));
+    if(dna.wordmark&&dna.wordmark.dataUrl)
+      jobs.push(dnaReadFile(dna.wordmark.dataUrl,dna.wordmark.name).then(function(f){ if(typeof assignSlot==='function') assignSlot('iconVariant',f); }).catch(function(){}));
+
+    // the brand already moved in via experience.html → land in Brand Home, not the intro
+    function enterHome(){
+      if(typeof refreshArrive==='function'){ try{ refreshArrive(); }catch(e){} }
+      if(typeof showBrandHome==='function'){ showBrandHome(); }
+      else { document.body.classList.remove('mdx-active','mdx-done'); document.body.classList.add('md-home'); }
+    }
+    if(jobs.length) Promise.all(jobs).then(enterHome, enterHome);
+    else enterHome();
+  }
+
   function processIntake(fileList){
     var files=Array.prototype.slice.call(fileList||[]); if(!files.length)return;
     var logo=pickPrimaryLogo(files);
