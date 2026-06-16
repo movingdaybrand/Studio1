@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,200;14..32,300;14..32,400;14..32,500&display=swap" rel="stylesheet" />
 <style>
 :root{
   --cream:#F1ECDF;--paper:#FBF8F0;--forest:#1F3D2E;--forest-deep:#14291F;--moss:#2D5642;--sage:#C4D9CB;--ink:#15140F;--muted:#6B6558;--rule:rgba(21,20,15,.12);
@@ -2284,7 +2285,7 @@ body{
 </style>
 
 </head>
-<body>
+<body class="mdx-active">
 <!-- ═══════════════════════════════════════════════════════
      MOVING DAY ENVIRONMENT — ai-test.html visual system
      Frosted morning light, icy glass, soft emerald depth.
@@ -2296,6 +2297,354 @@ body{
   <div class="md-env-glow"></div>
   <div class="md-env-v"></div>
 </div>
+<!-- ████████████████████████████████████████████████████████████████████████
+     MOVE IN EXPERIENCE  —  guided, step-by-step Brand Home setup
+     Drives the existing builder engine (data-field / data-hex / data-direct-slot)
+     so every feature is preserved; only the sticky banner + this flow are shown.
+     ████████████████████████████████████████████████████████████████████████ -->
+<style id="mdx-experience-styles">
+/* ── visibility states ─────────────────────────────────────────── */
+#mdxExperience{display:none;}
+body.mdx-active #mdxExperience{display:block;}
+body.mdx-active .builder-app,
+body.mdx-active #editorPanel,
+body.mdx-active #previewShell{display:none!important;}
+body.mdx-done .builder-app,
+body.mdx-done #editorPanel,
+body.mdx-done #mdxExperience{display:none!important;}
+
+/* ── shell ─────────────────────────────────────────────────────── */
+#mdxExperience{
+  position:fixed;inset:0;z-index:60;
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  color:rgba(8,30,18,.90);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+}
+#mdxExperience *{box-sizing:border-box;}
+
+/* ── sticky banner ─────────────────────────────────────────────── */
+.mdx-bar{
+  position:relative;z-index:3;flex:0 0 auto;
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  padding:14px clamp(16px,4vw,40px);
+  background:rgba(255,255,255,.55);
+  backdrop-filter:blur(26px) saturate(170%);
+  -webkit-backdrop-filter:blur(26px) saturate(170%);
+  border-bottom:.5px solid rgba(44,90,60,.10);
+  box-shadow:0 1px 0 rgba(255,255,255,.7), 0 10px 30px rgba(20,60,36,.04);
+}
+.mdx-bar-brand{display:flex;align-items:center;gap:10px;min-width:0;}
+.mdx-bar-brand svg{width:22px;height:16px;fill:rgba(20,41,31,.86);flex:0 0 auto;}
+.mdx-bar-brand b{font-size:13px;font-weight:500;letter-spacing:-.01em;color:rgba(10,32,18,.86);}
+.mdx-bar-brand i{font-size:10px;font-weight:500;letter-spacing:.18em;text-transform:uppercase;color:rgba(14,40,22,.42);font-style:normal;padding-left:10px;margin-left:4px;border-left:1px solid rgba(44,90,60,.16);}
+.mdx-bar-progress{display:flex;align-items:center;gap:7px;}
+.mdx-dot{width:7px;height:7px;border-radius:50%;background:rgba(44,90,60,.18);transition:.4s cubic-bezier(.22,1,.36,1);}
+.mdx-dot.is-done{background:rgba(44,110,70,.55);}
+.mdx-dot.is-active{background:rgba(30,80,50,.95);transform:scale(1.5);}
+.mdx-bar-actions{display:flex;gap:8px;}
+.mdx-bar-btn{
+  border:none;border-radius:100px;cursor:pointer;
+  padding:8px 15px;font-family:inherit;font-size:11px;font-weight:500;letter-spacing:.02em;
+  color:rgba(8,28,16,.82);
+  background:linear-gradient(180deg,rgba(255,255,255,.92),rgba(248,253,250,.78));
+  box-shadow:0 0 0 .5px rgba(255,255,255,.96),0 0 0 1px rgba(44,92,62,.18),inset 0 1px 0 rgba(255,255,255,1),0 4px 12px rgba(20,60,36,.07);
+  transition:transform .18s ease,box-shadow .25s ease;
+}
+.mdx-bar-btn:hover{transform:translateY(-1px);box-shadow:0 0 0 .5px rgba(255,255,255,1),0 0 0 1px rgba(44,100,66,.30),inset 0 1px 0 rgba(255,255,255,1),0 6px 16px rgba(20,60,36,.11);}
+.mdx-bar-btn.ghost{background:transparent;box-shadow:none;color:rgba(14,40,22,.50);}
+.mdx-bar-btn.ghost:hover{color:rgba(10,32,18,.86);box-shadow:none;}
+
+/* ── stage ─────────────────────────────────────────────────────── */
+.mdx-stage{position:relative;z-index:2;flex:1 1 auto;display:flex;align-items:center;justify-content:center;padding:clamp(20px,4vw,48px);overflow-y:auto;}
+.mdx-step{
+  width:100%;max-width:560px;display:none;flex-direction:column;align-items:center;text-align:center;
+}
+.mdx-step.is-active{display:flex;}
+.mdx-step.is-enter{animation:mdxRise .85s cubic-bezier(.22,1,.36,1) both;}
+.mdx-step.is-leave{animation:mdxFall .42s cubic-bezier(.4,0,1,1) both;}
+@keyframes mdxRise{from{opacity:0;transform:translateY(14px) scale(.992);}to{opacity:1;transform:none;}}
+@keyframes mdxFall{from{opacity:1;transform:none;}to{opacity:0;transform:translateY(-10px) scale(.992);}}
+
+.mdx-kicker{font-size:9px;font-weight:500;letter-spacing:.34em;text-transform:uppercase;color:rgba(18,46,28,.46);margin-bottom:1.1rem;}
+.mdx-headline{font-size:clamp(2rem,4.4vw,3rem);font-weight:200;line-height:1.08;letter-spacing:-.04em;color:rgba(8,30,18,.92);margin-bottom:.85rem;}
+.mdx-headline .soft{color:rgba(10,30,18,.42);}
+.mdx-sub{font-size:.92rem;font-weight:300;line-height:1.6;color:rgba(14,40,22,.58);max-width:430px;margin:0 auto 2.2rem;}
+
+/* glass body */
+.mdx-card{
+  width:100%;border-radius:26px;position:relative;overflow:hidden;
+  background:rgba(255,255,255,.62);
+  backdrop-filter:blur(46px) saturate(180%);
+  -webkit-backdrop-filter:blur(46px) saturate(180%);
+  box-shadow:0 0 0 .5px rgba(255,255,255,.95),0 0 0 1px rgba(44,90,60,.12),inset 0 1px 0 rgba(255,255,255,1),0 16px 48px rgba(20,60,36,.10),0 40px 80px rgba(20,60,36,.07);
+  padding:clamp(22px,3.4vw,34px);
+}
+
+/* big underlined name field */
+.mdx-name-field{
+  width:100%;border:none;background:transparent;outline:none;text-align:center;
+  font-family:var(--display,'Instrument Serif',serif);
+  font-size:clamp(2.1rem,5vw,3rem);line-height:1.05;font-weight:400;letter-spacing:-.03em;
+  color:rgba(8,30,18,.92);
+  padding:.2rem 0 .6rem;border-bottom:1px solid rgba(44,90,60,.20);
+  transition:border-color .25s ease;
+}
+.mdx-name-field::placeholder{color:rgba(14,40,22,.26);}
+.mdx-name-field:focus{border-color:rgba(44,110,70,.55);}
+
+.mdx-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;}
+.mdx-field{display:flex;flex-direction:column;gap:6px;text-align:left;}
+.mdx-field.full{grid-column:1/-1;}
+.mdx-field label{font-size:8.5px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:rgba(14,40,22,.44);}
+.mdx-input,.mdx-textarea{
+  width:100%;border:1px solid rgba(44,90,60,.16);border-radius:13px;background:rgba(255,255,255,.6);
+  padding:11px 13px;font-family:inherit;font-size:14px;font-weight:300;color:rgba(8,30,18,.9);outline:none;
+  transition:border-color .2s ease,background .2s ease;
+}
+.mdx-input:focus,.mdx-textarea:focus{border-color:rgba(44,110,70,.5);background:rgba(255,255,255,.85);}
+.mdx-textarea{min-height:70px;resize:vertical;line-height:1.5;}
+
+/* upload tiles */
+.mdx-tiles{display:grid;gap:12px;}
+.mdx-tiles.cols-3{grid-template-columns:repeat(3,1fr);}
+.mdx-tiles.cols-2{grid-template-columns:repeat(2,1fr);}
+.mdx-tile{
+  position:relative;border-radius:16px;border:1px dashed rgba(44,90,60,.26);
+  background:rgba(255,255,255,.5);cursor:pointer;overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:118px;padding:14px;text-align:center;gap:8px;
+  transition:border-color .2s ease,background .2s ease,transform .18s ease;
+}
+.mdx-tile:hover{border-color:rgba(44,110,70,.5);background:rgba(255,255,255,.72);transform:translateY(-1px);}
+.mdx-tile.is-over{border-style:solid;border-color:rgba(44,140,84,.6);background:rgba(236,250,242,.85);}
+.mdx-tile.is-filled{border-style:solid;border-color:rgba(44,90,60,.2);}
+.mdx-tile-ico{width:26px;height:26px;stroke:rgba(20,60,36,.4);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.mdx-tile-name{font-size:10.5px;font-weight:500;letter-spacing:.04em;color:rgba(14,40,22,.66);}
+.mdx-tile-hint{font-size:9px;font-weight:300;color:rgba(14,40,22,.4);}
+.mdx-tile-thumb{position:absolute;inset:6px;border-radius:11px;background:#fff center/contain no-repeat;display:none;box-shadow:inset 0 0 0 1px rgba(21,20,15,.06);}
+.mdx-tile.is-filled .mdx-tile-thumb{display:block;}
+.mdx-tile.is-filled .mdx-tile-ico,.mdx-tile.is-filled .mdx-tile-hint{display:none;}
+.mdx-tile.is-filled .mdx-tile-name{position:absolute;left:8px;bottom:7px;z-index:2;background:rgba(255,255,255,.86);border-radius:7px;padding:2px 7px;font-size:9px;backdrop-filter:blur(6px);}
+.mdx-tile.dark{background:linear-gradient(180deg,#1F3D2E,#14291F);border-color:rgba(255,255,255,.16);}
+.mdx-tile.dark .mdx-tile-ico{stroke:rgba(241,236,223,.7);}
+.mdx-tile.dark .mdx-tile-name{color:rgba(241,236,223,.78);}
+.mdx-tile.dark .mdx-tile-hint{color:rgba(241,236,223,.42);}
+
+/* colours */
+.mdx-swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+.mdx-swatch{display:flex;flex-direction:column;gap:7px;}
+.mdx-swatch-well{position:relative;border-radius:14px;aspect-ratio:1;overflow:hidden;box-shadow:inset 0 0 0 1px rgba(21,20,15,.08),0 6px 16px rgba(20,60,36,.06);}
+.mdx-swatch-well input[type=color]{position:absolute;inset:-20%;width:140%;height:140%;border:none;padding:0;background:transparent;cursor:pointer;}
+.mdx-swatch-role{font-size:8.5px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:rgba(14,40,22,.5);text-align:center;}
+.mdx-swatch input[type=text]{width:100%;border:1px solid rgba(44,90,60,.14);border-radius:8px;background:rgba(255,255,255,.6);text-align:center;font-family:ui-monospace,monospace;font-size:9.5px;font-weight:500;text-transform:uppercase;padding:4px 2px;outline:none;color:rgba(8,30,18,.78);}
+.mdx-swatch input[type=text]:focus{border-color:rgba(44,110,70,.5);}
+
+/* preset chips */
+.mdx-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;}
+.mdx-chip{border:1px solid rgba(44,90,60,.18);background:rgba(255,255,255,.5);border-radius:100px;padding:6px 12px;font-size:11px;font-weight:300;color:rgba(14,40,22,.66);cursor:pointer;transition:.18s;}
+.mdx-chip:hover{border-color:rgba(44,110,70,.5);background:rgba(255,255,255,.8);color:rgba(8,30,18,.9);}
+
+/* usage lists */
+.mdx-usage{display:grid;grid-template-columns:1fr 1fr;gap:16px;text-align:left;}
+.mdx-usage h4{font-size:9px;font-weight:500;letter-spacing:.16em;text-transform:uppercase;margin-bottom:9px;}
+.mdx-usage .do h4{color:rgba(34,110,70,.9);}
+.mdx-usage .dont h4{color:rgba(156,60,60,.9);}
+.mdx-usage .mdx-input{margin-bottom:7px;font-size:12.5px;padding:8px 11px;}
+
+/* actions */
+.mdx-actions{display:flex;align-items:center;justify-content:center;gap:14px;margin-top:2rem;}
+.mdx-back{border:none;background:none;cursor:pointer;font-family:inherit;font-size:12px;font-weight:300;color:rgba(14,40,22,.46);padding:8px 4px;transition:.2s;}
+.mdx-back:hover{color:rgba(8,30,18,.85);}
+.mdx-cta{
+  display:inline-flex;align-items:center;gap:.55rem;padding:.82rem 2.1rem;border:none;border-radius:100px;cursor:pointer;
+  font-family:inherit;font-size:.78rem;font-weight:450;letter-spacing:.06em;color:rgba(8,28,16,.9);
+  background:linear-gradient(180deg,rgba(255,255,255,.95),rgba(248,253,250,.82));
+  box-shadow:0 0 0 .5px rgba(255,255,255,.98),0 0 0 1px rgba(44,92,62,.24),inset 0 1px 0 rgba(255,255,255,1),0 2px 8px rgba(20,60,36,.1),0 10px 28px rgba(20,60,36,.11);
+  position:relative;overflow:hidden;transition:background .25s ease,box-shadow .28s ease,transform .18s ease;
+}
+.mdx-cta:hover{background:linear-gradient(180deg,rgba(255,255,255,1),rgba(250,255,252,.88));transform:translateY(-1px);box-shadow:0 0 0 .5px rgba(255,255,255,1),0 0 0 1px rgba(44,100,66,.34),inset 0 1px 0 rgba(255,255,255,1),0 4px 12px rgba(20,60,36,.13),0 14px 34px rgba(20,60,36,.13);}
+.mdx-cta:active{transform:scale(.978);}
+.mdx-cta svg{width:12px;height:12px;stroke:rgba(8,28,16,.42);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;transition:transform .22s ease;}
+.mdx-cta:hover svg{transform:translateX(2px);}
+
+/* preparing beat */
+.mdx-prep{position:absolute;inset:0;z-index:4;display:none;align-items:center;justify-content:center;flex-direction:column;gap:1.1rem;background:rgba(243,247,243,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+.mdx-prep.on{display:flex;animation:mdxFade .4s ease both;}
+@keyframes mdxFade{from{opacity:0;}to{opacity:1;}}
+.mdx-prep-ring{width:30px;height:30px;border-radius:50%;border:2px solid rgba(44,90,60,.16);border-top-color:rgba(44,110,70,.7);animation:mdxSpin .9s linear infinite;}
+@keyframes mdxSpin{to{transform:rotate(360deg);}}
+.mdx-prep-kicker{font-size:9px;font-weight:500;letter-spacing:.3em;text-transform:uppercase;color:rgba(18,46,28,.42);}
+.mdx-prep-text{font-size:.95rem;font-weight:300;color:rgba(14,40,22,.62);}
+
+@media(max-width:560px){
+  .mdx-mini-grid,.mdx-usage{grid-template-columns:1fr;}
+  .mdx-tiles.cols-3,.mdx-tiles.cols-2{grid-template-columns:1fr 1fr;}
+  .mdx-swatches{grid-template-columns:repeat(5,1fr);gap:6px;}
+  .mdx-bar i{display:none;}
+  .mdx-bar-btn.ghost{display:none;}
+}
+@media(prefers-reduced-motion:reduce){
+  .mdx-step.is-enter,.mdx-step.is-leave,.mdx-prep.on,.mdx-prep-ring{animation:none!important;}
+}
+</style>
+
+<div id="mdxExperience" aria-label="Brand Home setup">
+  <header class="mdx-bar">
+    <div class="mdx-bar-brand">
+      <svg viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M769.4,89.65v111.85h-39.04c.07-25.79-35.02-31.29-50.28-36.68-16.18-5.71,0-14.05,0-14.05l89.32-61.11Z"/><path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/></svg>
+      <b>Moving Day</b><i>Brand Home setup</i>
+    </div>
+    <div class="mdx-bar-progress" id="mdxProgress" aria-hidden="true"></div>
+    <div class="mdx-bar-actions">
+      <button class="mdx-bar-btn" id="mdxControlsBtn" type="button">Full controls</button>
+      <button class="mdx-bar-btn ghost" id="mdxSkipBtn" type="button">Skip to guide</button>
+    </div>
+  </header>
+
+  <div class="mdx-stage" id="mdxStage">
+    <div class="mdx-prep" id="mdxPrep" aria-hidden="true">
+      <div class="mdx-prep-ring"></div>
+      <div class="mdx-prep-kicker">Brand Concierge</div>
+      <div class="mdx-prep-text" id="mdxPrepText">Preparing the next room…</div>
+    </div>
+
+    <!-- 1 · WELCOME -->
+    <section class="mdx-step" data-step="welcome">
+      <p class="mdx-kicker">Welcome home</p>
+      <h1 class="mdx-headline">Let's move <span class="soft">a brand in.</span></h1>
+      <p class="mdx-sub">Start with the name. Everything else arrives one calm step at a time.</p>
+      <div class="mdx-card">
+        <input class="mdx-name-field" id="mdxClientName" type="text" placeholder="Brand name" autocomplete="off" aria-label="Brand name">
+        <div class="mdx-mini-grid">
+          <div class="mdx-field"><label>What they do</label><input class="mdx-input" id="mdxCategory" type="text" placeholder="e.g. Law firm"></div>
+          <div class="mdx-field"><label>Delivered</label><input class="mdx-input" id="mdxDate" type="text" placeholder="Month Year"></div>
+          <div class="mdx-field full"><label>One-line brand message</label><textarea class="mdx-textarea" id="mdxTagline" placeholder="A short, clear statement for the guide's opening."></textarea></div>
+        </div>
+      </div>
+      <div class="mdx-actions">
+        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+    </section>
+
+    <!-- 2 · LOGOS -->
+    <section class="mdx-step" data-step="logos">
+      <p class="mdx-kicker">Step 02 · Logo system</p>
+      <h1 class="mdx-headline">Bring the <span class="soft">logos</span> over.</h1>
+      <p class="mdx-sub">Drop the primary lockup, the icon, and an alternate colourway. They land straight into the guide.</p>
+      <div class="mdx-card">
+        <div class="mdx-tiles cols-3">
+          <label class="mdx-tile" data-mdx-tile="primaryLogo">
+            <span class="mdx-tile-thumb"></span>
+            <svg class="mdx-tile-ico" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+            <span class="mdx-tile-name">Primary logo</span><span class="mdx-tile-hint">SVG / PNG</span>
+            <input type="file" accept="image/*,.svg,.pdf" hidden>
+          </label>
+          <label class="mdx-tile dark" data-mdx-tile="iconMark">
+            <span class="mdx-tile-thumb"></span>
+            <svg class="mdx-tile-ico" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+            <span class="mdx-tile-name">Icon mark</span><span class="mdx-tile-hint">SVG / PNG</span>
+            <input type="file" accept="image/*,.svg,.pdf" hidden>
+          </label>
+          <label class="mdx-tile" data-mdx-tile="iconVariant">
+            <span class="mdx-tile-thumb"></span>
+            <svg class="mdx-tile-ico" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>
+            <span class="mdx-tile-name">Brand variant</span><span class="mdx-tile-hint">Alt colourway</span>
+            <input type="file" accept="image/*,.svg,.pdf" hidden>
+          </label>
+        </div>
+      </div>
+      <div class="mdx-actions">
+        <button class="mdx-back" data-mdx-back type="button">Back</button>
+        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+    </section>
+
+    <!-- 3 · COLOURS -->
+    <section class="mdx-step" data-step="colors">
+      <p class="mdx-kicker">Step 03 · Colour</p>
+      <h1 class="mdx-headline">Set the <span class="soft">palette.</span></h1>
+      <p class="mdx-sub">Five roles carry the whole system. Tap a swatch to choose, or type a hex.</p>
+      <div class="mdx-card">
+        <div class="mdx-swatches" id="mdxSwatches"></div>
+        <div class="mdx-chips"><button class="mdx-chip" id="mdxExtractColors" type="button" hidden>Auto-extract from a logo</button></div>
+      </div>
+      <div class="mdx-actions">
+        <button class="mdx-back" data-mdx-back type="button">Back</button>
+        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+    </section>
+
+    <!-- 4 · TYPOGRAPHY -->
+    <section class="mdx-step" data-step="type">
+      <p class="mdx-kicker">Step 04 · Typography</p>
+      <h1 class="mdx-headline">Choose the <span class="soft">type.</span></h1>
+      <p class="mdx-sub">A display face for headlines, a body face for everything else.</p>
+      <div class="mdx-card">
+        <div class="mdx-mini-grid">
+          <div class="mdx-field"><label>Display</label><input class="mdx-input" id="mdxDisplayFont" type="text" placeholder="Instrument Serif">
+            <div class="mdx-chips" data-mdx-fontchips="display"><button class="mdx-chip" type="button">Instrument Serif</button><button class="mdx-chip" type="button">Playfair Display</button><button class="mdx-chip" type="button">Fraunces</button></div>
+          </div>
+          <div class="mdx-field"><label>Body</label><input class="mdx-input" id="mdxBodyFont" type="text" placeholder="Geist">
+            <div class="mdx-chips" data-mdx-fontchips="body"><button class="mdx-chip" type="button">Geist</button><button class="mdx-chip" type="button">Inter</button><button class="mdx-chip" type="button">Söhne</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="mdx-actions">
+        <button class="mdx-back" data-mdx-back type="button">Back</button>
+        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+    </section>
+
+    <!-- 5 · IN USE -->
+    <section class="mdx-step" data-step="use">
+      <p class="mdx-kicker">Step 05 · In use</p>
+      <h1 class="mdx-headline">Show it in the <span class="soft">world.</span></h1>
+      <p class="mdx-sub">Add a few applications. Skip any you don't have yet — you can add them later.</p>
+      <div class="mdx-card">
+        <div class="mdx-tiles cols-2">
+          <label class="mdx-tile" data-mdx-tile="profileImage"><span class="mdx-tile-thumb"></span><svg class="mdx-tile-ico" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg><span class="mdx-tile-name">Profile</span><span class="mdx-tile-hint">Square image</span><input type="file" accept="image/*,.svg,.pdf" hidden></label>
+          <label class="mdx-tile" data-mdx-tile="websiteHeader"><span class="mdx-tile-thumb"></span><svg class="mdx-tile-ico" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg><span class="mdx-tile-name">Digital</span><span class="mdx-tile-hint">Web / screen</span><input type="file" accept="image/*,.svg,.pdf" hidden></label>
+          <label class="mdx-tile" data-mdx-tile="businessCard"><span class="mdx-tile-thumb"></span><svg class="mdx-tile-ico" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg><span class="mdx-tile-name">Print</span><span class="mdx-tile-hint">Card / stationery</span><input type="file" accept="image/*,.svg,.pdf" hidden></label>
+          <label class="mdx-tile" data-mdx-tile="socialPost"><span class="mdx-tile-thumb"></span><svg class="mdx-tile-ico" viewBox="0 0 24 24"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg><span class="mdx-tile-name">Social</span><span class="mdx-tile-hint">Post / story</span><input type="file" accept="image/*,.svg,.pdf" hidden></label>
+        </div>
+      </div>
+      <div class="mdx-actions">
+        <button class="mdx-back" data-mdx-back type="button">Back</button>
+        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+    </section>
+
+    <!-- 6 · USAGE -->
+    <section class="mdx-step" data-step="usage">
+      <p class="mdx-kicker">Step 06 · Usage</p>
+      <h1 class="mdx-headline">Set the <span class="soft">rules.</span></h1>
+      <p class="mdx-sub">A short do / don't keeps the brand intact after handoff. Edit or keep the defaults.</p>
+      <div class="mdx-card">
+        <div class="mdx-usage">
+          <div class="do"><h4>Do</h4><div id="mdxUsageDo"></div></div>
+          <div class="dont"><h4>Don't</h4><div id="mdxUsageDont"></div></div>
+        </div>
+      </div>
+      <div class="mdx-actions">
+        <button class="mdx-back" data-mdx-back type="button">Back</button>
+        <button class="mdx-cta" data-mdx-next type="button">Continue<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+    </section>
+
+    <!-- 7 · ARRIVE -->
+    <section class="mdx-step" data-step="arrive">
+      <p class="mdx-kicker">All moved in</p>
+      <h1 class="mdx-headline" id="mdxArriveHead">The brand has a <span class="soft">home.</span></h1>
+      <p class="mdx-sub">Everything you added is laid out and ready. Open the Brand Home to review, publish, or download.</p>
+      <div class="mdx-actions">
+        <button class="mdx-back" data-mdx-back type="button">Back</button>
+        <button class="mdx-cta" id="mdxFinish" type="button">Open Brand Home<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+    </section>
+  </div>
+</div>
+
 <div class="builder-app" id="builderApp">
   <div class="builder-shell">
     <nav class="studio-nav">
@@ -5398,6 +5747,239 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     const guide=$('#guidePreview');if(guide){new MutationObserver(()=>{clearTimeout(window.__mdSimpleGuideRefresh);window.__mdSimpleGuideRefresh=setTimeout(renderSimpleTool,80);}).observe(guide,{childList:true,subtree:true});}
   }
   ready(()=>setTimeout(boot,80));
+})();
+</script>
+
+<script id="mdx-experience-script">
+(function(){
+  var STEPS=['welcome','logos','colors','type','use','usage','arrive'];
+  var ROLES=['Primary','Secondary','Accent','Light','Dark'];
+  var FALLBACK_COLORS=['#1F3D2E','#2D5642','#C4D9CB','#F1ECDF','#15140F'];
+  var PREP={logos:'Opening the logo room…',colors:'Mixing the palette…',type:'Setting the type…',use:'Laying out applications…',usage:'Writing the rules…',arrive:'Preparing your Brand Home…'};
+  var reduce = !!(window.matchMedia && matchMedia('(prefers-reduced-motion:reduce)').matches);
+  var idx=0, busy=false, usageBuilt=false;
+
+  function $(s,r){return (r||document).querySelector(s);}
+  function $all(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));}
+  function ready(fn){document.readyState==='loading'?document.addEventListener('DOMContentLoaded',fn):fn();}
+  function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function normHex(v){v=String(v||'').trim();if(v&&v[0]!=='#')v='#'+v;return /^#[0-9a-f]{6}$/i.test(v)?v.toUpperCase():'';}
+
+  /* ── proxy to the existing builder engine ─────────────────────── */
+  function setField(name,val){var f=$('[data-field="'+name+'"]');if(f){f.value=val;f.dispatchEvent(new Event('input',{bubbles:true}));}}
+  function setColor(i,hex){var t=document.querySelector('[data-hex="'+i+'"]');if(t){t.value=hex;t.dispatchEvent(new Event('input',{bubbles:true}));}}
+  function assignSlot(key,file){
+    var inp=document.querySelector('[data-direct-slot="'+key+'"]');
+    if(!inp||!file)return;
+    try{var dt=new DataTransfer();dt.items.add(file);inp.files=dt.files;}catch(e){return;}
+    inp.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+
+  ready(function(){ setTimeout(init, 120); });
+
+  function init(){
+    buildDots();
+    buildSwatches();
+    wireWelcome();
+    wireTiles();
+    wireFonts();
+    wireExtract();
+    wireNav();
+    // open on first step
+    var first=stepEl(0); if(first){first.classList.add('is-active');} updateDots(); updateBack(first);
+  }
+
+  /* ── progress dots ────────────────────────────────────────────── */
+  function buildDots(){
+    var p=$('#mdxProgress'); if(!p)return;
+    p.innerHTML=STEPS.map(function(){return '<span class="mdx-dot"></span>';}).join('');
+  }
+  function updateDots(){
+    $all('.mdx-dot').forEach(function(d,i){
+      d.classList.toggle('is-active',i===idx);
+      d.classList.toggle('is-done',i<idx);
+    });
+  }
+  function stepEl(n){return document.querySelector('.mdx-step[data-step="'+STEPS[n]+'"]');}
+  function updateBack(el){var b=el&&el.querySelector('[data-mdx-back]'); if(b)b.style.visibility=(idx===0?'hidden':'visible');}
+
+  /* ── welcome ──────────────────────────────────────────────────── */
+  function wireWelcome(){
+    var map={mdxClientName:'clientName',mdxCategory:'category',mdxDate:'date',mdxTagline:'tagline'};
+    Object.keys(map).forEach(function(id){
+      var el=$('#'+id); if(!el)return;
+      el.addEventListener('input',function(){ setField(map[id], el.value); if(id==='mdxClientName') refreshArrive(); });
+    });
+  }
+  function refreshArrive(){
+    var h=$('#mdxArriveHead'); if(!h)return;
+    var name=(($('#mdxClientName')||{}).value||'').trim();
+    h.innerHTML = name ? (esc(name)+' has a <span class="soft">home.</span>') : 'The brand has a <span class="soft">home.</span>';
+  }
+
+  /* ── colours ──────────────────────────────────────────────────── */
+  function buildSwatches(){
+    var wrap=$('#mdxSwatches'); if(!wrap)return;
+    wrap.innerHTML='';
+    for(var i=0;i<5;i++){
+      var live=document.querySelector('[data-hex="'+i+'"]');
+      var hex=(live&&normHex(live.value))||FALLBACK_COLORS[i];
+      var cell=document.createElement('div');
+      cell.className='mdx-swatch';
+      cell.innerHTML='<div class="mdx-swatch-well"><input type="color" value="'+hex+'" data-mdx-color="'+i+'" aria-label="'+ROLES[i]+' colour"></div>'+
+        '<span class="mdx-swatch-role">'+ROLES[i]+'</span>'+
+        '<input type="text" value="'+hex+'" data-mdx-hex="'+i+'" maxlength="7" aria-label="'+ROLES[i]+' hex">';
+      wrap.appendChild(cell);
+    }
+    wrap.addEventListener('input',function(e){
+      var t=e.target;
+      if(t.matches('[data-mdx-color]')){
+        var i=+t.getAttribute('data-mdx-color'), v=t.value.toUpperCase();
+        setColor(i,v); var tx=wrap.querySelector('[data-mdx-hex="'+i+'"]'); if(tx)tx.value=v;
+      } else if(t.matches('[data-mdx-hex]')){
+        var j=+t.getAttribute('data-mdx-hex'), nv=normHex(t.value); if(!nv)return;
+        setColor(j,nv); var cl=wrap.querySelector('[data-mdx-color="'+j+'"]'); if(cl)cl.value=nv;
+      }
+    });
+  }
+  function syncSwatches(){
+    for(var i=0;i<5;i++){
+      var live=document.querySelector('[data-hex="'+i+'"]'); if(!live)continue;
+      var hex=normHex(live.value)||FALLBACK_COLORS[i];
+      var c=document.querySelector('[data-mdx-color="'+i+'"]'); if(c)c.value=hex;
+      var t=document.querySelector('[data-mdx-hex="'+i+'"]'); if(t)t.value=hex;
+    }
+  }
+  function wireExtract(){
+    var btn=$('#mdxExtractColors'), engine=document.querySelector('#analyzePaletteBtn');
+    if(!btn||!engine)return;
+    btn.hidden=false;
+    btn.addEventListener('click',function(){ engine.click(); setTimeout(syncSwatches,900); });
+  }
+
+  /* ── typography ───────────────────────────────────────────────── */
+  function wireFonts(){
+    var d=$('#mdxDisplayFont'), b=$('#mdxBodyFont');
+    var dv=document.querySelector('[data-field="displayFont"]'), bv=document.querySelector('[data-field="bodyFont"]');
+    if(d&&dv&&dv.value)d.value=dv.value;
+    if(b&&bv&&bv.value)b.value=bv.value;
+    if(d)d.addEventListener('input',function(){setField('displayFont',d.value);});
+    if(b)b.addEventListener('input',function(){setField('bodyFont',b.value);});
+    $all('[data-mdx-fontchips]').forEach(function(grp){
+      var role=grp.getAttribute('data-mdx-fontchips');
+      grp.addEventListener('click',function(e){
+        var c=e.target.closest('.mdx-chip'); if(!c)return;
+        var input=role==='display'?d:b; if(!input)return;
+        input.value=c.textContent.trim(); setField(role==='display'?'displayFont':'bodyFont',input.value);
+      });
+    });
+  }
+
+  /* ── upload tiles → real per-slot inputs ──────────────────────── */
+  function showThumb(tile,file){
+    var thumb=tile.querySelector('.mdx-tile-thumb'); if(!thumb)return;
+    var r=new FileReader();
+    r.onload=function(){ thumb.style.backgroundImage='url("'+r.result+'")'; tile.classList.add('is-filled'); };
+    r.readAsDataURL(file);
+  }
+  function wireTiles(){
+    $all('.mdx-tile[data-mdx-tile]').forEach(function(tile){
+      var key=tile.getAttribute('data-mdx-tile');
+      var input=tile.querySelector('input[type=file]');
+      if(input){
+        input.addEventListener('change',function(){
+          var file=input.files&&input.files[0]; if(!file)return;
+          assignSlot(key,file);
+          if(key==='primaryLogo') assignSlot('heroLogo',file);
+          showThumb(tile,file); input.value='';
+        });
+      }
+      ['dragenter','dragover'].forEach(function(ev){tile.addEventListener(ev,function(e){e.preventDefault();tile.classList.add('is-over');});});
+      ['dragleave','dragend'].forEach(function(ev){tile.addEventListener(ev,function(){tile.classList.remove('is-over');});});
+      tile.addEventListener('drop',function(e){
+        e.preventDefault(); tile.classList.remove('is-over');
+        var file=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(!file)return;
+        assignSlot(key,file);
+        if(key==='primaryLogo') assignSlot('heroLogo',file);
+        showThumb(tile,file);
+      });
+    });
+  }
+
+  /* ── usage lists mirror the live guide's editable rules ───────── */
+  function buildUsage(){
+    if(usageBuilt)return; usageBuilt=true;
+    fillUsage('#guidePreview .usage-card.do li','#mdxUsageDo');
+    fillUsage('#guidePreview .usage-card.dont li','#mdxUsageDont');
+  }
+  function fillUsage(srcSel,hostSel){
+    var host=$(hostSel); var rows=$all(srcSel); if(!host)return;
+    host.innerHTML='';
+    rows.forEach(function(li){
+      var inp=document.createElement('input');
+      inp.type='text'; inp.className='mdx-input'; inp.value=(li.textContent||'').trim();
+      inp.addEventListener('input',function(){ li.textContent=inp.value; li.dispatchEvent(new Event('input',{bubbles:true})); });
+      host.appendChild(inp);
+    });
+  }
+
+  /* ── navigation + transitions ─────────────────────────────────── */
+  function wireNav(){
+    document.addEventListener('click',function(e){
+      if(e.target.closest('[data-mdx-next]')) go(idx+1,1);
+      else if(e.target.closest('[data-mdx-back]')) go(idx-1,-1);
+    });
+    var fin=$('#mdxFinish'); if(fin)fin.addEventListener('click',finish);
+    var skip=$('#mdxSkipBtn'); if(skip)skip.addEventListener('click',finish);
+    var ctrl=$('#mdxControlsBtn'); if(ctrl)ctrl.addEventListener('click',openControls);
+    // make the live guide's "Controls" buttons reveal the full console when in done state
+    ['#backToEditorBtn','#backToEditorBtnTop'].forEach(function(sel){
+      var b=document.querySelector(sel);
+      if(b)b.addEventListener('click',function(){ if(document.body.classList.contains('mdx-done')){ document.body.classList.remove('mdx-done'); var ed=$('#editorPanel'); if(ed)setTimeout(function(){ed.scrollIntoView({behavior:'smooth',block:'start'});},60);} });
+    });
+  }
+
+  function go(to,dir){
+    if(busy||to<0||to>=STEPS.length)return;
+    busy=true;
+    var cur=stepEl(idx), nxt=stepEl(to);
+    if(STEPS[to]==='colors') setTimeout(syncSwatches,0);
+    if(STEPS[to]==='usage') buildUsage();
+    if(STEPS[to]==='arrive') refreshArrive();
+
+    function enter(){
+      cur.classList.remove('is-active','is-leave','is-enter');
+      idx=to;
+      nxt.classList.add('is-active','is-enter');
+      updateDots(); updateBack(nxt);
+      var stage=$('#mdxStage'); if(stage)stage.scrollTop=0;
+      setTimeout(function(){ nxt.classList.remove('is-enter'); busy=false; }, reduce?0:860);
+    }
+
+    if(reduce){ cur.classList.remove('is-active'); enter(); return; }
+    cur.classList.add('is-leave');
+    setTimeout(function(){
+      if(dir>0 && PREP[STEPS[to]]){
+        showPrep(PREP[STEPS[to]]);
+        setTimeout(function(){ hidePrep(); enter(); }, 600);
+      } else { enter(); }
+    }, 420);
+  }
+
+  function showPrep(text){var p=$('#mdxPrep'),t=$('#mdxPrepText'); if(t)t.textContent=text; if(p)p.classList.add('on');}
+  function hidePrep(){var p=$('#mdxPrep'); if(p)p.classList.remove('on');}
+
+  /* ── exits ────────────────────────────────────────────────────── */
+  function finish(){
+    document.body.classList.remove('mdx-active');
+    document.body.classList.add('mdx-done');
+    var pv=$('#previewBtn'); if(pv)pv.click();
+    window.scrollTo({top:0,behavior:'auto'});
+  }
+  function openControls(){
+    document.body.classList.remove('mdx-active','mdx-done');
+    var ed=$('#editorPanel'); if(ed)setTimeout(function(){ed.scrollIntoView({behavior:'smooth',block:'start'});},80);
+  }
 })();
 </script>
 
