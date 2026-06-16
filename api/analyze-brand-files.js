@@ -19,6 +19,53 @@ Your role is brand understanding, not file intake.
 
 Do not contradict the local preparation report unless the visual evidence clearly requires it.
 
+══════════════════════════════════════════════════════════════════════
+HOW TO CLASSIFY ASSETS — LOOK AT THE IMAGE, NOT THE FILENAME
+══════════════════════════════════════════════════════════════════════
+Classify every asset by what you actually SEE in the image. Filenames are an
+unreliable, weak hint only — they are frequently generic ("logo.png",
+"final_v2.png", "asset1.jpg"), wrong, or copied. When the filename and the
+image disagree, TRUST THE IMAGE. Never assign a role from the filename alone
+when an image is available.
+
+Decide each visual asset's type from its content:
+
+- "Primary Logo": the full brand signature / lockup — usually the symbol (mark)
+  AND the brand name (wordmark) together. This is the lead identity.
+- "Icon Mark": the symbol or emblem ALONE, with no words. Often compact and
+  near-square, and still reads at small sizes (favicon, app icon, avatar).
+- "Wordmark": the brand NAME set in type, with no symbol — a logotype.
+- "Logo Variant": the same logo rendered as a single-color / monochrome /
+  knockout version (e.g. all-black or all-white) meant for placing on
+  backgrounds. Note it as a variant, not a separate brand.
+- "Photography": a photograph or real-world image (people, product, building,
+  scene). Not a logo.
+- "Pattern": a texture, repeating motif, or graphic background element.
+- "Document": a guideline PDF, deck, presentation, or reference file.
+- "Font": a typeface file (otf/ttf/woff).
+- "Other": anything that does not fit the above.
+
+For every LOGO-type asset (Primary Logo, Icon Mark, Wordmark, Logo Variant),
+also report:
+- "tone": the dominant ink/artwork color of the logo itself —
+  "dark" (the logo is a dark color on transparency/light),
+  "light" (the logo is white or very light), or
+  "mixed" (full color / both).
+- "transparentBackground": true if the artwork sits on a transparent or
+  knocked-out background, false if it has a baked-in solid background.
+
+CONTRAST / PLACEMENT — never make a logo disappear:
+- A "dark" logo must be shown on a LIGHT or NEUTRAL background.
+- A "light" logo must be shown on a DARK or BRAND-COLOR background.
+- NEVER recommend placing a dark logo on a dark color, or a light logo on a
+  light color. In particular, do not place a dark primary logo on the primary
+  brand color when the primary color is dark — pick a contrasting background
+  instead, or call for a knockout variant.
+- Each logo's "recommendedBackground" must CONTRAST with its tone:
+  "light" | "neutral" | "dark" | "brand-color".
+
+══════════════════════════════════════════════════════════════════════
+
 You MUST return ONLY valid JSON — no markdown fences, no preamble, no explanation. The response must parse cleanly with JSON.parse().
 
 Return this exact shape:
@@ -66,19 +113,47 @@ Return this exact shape:
     "profileImage": "string — filename best for profile/avatar use",
     "websiteHeader": "string — filename best for website header"
   },
+  "logoSystem": {
+    "primaryLogo": {
+      "file": "string — exact filename, or empty if none",
+      "type": "string — Primary Logo | Icon Mark | Wordmark | Logo Variant",
+      "tone": "string — dark | light | mixed",
+      "transparentBackground": true,
+      "recommendedBackground": "string — light | neutral | dark | brand-color"
+    },
+    "iconMark": {
+      "file": "string — exact filename, or empty if none",
+      "type": "string — Icon Mark",
+      "tone": "string — dark | light | mixed",
+      "transparentBackground": true,
+      "recommendedBackground": "string — light | neutral | dark | brand-color"
+    },
+    "wordmark": {
+      "file": "string — exact filename, or empty if none",
+      "type": "string — Wordmark",
+      "tone": "string — dark | light | mixed",
+      "transparentBackground": true,
+      "recommendedBackground": "string — light | neutral | dark | brand-color"
+    }
+  },
   "assetAssignments": [
     {
       "fileId": "string — asset id e.g. asset_1",
       "slot": "string — one of: PrimaryLogo, SecondaryLogo, IconMark, WebsiteHeader, SocialAvatar, BusinessCard, PrintAsset, ExtraAsset",
-      "reason": "string — one sentence"
+      "reason": "string — one sentence grounded in what the image shows"
     }
   ],
   "assetReport": [
     {
       "name": "string — original filename",
+      "assetType": "string — Primary Logo | Icon Mark | Wordmark | Logo Variant | Photography | Pattern | Document | Font | Other",
       "assetRole": "string — e.g. Primary Logo, Icon Mark, Secondary Logo",
+      "tone": "string — for logos: dark | light | mixed; otherwise n/a",
+      "transparentBackground": true,
+      "recommendedBackground": "string — for logos: light | neutral | dark | brand-color; otherwise n/a",
       "placement": "string — e.g. Website header, Social avatar, Print",
-      "reason": "string — one sentence on why",
+      "reason": "string — one sentence on why, based on the IMAGE content",
+      "confidence": number,
       "qualityScore": number
     }
   ],
@@ -118,14 +193,19 @@ Return this exact shape:
 }
 
 Rules:
+- Classify every asset by visual evidence first. Filenames are weak hints and may be wrong; when the filename and image disagree, trust the image.
+- assetType in assetReport must be set from the IMAGE content for visual assets, not the filename.
+- assetReport must include one entry per uploaded file in the prepared asset set.
+- For every logo-type asset, set tone (dark/light/mixed) and a recommendedBackground that CONTRASTS with that tone. A dark logo gets a light or neutral background; a light logo gets a dark or brand-color background. Never place a dark logo on a dark color or a light logo on a light color.
+- logoSystem must identify the best primaryLogo, iconMark, and wordmark from the actual artwork. If one is genuinely absent, leave its file empty rather than forcing a wrong file.
 - palette and colors must both be present and have 5 items each. They can be the same data.
 - selectedAssets values must be actual filenames from the uploaded files. Use the exact names passed in.
-- assetReport must include one entry per uploaded file in the prepared asset set.
 - downloadCards should suggest 2-3 logical groupings, such as Logo Package, Color Variants, Social Assets, Reference Files, or Brand Home Files.
 - usage.do and usage.dont must each have 3-5 plain string rules. Do not use bullet characters.
 - typography.displayFont and typography.bodyFont must be plain strings with font names only.
 - If you cannot detect a font name, make your best educated guess based on visual style.
 - Do not invent colors not visible in the uploaded files.
+- confidence is 0 to 1 and reflects how sure you are of the asset's type from the image (lower it for SVGs and non-visual files you could not actually see).
 - qualityScore is 1-10 based on resolution, clarity, and usefulness of the asset.
 - customer-facing language should feel calm, professional, specific, and concierge-level.
 - recommendations must include exactly 3 items.
@@ -166,6 +246,15 @@ function asArray(value) {
 
 function normalizeText(value, fallback = "") {
   return typeof value === "string" && value.trim() ? value.trim() : fallback;
+}
+
+// Pick a contrasting background from a logo tone, so a logo is never placed
+// where it would disappear. Used to backfill logoSystem if the model omits it.
+function backgroundForTone(tone) {
+  const t = String(tone || "").toLowerCase();
+  if (t === "light") return "dark";
+  if (t === "dark") return "light";
+  return "neutral";
 }
 
 function buildFallbackRecommendations(parsed, assets, preparationReport) {
@@ -279,6 +368,47 @@ function normalizeRecommendations(parsed, assets, preparationReport) {
   }));
 }
 
+// Ensure logoSystem exists and every logo carries a contrasting background,
+// even if the model under-fills it — so renderers always have safe placement data.
+function normalizeLogoSystem(parsed) {
+  const report = asArray(parsed?.assetReport);
+  const selected = parsed?.selectedAssets || {};
+
+  function findByType(...types) {
+    const wanted = types.map(t => t.toLowerCase());
+    return report.find(r => wanted.includes(String(r?.assetType || "").toLowerCase()));
+  }
+
+  function slot(existing, fallbackFile, fallbackType) {
+    const e = existing && typeof existing === "object" ? existing : {};
+    const fromReport =
+      findByType(fallbackType) ||
+      report.find(r => String(r?.name || "") === String(e.file || fallbackFile || ""));
+    const tone = normalizeText(e.tone, fromReport ? normalizeText(fromReport.tone, "mixed") : "mixed");
+    return {
+      file: normalizeText(e.file, fallbackFile || ""),
+      type: normalizeText(e.type, fallbackType),
+      tone,
+      transparentBackground:
+        typeof e.transparentBackground === "boolean"
+          ? e.transparentBackground
+          : (typeof fromReport?.transparentBackground === "boolean" ? fromReport.transparentBackground : true),
+      recommendedBackground: normalizeText(
+        e.recommendedBackground,
+        normalizeText(fromReport?.recommendedBackground, backgroundForTone(tone))
+      )
+    };
+  }
+
+  const incoming = parsed?.logoSystem && typeof parsed.logoSystem === "object" ? parsed.logoSystem : {};
+
+  return {
+    primaryLogo: slot(incoming.primaryLogo, selected.primaryLogo || selected.heroLogo, "Primary Logo"),
+    iconMark: slot(incoming.iconMark, selected.iconMark, "Icon Mark"),
+    wordmark: slot(incoming.wordmark, selected.iconVariant, "Wordmark")
+  };
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -351,7 +481,7 @@ export default async function handler(req, res) {
     const lowerName = safeName.toLowerCase();
 
     const metadataText = [
-      `File: ${safeName}`,
+      `File (weak hint only): ${safeName}`,
       `ID: ${id || "unknown"}`,
       `Type: ${safeType}`,
       `Category: ${category || "unknown"}`,
@@ -366,8 +496,8 @@ export default async function handler(req, res) {
       content.push({
         type: "text",
         text:
-          `[SVG asset]\n${metadataText}\n` +
-          "SVG files are brand assets. Assign this file a role using its exact filename."
+          `[SVG asset — not rasterized, so you cannot see it directly]\n${metadataText}\n` +
+          "Infer its role from filename, extension, and prepared category, and set a LOWER confidence because you could not visually inspect it. Reference it by its exact filename."
       });
 
       continue;
@@ -385,8 +515,12 @@ export default async function handler(req, res) {
       content.push({
         type: "text",
         text:
-          `The image above is this prepared asset:\n${metadataText}\n` +
-          "Use the exact filename when referencing this asset."
+          "The image above is a prepared brand asset. Classify it by what you SEE — full logo lockup, " +
+          "icon/symbol mark, wordmark/logotype, monochrome or knockout variant, photograph, pattern, or reference document. " +
+          "The filename below is only a weak hint and may be generic or wrong; trust the image over the filename.\n" +
+          `${metadataText}\n` +
+          "Reference this asset by its exact filename in your output. If it is a logo, report its tone (dark, light, or mixed), " +
+          "whether it has a transparent background, and a recommendedBackground that CONTRASTS with its tone so it never disappears."
       });
 
       continue;
@@ -395,8 +529,8 @@ export default async function handler(req, res) {
     content.push({
       type: "text",
       text:
-        `[Non-visual uploaded asset]\n${metadataText}\n` +
-        "Do not attempt to visually inspect this file. Use its filename, extension, and prepared category to infer its brand role."
+        `[Non-visual uploaded asset — you cannot see it]\n${metadataText}\n` +
+        "Do not attempt to visually inspect this file. Infer its brand role from filename, extension, and prepared category, and set a LOWER confidence."
     });
   }
 
@@ -404,8 +538,9 @@ export default async function handler(req, res) {
     type: "text",
     text:
       "Perform brand understanding from the uploaded visual assets and the local preparation report. " +
-      "Return the full structured JSON exactly in the required shape. " +
-      "Use exact filenames from the uploaded assets. Do not include markdown."
+      "Classify each asset by its image content, not its filename. Identify the primary logo, icon mark, and wordmark from the actual artwork, " +
+      "and give every logo a tone and a contrasting recommendedBackground. " +
+      "Return the full structured JSON exactly in the required shape. Use exact filenames. Do not include markdown."
   });
 
   let openAiResponse;
@@ -508,6 +643,9 @@ export default async function handler(req, res) {
   if (!Array.isArray(parsed.downloadCards)) {
     parsed.downloadCards = [];
   }
+
+  // Always provide safe, contrasting logo placement data for the renderers.
+  parsed.logoSystem = normalizeLogoSystem(parsed);
 
   if (!parsed.usage || typeof parsed.usage !== "object") {
     parsed.usage = {
