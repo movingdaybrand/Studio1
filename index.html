@@ -3099,7 +3099,7 @@ body.ws-expanded .mdx-in-workspace .simple-box-buttons{grid-template-columns:rep
   <div class="mdx-ws-head" id="mdxWsHandle">
     <div class="mdx-ws-title">
       <svg viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M769.4,89.65v111.85h-39.04c.07-25.79-35.02-31.29-50.28-36.68-16.18-5.71,0-14.05,0-14.05l89.32-61.11Z"/><path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/></svg>
-      <div><b>Brand Home Workspace</b><span>Everything that builds your guide</span></div>
+      <div><b id="mdxWsTitle">Brand Home Workspace</b><span id="mdxWsSub">Everything that builds your guide</span></div>
     </div>
     <button class="mdx-ws-expand" id="mdxWsExpand" type="button" aria-label="Expand to full screen" title="Expand">
       <svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 4 4 4 4 9"/><polyline points="15 4 20 4 20 9"/><polyline points="15 20 20 20 20 15"/><polyline points="9 20 4 20 4 15"/></svg>
@@ -3143,6 +3143,154 @@ body.ws-expanded .mdx-in-workspace .simple-box-buttons{grid-template-columns:rep
 .preview-toolbar .builder-btn.primary,.preview-toolbar .builder-btn.publish{background:linear-gradient(180deg,#244a36,#1b3a2a) !important;color:#f1ecdf !important;border-color:transparent !important;}
 .preview-toolbar .builder-btn.danger{background:transparent !important;color:rgba(156,60,60,.85) !important;border-color:rgba(156,60,60,.22) !important;}
 </style>
+<!-- ████████████████████████████████████████████████████████████████████████
+     BRAND HOME — the compiled home every brand lives in (lands after Welcome Home)
+     ████████████████████████████████████████████████████████████████████████ -->
+<style id="brand-home-styles">
+#brandHome{display:none;position:fixed;inset:0;z-index:55;font-family:'Inter',system-ui,-apple-system,sans-serif;color:rgba(8,30,18,.9);overflow-y:auto;padding:clamp(28px,6vh,84px) clamp(20px,5vw,90px);}
+body.md-home #brandHome{display:block;animation:mdhIn .7s cubic-bezier(.22,1,.36,1) both;}
+body.md-home .builder-app,body.md-home #mdxExperience,body.md-home #previewShell,body.md-home #mdxWorkspace{display:none!important;}
+@keyframes mdhIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+.mdh-shell{max-width:1080px;margin:0 auto;}
+.mdh-top{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:clamp(28px,4vh,52px);}
+.mdh-plate{display:flex;align-items:center;gap:20px;min-width:0;}
+.mdh-logo{width:84px;height:84px;border-radius:22px;flex:0 0 auto;display:grid;place-items:center;overflow:hidden;background:rgba(255,255,255,.6);backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);box-shadow:0 0 0 .5px rgba(255,255,255,.95),0 0 0 1px rgba(44,90,60,.12),inset 0 1px 0 rgba(255,255,255,1),0 18px 48px rgba(20,60,36,.1);}
+.mdh-logo img{max-width:78%;max-height:78%;object-fit:contain;}
+.mdh-logo svg{width:40px;height:28px;fill:rgba(20,41,31,.9);}
+.mdh-kicker{font-size:9px;font-weight:500;letter-spacing:.34em;text-transform:uppercase;color:rgba(18,46,28,.46);margin-bottom:8px;}
+.mdh-name{font-size:clamp(2.2rem,4.6vw,3.4rem);font-weight:200;letter-spacing:-.04em;line-height:1;color:rgba(8,30,18,.92);}
+.mdh-meta{font-size:.9rem;font-weight:300;color:rgba(14,40,22,.55);margin-top:10px;}
+.mdh-actions{display:flex;gap:10px;align-items:center;}
+.mdh-btn{display:inline-flex;align-items:center;gap:.5rem;padding:.8rem 1.7rem;border:none;border-radius:100px;cursor:pointer;font-family:inherit;font-size:.78rem;font-weight:500;letter-spacing:.04em;color:#f1ecdf;background:linear-gradient(180deg,#244a36,#1b3a2a);box-shadow:0 10px 28px rgba(20,60,36,.18);transition:transform .18s ease;}
+.mdh-btn:hover{transform:translateY(-1px);}
+.mdh-btn svg{width:13px;height:13px;stroke:rgba(241,236,223,.7);stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.mdh-btn.ghost{background:rgba(255,255,255,.55);color:rgba(10,32,18,.8);box-shadow:0 0 0 1px rgba(44,92,62,.16),inset 0 1px 0 rgba(255,255,255,1);}
+.mdh-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:clamp(14px,1.6vw,22px);align-items:start;}
+.mdh-card{background:rgba(255,255,255,.5);backdrop-filter:blur(40px) saturate(175%);-webkit-backdrop-filter:blur(40px) saturate(175%);border-radius:24px;padding:clamp(20px,2.4vw,30px);box-shadow:0 0 0 .5px rgba(255,255,255,.9),0 0 0 1px rgba(44,90,60,.1),inset 0 1px 0 rgba(255,255,255,1),0 18px 50px rgba(20,60,36,.07);}
+.mdh-card-label{font-size:9px;font-weight:500;letter-spacing:.2em;text-transform:uppercase;color:rgba(18,46,28,.46);margin-bottom:18px;}
+.mdh-palette-card{grid-row:span 2;}
+.mdh-swatches{display:flex;flex-direction:column;gap:12px;}
+.mdh-swatch{display:flex;align-items:center;gap:14px;}
+.mdh-chip{width:46px;height:46px;border-radius:13px;flex:0 0 auto;box-shadow:inset 0 0 0 1px rgba(21,20,15,.08);}
+.mdh-swatch b{font-size:12px;font-weight:500;color:rgba(10,32,18,.82);flex:1;}
+.mdh-swatch i{font-family:ui-monospace,monospace;font-size:11px;font-style:normal;color:rgba(14,40,22,.5);text-transform:uppercase;}
+.mdh-type{display:flex;align-items:center;gap:20px;}
+.mdh-type-display{font-size:60px;line-height:1;color:rgba(8,30,18,.88);}
+.mdh-type-names p{font-size:13px;font-weight:300;color:rgba(14,40,22,.7);margin:5px 0;}
+.mdh-type-names b{font-weight:500;color:rgba(10,32,18,.5);font-size:9px;letter-spacing:.14em;text-transform:uppercase;display:block;margin-bottom:1px;}
+.mdh-rooms{display:flex;flex-direction:column;gap:8px;}
+.mdh-room{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid rgba(44,90,60,.1);background:rgba(255,255,255,.45);border-radius:13px;padding:13px 15px;cursor:pointer;font-family:inherit;font-size:13px;font-weight:400;color:rgba(10,32,18,.8);transition:.18s;width:100%;text-align:left;}
+.mdh-room:hover{border-color:rgba(44,110,70,.4);background:rgba(255,255,255,.74);transform:translateX(2px);}
+.mdh-room svg{width:13px;height:13px;stroke:rgba(20,60,36,.4);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto;}
+.mdh-foot{margin-top:clamp(22px,3vh,38px);text-align:center;font-size:.82rem;font-weight:300;color:rgba(14,40,22,.5);}
+.mdh-link{border:none;background:none;cursor:pointer;font:inherit;color:rgba(20,80,46,.85);text-decoration:underline;text-underline-offset:3px;}
+@media(max-width:760px){.mdh-grid{grid-template-columns:1fr;}.mdh-palette-card{grid-row:auto;}.mdh-top{flex-direction:column;align-items:flex-start;}}
+</style>
+
+<style id="brand-home-hub">
+.mdh-shell{max-width:1080px;margin:0 auto;}
+.mdh-hero{text-align:center;margin-bottom:clamp(34px,6vh,72px);}
+.mdh-greeting{font-size:9px;font-weight:500;letter-spacing:.34em;text-transform:uppercase;color:rgba(18,46,28,.46);margin-bottom:1.2rem;animation:mdhRise .9s cubic-bezier(.22,1,.36,1) .1s both;}
+.mdh-welcome{font-size:clamp(2.6rem,6vw,4.2rem);font-weight:200;letter-spacing:-.045em;line-height:1.04;color:rgba(8,30,18,.92);animation:mdhRise .9s cubic-bezier(.22,1,.36,1) .22s both;}
+.mdh-welcome .soft{color:rgba(10,30,18,.42);}
+.mdh-welcome-sub{font-size:.95rem;font-weight:300;color:rgba(14,40,22,.58);margin-top:1.1rem;animation:mdhRise .9s cubic-bezier(.22,1,.36,1) .42s both;}
+@keyframes mdhRise{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+.mdh-rooms-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,1.6vw,22px);}
+.mdh-dest{display:flex;flex-direction:column;align-items:flex-start;text-align:left;cursor:pointer;border:none;background:rgba(255,255,255,.5);backdrop-filter:blur(40px) saturate(175%);-webkit-backdrop-filter:blur(40px) saturate(175%);border-radius:26px;padding:clamp(22px,2.4vw,32px);min-height:186px;position:relative;overflow:hidden;box-shadow:0 0 0 .5px rgba(255,255,255,.92),0 0 0 1px rgba(44,90,60,.1),inset 0 1px 0 rgba(255,255,255,1),0 16px 44px rgba(20,60,36,.07);font-family:inherit;transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease,background .3s ease;opacity:0;animation:mdhRise .8s cubic-bezier(.22,1,.36,1) both;}
+.mdh-rooms-grid .mdh-dest:nth-child(1){animation-delay:.5s}.mdh-rooms-grid .mdh-dest:nth-child(2){animation-delay:.57s}.mdh-rooms-grid .mdh-dest:nth-child(3){animation-delay:.64s}.mdh-rooms-grid .mdh-dest:nth-child(4){animation-delay:.71s}.mdh-rooms-grid .mdh-dest:nth-child(5){animation-delay:.78s}.mdh-rooms-grid .mdh-dest:nth-child(6){animation-delay:.85s}
+.mdh-dest:hover{transform:translateY(-3px);background:rgba(255,255,255,.66);box-shadow:0 0 0 .5px rgba(255,255,255,1),0 0 0 1px rgba(44,100,66,.2),inset 0 1px 0 rgba(255,255,255,1),0 22px 60px rgba(20,60,36,.12);}
+.mdh-dest-ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:rgba(255,255,255,.65);box-shadow:inset 0 0 0 1px rgba(44,90,60,.12);}
+.mdh-dest-ic svg{width:22px;height:22px;stroke:rgba(20,60,36,.66);stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.mdh-dest-text{margin-top:24px;}
+.mdh-dest-text b{display:block;font-size:1.15rem;font-weight:400;letter-spacing:-.02em;color:rgba(8,30,18,.9);}
+.mdh-dest-text i{display:block;font-style:normal;font-size:.82rem;font-weight:300;color:rgba(14,40,22,.52);margin-top:4px;}
+.mdh-dest-go{position:absolute;top:clamp(22px,2.4vw,32px);right:clamp(22px,2.4vw,32px);opacity:0;transform:translateX(-4px);transition:.25s;}
+.mdh-dest-go svg{width:15px;height:15px;stroke:rgba(20,60,36,.5);stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.mdh-dest:hover .mdh-dest-go{opacity:1;transform:none;}
+#mdhBackHome{display:none;position:fixed;top:clamp(14px,2vh,22px);left:clamp(14px,2vw,26px);z-index:58;align-items:center;gap:7px;border:none;cursor:pointer;border-radius:100px;padding:9px 16px 9px 12px;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;color:rgba(8,28,16,.82);background:rgba(255,255,255,.7);backdrop-filter:blur(24px) saturate(170%);-webkit-backdrop-filter:blur(24px) saturate(170%);box-shadow:0 0 0 1px rgba(44,92,62,.16),inset 0 1px 0 rgba(255,255,255,1),0 8px 22px rgba(20,60,36,.1);transition:transform .18s ease;}
+body.md-guide-room #mdhBackHome{display:inline-flex;animation:mdhRise .5s ease both;}
+#mdhBackHome:hover{transform:translateY(-1px);}
+#mdhBackHome svg{width:14px;height:14px;stroke:rgba(8,28,16,.5);stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+#mdhDeliverables{display:none;position:fixed;inset:0;z-index:57;align-items:center;justify-content:center;font-family:'Inter',sans-serif;padding:clamp(20px,5vw,60px);}
+body.md-deliv #mdhDeliverables{display:flex;}
+body.md-deliv .builder-app,body.md-deliv #mdxExperience,body.md-deliv #previewShell,body.md-deliv #mdxWorkspace,body.md-deliv #brandHome{display:none!important;}
+.mdh-deliv-shell{width:100%;max-width:680px;text-align:center;animation:mdhRise .6s cubic-bezier(.22,1,.36,1) both;}
+.mdh-deliv-back{display:inline-flex;align-items:center;gap:6px;border:none;background:none;cursor:pointer;font:inherit;font-size:12px;font-weight:500;color:rgba(14,40,22,.5);margin-bottom:2rem;}
+.mdh-deliv-back:hover{color:rgba(8,30,18,.85);}
+.mdh-deliv-back svg{width:13px;height:13px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.mdh-deliv-title{font-size:clamp(2rem,4.6vw,3rem);font-weight:200;letter-spacing:-.04em;color:rgba(8,30,18,.92);}
+.mdh-deliv-title .soft{color:rgba(10,30,18,.42);}
+.mdh-deliv-sub{font-size:.9rem;font-weight:300;color:rgba(14,40,22,.55);margin-top:.9rem;margin-bottom:2.4rem;}
+.mdh-deliv-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.mdh-deliv-card{display:flex;flex-direction:column;align-items:flex-start;gap:5px;text-align:left;cursor:pointer;border:none;background:rgba(255,255,255,.5);backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);border-radius:20px;padding:22px 24px;box-shadow:0 0 0 .5px rgba(255,255,255,.9),0 0 0 1px rgba(44,90,60,.1),inset 0 1px 0 rgba(255,255,255,1),0 14px 38px rgba(20,60,36,.07);font-family:inherit;transition:transform .2s ease,background .2s ease;}
+.mdh-deliv-card:hover{transform:translateY(-2px);background:rgba(255,255,255,.7);}
+.mdh-deliv-card b{font-size:1.05rem;font-weight:500;color:rgba(8,30,18,.9);}
+.mdh-deliv-card i{font-style:normal;font-size:.8rem;font-weight:300;color:rgba(14,40,22,.5);}
+@media(max-width:900px){.mdh-rooms-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:560px){.mdh-rooms-grid,.mdh-deliv-grid{grid-template-columns:1fr;}}
+</style>
+
+<div id="brandHome" aria-label="Brand Home">
+  <div class="mdh-shell">
+    <header class="mdh-hero">
+      <p class="mdh-greeting" id="mdhGreeting">Good afternoon.</p>
+      <h1 class="mdh-welcome">Welcome <span class="soft">home.</span></h1>
+      <p class="mdh-welcome-sub">Everything has a place. Choose where you'd like to continue.</p>
+    </header>
+    <div class="mdh-rooms-grid" id="mdhRoomsGrid">
+      <button class="mdh-dest" data-room="identity" type="button">
+        <span class="mdh-dest-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span>
+        <span class="mdh-dest-text"><b>Identity</b><i>Name, logo & palette</i></span>
+        <span class="mdh-dest-go"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span>
+      </button>
+      <button class="mdh-dest" data-room="assets" type="button">
+        <span class="mdh-dest-ic"><svg viewBox="0 0 24 24"><path d="M3 7l2-2h5l2 2h8v12H3z"/></svg></span>
+        <span class="mdh-dest-text"><b>Assets</b><i>Logos, photography, documents</i></span>
+        <span class="mdh-dest-go"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span>
+      </button>
+      <button class="mdh-dest" data-room="guide" type="button">
+        <span class="mdh-dest-ic"><svg viewBox="0 0 24 24"><path d="M4 5h7a3 3 0 0 1 3 3v11a2.5 2.5 0 0 0-2.5-2.5H4z"/><path d="M20 5h-3a3 3 0 0 0-3 3v11a2.5 2.5 0 0 1 2.5-2.5H20z"/></svg></span>
+        <span class="mdh-dest-text"><b>Brand Guide</b><i>Your living guide</i></span>
+        <span class="mdh-dest-go"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span>
+      </button>
+      <button class="mdh-dest" data-room="typography" type="button">
+        <span class="mdh-dest-ic"><svg viewBox="0 0 24 24"><path d="M5 7V5h14v2"/><line x1="12" y1="5" x2="12" y2="19"/><line x1="9" y1="19" x2="15" y2="19"/></svg></span>
+        <span class="mdh-dest-text"><b>Typography</b><i>Display & body type</i></span>
+        <span class="mdh-dest-go"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span>
+      </button>
+      <button class="mdh-dest" data-room="deliverables" type="button">
+        <span class="mdh-dest-ic"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="8 11 12 15 16 11"/><path d="M5 19h14"/></svg></span>
+        <span class="mdh-dest-text"><b>Deliverables</b><i>PDF, ZIP, publish, share</i></span>
+        <span class="mdh-dest-go"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span>
+      </button>
+      <button class="mdh-dest" data-room="founder" type="button">
+        <span class="mdh-dest-ic"><svg viewBox="0 0 24 24"><line x1="4" y1="8" x2="20" y2="8"/><circle cx="9" cy="8" r="2.4" fill="var(--md-ice,#f3f7f3)"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="15" cy="16" r="2.4" fill="var(--md-ice,#f3f7f3)"/></svg></span>
+        <span class="mdh-dest-text"><b>Founder Tools</b><i>Advanced controls</i></span>
+        <span class="mdh-dest-go"><svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- floating return-to-home for the Brand Guide room -->
+<button id="mdhBackHome" type="button" aria-label="Back to Brand Home"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="11 18 5 12 11 6"/></svg><span>Brand Home</span></button>
+
+<!-- Deliverables room -->
+<div id="mdhDeliverables" aria-label="Deliverables">
+  <div class="mdh-deliv-shell">
+    <button class="mdh-deliv-back" id="mdhDelivBack" type="button"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="11 18 5 12 11 6"/></svg>Brand Home</button>
+    <p class="mdh-kicker">Deliverables</p>
+    <h2 class="mdh-deliv-title">Take it <span class="soft">with you.</span></h2>
+    <p class="mdh-deliv-sub">Everything you moved in, ready to send.</p>
+    <div class="mdh-deliv-grid">
+      <button class="mdh-deliv-card" data-deliver="pdf" type="button"><b>PDF</b><i>Printable guide</i></button>
+      <button class="mdh-deliv-card" data-deliver="zip" type="button"><b>ZIP</b><i>All assets</i></button>
+      <button class="mdh-deliv-card" data-deliver="publish" type="button"><b>Publish</b><i>Lock & finalize</i></button>
+      <button class="mdh-deliv-card" data-deliver="share" type="button"><b>Share</b><i>Standalone HTML</i></button>
+    </div>
+  </div>
+</div>
+
 <div class="builder-app" id="builderApp">
   <div class="builder-shell">
     <nav class="studio-nav">
@@ -6287,6 +6435,7 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     wireNav();
     wireIntake();
     setupWorkspace();
+    wireBrandHome();
     // open on first step (the front door)
     var first=stepEl(0); if(first){first.classList.add('is-active');} updateDots(); updateBack(first); updateChrome();
   }
@@ -6481,10 +6630,8 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
 
   /* ── exits ────────────────────────────────────────────────────── */
   function finish(){
-    document.body.classList.remove('mdx-active');
-    document.body.classList.add('mdx-done');
-    var pv=$('#previewBtn'); if(pv)pv.click();
-    window.scrollTo({top:0,behavior:'auto'});
+    var pv=$('#previewBtn'); if(pv)pv.click();   // ensure the guide is rendered from state
+    showBrandHome();
   }
   /* ── room helpers: confirmation logo, arrival check, recommendations ── */
   function showConfirmLogo(file){
@@ -6586,6 +6733,90 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
   }
 
   /* ── floating Brand Home Workspace ────────────────────────────── */
+  /* ── BRAND HOME — the compiled home every brand lives in ──────── */
+  function val(sel){var e=document.querySelector(sel);return e?(e.value||e.textContent||'').trim():'';}
+  function brandLogoSrc(){
+    var gl=document.querySelector('#guidePreview .guide-logo');
+    if(gl&&gl.getAttribute('src')&&/^data:/.test(gl.getAttribute('src')))return gl.getAttribute('src');
+    var t=document.querySelector('#thumb-primaryLogo img,#thumb-heroLogo img');
+    if(t&&t.src)return t.src;
+    return '';
+  }
+  var WS_ROOMS={
+    identity:{title:'Identity',sub:'Name, logo & palette',sections:['brandhome','logo','colors']},
+    assets:{title:'Assets',sub:'Uploads & files',sections:['assets']},
+    typography:{title:'Typography',sub:'Display & body type',sections:['type']},
+    founder:{title:'Founder Tools',sub:'Advanced controls',sections:['sections']}
+  };
+  var wsFromHome=false;
+  function renderBrandHome(){
+    var g=$('#mdhGreeting'); if(g){ var h=new Date().getHours(); g.textContent=(h<12?'Good morning.':h<18?'Good afternoon.':'Good evening.'); }
+  }
+  function showBrandHome(){
+    renderBrandHome();
+    document.body.classList.remove('mdx-active','mdx-done','mdx-workspace','ws-expanded');
+    document.body.classList.add('md-home');
+    window.scrollTo({top:0,behavior:'auto'});
+  }
+  function openGuideFromHome(label){
+    document.body.classList.remove('md-home');
+    document.body.classList.add('mdx-done');
+    var pv=$('#previewBtn'); if(pv)pv.click();
+    if(label) setTimeout(function(){ scrollGuideToLabel(label); }, 220);
+    else window.scrollTo({top:0,behavior:'auto'});
+  }
+  function scrollGuideToLabel(label){
+    var g=document.querySelector('#guidePreview'); if(!g)return;
+    var t = (label==='hero') ? g.querySelector('.guide-hero')
+      : $all('#guidePreview .guide-section').filter(function(s){var l=s.querySelector('.section-label');return l&&l.textContent.trim().toLowerCase()===String(label).toLowerCase();})[0];
+    if(t)try{t.scrollIntoView({behavior:'smooth',block:'start'});}catch(e){}
+  }
+  function wireBrandHome(){
+    var grid=$('#mdhRoomsGrid');
+    if(grid)grid.addEventListener('click',function(e){
+      var b=e.target.closest('[data-room]'); if(!b)return;
+      var k=b.getAttribute('data-room');
+      if(k==='guide') openGuideRoom();
+      else if(k==='deliverables') openDeliverables();
+      else openRoom(k);
+    });
+    var back=$('#mdhBackHome'); if(back)back.addEventListener('click',function(){ document.body.classList.remove('md-guide-room'); showBrandHome(); });
+    var db=$('#mdhDelivBack'); if(db)db.addEventListener('click',function(){ document.body.classList.remove('md-deliv'); showBrandHome(); });
+    var dgrid=document.querySelector('#mdhDeliverables .mdh-deliv-grid');
+    if(dgrid)dgrid.addEventListener('click',function(e){
+      var b=e.target.closest('[data-deliver]'); if(!b)return;
+      var map={pdf:'#generatePdfBtn',zip:'#downloadAssetsBtn',publish:'#publishBtn',share:'#downloadHtmlBtn'};
+      var sel=map[b.getAttribute('data-deliver')]; var btn=sel&&document.querySelector(sel);
+      document.body.classList.remove('md-deliv','md-home');
+      document.body.classList.add('mdx-done','md-guide-room');
+      var pv=$('#previewBtn'); if(pv)pv.click();
+      if(btn) setTimeout(function(){ try{btn.click();}catch(e){} },180);
+    });
+  }
+  // open a focused room: reveal only its sections, rename the header, return home on close
+  function openRoom(roomKey){
+    var room=WS_ROOMS[roomKey]; if(!room)return;
+    document.body.classList.remove('md-home','md-deliv','md-guide-room','mdx-done','mdx-active');
+    document.body.classList.add('mdx-workspace'); wsFromHome=true;
+    var pv=$('#previewBtn'); if(pv)pv.click();
+    var win=$('#mdxWorkspace'); if(win){ win.classList.remove('on'); void win.offsetWidth; win.classList.add('on'); }
+    var t=$('#mdxWsTitle'); if(t)t.textContent=room.title;
+    var s=$('#mdxWsSub'); if(s)s.textContent=room.sub;
+    $all('.mdx-ws-tab').forEach(function(tab){ tab.style.display = room.sections.indexOf(tab.getAttribute('data-ws-go'))>=0 ? '' : 'none'; });
+    var nav=document.querySelector('.mdx-ws-nav'); if(nav)nav.style.display = room.sections.length>1 ? '' : 'none';
+    setTimeout(function(){ showWsSection(room.sections[0], true); }, 50);
+  }
+  function openGuideRoom(){
+    document.body.classList.remove('md-home','md-deliv','mdx-workspace');
+    document.body.classList.add('mdx-done','md-guide-room');
+    var pv=$('#previewBtn'); if(pv)pv.click();
+    window.scrollTo({top:0,behavior:'auto'});
+  }
+  function openDeliverables(){
+    document.body.classList.remove('md-home');
+    document.body.classList.add('md-deliv');
+  }
+
   var WS_SECTIONS=[
     {key:'brandhome',label:'Brand Home',h3:'brand home',preview:'hero'},
     {key:'assets',   label:'Assets',    h3:'assets',    preview:'use'},
@@ -6656,6 +6887,11 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     var win=$('#mdxWorkspace'); if(win)win.classList.remove('on');
     document.body.classList.remove('mdx-workspace','ws-expanded');
     var ex=$('#mdxWsExpand'); if(ex){ex.classList.remove('is-on');ex.setAttribute('title','Expand');}
+    $all('.mdx-ws-tab').forEach(function(tab){ tab.style.display=''; });
+    var nav=document.querySelector('.mdx-ws-nav'); if(nav)nav.style.display='';
+    var t=$('#mdxWsTitle'); if(t)t.textContent='Brand Home Workspace';
+    var s=$('#mdxWsSub'); if(s)s.textContent='Everything that builds your guide';
+    if(wsFromHome){ wsFromHome=false; showBrandHome(); return; }
     document.body.classList.add('mdx-done');           // guide stays; toolbar re-opens workspace
   }
   function makeDraggable(win, handle){
