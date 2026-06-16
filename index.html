@@ -1,276 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Brand Home — concept</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@200;300;400;500;600&display=swap" rel="stylesheet">
-<style>
-:root{
-  --bg-1:#eef1ea;--bg-2:#f7f8f3;--bg-3:#e9ece2;
-  --ink:#0d1f13;--ink-soft:rgba(13,31,19,.56);--ink-faint:rgba(13,31,19,.4);
-  --sage:#2c5a3c;--sage-line:rgba(44,90,60,.12);
-  --glass:rgba(255,255,255,.55);
-  --r-lg:30px;--r-md:22px;--r-sm:16px;
-  --shadow:0 0 0 .5px rgba(255,255,255,.9),0 0 0 1px rgba(44,90,60,.09),inset 0 1px 0 rgba(255,255,255,1),0 18px 50px rgba(20,60,36,.07);
-  --shadow-hover:0 0 0 .5px rgba(255,255,255,1),0 0 0 1px rgba(44,100,66,.18),inset 0 1px 0 rgba(255,255,255,1),0 26px 64px rgba(20,60,36,.13);
-  --display:'Fraunces',Georgia,serif;--body:'Inter',-apple-system,system-ui,sans-serif;
-  --b1:#1c2b22;--b2:#f3efe6;--b3:#b4915a;--b4:#4e6b5a;--b5:#0e1a14;
+}, function(){ assignLogosFromDNA().then(enterHome, enterHome); });
 }
-*{box-sizing:border-box;}
-html{scroll-behavior:smooth;}
-body{margin:0;min-height:100vh;font-family:var(--body);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden;
-  background:radial-gradient(1200px 700px at 78% -8%,rgba(180,205,185,.4),transparent 60%),radial-gradient(900px 600px at 8% 108%,rgba(196,214,198,.34),transparent 55%),linear-gradient(160deg,var(--bg-1),var(--bg-2) 46%,var(--bg-3));}
-button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
-:focus-visible{outline:2px solid var(--sage);outline-offset:3px;border-radius:6px;}
 
-/* glass environment grows with its content; the PAGE scrolls, nothing is trapped */
-.env{max-width:1360px;margin:0 auto;padding:clamp(18px,3vw,40px);}
-.glasspane{position:relative;border-radius:var(--r-lg);min-height:calc(100vh - 80px);
-  background:linear-gradient(160deg,rgba(255,255,255,.66),rgba(255,255,255,.38));
-  backdrop-filter:blur(46px) saturate(175%);-webkit-backdrop-filter:blur(46px) saturate(175%);
-  box-shadow:var(--shadow);padding:clamp(24px,4vw,60px);}
-
-/* reusable VISUAL CONTAINER — clipping mask: cover, center, overflow hidden, glass, hover lift */
-.vframe{position:relative;overflow:hidden;border-radius:var(--r-md);background:rgba(255,255,255,.5);box-shadow:var(--shadow);transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s ease;}
-.vframe:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover);}
-.vframe>img{width:100%;height:100%;object-fit:cover;object-position:center;display:block;}
-.vframe.contain>img{object-fit:contain;padding:14%;}
-.vframe-tag{position:absolute;left:14px;bottom:12px;z-index:2;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;color:var(--ink-soft);background:rgba(255,255,255,.78);padding:4px 9px;border-radius:8px;backdrop-filter:blur(6px);}
-.vframe-tag.on-dark{color:rgba(243,239,230,.82);background:rgba(8,20,12,.34);}
-.vframe-act{position:absolute;top:11px;right:11px;z-index:2;opacity:0;transform:translateY(-3px);font-size:11px;font-weight:500;color:var(--ink-soft);background:rgba(255,255,255,.82);backdrop-filter:blur(8px);padding:6px 11px;border-radius:99px;transition:.25s;box-shadow:inset 0 0 0 1px rgba(44,90,60,.1);}
-.vframe:hover .vframe-act{opacity:1;transform:none;}
-
-/* views: stacked, only one shown; each grows the glass so everything fits */
-.view{display:none;}
-.view.show{display:block;animation:viewIn .5s cubic-bezier(.22,1,.36,1) both;}
-@keyframes viewIn{from{opacity:0;transform:scale(.99) translateY(6px);filter:blur(2px);}to{opacity:1;transform:none;filter:none;}}
-
-/* HOME */
-.home-head{text-align:center;margin:clamp(18px,5vh,64px) 0 clamp(28px,5vh,52px);}
-.kicker{font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;}
-.welcome{font-family:var(--display);font-weight:300;font-size:clamp(38px,6vw,66px);letter-spacing:-.02em;margin:.32em 0 .18em;}
-.welcome .soft{color:var(--ink-faint);}
-.welcome-sub{color:var(--ink-soft);font-weight:300;font-size:clamp(15px,1.6vw,17px);}
-.rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,1.6vw,22px);max-width:1120px;margin:0 auto;}
-@media(max-width:760px){.rooms{grid-template-columns:1fr 1fr;}}
-@media(max-width:480px){.rooms{grid-template-columns:1fr;}}
-.room-card{text-align:left;display:flex;flex-direction:column;min-height:184px;padding:clamp(20px,2.2vw,30px);border-radius:var(--r-md);background:var(--glass);backdrop-filter:blur(40px) saturate(175%);-webkit-backdrop-filter:blur(40px) saturate(175%);box-shadow:var(--shadow);transition:transform .35s cubic-bezier(.22,1,.36,1),box-shadow .35s ease,background .35s ease;position:relative;overflow:hidden;}
-.room-card:hover{transform:translateY(-4px);background:rgba(255,255,255,.66);box-shadow:var(--shadow-hover);}
-.room-ic{width:44px;height:44px;border-radius:13px;display:grid;place-items:center;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px var(--sage-line);}
-.room-ic svg{width:22px;height:22px;stroke:rgba(20,60,36,.66);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
-.room-card b{display:block;font-weight:400;font-size:1.18rem;letter-spacing:-.01em;margin-top:auto;}
-.room-card i{display:block;font-style:normal;font-size:.82rem;font-weight:300;color:var(--ink-soft);margin-top:4px;}
-.room-card .go{position:absolute;top:24px;right:24px;opacity:0;transform:translateX(-4px);transition:.25s;color:var(--ink-faint);}
-.room-card:hover .go{opacity:1;transform:none;}
-.founder-link{display:block;margin:clamp(24px,5vh,42px) auto 0;width:max-content;font-size:12px;color:var(--ink-faint);padding:8px 16px;border-radius:99px;transition:.2s;}
-.founder-link:hover{color:var(--sage);background:rgba(255,255,255,.5);}
-
-/* ROOM chrome */
-.room-top{display:flex;align-items:center;gap:18px;margin-bottom:clamp(22px,4vh,40px);}
-.back{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-soft);padding:9px 15px 9px 11px;border-radius:99px;background:rgba(255,255,255,.6);box-shadow:var(--shadow);transition:.2s;}
-.back:hover{transform:translateX(-2px);color:var(--ink);}
-.back svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;}
-.room-id .rk{font-size:10px;letter-spacing:.28em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;}
-.room-id h1{font-family:var(--display);font-weight:300;font-size:clamp(26px,3.6vw,40px);letter-spacing:-.02em;margin:.1em 0 0;}
-.sect-label{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;margin:clamp(14px,2vh,22px) 2px 12px;}
-.review{display:grid;gap:clamp(14px,1.8vw,22px);}
-
-/* identity */
-.id-hero{display:grid;grid-template-columns:1.55fr 1fr;gap:clamp(14px,1.8vw,22px);}
-@media(max-width:860px){.id-hero{grid-template-columns:1fr;}}
-.id-primary{min-height:280px;background:var(--b2);display:grid;place-items:center;}
-.id-primary .wm{font-family:var(--display);font-weight:400;font-size:clamp(28px,3.4vw,42px);color:var(--b1);text-align:center;line-height:1.05;}
-.id-primary .wm small{display:block;font-size:.34em;letter-spacing:.34em;text-transform:uppercase;color:var(--b3);margin-top:1.1em;font-weight:500;}
-.id-namecard{padding:clamp(26px,3.4vw,46px);border-radius:var(--r-md);display:flex;flex-direction:column;justify-content:center;background:linear-gradient(155deg,rgba(255,255,255,.6),rgba(255,255,255,.36));backdrop-filter:blur(30px) saturate(170%);box-shadow:var(--shadow);}
-.id-namecard .lab{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;margin-bottom:16px;}
-.id-name{font-family:var(--display);font-weight:400;font-size:clamp(32px,4.2vw,54px);line-height:1.02;letter-spacing:-.02em;outline:none;border-radius:8px;}
-.id-name:focus{box-shadow:0 0 0 2px rgba(44,90,60,.25);}
-.id-tag{font-family:var(--display);font-style:italic;font-weight:300;font-size:clamp(16px,1.8vw,21px);color:var(--ink-soft);margin-top:16px;max-width:30ch;outline:none;border-radius:8px;line-height:1.3;}
-.id-tag:focus{box-shadow:0 0 0 2px rgba(44,90,60,.25);}
-.edit-hint{font-size:11px;color:var(--ink-faint);margin-top:20px;display:inline-flex;align-items:center;gap:6px;}
-.edit-hint svg{width:13px;height:13px;stroke:currentColor;stroke-width:1.6;fill:none;}
-.id-marks{display:grid;grid-template-columns:1fr 1fr 1fr;gap:clamp(14px,1.8vw,22px);}
-@media(max-width:680px){.id-marks{grid-template-columns:1fr 1fr;}}
-.markframe{aspect-ratio:4/3;display:grid;place-items:center;}
-.markframe.dark{background:var(--b1);}.markframe.brand{background:var(--b4);}.markframe.paper{background:var(--b2);}
-.mono{width:74px;height:74px;border-radius:20px;display:grid;place-items:center;font-family:var(--display);font-weight:500;font-size:30px;}
-.mono.fill{background:var(--b3);color:var(--b1);}.mono.line{box-shadow:inset 0 0 0 2px var(--b2);color:var(--b2);}
-.wordmark-mini{font-family:var(--display);font-size:24px;color:var(--b1);text-align:center;}
-.wordmark-mini small{display:block;font-size:.36em;letter-spacing:.3em;text-transform:uppercase;color:var(--b3);margin-top:.7em;}
-.id-colors{display:grid;grid-template-columns:repeat(5,1fr);gap:clamp(10px,1.2vw,16px);}
-.swatch{aspect-ratio:3/4;border-radius:var(--r-sm);position:relative;overflow:hidden;box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease;cursor:pointer;}
-.swatch:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover);}
-.swatch span{position:absolute;left:12px;bottom:11px;font-size:10px;font-weight:600;}
-.swatch .hex{position:absolute;left:12px;top:12px;font-size:9px;font-family:ui-monospace,monospace;opacity:.7;}
-
-/* assets gallery */
-.gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,1.5vw,20px);}
-@media(max-width:860px){.gallery{grid-template-columns:1fr 1fr;}}
-.gframe{aspect-ratio:1;}
-.ph{width:100%;height:100%;}
-.ph.a{background:linear-gradient(135deg,#2c5a3c,#4e6b5a);}
-.ph.b{background:linear-gradient(135deg,#b4915a,#e4cfa6);}
-.ph.c{background:linear-gradient(135deg,#1c2b22,#36493c);}
-.ph.d{background:linear-gradient(135deg,#cdd9cd,#eef1ea);}
-.gframe.tall{aspect-ratio:auto;min-height:0;}
-.glogo{background:var(--b2);display:grid;place-items:center;}
-.glogo .wordmark-mini{font-size:20px;}
-
-/* typography specimen */
-.spec{padding:clamp(26px,3.4vw,46px);border-radius:var(--r-md);background:linear-gradient(155deg,rgba(255,255,255,.62),rgba(255,255,255,.36));backdrop-filter:blur(30px) saturate(170%);box-shadow:var(--shadow);}
-.spec .big{font-family:var(--display);font-weight:300;font-size:clamp(40px,7vw,92px);line-height:.96;letter-spacing:-.03em;color:var(--b1);}
-.spec .scale{display:flex;gap:22px;flex-wrap:wrap;align-items:baseline;margin:26px 0;color:var(--b1);font-family:var(--display);}
-.spec .scale span{opacity:.9;}
-.spec .body{max-width:62ch;color:var(--ink-soft);font-size:clamp(15px,1.5vw,17px);line-height:1.7;font-weight:300;}
-.pairline{display:flex;gap:14px;flex-wrap:wrap;margin-top:24px;font-size:12px;color:var(--ink-faint);}
-.pairline b{font-weight:500;color:var(--ink-soft);}
-
-/* deliverables vault */
-.vault{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(12px,1.5vw,20px);}
-@media(max-width:760px){.vault{grid-template-columns:1fr 1fr;}}
-.vaultcard{padding:clamp(22px,2.4vw,32px);border-radius:var(--r-md);min-height:160px;display:flex;flex-direction:column;background:linear-gradient(160deg,rgba(255,255,255,.6),rgba(255,255,255,.36));backdrop-filter:blur(30px) saturate(170%);box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease;cursor:pointer;}
-.vaultcard:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover);}
-.vaultcard b{font-family:var(--display);font-weight:400;font-size:1.5rem;margin-top:auto;}
-.vaultcard i{font-style:normal;font-size:.8rem;color:var(--ink-soft);margin-top:4px;}
-.vaultcard .vic{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--b3);font-weight:600;}
-
-/* guide hero */
-.guidehero{min-height:420px;border-radius:var(--r-md);overflow:hidden;background:var(--b1);color:var(--b2);position:relative;box-shadow:var(--shadow);padding:clamp(34px,5vw,64px);display:flex;flex-direction:column;justify-content:flex-end;}
-.guidehero .ge{font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--b3);font-weight:500;}
-.guidehero h2{font-family:var(--display);font-weight:300;font-size:clamp(40px,6vw,86px);line-height:.98;letter-spacing:-.03em;margin:.2em 0 0;}
-.guidehero p{font-family:var(--display);font-style:italic;font-weight:300;color:rgba(243,239,230,.7);max-width:34ch;margin-top:.6em;font-size:clamp(17px,2vw,24px);}
-
-/* founder list */
-.flist{display:grid;gap:12px;max-width:620px;}
-.frow{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-radius:var(--r-sm);background:rgba(255,255,255,.5);box-shadow:var(--shadow);}
-.frow b{font-weight:400;}.frow i{font-style:normal;font-size:.8rem;color:var(--ink-faint);}
-.toggle{width:42px;height:24px;border-radius:99px;background:rgba(44,90,60,.18);position:relative;}
-.toggle::after{content:'';position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.2);}
-.note{margin-top:clamp(20px,3vh,32px);font-size:12.5px;color:var(--ink-soft);text-align:center;line-height:1.6;max-width:60ch;margin-left:auto;margin-right:auto;}
-@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}html{scroll-behavior:auto;}}
-</style>
-</head>
-<body>
-<div class="env"><div class="glasspane">
-
-  <!-- HOME -->
-  <section id="home" class="view show">
-    <header class="home-head">
-      <p class="kicker">Good evening</p>
-      <h1 class="welcome">Welcome <span class="soft">home.</span></h1>
-      <p class="welcome-sub">Everything has a place. Choose where you'd like to continue.</p>
-    </header>
-    <div class="rooms">
-      <button class="room-card" data-open="identity"><span class="room-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><b>Identity</b><i>Logo, name &amp; palette</i><span class="go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
-      <button class="room-card" data-open="assets"><span class="room-ic"><svg viewBox="0 0 24 24"><path d="M3 7l2-2h5l2 2h8v12H3z"/></svg></span><b>Assets</b><i>The brand's archive</i><span class="go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
-      <button class="room-card" data-open="guide"><span class="room-ic"><svg viewBox="0 0 24 24"><path d="M4 5h7a3 3 0 0 1 3 3v11a2.5 2.5 0 0 0-2.5-2.5H4z"/><path d="M20 5h-3a3 3 0 0 0-3 3v11a2.5 2.5 0 0 1 2.5-2.5H20z"/></svg></span><b>Brand Guide</b><i>The living document</i><span class="go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
-      <button class="room-card" data-open="typography"><span class="room-ic"><svg viewBox="0 0 24 24"><path d="M5 7V5h14v2"/><line x1="12" y1="5" x2="12" y2="19"/><line x1="9" y1="19" x2="15" y2="19"/></svg></span><b>Typography</b><i>The voice in type</i><span class="go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
-      <button class="room-card" data-open="deliverables"><span class="room-ic"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="8 11 12 15 16 11"/><path d="M5 19h14"/></svg></span><b>Deliverables</b><i>Everything ready to leave</i><span class="go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
-      <button class="room-card" data-open="founder"><span class="room-ic"><svg viewBox="0 0 24 24"><line x1="4" y1="8" x2="20" y2="8"/><circle cx="9" cy="8" r="2.4"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="15" cy="16" r="2.4"/></svg></span><b>Founder Tools</b><i>Advanced controls</i><span class="go"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
-    </div>
-  </section>
-
-  <!-- ROOM (content injected) -->
-  <section id="room" class="view" aria-label="Room">
-    <div class="room-top">
-      <button class="back" id="backBtn"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="11 18 5 12 11 6"/></svg>Brand Home</button>
-      <div class="room-id"><div class="rk" id="roomKicker">Identity</div><h1 id="roomTitle">Everything that makes you, you.</h1></div>
-    </div>
-    <div id="roomBody"></div>
-  </section>
-
-</div></div>
-
-<script>
-const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const ROOMS={
-  identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
-    <div class="review">
-      <div class="id-hero">
-        <div class="vframe contain id-primary"><div class="wm" id="wmBig">${NAME}<small>Private Advisory</small></div><span class="vframe-tag">Primary logo</span><span class="vframe-act">Replace</span></div>
-        <div class="id-namecard"><div class="lab">Brand name &amp; tagline</div>
-          <div class="id-name" id="bName" contenteditable="true" spellcheck="false">${NAME}</div>
-          <div class="id-tag" contenteditable="true" spellcheck="false">${TAG}</div>
-          <span class="edit-hint"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Click any text to edit</span>
-        </div>
-      </div>
-      <div class="sect-label">Marks</div>
-      <div class="id-marks">
-        <div class="vframe markframe paper"><div class="wordmark-mini">${NAME}<small>est. 2014</small></div><span class="vframe-tag">Wordmark</span><span class="vframe-act">Replace</span></div>
-        <div class="vframe markframe dark"><div class="mono fill">MF</div><span class="vframe-tag on-dark">Icon · reversed</span><span class="vframe-act">Replace</span></div>
-        <div class="vframe markframe brand"><div class="mono line">MF</div><span class="vframe-tag on-dark">Icon · on brand</span><span class="vframe-act">Replace</span></div>
-      </div>
-      <div class="sect-label">Primary colors</div>
-      <div class="id-colors">
-        <div class="swatch" style="background:#1c2b22;color:#f3efe6"><span class="hex">#1C2B22</span><span>Ink</span></div>
-        <div class="swatch" style="background:#4e6b5a;color:#f3efe6"><span class="hex">#4E6B5A</span><span>Sage</span></div>
-        <div class="swatch" style="background:#b4915a;color:#1c2b22"><span class="hex">#B4915A</span><span>Brass</span></div>
-        <div class="swatch" style="background:#f3efe6;color:#1c2b22"><span class="hex">#F3EFE6</span><span>Paper</span></div>
-        <div class="swatch" style="background:#0e1a14;color:#f3efe6"><span class="hex">#0E1A14</span><span>Deep</span></div>
-      </div>
-      <p class="note">Every box is the same clipping-mask container — drop a real logo in and it fills cleanly, no stretching. Name and tagline edit in place.</p>
-    </div>`},
-  assets:{kicker:'Assets',title:'Everything the brand owns.',html:`
-    <div class="sect-label">Logos</div>
-    <div class="gallery">
-      <div class="vframe gframe glogo"><div class="wordmark-mini">MF</div><span class="vframe-tag">Primary</span></div>
-      <div class="vframe gframe glogo" style="background:#1c2b22"><div class="wordmark-mini" style="color:#f3efe6">MF</div><span class="vframe-tag on-dark">Reversed</span></div>
-      <div class="vframe gframe"><div class="ph c"></div><span class="vframe-tag on-dark">Icon · SVG</span></div>
-      <div class="vframe gframe glogo" style="background:#4e6b5a"><div class="wordmark-mini" style="color:#f3efe6">MF</div><span class="vframe-tag on-dark">On brand</span></div>
-    </div>
-    <div class="sect-label">Photography &amp; documents</div>
-    <div class="gallery">
-      <div class="vframe gframe"><div class="ph a"></div><span class="vframe-tag on-dark">Photography</span></div>
-      <div class="vframe gframe"><div class="ph b"></div><span class="vframe-tag on-dark">Photography</span></div>
-      <div class="vframe gframe"><div class="ph d"></div><span class="vframe-tag">Guidelines.pdf</span></div>
-      <div class="vframe gframe"><div class="ph c"></div><span class="vframe-tag on-dark">Deck.key</span></div>
-    </div>
-    <p class="note">Assets as a gallery, not file rows — every upload sits in a clipping frame and fills it. No stretched images, no tiny thumbnails.</p>`},
-  guide:{kicker:'Brand Guide',title:'The living document.',html:`
-    <div class="guidehero"><div class="ge">Brand Guide · Marlowe &amp; Finch</div><h2>A guide that<br>stays current.</h2><p>The only room where the guide itself lives. Your editor, sections, and live preview stay exactly as they are.</p></div>
-    <p class="note">This is the one room that shows the guide. Your existing guide editor, section editing, live preview, and placement tools all stay — they just live here, framed as a publishing studio.</p>`},
-  typography:{kicker:'Typography',title:'The voice, in type.',html:`
-    <div class="spec">
-      <div class="big">Considered counsel.</div>
-      <div class="scale"><span style="font-size:54px">Aa</span><span style="font-size:38px">Aa</span><span style="font-size:26px">Aa</span><span style="font-size:18px">Aa</span></div>
-      <p class="body">Body copy set in Inter — quiet, readable, and built for long passages, captions, and interface labels. The display face carries the brand's character; the body face stays out of the way so the words do the work.</p>
-      <div class="pairline"><span><b>Display</b> Fraunces · 300–500</span><span><b>Body</b> Inter · 300–400</span><span><b>Pairing</b> editorial serif + neutral grotesque</span></div>
-    </div>
-    <p class="note">Typography as a specimen, not a font menu — real headline, real scale, real body in context.</p>`},
-  deliverables:{kicker:'Deliverables',title:'Everything ready to leave.',html:`
-    <div class="vault">
-      <button class="vaultcard"><span class="vic">Document</span><b>PDF</b><i>Printable guide</i></button>
-      <button class="vaultcard"><span class="vic">Web</span><b>HTML</b><i>Standalone page</i></button>
-      <button class="vaultcard"><span class="vic">Bundle</span><b>ZIP</b><i>All assets</i></button>
-      <button class="vaultcard"><span class="vic">Link</span><b>Share</b><i>A living URL</i></button>
-      <button class="vaultcard"><span class="vic">Finalize</span><b>Publish</b><i>Lock the version</i></button>
-      <button class="vaultcard"><span class="vic">History</span><b>Versions</b><i>Every save, kept</i></button>
-    </div>
-    <p class="note">The vault — every way the brand leaves home. Your real export, PDF, ZIP, HTML, publish, and share logic wires straight into these tiles.</p>`},
-  founder:{kicker:'Founder Tools',title:'Advanced controls.',html:`
-    <div class="flist">
-      <div class="frow"><div><b>Editor mode</b><i>Show section editing &amp; placement tools</i></div><div class="toggle"></div></div>
-      <div class="frow"><div><b>AI Brand Concierge</b><i>Analyze uploads on intake</i></div><div class="toggle"></div></div>
-      <div class="frow"><div><b>Local-only mode</b><i>Skip the AI route, organize on-device</i></div><div class="toggle"></div></div>
-      <div class="frow"><div><b>Raw JSON</b><i>Inspect the brand data model</i></div><div class="toggle"></div></div>
-    </div>
-    <p class="note">The advanced shelf — tucked away from the main rooms, exactly as you asked.</p>`}
-};
-const home=document.getElementById('home'), room=document.getElementById('room'),
-      roomBody=document.getElementById('roomBody'), roomTitle=document.getElementById('roomTitle'), roomKicker=document.getElementById('roomKicker');
-function openRoom(key){
-  const r=ROOMS[key]; if(!r) return;
-  roomBody.innerHTML=r.html; roomTitle.innerHTML=r.title; roomKicker.textContent=r.kicker;
-  home.classList.remove('show'); room.classList.add('show');
-  window.scrollTo({top:0,behavior:'auto'});
-  const bName=document.getElementById('bName'), wmBig=document.getElementById('wmBig');
-  if(bName&&wmBig) bName.addEventListener('input',()=>{wmBig.childNodes[0].nodeValue=(bName.textContent.trim()||'Your Brand');});
-}
-document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openRoom(b.dataset.open)));
-document.getElementById('backBtn').addEventListener('click',()=>{room.classList.remove('show');home.classList.add('show');window.scrollTo({top:0,behavior:'auto'});});
-</script>
-</body>
-</html>
+  function processIntake(fileList){
+    var files=Array.prototype.slice.call(fileList||[]); if(!files.length)return;
+  /* ── ZIP intake: load JSZip on demand, expand archives into real Files ── */
+  function ensureJSZip(){
+    if(window.JSZip)return Promise.resolve(window.JSZip);
+    if(window.__jszipPromise)return window.__jszipPromise;
+    window.__jszipPromise=new Promise(function(resolve,reject){
+      var s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+      s.onload=function(){resolve(window.JSZip);};
+      s.onerror=function(){reject(new Error('JSZip failed to load'));};
+      document.head.appendChild(s);
+    });
+    return window.__jszipPromise;
+  }
+  async function expandZips(fileList){
+    var files=Array.prototype.slice.call(fileList||[]);
+    if(!files.some(function(f){return /\.zip$/i.test(f.name||'');}))return files;
+    var JSZipLib; try{ JSZipLib=await ensureJSZip(); }catch(e){ return files; } /* offline: keep zip as-is */
+    var out=[];
+    for(var i=0;i<files.length;i++){
+      var f=files[i];
+      if(!/\.zip$/i.test(f.name||'')){ out.push(f); continue; }
+      try{
+        var zip=await JSZipLib.loadAsync(f);
+        var names=Object.keys(zip.files);
+        for(var j=0;j<names.length;j++){
+          var entry=zip.files[names[j]];
+          if(entry.dir)continue;
+          if(/__MACOSX/.test(names[j]))continue;        /* mac resource forks */
+          var base=names[j].split('/').pop();
+          if(!base||/^\./.test(base))continue;          /* folders, .DS_Store, dotfiles */
+          var blob=await entry.async('blob');
+          out.push(new File([blob],base,{type:blob.type||''}));
+        }
+      }catch(err){ out.push(f); }                        /* unreadable zip: keep original */
+    }
+    return out;
+  }
+  async function processIntake(fileList){
+    var files=await expandZips(fileList); if(!files.length)return;
+var logo=pickPrimaryLogo(files);
+var others=files.filter(function(f){return f!==logo;});
+forwardToEngine(others);
