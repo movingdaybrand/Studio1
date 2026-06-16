@@ -7734,5 +7734,98 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
 
 </script>
 
+
+<style id="md-guide-icy-skin">
+/* ── ICY-GLASS SKIN for the in-app guide preview (cosmetic only; layout untouched) ── */
+#guidePreview{ background:#f3f7f3 !important; border:1px solid rgba(44,90,60,.12) !important; box-shadow:0 38px 120px rgba(20,60,36,.12) !important; }
+.preview-shell{ background:#f3f7f3 !important; color:#0A1E13 !important; }
+.preview-toolbar{ background:rgba(243,247,243,.72) !important; border-bottom:1px solid rgba(44,90,60,.12) !important; -webkit-backdrop-filter:blur(30px) saturate(170%) !important; backdrop-filter:blur(30px) saturate(170%) !important; }
+.preview-brand{ font-family:'Inter',system-ui,sans-serif !important; font-weight:300 !important; color:#0A1E13 !important; letter-spacing:-.02em !important; }
+.guide-hero .guide-title{ font-family:'Inter',system-ui,sans-serif !important; font-weight:200 !important; letter-spacing:-.05em !important; }
+.guide-hero .guide-tagline{ font-family:'Inter',system-ui,sans-serif !important; font-weight:300 !important; }
+.guide-eyebrow, .guide-meta b{ font-family:'Inter',system-ui,sans-serif !important; font-weight:600 !important; letter-spacing:.2em !important; }
+.guide-section{ background:transparent !important; border-bottom:1px solid rgba(44,90,60,.12) !important; }
+.section-label{ font-family:'Inter',system-ui,sans-serif !important; font-weight:600 !important; letter-spacing:.22em !important; color:#2C784C !important; }
+.section-title{ font-family:'Inter',system-ui,sans-serif !important; font-weight:200 !important; letter-spacing:-.035em !important; color:#0A1E13 !important; }
+.section-copy{ color:rgba(14,42,24,.6) !important; font-weight:300 !important; }
+.logo-cell, .type-card-preview, .usage-card, .mockup{
+  background:rgba(255,255,255,.6) !important;
+  border:1px solid rgba(44,90,60,.12) !important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.82), 0 12px 36px rgba(20,60,36,.07) !important;
+  -webkit-backdrop-filter:blur(26px) saturate(165%) !important; backdrop-filter:blur(26px) saturate(165%) !important;
+}
+.logo-cell.dark{ background:var(--c1) !important; }
+.logo-cell.brand{ background:var(--c5) !important; }
+.mockup.profile{ background:var(--c1) !important; }
+.mockup.print{ background:var(--c5) !important; }
+.mockup.social{ background:var(--c3) !important; }
+.logo-cell-label{ font-family:'Inter',system-ui,sans-serif !important; font-weight:600 !important; color:rgba(14,42,24,.5) !important; }
+.swatch span{ font-family:'Inter',system-ui,sans-serif !important; font-weight:700 !important; }
+.usage-tag{ font-family:'Inter',system-ui,sans-serif !important; font-weight:600 !important; }
+.usage-card ul{ color:rgba(14,42,24,.62) !important; font-weight:300 !important; }
+.usage-card.do{ border-top:3px solid #2C784C !important; }
+.usage-card.do .usage-tag{ color:#2C784C !important; }
+.usage-card.do li:before{ color:#2C784C !important; }
+.guide-footer-inner{ font-family:'Inter',system-ui,sans-serif !important; }
+</style>
+<script id="md-guide-contrast">
+(function(){
+  function lum(r,g,b){ return (r*299+g*587+b*114)/1000; }
+  function bgOf(el){
+    var n=el;
+    while(n && n.nodeType===1){
+      var c=getComputedStyle(n).backgroundColor;
+      var m=c && c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
+      if(m && (m[4]===undefined || parseFloat(m[4])>0.05)) return [+m[1],+m[2],+m[3]];
+      n=n.parentElement;
+    }
+    return [243,247,243];
+  }
+  function analyze(src){
+    return new Promise(function(res){
+      var im=new Image();
+      im.onload=function(){
+        try{
+          var w=Math.min(im.naturalWidth||64,64), h=Math.min(im.naturalHeight||64,64);
+          if(!w||!h){res({tone:'mixed',mono:false});return;}
+          var cv=document.createElement('canvas'); cv.width=w; cv.height=h;
+          var ctx=cv.getContext('2d'); ctx.drawImage(im,0,0,w,h);
+          var px=ctx.getImageData(0,0,w,h).data, L=0,ch=0,nn=0;
+          for(var i=0;i<px.length;i+=4){ if(px[i+3]<24) continue; var r=px[i],g=px[i+1],b=px[i+2]; L+=lum(r,g,b); ch+=Math.max(r,g,b)-Math.min(r,g,b); nn++; }
+          if(!nn){res({tone:'mixed',mono:false});return;}
+          var aL=L/nn, aC=ch/nn;
+          res({ tone: aL<110?'dark':(aL>175?'light':'mixed'), mono: aC<30 });
+        }catch(e){ res({tone:'mixed',mono:false}); }
+      };
+      im.onerror=function(){ res({tone:'mixed',mono:false}); };
+      im.src=src;
+    });
+  }
+  function fix(img){
+    if(!img || !img.getAttribute) return;
+    var stage = img.closest('.guide-hero, .logo-cell, .mockup') || img.parentElement;
+    if(!stage) return;
+    var bg=bgOf(stage), bgDark=lum(bg[0],bg[1],bg[2])<140;
+    var src=img.getAttribute('src')||''; if(!src) return;
+    analyze(src).then(function(info){
+      img.style.filter=''; img.style.background=''; img.style.padding=''; img.style.borderRadius='';
+      var clash=(bgDark && info.tone==='dark')||(!bgDark && info.tone==='light');
+      if(!clash) return;
+      if(info.mono){ img.style.filter = bgDark ? 'brightness(0) invert(1)' : 'brightness(0)'; }
+      else { img.style.background = bgDark ? 'rgba(255,255,255,.94)' : 'rgba(21,20,15,.92)'; img.style.padding='8%'; img.style.borderRadius='12px'; }
+    });
+  }
+  function run(){
+    var g=document.querySelector('#guidePreview'); if(!g) return;
+    g.querySelectorAll('.guide-hero .guide-logo, .logo-cell img, .mockup img').forEach(fix);
+  }
+  var t;
+  function schedule(){ clearTimeout(t); t=setTimeout(run, 120); }
+  if(document.readyState!=='loading') schedule(); else document.addEventListener('DOMContentLoaded', schedule);
+  var host=document.querySelector('#guidePreview');
+  if(host && window.MutationObserver){ new MutationObserver(schedule).observe(host,{childList:true,subtree:true,attributes:true,attributeFilter:['src','class']}); }
+})();
+</script>
+
 </body>
 </html>
