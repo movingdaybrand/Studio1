@@ -2285,7 +2285,7 @@ body{
 </style>
 
 </head>
-<body class="mdx-active">
+<body class="md-home">
 <!-- ═══════════════════════════════════════════════════════
      MOVING DAY ENVIRONMENT — ai-test.html visual system
      Frosted morning light, icy glass, soft emerald depth.
@@ -7034,9 +7034,11 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     setupWorkspace();
     wireBrandHome();
     wireAiToggle();
-    // open on first step (the front door)
-    var first=stepEl(0); if(first){first.classList.add('is-active');} updateDots(); updateBack(first); updateChrome();
-    // EXPERIENCE TO BRAND HOME BRIDGE — if experience.html handed off Brand DNA, prefill + land in Brand Home
+    // Experience.html is the single front door. Index opens straight into Brand Home —
+    // no duplicate welcome. The intro steps stay in the DOM but are never shown here.
+    updateDots(); updateChrome();
+    showBrandHome();
+    // EXPERIENCE TO BRAND HOME BRIDGE — if experience.html handed off Brand DNA, prefill the home
     loadBrandDNA();
   }
 
