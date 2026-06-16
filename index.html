@@ -7385,6 +7385,36 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
       .then(function(b){return new File([b], name||'logo.png', {type:b.type||'image/png'});});
   }
   /* ════════════════════ INDEX PREFILL FROM BRAND DNA ════════════════════ */
+  /* ── Heavy asset handoff (matches experience.html): the full upload pack crosses
+     through IndexedDB, not localStorage, so nothing is lost to the 5MB cap. ── */
+  var BRIDGE_DB='movingDayBridge', BRIDGE_STORE='assets', BRIDGE_DB_VER=1;
+  function bridgeOpenDB(){
+    return new Promise(function(res,rej){
+      if(typeof indexedDB==='undefined') return rej(new Error('no idb'));
+      var r=indexedDB.open(BRIDGE_DB,BRIDGE_DB_VER);
+      r.onupgradeneeded=function(){ var db=r.result; if(!db.objectStoreNames.contains(BRIDGE_STORE)) db.createObjectStore(BRIDGE_STORE,{keyPath:'idx'}); };
+      r.onsuccess=function(){ res(r.result); };
+      r.onerror=function(){ rej(r.error); };
+    });
+  }
+  function bridgeReadAssets(){
+    return new Promise(function(res){
+      bridgeOpenDB().then(function(db){
+        try{
+          var tx=db.transaction(BRIDGE_STORE,'readonly'), g=tx.objectStore(BRIDGE_STORE).getAll();
+          g.onsuccess=function(){ res(g.result||[]); db.close(); };
+          g.onerror=function(){ res([]); db.close(); };
+        }catch(e){ res([]); try{db.close();}catch(_){} }
+      }).catch(function(){ res([]); });
+    });
+  }
+  function bridgeClearAssets(){
+    bridgeOpenDB().then(function(db){
+      try{ var tx=db.transaction(BRIDGE_STORE,'readwrite'); tx.objectStore(BRIDGE_STORE).clear(); tx.oncomplete=function(){db.close();}; tx.onerror=function(){try{db.close();}catch(_){}}; }
+      catch(e){ try{db.close();}catch(_){} }
+    }).catch(function(){});
+  }
+
   function loadBrandDNA(){
     var raw;
     try{ raw=localStorage.getItem(BRAND_DNA_KEY); }catch(e){ return; }
@@ -7414,23 +7444,57 @@ const game={ready:false,active:false,dragging:false,strokes:0,best:null,ball:{x:
     // recommendations (kept for the recommendations room)
     if(Array.isArray(dna.recommendations)) dnaRecommendations=dna.recommendations;
 
-    // logos / selected assets → assign into existing slots via the engine's own pipeline
-    var jobs=[];
-    if(dna.primaryLogo&&dna.primaryLogo.dataUrl)
-      jobs.push(dnaReadFile(dna.primaryLogo.dataUrl,dna.primaryLogo.name).then(function(f){ if(typeof assignSlot==='function'){ assignSlot('primaryLogo',f); assignSlot('heroLogo',f); } }).catch(function(){}));
-    if(dna.iconMark&&dna.iconMark.dataUrl)
-      jobs.push(dnaReadFile(dna.iconMark.dataUrl,dna.iconMark.name).then(function(f){ if(typeof assignSlot==='function') assignSlot('iconMark',f); }).catch(function(){}));
-    if(dna.wordmark&&dna.wordmark.dataUrl)
-      jobs.push(dnaReadFile(dna.wordmark.dataUrl,dna.wordmark.name).then(function(f){ if(typeof assignSlot==='function') assignSlot('iconVariant',f); }).catch(function(){}));
-
     // the brand already moved in via experience.html → land in Brand Home, not the intro
     function enterHome(){
       if(typeof refreshArrive==='function'){ try{ refreshArrive(); }catch(e){} }
       if(typeof showBrandHome==='function'){ showBrandHome(); }
       else { document.body.classList.remove('mdx-active','mdx-done'); document.body.classList.add('md-home'); }
     }
-    if(jobs.length) Promise.all(jobs).then(enterHome, enterHome);
-    else enterHome();
+
+    // assign the three role logos from the light DNA data URLs (fallback if IndexedDB is empty)
+    function assignLogosFromDNA(){
+      var jobs=[];
+      if(dna.primaryLogo&&dna.primaryLogo.dataUrl)
+        jobs.push(dnaReadFile(dna.primaryLogo.dataUrl,dna.primaryLogo.name).then(function(f){ if(typeof assignSlot==='function'){ assignSlot('primaryLogo',f); assignSlot('heroLogo',f); } }).catch(function(){}));
+      if(dna.iconMark&&dna.iconMark.dataUrl)
+        jobs.push(dnaReadFile(dna.iconMark.dataUrl,dna.iconMark.name).then(function(f){ if(typeof assignSlot==='function') assignSlot('iconMark',f); }).catch(function(){}));
+      if(dna.wordmark&&dna.wordmark.dataUrl)
+        jobs.push(dnaReadFile(dna.wordmark.dataUrl,dna.wordmark.name).then(function(f){ if(typeof assignSlot==='function') assignSlot('iconVariant',f); }).catch(function(){}));
+      return Promise.all(jobs);
+    }
+
+    // ALL uploaded files come over via IndexedDB → populate the builder's asset pool + slots
+    bridgeReadAssets().then(function(records){
+      if(records && records.length){
+        var items=records.map(function(rec){
+          try{ return { role:String(rec.role||''), file:new File([rec.blob], rec.name||'asset', {type:rec.type||(rec.blob&&rec.blob.type)||'application/octet-stream'}) }; }
+          catch(e){ return null; }
+        }).filter(Boolean);
+
+        var isIcon=function(r){return /Icon|Mark/i.test(r);};
+        var isWord=function(r){return /Wordmark|Logotype/i.test(r);};
+        var isLogo=function(r){return /Logo|Primary/i.test(r);};
+        var primary=items.find(function(x){return isLogo(x.role)&&!isIcon(x.role)&&!isWord(x.role);}) || items.find(function(x){return isLogo(x.role);});
+        var icon=items.find(function(x){return isIcon(x.role);});
+        var word=items.find(function(x){return isWord(x.role);});
+        var slotted=[primary,icon,word].filter(Boolean);
+        var others=items.filter(function(x){return slotted.indexOf(x)<0;});
+
+        if(others.length && typeof forwardToEngine==='function') forwardToEngine(others.map(function(x){return x.file;}));
+        if(typeof assignSlot==='function'){
+          if(primary){ assignSlot('primaryLogo',primary.file); assignSlot('heroLogo',primary.file); }
+          if(icon) assignSlot('iconMark',icon.file);
+          if(word) assignSlot('iconVariant',word.file);
+        }
+        // if a role wasn't present in the pack, fall back to the DNA data URL for that logo
+        if(!primary || !icon || !word) assignLogosFromDNA();
+        bridgeClearAssets();
+        setTimeout(enterHome, 60);
+      } else {
+        // no IndexedDB pack (e.g. older save) → use the DNA logos only
+        assignLogosFromDNA().then(enterHome, enterHome);
+      }
+    }, function(){ assignLogosFromDNA().then(enterHome, enterHome); });
   }
 
   function processIntake(fileList){
