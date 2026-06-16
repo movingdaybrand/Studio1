@@ -133,7 +133,9 @@ img { max-width: 100%; display: block; }
   flex: 1; display: flex; align-items: center; justify-content: center;
   min-height: 140px;
 }
-.hero-panel-logo img { max-height: 80px; max-width: 100%; object-fit: contain; filter: brightness(0) invert(1); }
+/* Contrast for the hero logo is decided at render time (see enhanceLogoContrast),
+   so it adapts whether the primary colour is dark or light. */
+.hero-panel-logo img { max-height: 80px; max-width: 100%; object-fit: contain; }
 .hero-panel-logo .logo-placeholder {
   font-family: var(--display); font-size: 28px; letter-spacing: -.04em;
   color: rgba(241,236,223,.5); font-style: italic;
@@ -418,6 +420,9 @@ img { max-width: 100%; display: block; }
       bodyFontNote: raw.bodyFontNote || 'Use for body copy, captions, labels, and all UI.',
       colors,
       images: raw.images || {},
+      // Optional logo placement guidance from the AI (analyze-brand-files logoSystem).
+      // Present when the guide data came through the concierge; absent for manual builds.
+      logoSystem: raw.logoSystem || null,
       usageDo: raw.usageDo || ['Use approved logo versions only','Keep clear space around the logo','Use the primary color as the dominant brand color','Use accent colors sparingly and with purpose','Use the icon mark for favicons and tight placements'],
       usageDont: raw.usageDont || ['Do not stretch, rotate, or distort the logo','Do not place the logo on low-contrast backgrounds','Do not use colors outside the approved palette','Do not add shadows or effects to the logo','Do not mix in off-brand fonts'],
       downloads: raw.downloads || defaultDownloads(),
@@ -461,6 +466,9 @@ img { max-width: 100%; display: block; }
       renderDownloads(d),
       renderFooter(d)
     ].join('');
+
+    // Make sure no logo sits on a background it would disappear into.
+    enhanceLogoContrast(d);
   }
 
   // ── HERO ───────────────────────────────────────────────────────────────────
@@ -717,6 +725,107 @@ img { max-width: 100%; display: block; }
         <p>${slug ? `No published guide found for "${slug}". Publish it from the builder first.` : 'No slug provided. Add ?slug=your-client to the URL.'}</p>
         <a href="/guide.html" class="topbar-btn primary" style="margin-top:8px">Open Builder</a>
       </div>`;
+  }
+
+  // ── LOGO CONTRAST ────────────────────────────────────────────────────────
+  // A logo must never disappear into its background. We read each logo's tone
+  // (from the AI's logoSystem when the data carries it, otherwise sampled from
+  // the image itself) and, only when it would actually clash with its stage:
+  //   • a single-colour mark is knocked out to contrast (white on dark, black on light)
+  //   • a full-colour logo is sat on a contrasting plate so its colours survive
+  // Logos that already contrast are left exactly as they are.
+  function enhanceLogoContrast(d) {
+    const c1 = (d.colors && d.colors[0] && d.colors[0].hex) || '#1F3D2E';
+    const CREAM = '#F1ECDF', INK = '#15140F';
+
+    function stageBgFor(img) {
+      if (img.closest('.hero-panel')) return c1;
+      const stage = img.closest('.logo-card-stage, .icon-stage');
+      if (!stage) return CREAM;
+      if (stage.classList.contains('brand')) return c1;   // brand colour = primary (c1)
+      if (stage.classList.contains('dark')) return INK;
+      return CREAM;                                         // .light
+    }
+
+    // Optional tone hint from the AI for the main marks, keyed by image src.
+    const ls = d.logoSystem || {};
+    const toneBySrc = {};
+    [['primaryLogo', d.images?.primaryLogo], ['heroLogo', d.images?.heroLogo],
+     ['iconMark', d.images?.iconMark], ['wordmark', d.images?.iconVariant]]
+      .forEach(([key, src]) => {
+        if (!src) return;
+        const node = ls[key] || (key === 'wordmark' ? ls.wordmark : null);
+        if (node && node.tone) toneBySrc[src] = String(node.tone).toLowerCase();
+      });
+
+    document.querySelectorAll('.hero-panel-logo img, .logo-card-stage img, .icon-stage img')
+      .forEach(img => applyLogoContrast(img, stageBgFor(img), toneBySrc[img.getAttribute('src') || '']));
+  }
+
+  function applyLogoContrast(img, bgHex, aiTone) {
+    const place = info => {
+      img.style.filter = '';
+      img.style.background = '';
+      img.style.padding = '';
+      img.style.borderRadius = '';
+
+      const tone = aiTone || info.tone;
+      const bgDark = isColorDark(bgHex);
+      const clash = (bgDark && tone === 'dark') || (!bgDark && tone === 'light');
+      if (!clash) return; // already readable — keep the logo's true colours
+
+      if (info.mono) {
+        // single-colour mark → knock out to the opposite end so it always reads
+        img.style.filter = bgDark ? 'brightness(0) invert(1)' : 'brightness(0)';
+      } else {
+        // full-colour logo → sit it on a contrasting plate instead of recolouring
+        img.style.background = bgDark ? 'rgba(255,255,255,.94)' : 'rgba(21,20,15,.92)';
+        img.style.padding = '8%';
+        img.style.borderRadius = '12px';
+      }
+    };
+
+    const src = img.getAttribute('src') || '';
+    if (!src) return;
+    // If the AI already told us the tone we still sample mono-vs-colour from pixels.
+    analyzeLogoArt(src).then(place).catch(() => {});
+  }
+
+  // Sample a logo image: average luminance (dark/light/mixed) and how colourful it is.
+  function analyzeLogoArt(src) {
+    return new Promise(resolve => {
+      const im = new Image();
+      im.onload = () => {
+        try {
+          const w = Math.min(im.naturalWidth || 64, 64);
+          const h = Math.min(im.naturalHeight || 64, 64);
+          if (!w || !h) { resolve({ tone: 'mixed', mono: false }); return; }
+          const cv = document.createElement('canvas');
+          cv.width = w; cv.height = h;
+          const ctx = cv.getContext('2d');
+          ctx.drawImage(im, 0, 0, w, h);
+          const px = ctx.getImageData(0, 0, w, h).data;
+          let lum = 0, chroma = 0, n = 0;
+          for (let i = 0; i < px.length; i += 4) {
+            if (px[i + 3] < 24) continue;            // skip transparent pixels
+            const r = px[i], g = px[i + 1], b = px[i + 2];
+            lum += (r * 299 + g * 587 + b * 114) / 1000;
+            chroma += Math.max(r, g, b) - Math.min(r, g, b);
+            n++;
+          }
+          if (!n) { resolve({ tone: 'mixed', mono: false }); return; }
+          const avgLum = lum / n, avgChroma = chroma / n;
+          resolve({
+            tone: avgLum < 110 ? 'dark' : (avgLum > 175 ? 'light' : 'mixed'),
+            mono: avgChroma < 30                      // low colour spread = single-colour mark
+          });
+        } catch (e) {
+          resolve({ tone: 'mixed', mono: false });    // tainted/unsampleable → leave as-is
+        }
+      };
+      im.onerror = () => resolve({ tone: 'mixed', mono: false });
+      im.src = src;
+    });
   }
 
   // ── UTILS ──────────────────────────────────────────────────────────────────
