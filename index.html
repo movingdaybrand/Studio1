@@ -135,13 +135,64 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .guidehero h2{font-family:var(--display);font-weight:300;font-size:clamp(30px,4.4vw,56px);line-height:.98;letter-spacing:-.03em;margin:.18em 0 0;}
 .guidehero p{font-family:var(--display);font-style:italic;font-weight:300;color:rgba(243,239,230,.68);max-width:34ch;margin-top:.5em;font-size:clamp(15px,1.6vw,20px);}
 
+/* full guide document (the only room that renders the guide) */
+.guidedoc{background:var(--b2);color:var(--b1);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow);}
+.gd-hero{background:var(--b1);color:var(--b2);padding:clamp(24px,4vw,44px);}
+.gd-eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--b3);font-weight:500;}
+.gd-title{font-family:var(--display);font-weight:300;font-size:clamp(32px,5vw,60px);letter-spacing:-.03em;line-height:1;margin:.18em 0 0;}
+.gd-tag{font-family:var(--display);font-style:italic;font-weight:300;color:rgba(243,239,230,.7);font-size:clamp(15px,1.6vw,19px);margin-top:.5em;}
+.gd-meta{display:flex;gap:26px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid rgba(243,239,230,.16);}
+.gd-meta b{display:block;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(243,239,230,.5);font-weight:500;margin-bottom:2px;}
+.gd-meta span{font-size:12.5px;color:var(--b2);}
+.gd-section{padding:clamp(20px,3.2vw,34px);border-top:1px solid rgba(28,43,34,.1);}
+.gd-num{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--b3);font-weight:600;margin-bottom:16px;}
+.gd-logos{display:grid;grid-template-columns:1.6fr 1fr 1fr;gap:9px;}
+.gd-logocell{min-height:112px;display:grid;place-items:center;border-radius:var(--r-sm);}
+.gd-logocell.paper{background:#fff;}.gd-logocell.dark{background:var(--b1);}.gd-logocell.brand{background:var(--b4);}
+.wm-doc{font-family:var(--display);font-size:clamp(17px,2vw,25px);color:var(--b1);text-align:center;}
+.wm-doc small{display:block;font-size:.32em;letter-spacing:.3em;text-transform:uppercase;color:var(--b3);margin-top:.9em;}
+.gd-palette{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
+.gd-sw{border-radius:var(--r-sm);aspect-ratio:1;display:flex;flex-direction:column;justify-content:flex-end;padding:10px;}
+.gd-sw span{font-size:11px;font-weight:600;}.gd-sw i{font-style:normal;font-size:9px;font-family:ui-monospace,monospace;opacity:.7;margin-top:2px;}
+.gd-type{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.gd-typelabel{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--b3);font-weight:600;margin-bottom:9px;}
+.gd-disp{font-family:var(--display);font-weight:300;font-size:clamp(28px,4vw,44px);line-height:1;letter-spacing:-.02em;}
+.gd-bodysample{font-size:14px;line-height:1.6;color:rgba(28,43,34,.7);}
+.gd-fname{display:inline-block;margin-top:10px;font-size:12px;color:var(--b3);}
+.gd-mockups{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
+.gd-mock{aspect-ratio:1;border-radius:var(--r-sm);}
+.gd-usage{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.gd-use{padding:16px 18px;border-radius:var(--r-sm);background:#fff;border-top:2px solid var(--b4);}
+.gd-use.dont{border-top-color:#9c3c3c;}
+.gd-use b{font-size:11px;letter-spacing:.12em;text-transform:uppercase;}
+.gd-use.do b{color:var(--b4);}.gd-use.dont b{color:#9c3c3c;}
+.gd-use ul{list-style:none;padding:0;margin:11px 0 0;display:grid;gap:6px;font-size:13px;color:rgba(28,43,34,.72);}
+.gd-files{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
+.gd-file{text-align:left;padding:15px 17px;border-radius:var(--r-sm);background:#fff;box-shadow:var(--shadow);cursor:pointer;transition:transform .25s,box-shadow .25s;}
+.gd-file:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover);}
+.gd-file b{display:block;font-weight:500;font-size:.9rem;}
+.gd-file span{font-size:11px;color:var(--b3);}
+@media(max-width:640px){.gd-type,.gd-logos{grid-template-columns:1fr;}.gd-mockups{grid-template-columns:1fr 1fr;}.gd-usage,.gd-files{grid-template-columns:1fr;}}
+
 /* founder list */
 .flist{display:grid;gap:9px;max-width:580px;}
 .frow{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-radius:var(--r-sm);background:rgba(255,255,255,.5);box-shadow:var(--shadow);}
 .frow b{font-weight:400;font-size:.94rem;}.frow i{font-style:normal;font-size:.76rem;color:var(--ink-faint);}
 .toggle{width:38px;height:22px;border-radius:99px;background:rgba(44,90,60,.16);position:relative;flex:0 0 auto;}
-.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .22s cubic-bezier(.22,1,.36,1);}
+.toggle{cursor:pointer;transition:background .22s ease;}
+.toggle.on{background:var(--sage);}
+.toggle.on::after{left:19px;}
 .note{margin-top:clamp(16px,2.4vh,26px);font-size:11.5px;color:var(--ink-faint);text-align:center;line-height:1.55;max-width:58ch;margin-left:auto;margin-right:auto;}
+/* every container in a room is editable — quiet hover affordance */
+.vframe,.swatch,.gd-sw{cursor:pointer;}
+.gd-sw{position:relative;}
+.vframe::after,.swatch::after,.gd-sw::after{content:'Replace';position:absolute;top:8px;right:8px;z-index:4;font-size:9px;letter-spacing:.02em;color:var(--ink-soft);background:rgba(255,255,255,.86);backdrop-filter:blur(6px);padding:3px 8px;border-radius:99px;opacity:0;transform:translateY(-3px);transition:opacity .2s,transform .2s;box-shadow:inset 0 0 0 1px rgba(44,90,60,.1);pointer-events:none;}
+.swatch::after,.gd-sw::after{content:'Color';}
+.vframe:hover::after,.swatch:hover::after,.gd-sw:hover::after{opacity:1;transform:none;}
+[contenteditable="true"]{outline:none;border-radius:6px;transition:box-shadow .15s;}
+[contenteditable="true"]:hover{box-shadow:0 0 0 1px rgba(44,90,60,.16);}
+[contenteditable="true"]:focus{box-shadow:0 0 0 2px rgba(44,90,60,.25);}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}html{scroll-behavior:auto;}}
 </style>
 </head>
@@ -173,6 +224,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
   </section>
 
 </div></div>
+
+<input type="file" id="editFile" accept="image/*" hidden>
+<input type="color" id="editColor" hidden>
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
@@ -218,8 +272,58 @@ const ROOMS={
       <div class="vframe gframe"><div class="ph c"></div><span class="vframe-tag on-dark">Deck.key</span></div>
     </div>`},
   guide:{kicker:'Brand Guide',title:'The living document.',html:`
-    <div class="guidehero"><div class="ge">Brand Guide · Marlowe &amp; Finch</div><h2>A guide that<br>stays current.</h2><p>The only room where the guide itself lives.</p></div>
-    <p class="note">The one room that shows the guide. Your existing editor, sections, live preview, and placement tools all stay — they just live here.</p>`},
+    <div class="guidedoc">
+      <div class="gd-hero">
+        <div class="gd-eyebrow">Brand Guide</div>
+        <h2 class="gd-title">Marlowe &amp; Finch</h2>
+        <p class="gd-tag">Considered counsel for considered lives.</p>
+        <div class="gd-meta"><div><b>Category</b><span>Private Advisory</span></div><div><b>Established</b><span>2014</span></div><div><b>Palette</b><span>5 colors</span></div></div>
+      </div>
+      <div class="gd-section"><div class="gd-num">01 — Logo System</div>
+        <div class="gd-logos">
+          <div class="vframe contain gd-logocell paper"><div class="wm-doc">Marlowe &amp; Finch<small>Private Advisory</small></div></div>
+          <div class="vframe gd-logocell dark"><div class="mono fill">MF</div></div>
+          <div class="vframe gd-logocell brand"><div class="mono line">MF</div></div>
+        </div>
+      </div>
+      <div class="gd-section"><div class="gd-num">02 — Color Palette</div>
+        <div class="gd-palette">
+          <div class="gd-sw" style="background:#1c2b22;color:#f3efe6"><span>Ink</span><i>#1C2B22</i></div>
+          <div class="gd-sw" style="background:#4e6b5a;color:#f3efe6"><span>Sage</span><i>#4E6B5A</i></div>
+          <div class="gd-sw" style="background:#b4915a;color:#1c2b22"><span>Brass</span><i>#B4915A</i></div>
+          <div class="gd-sw" style="background:#f3efe6;color:#1c2b22"><span>Paper</span><i>#F3EFE6</i></div>
+          <div class="gd-sw" style="background:#0e1a14;color:#f3efe6"><span>Deep</span><i>#0E1A14</i></div>
+        </div>
+      </div>
+      <div class="gd-section"><div class="gd-num">03 — Typography</div>
+        <div class="gd-type">
+          <div><div class="gd-typelabel">Display</div><div class="gd-disp">Considered counsel.</div><span class="gd-fname">Fraunces · 300–500</span></div>
+          <div><div class="gd-typelabel">Body</div><div class="gd-bodysample">Clear, readable copy for pages, captions, and interface labels — set to stay out of the way so the words do the work.</div><span class="gd-fname">Inter · 300–400</span></div>
+        </div>
+      </div>
+      <div class="gd-section"><div class="gd-num">04 — In Use</div>
+        <div class="gd-mockups">
+          <div class="vframe gd-mock"><div class="ph c"></div><span class="vframe-tag on-dark">Profile</span></div>
+          <div class="vframe gd-mock"><div class="ph a"></div><span class="vframe-tag on-dark">Website</span></div>
+          <div class="vframe gd-mock"><div class="ph b"></div><span class="vframe-tag">Print</span></div>
+          <div class="vframe gd-mock"><div class="ph d"></div><span class="vframe-tag">Social</span></div>
+        </div>
+      </div>
+      <div class="gd-section"><div class="gd-num">05 — Usage</div>
+        <div class="gd-usage">
+          <div class="gd-use do"><b>Do</b><ul><li>Use approved logo files only</li><li>Keep clear space around every mark</li><li>Use the palette consistently</li></ul></div>
+          <div class="gd-use dont"><b>Don't</b><ul><li>Stretch, skew, or distort logos</li><li>Place marks on low-contrast grounds</li><li>Add unapproved effects or shadows</li></ul></div>
+        </div>
+      </div>
+      <div class="gd-section"><div class="gd-num">06 — Files</div>
+        <div class="gd-files">
+          <button class="gd-file"><b>Logo package</b><span>PNG · SVG</span></button>
+          <button class="gd-file"><b>Color styles</b><span>HEX · ASE</span></button>
+          <button class="gd-file"><b>Full guide</b><span>PDF</span></button>
+        </div>
+      </div>
+    </div>
+    <p class="note">The whole guide renders here, and only here — your real editor, sections, live preview, and placement tools plug into this room untouched.</p>`},
   typography:{kicker:'Typography',title:'The voice, in type.',html:`
     <div class="spec">
       <div class="big">Considered counsel.</div>
@@ -249,12 +353,50 @@ const home=document.getElementById('home'), room=document.getElementById('room')
 function openRoom(key){
   const r=ROOMS[key]; if(!r) return;
   roomBody.innerHTML=r.html; roomTitle.innerHTML=r.title; roomKicker.textContent=r.kicker;
+  enableEditing(roomBody);
   home.classList.remove('show'); room.classList.add('show'); window.scrollTo({top:0,behavior:'auto'});
   const bName=document.getElementById('bName'), wmBig=document.getElementById('wmBig');
   if(bName&&wmBig) bName.addEventListener('input',()=>{wmBig.childNodes[0].nodeValue=(bName.textContent.trim()||'Your Brand');});
 }
 document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openRoom(b.dataset.open)));
 document.getElementById('backBtn').addEventListener('click',()=>{room.classList.remove('show');home.classList.add('show');window.scrollTo({top:0,behavior:'auto'});});
+// founder toggles + any future toggle: flip on click
+// ── make every container editable: replace images, pick colors, edit text ──
+const fileInput=document.getElementById('editFile'), colorInput=document.getElementById('editColor');
+let editTarget=null;
+function isLogoFrame(f){return f.classList.contains('contain')||!!f.querySelector('.wm,.wm-doc,.wordmark-mini,.mono');}
+function enableEditing(root){
+  root.querySelectorAll('.id-name,.id-tag,.gd-title,.gd-tag,.gd-disp,.gd-bodysample,.spec .big,.spec .body,.gd-use li')
+    .forEach(el=>{el.setAttribute('contenteditable','true');el.setAttribute('spellcheck','false');});
+}
+roomBody.addEventListener('click',e=>{
+  const tog=e.target.closest('.toggle'); if(tog){tog.classList.toggle('on');return;}
+  if(e.target.isContentEditable) return;                       // editing text, not replacing
+  const sw=e.target.closest('.swatch,.gd-sw');
+  if(sw){editTarget=sw;colorInput.value=rgbToHex(getComputedStyle(sw).backgroundColor);colorInput.click();return;}
+  const fr=e.target.closest('.vframe');
+  if(fr){editTarget=fr;fileInput.click();return;}
+});
+fileInput.addEventListener('change',()=>{
+  const f=fileInput.files&&fileInput.files[0]; if(!f||!editTarget){fileInput.value='';return;}
+  const rd=new FileReader();
+  rd.onload=()=>{
+    const tag=editTarget.querySelector('.vframe-tag'); const tagHTML=tag?tag.outerHTML:'';
+    editTarget.classList.toggle('contain',isLogoFrame(editTarget));
+    editTarget.innerHTML='<img alt="">'+tagHTML;
+    editTarget.querySelector('img').src=rd.result;
+    editTarget=null; fileInput.value='';
+  };
+  rd.readAsDataURL(f);
+});
+colorInput.addEventListener('input',()=>{
+  if(!editTarget) return;
+  const hex=colorInput.value.toUpperCase();
+  editTarget.style.background=hex; editTarget.style.color=readableOn(hex);
+  const hexEl=editTarget.querySelector('.hex,i'); if(hexEl) hexEl.textContent=hex;
+});
+function rgbToHex(rgb){const m=(rgb||'').match(/\d+/g); if(!m) return '#888888'; return '#'+m.slice(0,3).map(n=>(+n).toString(16).padStart(2,'0')).join('');}
+function readableOn(hex){const r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16); return (0.299*r+0.587*g+0.114*b)/255>0.6?'#1c2b22':'#f3efe6';}
 </script>
 </body>
 </html>
