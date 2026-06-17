@@ -429,7 +429,15 @@ const ROOMS={
 const home=document.getElementById('home'), room=document.getElementById('room'),
       roomBody=document.getElementById('roomBody'), roomTitle=document.getElementById('roomTitle'), roomKicker=document.getElementById('roomKicker'),
       roomDesc=document.getElementById('roomDesc'), statusDot=document.getElementById('statusDot'), statusText=document.getElementById('statusText');
-let activeRoom='home', currentRoom=null; const founderState={};
+let activeRoom='home', currentRoom=null; const founderState=loadFounderState();
+function loadFounderState(){
+  let s={};
+  try{ const raw=localStorage.getItem('mdFounderState'); if(raw) s=JSON.parse(raw)||{}; }catch(e){}
+  if(s['AI Brand Concierge']===undefined) s['AI Brand Concierge']=true;   // Concierge is on by default
+  return s;
+}
+function saveFounderState(){ try{ localStorage.setItem('mdFounderState', JSON.stringify(founderState)); }catch(e){} }
+function conciergeOn(){ return !!founderState['AI Brand Concierge'] && !founderState['Local-only mode']; }
 const SHELL=document.querySelector('.glasspane');
 const ROOM_META={
   identity:{desc:'Name, logos, and color foundation.'},
@@ -483,7 +491,7 @@ function applyFounder(root){
 roomBody.addEventListener('click',e=>{
   const tog=e.target.closest('.toggle');
   if(tog){ const on=tog.classList.toggle('on'); const row=tog.closest('.frow'), lab=row&&row.querySelector('b');
-    if(lab){ const name=lab.textContent.trim(); founderState[name]=on; if(name==='Editor mode') enableEditing(roomBody); if(name==='Raw JSON') refreshFounderState(); } return; }
+    if(lab){ const name=lab.textContent.trim(); founderState[name]=on; saveFounderState(); if(name==='Editor mode') enableEditing(roomBody); if(name==='Raw JSON') refreshFounderState(); } return; }
   const deliv=e.target.closest('.vaultcard[data-deliv]'); if(deliv){ handleDeliverable(deliv.dataset.deliv); return; }
   if(!editorActive()) return;                                  // edits only live in Editor mode
   if(e.target.isContentEditable) return;                       // editing text, not replacing
@@ -569,7 +577,7 @@ const MDWorkspaceState={
   brand:{name:'',category:'',tagline:''},
   identity:{primaryLogoId:'',secondaryLogoId:'',iconMarkId:'',wordmarkId:''},
   colors:[], typography:{displayFont:'',bodyFont:'',displayNote:'',bodyNote:''},
-  sections:[], assets:[], deliverables:{htmlReady:false,pdfReady:false,zipReady:false}, updatedAt:''
+  sections:[], assets:[], deliverables:{htmlReady:false,pdfReady:false,zipReady:false}, preparation:null, updatedAt:''
 };
 function assignRoles(){
   brand.logos.forEach(l=>{ if(!l.id) l.id=newId(); });
@@ -912,11 +920,12 @@ function prepDataUrl(im){            // rasterize SVGs + flatten transparency so
     }catch(e){ res(im.url); }
   });
 }
-async function requestReview(assets){
+async function requestReview(assets, report){
   const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),60000);
+  const preparationReport = report || {preparedFileCount:assets.length, assets:assets.map(a=>({uploadId:a.id,category:a.category}))};
   try{
     const res=await fetch('/api/analyze-brand-files',{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,
-      body:JSON.stringify({preparationReport:{preparedFileCount:assets.length,assets:assets.map(a=>({uploadId:a.id,category:a.category}))},assets})});
+      body:JSON.stringify({preparationReport, assets})});
     if(!res.ok) throw new Error('route '+res.status);
     return await res.json();
   } finally { clearTimeout(t); }
@@ -1077,17 +1086,73 @@ function placeLogos(root){
     if(pick) setFrameImage(fr,pick.url,true);
   });
 }
+/* ════════════════ STAGE 1 — LOCAL PREPARATION ════════════════
+   Build a full asset inventory, drop exact duplicates, sort into the brand
+   category vocabulary, and produce ONE clean Brand Preparation Report. This
+   runs before any API call and feeds both the rooms and the Concierge. */
+const PREP_CATEGORIES=['Primary Logo','Secondary Logo','Wordmark','Icon Mark','Photography','Brand Guidelines','Typography','Presentation','Document','Video','Miscellaneous'];
+function mimeFor(ext){ ext=(ext||'').toLowerCase();
+  return ({png:'image/png',jpg:'image/jpeg',jpeg:'image/jpeg',webp:'image/webp',gif:'image/gif',svg:'image/svg+xml',
+    pdf:'application/pdf',ppt:'application/vnd.ms-powerpoint',pptx:'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+    doc:'application/msword',docx:'application/vnd.openxmlformats-officedocument.wordprocessingml.document',key:'application/vnd.apple.keynote',
+    txt:'text/plain',rtf:'application/rtf',ttf:'font/ttf',otf:'font/otf',woff:'font/woff',woff2:'font/woff2',
+    mp4:'video/mp4',mov:'video/quicktime',webm:'video/webm',m4v:'video/x-m4v'})[ext]||'application/octet-stream'; }
+function categoryForAsset(a){
+  const ext=(a.ext||'').toLowerCase(), n=(a.name||'').toLowerCase();
+  if(['mp4','mov','webm','avi','m4v'].includes(ext)) return 'Video';
+  if(['ttf','otf','woff','woff2'].includes(ext)) return 'Typography';
+  if(ext==='pdf') return /guide|brand|standard|identity|manual/.test(n)?'Brand Guidelines':'Document';
+  if(['ppt','pptx','key'].includes(ext)) return 'Presentation';
+  if(['doc','docx','txt','rtf'].includes(ext)) return 'Document';
+  const fnLogo=/(logo|mark|icon|brand|wordmark|logotype|symbol|emblem|badge|crest|seal)/.test(n)||ext==='svg';
+  const isPhoto = !fnLogo && (a.transparentRatio!=null && a.transparentRatio<0.03) && (a.variety!=null && a.variety>120);
+  if(isPhoto) return 'Photography';
+  const isLogo = fnLogo || (a.transparentRatio!=null && a.transparentRatio>0.06) || (a.variety!=null && a.variety<70);
+  if(isLogo){
+    if(/wordmark|logotype/.test(n) || (a.aspect!=null && a.aspect>2.2)) return 'Wordmark';
+    if(/icon|symbol|emblem|favicon/.test(n) || (a.aspect!=null && a.aspect>0.8 && a.aspect<1.25 && /mark/.test(n))) return 'Icon Mark';
+    if(/secondary|alt/.test(n)) return 'Secondary Logo';
+    return 'Primary Logo';
+  }
+  return a.url ? 'Photography' : 'Miscellaneous';
+}
+function dedupeAssets(list){
+  const seen=new Set(), out=[];
+  for(const a of list){ if(!a) continue; const key=a.url||((a.name||'')+'|'+(a.ext||'')); if(seen.has(key)) continue; seen.add(key); out.push(a); }
+  return out;
+}
+function buildInventory(imgs, docs){
+  const inv=[];
+  (imgs||[]).forEach(im=>{ if(!im.id) im.id=newId();
+    inv.push({ id:im.id, name:im.name, ext:im.ext, mime:mimeFor(im.ext), aspect:im.aspect, lum:im.lum,
+      variety:im.variety, transparentRatio:im.transparentRatio, category:categoryForAsset(im), preview:im.url, _img:im }); });
+  (docs||[]).forEach(dc=>{ if(!dc.id) dc.id=newId();
+    inv.push({ id:dc.id, name:dc.name, ext:dc.ext, mime:mimeFor(dc.ext), category:categoryForAsset(dc), preview:null, _doc:dc }); });
+  return inv;
+}
+function buildPreparationReport(inv){
+  const counts={}; PREP_CATEGORIES.forEach(c=>counts[c]=0);
+  inv.forEach(a=>{ counts[a.category]=(counts[a.category]||0)+1; });
+  const present=Object.entries(counts).filter(([,n])=>n);
+  return {
+    preparedFileCount: inv.length,
+    categories: counts,
+    assets: inv.map(a=>({ uploadId:a.id, name:a.name, ext:a.ext, type:a.mime, category:a.category })),
+    hasPhotography: counts['Photography']>0, hasGuidelines: counts['Brand Guidelines']>0,
+    hasPresentations: counts['Presentation']>0, hasVideo: counts['Video']>0, hasFonts: counts['Typography']>0,
+    summary: inv.length+' asset'+(inv.length===1?'':'s')+' prepared — '+present.map(([c,n])=>n+' '+c).join(', ')
+  };
+}
 async function finishIntake(imgs,folderName){
   // baseline local sort — also the fallback if the AI route isn't reachable
   await analyzeAssets(imgs);                         // look at the pixels first
-  brand.logos=[]; brand.photos=[];
-  imgs.forEach(im=>{
-    const fnLogo=/(logo|mark|icon|brand|wordmark|symbol|emblem|badge|crest|seal|type)/i.test(im.name)||im.ext==='svg';
-    const tr=im.transparentRatio, va=im.variety;
-    const pixelLogo  = (tr!=null && tr>0.06) || (va!=null && va<70);     // transparency or few flat colours → a mark
-    const pixelPhoto = (tr!=null && tr<0.03) && (va!=null && va>120);    // opaque + rich colour → a photo
-    (((fnLogo||pixelLogo) && !pixelPhoto) ? brand.logos : brand.photos).push(im);
-  });
+  imgs = dedupeAssets(imgs);                          // remove exact duplicates
+  const inventory = buildInventory(imgs, brand.docs); // full asset inventory
+  const report = buildPreparationReport(inventory);   // ONE clean Brand Preparation Report
+  MDWorkspaceState.preparation = report;
+  const isLogoCat=c=>['Primary Logo','Secondary Logo','Wordmark','Icon Mark'].includes(c);
+  brand.logos = inventory.filter(a=>a._img && isLogoCat(a.category)).map(a=>a._img);
+  brand.photos= inventory.filter(a=>a._img && !isLogoCat(a.category)).map(a=>a._img);
   if(!brand.logos.length && imgs.length){            // nothing obvious → most logo-like by transparency / fewest colours
     const ranked=[...imgs].sort((a,b)=>((b.transparentRatio||0)-(a.transparentRatio||0))||((a.variety||999)-(b.variety||999)));
     brand.logos=ranked.slice(0,3); brand.photos=ranked.slice(3);
@@ -1100,20 +1165,24 @@ async function finishIntake(imgs,folderName){
   if(imgs.length){
     const picked=[...imgs].sort((a,b)=>scoreForVision(b.name)-scoreForVision(a.name)).slice(0,8);  // quick test: lean set
     urls=await Promise.all(picked.map(prepDataUrl));
-    setStatus('Quick read of your brand…');
+    const aiOn=conciergeOn();
     let aiOK=false;
-    try{
-      const assets=picked.map((im,i)=>({ id:'asset_'+(i+1), name:im.name,
-        type:(/^data:([^;,]+)/.exec(urls[i]||'')||[])[1]||('image/'+im.ext),
-        category:im.ext==='svg'?'logo':'image', dataUrl:urls[i] }));
-      aiOK=mapAiToBrand(await requestReview(assets), picked);
-    }catch(e){ console.warn('Brand Concierge unavailable — organized locally:',e); }
+    if(aiOn){
+      setStatus('Quick read of your brand…');
+      try{
+        const assets=picked.map((im,i)=>({ id:'asset_'+(i+1), name:im.name,
+          type:(/^data:([^;,]+)/.exec(urls[i]||'')||[])[1]||('image/'+im.ext),
+          category:im.ext==='svg'?'logo':'image', dataUrl:urls[i] }));
+        aiOK=mapAiToBrand(await requestReview(assets, report), picked);
+      }catch(e){ console.warn('Brand Concierge unavailable — organized locally:',e); }
+    }
     // colours come from the actual uploads even when the AI didn't run/return them
     if(!brand.colors.length){ try{ const pal=await extractPalette(urls); if(pal.length) brand.colors=pal; }catch(e){} }
     setStatus(total
-      ? (aiOK ? (brand.name?brand.name+' is moved in — same read as your Experience flow.':'Moved in — same read as your Experience flow.')
-              : (brand.colors.length?`${total} file${total===1?'':'s'} moved in — colours read from your logos (full AI runs on your live site).`
-                                     :`${total} file${total===1?'':'s'} moved in — organized locally (AI runs on your live site).`))
+      ? (!aiOn ? `${total} file${total===1?'':'s'} moved in — organized on-device (Concierge is off).`
+              : aiOK ? (brand.name?brand.name+' is moved in — same read as your Experience flow.':'Moved in — same read as your Experience flow.')
+                     : (brand.colors.length?`${total} file${total===1?'':'s'} moved in — colours read from your logos (full AI runs on your live site).`
+                                            :`${total} file${total===1?'':'s'} moved in — organized locally (AI runs on your live site).`))
       : 'Nothing readable found — try images, a PDF, a folder, or a .zip.');
   } else {
     setStatus(total? `${total} file${total===1?'':'s'} moved in.` : 'Nothing readable found — try images, a PDF, a folder, or a .zip.');
