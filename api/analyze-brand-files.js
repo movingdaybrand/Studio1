@@ -268,11 +268,17 @@ technical terms.
 "brandHomeImprovements": ["2-4 calm, specific, customer-facing suggestions for the customer's Brand Home"],
 "brandWorld": {
   "worldName": "string — an evocative-but-restrained name for this brand's environment",
+  "mood": "string — 2-4 words for the overall mood of the space",
   "coreFeeling": "string — 2-4 words for how it should feel to be inside this brand",
+  "environmentType": "string — e.g. quiet gallery, sunlit studio, stone atrium, editorial library (premium architecture, never sci-fi or literal rooms)",
   "environmentSummary": "string — one calm sentence describing the space",
   "lighting": { "primary": "string", "secondary": "string", "atmosphere": "string" },
-  "materials": ["2-4 material words, e.g. frosted glass, brushed brass, warm paper"],
+  "materials": ["2-4 material words, e.g. frosted glass, brushed brass, warm paper, concrete, wood"],
+  "glassStyle": "string — how frosted/clear the glass reads, e.g. soft frost, clear with a faint tint",
+  "surfaceStyle": "string — the dominant surface character, e.g. matte paper, polished stone, brushed metal",
   "motion": ["2-3 motion words, e.g. slow drift, soft parallax, gentle settle"],
+  "cameraBehavior": "string — how movement feels, e.g. slow dolly, gentle push-in, calm glide",
+  "depth": "string — sense of depth, e.g. shallow and intimate, deep and architectural",
   "geometry": { "logoInfluence": "string — how the logo's forms inform the space", "shapeLanguage": "string — e.g. soft radii, sharp verticals" },
   "colorMapping": {
     "background": "#rrggbb — a near-white or pale tint of the palette (the page stays light)",
@@ -665,11 +671,14 @@ function _sat(h){ const c=_hexToRgb(h),mx=Math.max(...c),mn=Math.min(...c); retu
 function _normHex(h){ if(typeof h!=="string"||!/^#?[0-9a-f]{6}$/i.test(h.trim())) return null; h=h.trim(); return (h[0]==="#"?h:"#"+h).toLowerCase(); }
 
 const DEFAULT_WORLD = {
-  worldName:"Moving Day", coreFeeling:"calm, premium, considered",
+  worldName:"Moving Day", mood:"calm, premium", coreFeeling:"calm, premium, considered",
+  environmentType:"quiet sunlit gallery",
   environmentSummary:"A quiet, light-filled space with frosted glass and soft sage light.",
   lighting:{ primary:"soft daylight", secondary:"low sage glow", atmosphere:"still and bright" },
   materials:["frosted glass","warm paper","brushed stone"],
+  glassStyle:"soft frost", surfaceStyle:"matte warm paper",
   motion:["slow drift","gentle settle"],
+  cameraBehavior:"calm glide", depth:"shallow and intimate",
   geometry:{ logoInfluence:"rounded, humanist forms", shapeLanguage:"soft radii" },
   colorMapping:{ background:"#f4f2ec", glass:"#eef1ea", glow:"#cfe0d2", accent:"#2c5a3c", shadow:"#14291f" },
   destinations:{
