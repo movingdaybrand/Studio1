@@ -188,6 +188,45 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .gd-fname{display:inline-block;margin-top:10px;font-size:12px;color:var(--b3);}
 .gd-mockups{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
 .gd-mock{aspect-ratio:1;border-radius:var(--r-sm);}
+/* ── composite application mockups (real logo + brand palette) ── */
+.mk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;}
+.mk{position:relative;aspect-ratio:4/3;border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow);background:var(--b2);display:grid;place-items:center;}
+.mk-tag{position:absolute;left:10px;bottom:9px;z-index:3;font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;color:var(--ink-soft);background:rgba(255,255,255,.82);padding:3px 7px;border-radius:6px;backdrop-filter:blur(6px);}
+.mk-tag.on-dark{color:rgba(255,255,255,.86);background:rgba(0,0,0,.28);}
+.mk img{display:block;object-fit:contain;}
+/* business card */
+.mk-card{width:74%;aspect-ratio:1.7/1;border-radius:9px;background:#fff;box-shadow:0 10px 26px rgba(20,40,28,.18);display:flex;flex-direction:column;justify-content:center;align-items:center;gap:7px;padding:10%;}
+.mk-card img{max-width:56%;max-height:38%;}
+.mk-card .mk-rule{width:34%;height:2px;border-radius:2px;background:var(--b3);}
+.mk-card .mk-nm{font-family:var(--display);font-size:11px;color:var(--b1);letter-spacing:.01em;}
+/* email signature */
+.mk-sig{width:80%;background:#fff;border-radius:8px;box-shadow:0 8px 22px rgba(20,40,28,.12);display:flex;align-items:center;gap:11px;padding:13px 15px;}
+.mk-sig img{width:30%;max-height:46px;}
+.mk-sig .mk-bar{width:2px;align-self:stretch;background:var(--b3);border-radius:2px;}
+.mk-sig .mk-lines{display:flex;flex-direction:column;gap:4px;flex:1;}
+.mk-sig .mk-lines b{font-size:10px;color:var(--b1);font-weight:600;}
+.mk-sig .mk-lines i{font-style:normal;font-size:8px;color:var(--ink-faint);}
+.mk-sig .mk-lines .mk-accent{color:var(--b3);font-weight:600;}
+/* website header */
+.mk-web{width:86%;border-radius:8px;overflow:hidden;background:#fff;box-shadow:0 8px 22px rgba(20,40,28,.12);}
+.mk-web .mk-nav{display:flex;align-items:center;gap:8px;padding:9px 12px;border-bottom:1px solid rgba(0,0,0,.06);}
+.mk-web .mk-nav img{height:15px;max-width:42%;}
+.mk-web .mk-nav .mk-links{margin-left:auto;display:flex;gap:7px;}
+.mk-web .mk-nav .mk-links span{width:16px;height:4px;border-radius:3px;background:var(--b4);opacity:.5;}
+.mk-web .mk-hero{height:46px;background:linear-gradient(120deg,var(--b1),var(--b4));}
+/* social post */
+.mk-post{width:72%;aspect-ratio:1/1;border-radius:12px;background:linear-gradient(150deg,var(--b1),var(--b5));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;padding:12%;}
+.mk-post img{max-width:60%;max-height:42%;}
+.mk-post .mk-cap{font-family:var(--display);font-size:10px;text-align:center;color:rgba(255,255,255,.9);}
+/* signage */
+.mk-sign{width:100%;height:100%;background:linear-gradient(180deg,#e9eae6,#dcdedb);display:grid;place-items:center;}
+.mk-sign .mk-panel{width:60%;aspect-ratio:1.5/1;border-radius:6px;background:var(--b1);box-shadow:0 14px 30px rgba(0,0,0,.22);display:grid;place-items:center;padding:9%;}
+.mk-sign .mk-panel img{max-width:74%;max-height:60%;}
+/* social avatar */
+.mk-avatar{width:100%;height:100%;background:linear-gradient(160deg,var(--b2),#fff);display:grid;place-items:center;}
+.mk-avatar .mk-circle{width:54%;aspect-ratio:1/1;border-radius:50%;background:var(--b1);box-shadow:0 10px 24px rgba(20,40,28,.2);display:grid;place-items:center;padding:14%;}
+.mk-avatar .mk-circle img{max-width:78%;max-height:78%;}
+@media(max-width:640px){.mk-grid{grid-template-columns:1fr 1fr;}}
 .gd-usage{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .gd-use{padding:16px 18px;border-radius:var(--r-sm);background:#fff;border-top:2px solid var(--b4);}
 .gd-use.dont{border-top-color:#9c3c3c;}
@@ -428,7 +467,7 @@ const ROOMS={
         </div>
       </div>
       <div class="gd-section"><div class="gd-num">04 — In Use</div>
-        <div class="gd-mockups">
+        <div class="gd-mockups" data-inuse>
           <div class="vframe gd-mock"><div class="ph c"></div><span class="vframe-tag on-dark">Profile</span></div>
           <div class="vframe gd-mock"><div class="ph a"></div><span class="vframe-tag on-dark">Website</span></div>
           <div class="vframe gd-mock"><div class="ph b"></div><span class="vframe-tag">Print</span></div>
@@ -1100,6 +1139,7 @@ function applyUploads(root){
   }
   applyType(root); applyTypeProse(root); applyDeliverables(root);
   placeLogos(root);
+  renderMockups(root);
   let pi=0;
   root.querySelectorAll('.gframe:not(.glogo),.gd-mock').forEach(fr=>{ const P=brand.photos[pi]; if(P){ setFrameImage(fr,P.url,false,P.id); pi++; } });
   if(brand.colors.length){ legibilityFix(root); applyMockups(root); }
@@ -1108,6 +1148,27 @@ function applyUploads(root){
 function pickMark(...roles){
   for(const r of roles){ const m=brand.logos.find(l=>l.role===r); if(m) return m; }
   return brand.logos[0]||null;
+}
+function logoForGround(dark){          // use the user's B/W variations when they exist
+  if(dark){ const w=brand.logos.find(l=>l.variant==='white'); if(w) return w.url; }
+  else { const b=brand.logos.find(l=>l.variant==='black'); if(b) return b.url; }
+  const p=pickMark('primaryLogo','wordmark','secondaryLogo'); return p?p.url:'';
+}
+function renderMockups(root){
+  const box=root.querySelector('[data-inuse]'); if(!box) return;
+  const dl=logoForGround(false); if(!dl) return;            // no logo yet → keep the default tiles
+  const wl=logoForGround(true)||dl;
+  const nm=esc(brand.name||'Brand');
+  const tag=esc((looksGenericTag(brand.tagline)?'':brand.tagline)||'');
+  const scenes=[
+    '<div class="mk"><div class="mk-card"><img alt="" src="'+dl+'"><span class="mk-rule"></span><span class="mk-nm">'+nm+'</span></div><span class="mk-tag">Business card</span></div>',
+    '<div class="mk"><div class="mk-sig"><img alt="" src="'+dl+'"><span class="mk-bar"></span><span class="mk-lines"><b>'+nm+'</b><i>Founder</i><i class="mk-accent">hello@'+brandSlug()+'.com</i></span></div><span class="mk-tag">Email signature</span></div>',
+    '<div class="mk"><div class="mk-web"><div class="mk-nav"><img alt="" src="'+dl+'"><span class="mk-links"><span></span><span></span><span></span></span></div><div class="mk-hero"></div></div><span class="mk-tag">Website header</span></div>',
+    '<div class="mk"><div class="mk-post"><img alt="" src="'+wl+'">'+(tag?'<span class="mk-cap">'+tag+'</span>':'')+'</div><span class="mk-tag on-dark">Social post</span></div>',
+    '<div class="mk"><div class="mk-sign"><div class="mk-panel"><img alt="" src="'+wl+'"></div></div><span class="mk-tag">Signage</span></div>',
+    '<div class="mk"><div class="mk-avatar"><div class="mk-circle"><img alt="" src="'+wl+'"></div></div><span class="mk-tag">Social avatar</span></div>'
+  ];
+  box.className='mk-grid'; box.innerHTML=scenes.join('');
 }
 function applyHomeColor(){
   // The home keeps its own calm palette. The brand's colours live in the Guide (applyPaletteVars), not the shell.
