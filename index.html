@@ -227,6 +227,10 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .mk-avatar .mk-circle{width:54%;aspect-ratio:1/1;border-radius:50%;background:var(--b1);box-shadow:0 10px 24px rgba(20,40,28,.2);display:grid;place-items:center;padding:14%;}
 .mk-avatar .mk-circle img{max-width:78%;max-height:78%;}
 @media(max-width:640px){.mk-grid{grid-template-columns:1fr 1fr;}}
+.mk-dl{position:absolute;top:8px;right:8px;z-index:4;display:flex;gap:5px;opacity:0;transition:opacity .2s;}
+.mk:hover .mk-dl{opacity:1;}
+.mk-dl button{font-size:9px;letter-spacing:.04em;font-weight:500;color:var(--ink-soft);background:rgba(255,255,255,.92);box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:99px;padding:3px 9px;cursor:pointer;transition:color .2s,box-shadow .2s;}
+.mk-dl button:hover{color:var(--ink);box-shadow:inset 0 0 0 1px rgba(44,90,60,.3);}
 .gd-usage{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .gd-use{padding:16px 18px;border-radius:var(--r-sm);background:#fff;border-top:2px solid var(--b4);}
 .gd-use.dont{border-top-color:#9c3c3c;}
@@ -665,6 +669,7 @@ roomBody.addEventListener('click',e=>{
   if(tog){ const on=tog.classList.toggle('on'); const row=tog.closest('.frow'), lab=row&&row.querySelector('b');
     if(lab){ const name=lab.textContent.trim(); founderState[name]=on; saveFounderState(); if(name==='Editor mode') enableEditing(roomBody); if(name==='Raw JSON') refreshFounderState(); } return; }
   const deliv=e.target.closest('.vaultcard[data-deliv]'); if(deliv){ handleDeliverable(deliv.dataset.deliv); return; }
+  const ex=e.target.closest('[data-export]'); if(ex){ exportApplication(ex.dataset.export, ex.dataset.fmt||'png'); return; }
   if(!editorActive()) return;                                  // edits only live in Editor mode
   const rm=e.target.closest('.asset-remove'); if(rm){ removeAsset(rm.dataset.remove); return; }
   const vb=e.target.closest('.asset-var'); if(vb){ makeLogoVariations(vb.dataset.var); return; }
@@ -884,7 +889,7 @@ function buildGuideHTML(){
   const tmp=document.createElement('div'); tmp.style.cssText='position:absolute;left:-9999px;top:0;width:900px;';
   tmp.innerHTML=ROOMS.guide.html; document.body.appendChild(tmp);
   try{ applyUploads(tmp); }catch(e){}
-  const node=tmp.querySelector('.guidedoc'); const inner=node?node.outerHTML:''; tmp.remove();
+  const node=tmp.querySelector('.guidedoc'); if(node) node.querySelectorAll('.mk-dl').forEach(n=>n.remove()); const inner=node?node.outerHTML:''; tmp.remove();
   const rs=getComputedStyle(document.documentElement);
   const vars=['--b1','--b2','--b3','--b4','--b5'].map(v=>v+':'+(rs.getPropertyValue(v).trim()||'')).join(';');
   const css=document.querySelector('style').textContent;
@@ -1160,15 +1165,45 @@ function renderMockups(root){
   const wl=logoForGround(true)||dl;
   const nm=esc(brand.name||'Brand');
   const tag=esc((looksGenericTag(brand.tagline)?'':brand.tagline)||'');
-  const scenes=[
-    '<div class="mk"><div class="mk-card"><img alt="" src="'+dl+'"><span class="mk-rule"></span><span class="mk-nm">'+nm+'</span></div><span class="mk-tag">Business card</span></div>',
-    '<div class="mk"><div class="mk-sig"><img alt="" src="'+dl+'"><span class="mk-bar"></span><span class="mk-lines"><b>'+nm+'</b><i>Founder</i><i class="mk-accent">hello@'+brandSlug()+'.com</i></span></div><span class="mk-tag">Email signature</span></div>',
-    '<div class="mk"><div class="mk-web"><div class="mk-nav"><img alt="" src="'+dl+'"><span class="mk-links"><span></span><span></span><span></span></span></div><div class="mk-hero"></div></div><span class="mk-tag">Website header</span></div>',
-    '<div class="mk"><div class="mk-post"><img alt="" src="'+wl+'">'+(tag?'<span class="mk-cap">'+tag+'</span>':'')+'</div><span class="mk-tag on-dark">Social post</span></div>',
-    '<div class="mk"><div class="mk-sign"><div class="mk-panel"><img alt="" src="'+wl+'"></div></div><span class="mk-tag">Signage</span></div>',
-    '<div class="mk"><div class="mk-avatar"><div class="mk-circle"><img alt="" src="'+wl+'"></div></div><span class="mk-tag">Social avatar</span></div>'
+  const cfg=[
+    {k:'business-card',label:'Business card',svg:true,inner:'<div class="mk-card"><img alt="" src="'+dl+'"><span class="mk-rule"></span><span class="mk-nm">'+nm+'</span></div>'},
+    {k:'email-signature',label:'Email signature',svg:false,inner:'<div class="mk-sig"><img alt="" src="'+dl+'"><span class="mk-bar"></span><span class="mk-lines"><b>'+nm+'</b><i>Founder</i><i class="mk-accent">hello@'+brandSlug()+'.com</i></span></div>'},
+    {k:'website-header',label:'Website header',svg:false,inner:'<div class="mk-web"><div class="mk-nav"><img alt="" src="'+dl+'"><span class="mk-links"><span></span><span></span><span></span></span></div><div class="mk-hero"></div></div>'},
+    {k:'social-post',label:'Social post',svg:true,dark:true,inner:'<div class="mk-post"><img alt="" src="'+wl+'">'+(tag?'<span class="mk-cap">'+tag+'</span>':'')+'</div>'},
+    {k:'signage',label:'Signage',svg:false,inner:'<div class="mk-sign"><div class="mk-panel"><img alt="" src="'+wl+'"></div></div>'},
+    {k:'social-avatar',label:'Social avatar',svg:true,inner:'<div class="mk-avatar"><div class="mk-circle"><img alt="" src="'+wl+'"></div></div>'}
   ];
-  box.className='mk-grid'; box.innerHTML=scenes.join('');
+  box.className='mk-grid';
+  box.innerHTML=cfg.map(c=>'<div class="mk">'+c.inner+'<span class="mk-tag'+(c.dark?' on-dark':'')+'">'+c.label+'</span><span class="mk-dl"><button data-export="'+c.k+'" data-fmt="png">PNG</button>'+(c.svg?'<button data-export="'+c.k+'" data-fmt="svg">SVG</button>':'')+'</span></div>').join('');
+}
+function loadImg(url){ return new Promise(r=>{ if(!url) return r(null); const i=new Image(); i.onload=()=>r(i); i.onerror=()=>r(null); i.src=url; }); }
+function cssVar(n,f){ return (getComputedStyle(document.documentElement).getPropertyValue(n).trim())||f; }
+function roundRect(x,a,b,w,h,r){ x.beginPath(); x.moveTo(a+r,b); x.arcTo(a+w,b,a+w,b+h,r); x.arcTo(a+w,b+h,a,b+h,r); x.arcTo(a,b+h,a,b,r); x.arcTo(a,b,a+w,b,r); x.closePath(); }
+const MK_SPECS={ 'social-avatar':{w:1080,h:1080}, 'social-post':{w:1080,h:1080}, 'business-card':{w:1050,h:600}, 'email-signature':{w:680,h:200}, 'website-header':{w:1600,h:400}, 'signage':{w:1600,h:1000} };
+async function exportApplication(kind, fmt){
+  const s=MK_SPECS[kind]; if(!s) return;
+  const dark=cssVar('--b1','#1c2b22'), deep=cssVar('--b5',dark), accent=cssVar('--b3','#888'), mid=cssVar('--b4',dark);
+  const nm=brand.name||'Brand', tg=(looksGenericTag(brand.tagline)?'':brand.tagline)||'', email='hello@'+brandSlug()+'.com';
+  const dlu=logoForGround(false), wl=logoForGround(true)||dlu;
+  if(fmt==='svg'){ const svg=buildAppSVG(kind,s,{dark,deep,accent,nm,tg,dl:dlu,wl}); if(svg) dl(brandSlug()+'-'+kind+'.svg', svg, 'image/svg+xml'); announceWorkspaceUpdate(kind.replace('-',' ')+' downloaded.','guide'); return; }
+  const c=document.createElement('canvas'); c.width=s.w; c.height=s.h; const x=c.getContext('2d');
+  const fit=(img,cx,cy,mw,mh)=>{ if(!img||!img.width) return; const r=Math.min(mw/img.width,mh/img.height), w=img.width*r,h=img.height*r; x.drawImage(img,cx-w/2,cy-h/2,w,h); };
+  const lightLogo=await loadImg(wl), darkLogo=await loadImg(dlu);
+  if(kind==='social-avatar'){ x.fillStyle=dark; x.fillRect(0,0,s.w,s.h); fit(lightLogo,s.w/2,s.h/2,s.w*0.46,s.h*0.46); }
+  else if(kind==='social-post'){ const g=x.createLinearGradient(0,0,s.w,s.h); g.addColorStop(0,dark); g.addColorStop(1,deep); x.fillStyle=g; x.fillRect(0,0,s.w,s.h); fit(lightLogo,s.w/2,s.h*0.44,s.w*0.5,s.h*0.34); if(tg){ x.fillStyle='rgba(255,255,255,.9)'; x.textAlign='center'; x.font='500 '+Math.round(s.w*0.034)+'px Inter,sans-serif'; x.fillText(tg.slice(0,42),s.w/2,s.h*0.74); } }
+  else if(kind==='business-card'){ x.fillStyle='#fff'; x.fillRect(0,0,s.w,s.h); fit(darkLogo,s.w/2,s.h*0.4,s.w*0.42,s.h*0.34); x.strokeStyle=accent; x.lineWidth=3; x.beginPath(); x.moveTo(s.w*0.43,s.h*0.61); x.lineTo(s.w*0.57,s.h*0.61); x.stroke(); x.fillStyle=dark; x.textAlign='center'; x.font='400 '+Math.round(s.w*0.032)+'px Fraunces,Georgia,serif'; x.fillText(nm,s.w/2,s.h*0.74); }
+  else if(kind==='email-signature'){ x.fillStyle='#fff'; x.fillRect(0,0,s.w,s.h); fit(darkLogo,s.w*0.15,s.h/2,s.w*0.2,s.h*0.56); x.strokeStyle=accent; x.lineWidth=3; x.beginPath(); x.moveTo(s.w*0.29,s.h*0.26); x.lineTo(s.w*0.29,s.h*0.74); x.stroke(); x.textAlign='left'; x.fillStyle=dark; x.font='600 '+Math.round(s.h*0.13)+'px Inter,sans-serif'; x.fillText(nm,s.w*0.33,s.h*0.42); x.fillStyle='rgba(0,0,0,.5)'; x.font='400 '+Math.round(s.h*0.095)+'px Inter,sans-serif'; x.fillText('Founder',s.w*0.33,s.h*0.6); x.fillStyle=accent; x.fillText(email,s.w*0.33,s.h*0.76); }
+  else if(kind==='website-header'){ x.fillStyle='#fff'; x.fillRect(0,0,s.w,s.h); fit(darkLogo,s.w*0.12,s.h*0.46,s.w*0.16,s.h*0.5); x.fillStyle=mid; for(let i=0;i<3;i++){ x.globalAlpha=.45; x.fillRect(s.w*0.6+i*110,s.h*0.43,70,12); } x.globalAlpha=1; const g=x.createLinearGradient(0,0,s.w,0); g.addColorStop(0,dark); g.addColorStop(1,mid); x.fillStyle=g; x.fillRect(0,s.h-16,s.w,16); }
+  else if(kind==='signage'){ const g=x.createLinearGradient(0,0,0,s.h); g.addColorStop(0,'#ecedea'); g.addColorStop(1,'#dadcd8'); x.fillStyle=g; x.fillRect(0,0,s.w,s.h); const pw=s.w*0.5,ph=s.h*0.44,px=(s.w-pw)/2,py=(s.h-ph)/2; x.save(); x.shadowColor='rgba(0,0,0,.25)'; x.shadowBlur=40; x.shadowOffsetY=20; x.fillStyle=dark; roundRect(x,px,py,pw,ph,18); x.fill(); x.restore(); fit(lightLogo,s.w/2,s.h/2,pw*0.66,ph*0.6); }
+  c.toBlob(b=>{ if(b){ dl(brandSlug()+'-'+kind+'.png',b,'image/png'); announceWorkspaceUpdate(kind.replace('-',' ')+' downloaded.','guide'); } else announceWorkspaceUpdate('Could not render that file.','guide'); },'image/png');
+}
+function buildAppSVG(kind,s,o){
+  const img=(x,y,w,h,href)=>'<image href="'+href+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" preserveAspectRatio="xMidYMid meet"/>';
+  const head='<svg xmlns="http://www.w3.org/2000/svg" width="'+s.w+'" height="'+s.h+'" viewBox="0 0 '+s.w+' '+s.h+'">';
+  if(kind==='social-avatar'){ const p=s.w*0.27; return head+'<rect width="'+s.w+'" height="'+s.h+'" fill="'+o.dark+'"/>'+img(p,p,s.w-2*p,s.h-2*p,o.wl)+'</svg>'; }
+  if(kind==='social-post'){ const p=s.w*0.25; return head+'<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+o.dark+'"/><stop offset="1" stop-color="'+o.deep+'"/></linearGradient></defs><rect width="'+s.w+'" height="'+s.h+'" fill="url(#g)"/>'+img(p,s.h*0.27,s.w-2*p,s.h*0.34,o.wl)+(o.tg?'<text x="'+(s.w/2)+'" y="'+(s.h*0.75)+'" text-anchor="middle" fill="#ffffff" font-family="Inter,sans-serif" font-size="'+Math.round(s.w*0.034)+'" font-weight="500">'+esc(o.tg.slice(0,42))+'</text>':'')+'</svg>'; }
+  if(kind==='business-card'){ const bw=s.w*0.42,bh=s.h*0.34; return head+'<rect width="'+s.w+'" height="'+s.h+'" fill="#ffffff"/>'+img((s.w-bw)/2,s.h*0.23,bw,bh,o.dl)+'<line x1="'+(s.w*0.43)+'" y1="'+(s.h*0.61)+'" x2="'+(s.w*0.57)+'" y2="'+(s.h*0.61)+'" stroke="'+o.accent+'" stroke-width="3"/><text x="'+(s.w/2)+'" y="'+(s.h*0.75)+'" text-anchor="middle" fill="'+o.dark+'" font-family="Fraunces,Georgia,serif" font-size="'+Math.round(s.w*0.032)+'">'+esc(o.nm)+'</text></svg>'; }
+  return null;
 }
 function applyHomeColor(){
   // The home keeps its own calm palette. The brand's colours live in the Guide (applyPaletteVars), not the shell.
