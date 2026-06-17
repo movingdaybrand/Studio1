@@ -3596,7 +3596,7 @@ body.md-state-concierge .concierge-missing {
      [SECTION 2]  CSS  —  END
      ████████████████████████████████████████████████████████████████████████ -->
 </head>
-<body class="md-state-welcome">
+<body>
 
 <!-- ████████████████████████████████████████████████████████████████████████
      [SECTION 3]  HTML  —  PAGE MARKUP / BODY
@@ -4333,60 +4333,8 @@ function activateUploadGlow() {
   }, 20000);
 }
 
-/* Expand any dropped .zip into its real inner files before staging.
-   Recurses into nested zips and subfolders, extracts every file type,
-   and disambiguates duplicate filenames so nothing is silently dropped.
-   JSZip is already loaded at the top of this file. */
-function isZipFile(f) {
-  return /\.zip$/i.test(f.name || '') ||
-    f.type === 'application/zip' || f.type === 'application/x-zip-compressed';
-}
-async function expandZips(fileList) {
-  const files = Array.from(fileList || []).filter(Boolean);
-  if (!window.JSZip) return files;            // CDN unavailable: keep the zip as-is
-  const out = [];
-  const used = new Set();                      // case-insensitive names already taken
-
-  function uniqueName(base, folder) {
-    if (!used.has(base.toLowerCase())) { used.add(base.toLowerCase()); return base; }
-    const dot = base.lastIndexOf('.');
-    const stem = dot > 0 ? base.slice(0, dot) : base;
-    const ext = dot > 0 ? base.slice(dot) : '';
-    const tag = (folder || '').split('/').filter(Boolean).pop();
-    let name = tag ? `${stem}__${tag}${ext}` : `${stem}-2${ext}`;
-    let i = 2;
-    while (used.has(name.toLowerCase())) { name = `${stem}-${i++}${ext}`; }
-    used.add(name.toLowerCase());
-    return name;
-  }
-
-  async function expand(file, depth) {
-    if (!isZipFile(file) || depth > 6) { out.push(file); return; }   // not a zip (or nested too deep): keep
-    let zip;
-    try { zip = await JSZip.loadAsync(file); }
-    catch (err) { out.push(file); return; }                          // unreadable: keep original
-    for (const path of Object.keys(zip.files)) {
-      const entry = zip.files[path];
-      if (entry.dir) continue;
-      if (/(^|\/)__MACOSX\//.test(path)) continue;                   // mac resource forks
-      const base = path.split('/').pop();
-      if (!base || /^\./.test(base)) continue;                       // .DS_Store, dotfiles
-      const blob = await entry.async('blob');
-      const when = (entry.date && entry.date.getTime()) || Date.now();
-      if (/\.zip$/i.test(base)) {                                    // nested zip → recurse
-        await expand(new File([blob], base, { type: 'application/zip', lastModified: when }), depth + 1);
-      } else {
-        const folder = path.slice(0, path.length - base.length);
-        out.push(new File([blob], uniqueName(base, folder), { type: blob.type || '', lastModified: when }));
-      }
-    }
-  }
-
-  for (const f of files) { await expand(f, 0); }
-  return out;
-}
-async function addFiles(fileList) {
-  const incoming = await expandZips(fileList);
+function addFiles(fileList) {
+  const incoming = Array.from(fileList || []).filter(Boolean);
   if (!incoming.length) return;
 
   incoming.forEach(file => {
@@ -4456,54 +4404,14 @@ document.addEventListener('dragleave', event => {
   if (dragDepth === 0) document.body.classList.remove('dragging');
 });
 
-/* Walk dropped OS folders (not zips) into their files via the entries API.
-   Entries must be captured synchronously in the drop handler. */
-function dirEntriesFrom(dt) {
-  const items = dt && dt.items ? Array.from(dt.items) : [];
-  return items
-    .filter(it => it.kind === 'file' && it.webkitGetAsEntry)
-    .map(it => it.webkitGetAsEntry())
-    .filter(Boolean);
-}
-function readEntryFile(entry) {
-  return new Promise(res => entry.file(f => res(f || null), () => res(null)));
-}
-function readDirBatch(reader) {
-  return new Promise(res => reader.readEntries(b => res(b || []), () => res([])));
-}
-async function walkEntry(entry, depth) {
-  if (depth > 12) return [];
-  if (entry.isFile) { const f = await readEntryFile(entry); return f ? [f] : []; }
-  if (entry.isDirectory) {
-    const reader = entry.createReader();
-    const all = [];
-    let batch;
-    do { batch = await readDirBatch(reader); all.push(...batch); } while (batch.length); // readEntries returns in chunks
-    const nested = await Promise.all(all.map(e => walkEntry(e, depth + 1)));
-    return nested.flat();
-  }
-  return [];
-}
-async function collectFromEntries(entries) {
-  const lists = await Promise.all(entries.map(e => walkEntry(e, 0)));
-  return lists.flat();
-}
-
 document.addEventListener('drop', event => {
   if (!hasDraggedFiles(event)) return;
   event.preventDefault();
   event.stopPropagation();
   dragDepth = 0;
   document.body.classList.remove('dragging');
-  if (appState !== 'upload' && appState !== 'local_preparing') return;
-  const dt = event.dataTransfer;
-  const entries = dirEntriesFrom(dt);            // capture synchronously
-  const flat = Array.from(dt?.files || []);      // capture synchronously (fallback)
-  if (entries.length) {
-    // folders walk into files; loose files come back from the walk too. addFiles → expandZips still unzips any archives inside.
-    collectFromEntries(entries).then(files => { if (files.length || flat.length) addFiles(files.length ? files : flat); });
-  } else if (flat.length) {
-    addFiles(flat);
+  if ((appState === 'upload' || appState === 'local_preparing') && event.dataTransfer?.files?.length) {
+    addFiles(event.dataTransfer.files);
   }
 });
 
@@ -4580,31 +4488,6 @@ btnMovein.addEventListener('click', event => {
   function fileToDataUrl(file) {
     return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(file);});
   }
-  /* Prepare an asset for the vision model: rasterize SVGs and flatten transparency
-     onto a neutral gray so the AI actually SEES the artwork (a raw SVG is invisible
-     to it, and transparent logos get mangled by the model's own flattening).
-     Falls back to the raw data URL on any failure so the pipeline never breaks. */
-  async function prepForVision(file){
-    try{
-      if(!file) return null;
-      const isSvg=(file.type==='image/svg+xml')||/\.svg$/i.test(file.name||'');
-      const isImage=isSvg||/^image\//.test(file.type||'');
-      if(!isImage) return await fileToDataUrl(file);          // non-visual: send as-is
-      const srcUrl=await fileToDataUrl(file);
-      const img=new Image(); img.crossOrigin='anonymous';
-      await new Promise((res,rej)=>{ img.onload=res; img.onerror=rej; img.src=srcUrl; });
-      let w=img.naturalWidth||img.width||0, h=img.naturalHeight||img.height||0;
-      if(!w||!h){ w=512; h=512; }                             // some SVGs report no size
-      const MAX=1024, scale=Math.min(1,MAX/Math.max(w,h));
-      w=Math.round(w*scale); h=Math.round(h*scale);
-      const c=document.createElement('canvas'); c.width=w; c.height=h;
-      const ctx=c.getContext('2d');
-      ctx.fillStyle='#808080';                                // neutral gray: dark AND light logos stay visible
-      ctx.fillRect(0,0,w,h);
-      ctx.drawImage(img,0,0,w,h);
-      return c.toDataURL('image/png');
-    }catch(e){ return await fileToDataUrl(file); }             // any failure: don't break the pipeline
-  }
   function downloadBlob(blob, name) {
     const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();a.remove();
   }
@@ -4646,32 +4529,25 @@ btnMovein.addEventListener('click', event => {
   //   ?mode=ai             → require /api/analyze-brand-files
   //   ?mode=local          → skip the API and organize locally
   const PARAMS = new URLSearchParams(window.location.search);
-  const ANALYSIS_MODE = (PARAMS.get('mode') || 'auto').toLowerCase();
+  // When no explicit ?mode is given, follow the Brand Home "AI Brand Concierge" toggle
+  // (shared via localStorage on the same origin). Concierge off / Local-only → organize locally.
+  function conciergeFromBrandHome(){
+    try{ const raw = localStorage.getItem('mdFounderState'); if(!raw) return true;
+      const s = JSON.parse(raw) || {};
+      if (s['Local-only mode']) return false;
+      if (s['AI Brand Concierge'] === false) return false;
+      return true;
+    }catch(e){ return true; }
+  }
+  const ANALYSIS_MODE = PARAMS.get('mode')
+    ? PARAMS.get('mode').toLowerCase()
+    : (conciergeFromBrandHome() ? 'auto' : 'local');
   const FOUNDER_MODE = PARAMS.get('founder') === '1' || PARAMS.get('mode') === 'founder';
   if (FOUNDER_MODE) document.body.classList.add('founder-mode');
 
   function isAnalyzableFile(file) {
     const e = ext(file.name);
     return (file.type || '').startsWith('image/') || ['svg','png','jpg','jpeg','webp'].includes(e);
-  }
-
-  // Cap and prioritize what the AI actually sees. Folders and zips can now stage
-  // dozens of images; the vision review should focus on the few that define the
-  // brand, not every photo and duplicate — that keeps it fast and on-target.
-  // (All files still stage for the asset library; this only bounds the AI call.)
-  const MAX_VISION_FILES = 14;
-  function scoreForVision(file) {
-    const n = (file.name || '').toLowerCase();
-    const e = ext(file.name);
-    let s = 0;
-    if (/logo|wordmark|logotype|lockup/.test(n)) s += 6;
-    if (/icon|mark|symbol|emblem|favicon|avatar|monogram/.test(n)) s += 4;
-    if (/brand|identity/.test(n)) s += 3;
-    if (e === 'svg') s += 3;                      // logos are often vector
-    if (e === 'png') s += 1;                      // often transparent marks
-    if (/photo|image|img|dsc|shot|banner|cover|hero|background|bg|stock|scene|team|headshot/.test(n)) s -= 4;
-    if (/^(img|dsc|photo)[\W_]/.test(n)) s -= 2;  // camera-roll naming
-    return s;
   }
 
   function isPreviewableImage(asset) {
@@ -5009,9 +4885,7 @@ btnMovein.addEventListener('click', event => {
           assets: dataUrls.map((url, i) => ({
             id: analyzable[i].uploadId,
             name: analyzable[i].file.name,
-            // Report the type of what we actually send: prepForVision rasterizes
-            // SVGs to PNG, so trust the data URL's real mime, not the original file's.
-            type: (/^data:([^;,]+)/.exec(url || '') || [])[1] || analyzable[i].file.type,
+            type: analyzable[i].file.type,
             category: report?.assets?.find(a => a.uploadId === analyzable[i].uploadId)?.category,
             dataUrl: url
           }))
@@ -5085,15 +4959,13 @@ btnMovein.addEventListener('click', event => {
       stepActive(1);
       const analyzable = allFiles
         .map((file, index) => ({ file, uploadId: `asset_${index + 1}` }))
-        .filter(item => isAnalyzableFile(item.file))
-        .sort((a, b) => scoreForVision(b.file) - scoreForVision(a.file))
-        .slice(0, MAX_VISION_FILES);
+        .filter(item => isAnalyzableFile(item.file));
 
       if (!analyzable.length) {
         throw new Error('Please include at least one PNG, JPG, WEBP, or SVG so Moving Day can prepare a visual review.');
       }
 
-      const dataUrls = await Promise.all(analyzable.map(item => prepForVision(item.file)));
+      const dataUrls = await Promise.all(analyzable.map(item => fileToDataUrl(item.file)));
       stepDone(1);
 
       setPreparingLine(ANALYSIS_MODE === 'local' ? 'Organizing your foundation' : 'Understanding your visual system');
