@@ -361,6 +361,28 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .founder-state.show{display:block;}
 .founder-state .fs-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(207,227,212,.6);border-bottom:1px solid rgba(207,227,212,.1);}
 .founder-state pre{margin:0;padding:13px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.5;max-height:300px;overflow:auto;white-space:pre-wrap;word-break:break-word;}
+
+/* deliverables: brand applications gallery */
+.apps-wrap{margin-top:clamp(22px,4vh,40px);}
+.apps-head h3{margin:0 0 4px;font-family:var(--display);font-weight:400;font-size:clamp(18px,2.4vw,23px);color:var(--ink);}
+.apps-head p{margin:0 0 16px;font-size:13px;line-height:1.55;color:var(--ink-faint);max-width:46ch;}
+.apps-group{margin-bottom:22px;}
+.apps-h{margin:0 0 10px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;}
+.apps-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;}
+.appcard{position:relative;border-radius:var(--r-sm);background:rgba(255,255,255,.62);box-shadow:inset 0 0 0 1px var(--sage-line),var(--shadow);padding:14px 14px 12px;display:flex;flex-direction:column;gap:3px;min-height:118px;backdrop-filter:blur(6px);}
+.appcard.on-dark{background:linear-gradient(150deg,var(--b1,#1c2b22),var(--b5,#0f1c14));box-shadow:var(--shadow);}
+.app-dim{font-size:10px;letter-spacing:.1em;color:var(--ink-faint);font-variant-numeric:tabular-nums;}
+.appcard.on-dark .app-dim{color:rgba(255,255,255,.55);}
+.app-name{font-size:14px;color:var(--ink);font-weight:500;margin-top:auto;}
+.appcard.on-dark .app-name{color:#fff;}
+.app-hint{font-size:11px;color:var(--ink-faint);font-style:normal;}
+.appcard.on-dark .app-hint{color:rgba(255,255,255,.6);}
+.app-dl{display:flex;gap:6px;margin-top:10px;}
+.app-dl button{font-family:inherit;font-size:11px;letter-spacing:.04em;color:var(--ink);background:rgba(255,255,255,.85);border:none;box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:7px;padding:6px 12px;cursor:pointer;transition:background .15s,box-shadow .15s;}
+.app-dl button:hover{background:#fff;box-shadow:inset 0 0 0 1px rgba(44,90,60,.35);}
+.appcard.on-dark .app-dl button{background:rgba(255,255,255,.16);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);}
+.appcard.on-dark .app-dl button:hover{background:rgba(255,255,255,.28);}
+.apps-empty{font-size:13px;color:var(--ink-faint);padding:18px 0;}
 </style>
 </head>
 <body>
@@ -508,7 +530,11 @@ const ROOMS={
       <button class="vaultcard" data-deliv="palette"><span class="vic">Color</span><b>Color styles</b><i>HEX values</i></button>
       <button class="vaultcard" data-deliv="versions"><span class="vic">History</span><b>Versions</b><i>Every save, kept</i></button>
     </div>
-    <p class="deliv-note">Deliverables always use the <b>latest version</b> of your Brand Home — current logo, colors, type, and assets.</p>`},
+    <p class="deliv-note">Deliverables always use the <b>latest version</b> of your Brand Home — current logo, colors, type, and assets.</p>
+    <div class="apps-wrap">
+      <div class="apps-head"><h3>Brand applications</h3><p>Your logo, sized correctly for each platform. Download and upload anywhere — no design tools needed.</p></div>
+      <div data-applications class="apps-body"></div>
+    </div>`},
   founder:{kicker:'Founder Tools',title:'Advanced controls.',html:`
     <div class="flist">
       <div class="frow"><div><b>Editor mode</b><i>Section editing &amp; placement tools</i></div><div class="toggle"></div></div>
@@ -548,6 +574,7 @@ function renderActiveRoom(){
   roomBody.innerHTML=r.html; roomTitle.innerHTML=r.title; roomKicker.textContent=r.kicker;
   if(roomDesc) roomDesc.textContent=(ROOM_META[key]&&ROOM_META[key].desc)||'';
   if(key==='assets') renderAssetsRoom();
+  if(key==='deliverables') renderApplications(roomBody);
   enableEditing(roomBody); applyUploads(roomBody); applyFounder(roomBody);
   if(key==='founder') refreshFounderState();
 }
@@ -1189,20 +1216,54 @@ function renderMockups(root){
 function loadImg(url){ return new Promise(r=>{ if(!url) return r(null); const i=new Image(); i.onload=()=>r(i); i.onerror=()=>r(null); i.src=url; }); }
 function cssVar(n,f){ return (getComputedStyle(document.documentElement).getPropertyValue(n).trim())||f; }
 function roundRect(x,a,b,w,h,r){ x.beginPath(); x.moveTo(a+r,b); x.arcTo(a+w,b,a+w,b+h,r); x.arcTo(a+w,b+h,a,b+h,r); x.arcTo(a,b+h,a,b,r); x.arcTo(a,b,a+w,b,r); x.closePath(); }
-const MK_SPECS={ 'social-avatar':{w:1080,h:1080}, 'social-post':{w:1080,h:1080}, 'business-card':{w:1050,h:600}, 'email-signature':{w:680,h:200}, 'website-header':{w:1600,h:400}, 'signage':{w:1600,h:1000} };
+const APP_SPECS={
+  'social-avatar':{w:1080,h:1080,mode:'badge',label:'Profile avatar',hint:'Instagram · LinkedIn · X',group:'Social',svg:true},
+  'social-post':{w:1080,h:1080,mode:'post',label:'Square post',hint:'Instagram · Facebook',group:'Social',svg:true},
+  'social-story':{w:1080,h:1920,mode:'post',label:'Story / cover',hint:'Reels · Stories',group:'Social'},
+  'facebook-cover':{w:820,h:312,mode:'badge',label:'Facebook cover',hint:'820 × 312',group:'Social'},
+  'linkedin-banner':{w:1584,h:396,mode:'post',label:'LinkedIn banner',hint:'1584 × 396',group:'Social'},
+  'x-header':{w:1500,h:500,mode:'post',label:'X / Twitter header',hint:'1500 × 500',group:'Social'},
+  'website-header':{w:1600,h:400,mode:'header',label:'Website header',hint:'Navigation bar',group:'Web & email'},
+  'email-signature':{w:680,h:200,mode:'signature',label:'Email signature',hint:'680 × 200',group:'Web & email'},
+  'favicon':{w:512,h:512,mode:'badge',label:'Favicon / app icon',hint:'512 × 512',group:'Web & email'},
+  'logo-transparent':{w:1024,h:1024,mode:'transparent',label:'Transparent logo',hint:'No background',group:'Web & email',svg:true},
+  'business-card':{w:1050,h:600,mode:'card',label:'Business card',hint:'3.5 × 2 in · 300dpi',group:'Print',svg:true},
+  'signage':{w:1600,h:1000,mode:'signage',label:'Signage / backdrop',hint:'Large format',group:'Print'}
+};
+const APP_GROUPS=['Social','Web & email','Print'];
+async function exportLogoFor(ground){   // 'color' → light logo for dark grounds; 'plain' → real/black logo for light & transparent grounds
+  const find=v=>brand.logos.find(l=>l.variant===v);
+  if(ground==='color'){ const w=find('white'); if(w) return w.url; const p=pickMark('primaryLogo','wordmark','secondaryLogo'); if(!p) return ''; const r=await recolorLogo(p.url,'white',/svg/i.test(p.ext||'')); return r||p.url; }
+  const b=find('black'); if(b) return b.url; const p=pickMark('primaryLogo','wordmark','secondaryLogo'); return p?p.url:'';
+}
+function imgToDataURL(url,isSvg){        // portable copy for embedding inside downloadable SVG (keeps real colours)
+  return new Promise(res=>{ if(!url) return res(''); if(/^data:/.test(url)) return res(url);
+    const img=new Image(); img.crossOrigin='anonymous';
+    img.onload=()=>{ try{ let w=img.naturalWidth||img.width||512,h=img.naturalHeight||img.height||512; if(isSvg){ const s=1024/Math.max(w,h); if(s>1){w=Math.round(w*s);h=Math.round(h*s);} } const c=document.createElement('canvas'); c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); res(c.toDataURL('image/png')); }catch(e){ res(url); } };
+    img.onerror=()=>res(url); img.src=url; });
+}
 async function exportApplication(kind, fmt){
-  const s=MK_SPECS[kind]; if(!s) return;
+  const s=APP_SPECS[kind]; if(!s) return;
   const dark=cssVar('--b1','#1c2b22'), deep=cssVar('--b5',dark), accent=cssVar('--b3','#888'), mid=cssVar('--b4',dark);
   const nm=brand.name||'Brand', tg=(looksGenericTag(brand.tagline)?'':brand.tagline)||'', email='hello@'+brandSlug()+'.com';
-  const dlu=logoForGround(false), wl=logoForGround(true)||dlu;
-  if(fmt==='svg'){ const svg=buildAppSVG(kind,s,{dark,deep,accent,nm,tg,dl:dlu,wl}); if(svg) dl(brandSlug()+'-'+kind+'.svg', svg, 'image/svg+xml'); announceWorkspaceUpdate(kind.replace('-',' ')+' downloaded.','guide'); return; }
+  const colorLogoUrl=await exportLogoFor('color'), plainLogoUrl=await exportLogoFor('plain');
+  if(fmt==='svg'){
+    const pm=pickMark('primaryLogo','wordmark','secondaryLogo')||{};
+    const dlData=await imgToDataURL(plainLogoUrl,/svg/i.test(pm.ext||''));
+    const svg=buildAppSVG(kind,s,{dark,deep,accent,nm,tg,dl:dlData,wl:colorLogoUrl||dlData});
+    if(svg){ dl(brandSlug()+'-'+kind+'.svg', svg, 'image/svg+xml'); announceWorkspaceUpdate(s.label+' downloaded.','deliverables'); }
+    return;
+  }
   const c=document.createElement('canvas'); c.width=s.w; c.height=s.h; const x=c.getContext('2d');
   const fit=(img,cx,cy,mw,mh)=>{ if(!img||!img.width) return; const r=Math.min(mw/img.width,mh/img.height), w=img.width*r,h=img.height*r; x.drawImage(img,cx-w/2,cy-h/2,w,h); };
-  const lightLogo=await loadImg(wl), darkLogo=await loadImg(dlu);
-  if(kind==='social-avatar'){ x.fillStyle=dark; x.fillRect(0,0,s.w,s.h); fit(lightLogo,s.w/2,s.h/2,s.w*0.46,s.h*0.46); }
-  else if(kind==='social-post'){ const g=x.createLinearGradient(0,0,s.w,s.h); g.addColorStop(0,dark); g.addColorStop(1,deep); x.fillStyle=g; x.fillRect(0,0,s.w,s.h); fit(lightLogo,s.w/2,s.h*0.44,s.w*0.5,s.h*0.34); if(tg){ x.fillStyle='rgba(255,255,255,.9)'; x.textAlign='center'; x.font='500 '+Math.round(s.w*0.034)+'px Inter,sans-serif'; x.fillText(tg.slice(0,42),s.w/2,s.h*0.74); } }
-  else if(kind==='business-card'){ x.fillStyle='#fff'; x.fillRect(0,0,s.w,s.h); fit(darkLogo,s.w/2,s.h*0.4,s.w*0.42,s.h*0.34); x.strokeStyle=accent; x.lineWidth=3; x.beginPath(); x.moveTo(s.w*0.43,s.h*0.61); x.lineTo(s.w*0.57,s.h*0.61); x.stroke(); x.fillStyle=dark; x.textAlign='center'; x.font='400 '+Math.round(s.w*0.032)+'px Fraunces,Georgia,serif'; x.fillText(nm,s.w/2,s.h*0.74); }
-  else if(kind==='email-signature'){
+  const lightLogo=await loadImg(colorLogoUrl), darkLogo=await loadImg(plainLogoUrl), ratio=s.w/s.h;
+  if(s.mode==='badge'){ x.fillStyle=dark; x.fillRect(0,0,s.w,s.h); fit(lightLogo,s.w/2,s.h/2,s.w*0.5,s.h*0.55); }
+  else if(s.mode==='post'){ const g=x.createLinearGradient(0,0,s.w,s.h); g.addColorStop(0,dark); g.addColorStop(1,deep); x.fillStyle=g; x.fillRect(0,0,s.w,s.h);
+    if(ratio>1.7){ fit(lightLogo,s.w/2,s.h/2,s.w*0.34,s.h*0.62); }
+    else { fit(lightLogo,s.w/2,s.h*0.42,s.w*0.54,s.h*0.32); if(tg){ x.fillStyle='rgba(255,255,255,.9)'; x.textAlign='center'; x.font='500 '+Math.round(Math.min(s.w,s.h)*0.04)+'px Inter,sans-serif'; x.fillText(tg.slice(0,42),s.w/2,s.h*0.72); } } }
+  else if(s.mode==='transparent'){ fit(darkLogo,s.w/2,s.h/2,s.w*0.82,s.h*0.82); }
+  else if(s.mode==='card'){ x.fillStyle='#fff'; x.fillRect(0,0,s.w,s.h); fit(darkLogo,s.w/2,s.h*0.4,s.w*0.42,s.h*0.34); x.strokeStyle=accent; x.lineWidth=3; x.beginPath(); x.moveTo(s.w*0.43,s.h*0.61); x.lineTo(s.w*0.57,s.h*0.61); x.stroke(); x.fillStyle=dark; x.textAlign='center'; x.font='400 '+Math.round(s.w*0.032)+'px Fraunces,Georgia,serif'; x.fillText(nm,s.w/2,s.h*0.74); }
+  else if(s.mode==='signature'){
     x.fillStyle='#fff'; x.fillRect(0,0,s.w,s.h);
     const nameF='600 '+Math.round(s.h*0.16)+'px Inter,sans-serif', subF='400 '+Math.round(s.h*0.105)+'px Inter,sans-serif';
     let lw=0, lh=0; if(darkLogo&&darkLogo.width){ const r=Math.min((s.h*1.0)/darkLogo.width,(s.h*0.62)/darkLogo.height); lw=darkLogo.width*r; lh=darkLogo.height*r; }
@@ -1216,17 +1277,32 @@ async function exportApplication(kind, fmt){
     x.fillStyle='rgba(0,0,0,.5)'; x.font=subF; x.fillText('Founder',tx,s.h*0.6);
     x.fillStyle=accent; x.fillText(email,tx,s.h*0.78);
   }
-  else if(kind==='website-header'){ x.fillStyle='#fff'; x.fillRect(0,0,s.w,s.h); fit(darkLogo,s.w*0.12,s.h*0.46,s.w*0.16,s.h*0.5); x.fillStyle=mid; for(let i=0;i<3;i++){ x.globalAlpha=.45; x.fillRect(s.w*0.6+i*110,s.h*0.43,70,12); } x.globalAlpha=1; const g=x.createLinearGradient(0,0,s.w,0); g.addColorStop(0,dark); g.addColorStop(1,mid); x.fillStyle=g; x.fillRect(0,s.h-16,s.w,16); }
-  else if(kind==='signage'){ const g=x.createLinearGradient(0,0,0,s.h); g.addColorStop(0,'#ecedea'); g.addColorStop(1,'#dadcd8'); x.fillStyle=g; x.fillRect(0,0,s.w,s.h); const pw=s.w*0.5,ph=s.h*0.44,px=(s.w-pw)/2,py=(s.h-ph)/2; x.save(); x.shadowColor='rgba(0,0,0,.25)'; x.shadowBlur=40; x.shadowOffsetY=20; x.fillStyle=dark; roundRect(x,px,py,pw,ph,18); x.fill(); x.restore(); fit(lightLogo,s.w/2,s.h/2,pw*0.66,ph*0.6); }
-  c.toBlob(b=>{ if(b){ dl(brandSlug()+'-'+kind+'.png',b,'image/png'); announceWorkspaceUpdate(kind.replace('-',' ')+' downloaded.','guide'); } else announceWorkspaceUpdate('Could not render that file.','guide'); },'image/png');
+  else if(s.mode==='header'){ x.fillStyle='#fff'; x.fillRect(0,0,s.w,s.h); fit(darkLogo,s.w*0.12,s.h*0.46,s.w*0.16,s.h*0.5); x.fillStyle=mid; for(let i=0;i<3;i++){ x.globalAlpha=.45; x.fillRect(s.w*0.6+i*110,s.h*0.43,70,12); } x.globalAlpha=1; const g=x.createLinearGradient(0,0,s.w,0); g.addColorStop(0,dark); g.addColorStop(1,mid); x.fillStyle=g; x.fillRect(0,s.h-16,s.w,16); }
+  else if(s.mode==='signage'){ const g=x.createLinearGradient(0,0,0,s.h); g.addColorStop(0,'#ecedea'); g.addColorStop(1,'#dadcd8'); x.fillStyle=g; x.fillRect(0,0,s.w,s.h); const pw=s.w*0.5,ph=s.h*0.44,px=(s.w-pw)/2,py=(s.h-ph)/2; x.save(); x.shadowColor='rgba(0,0,0,.25)'; x.shadowBlur=40; x.shadowOffsetY=20; x.fillStyle=dark; roundRect(x,px,py,pw,ph,18); x.fill(); x.restore(); fit(lightLogo,s.w/2,s.h/2,pw*0.66,ph*0.6); }
+  c.toBlob(b=>{ if(b){ dl(brandSlug()+'-'+kind+'.png',b,'image/png'); announceWorkspaceUpdate(s.label+' downloaded.','deliverables'); } else announceWorkspaceUpdate('Could not render that file.','deliverables'); },'image/png');
 }
 function buildAppSVG(kind,s,o){
   const img=(x,y,w,h,href)=>'<image href="'+href+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" preserveAspectRatio="xMidYMid meet"/>';
-  const head='<svg xmlns="http://www.w3.org/2000/svg" width="'+s.w+'" height="'+s.h+'" viewBox="0 0 '+s.w+' '+s.h+'">';
-  if(kind==='social-avatar'){ const p=s.w*0.27; return head+'<rect width="'+s.w+'" height="'+s.h+'" fill="'+o.dark+'"/>'+img(p,p,s.w-2*p,s.h-2*p,o.wl)+'</svg>'; }
-  if(kind==='social-post'){ const p=s.w*0.25; return head+'<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+o.dark+'"/><stop offset="1" stop-color="'+o.deep+'"/></linearGradient></defs><rect width="'+s.w+'" height="'+s.h+'" fill="url(#g)"/>'+img(p,s.h*0.27,s.w-2*p,s.h*0.34,o.wl)+(o.tg?'<text x="'+(s.w/2)+'" y="'+(s.h*0.75)+'" text-anchor="middle" fill="#ffffff" font-family="Inter,sans-serif" font-size="'+Math.round(s.w*0.034)+'" font-weight="500">'+esc(o.tg.slice(0,42))+'</text>':'')+'</svg>'; }
-  if(kind==='business-card'){ const bw=s.w*0.42,bh=s.h*0.34; return head+'<rect width="'+s.w+'" height="'+s.h+'" fill="#ffffff"/>'+img((s.w-bw)/2,s.h*0.23,bw,bh,o.dl)+'<line x1="'+(s.w*0.43)+'" y1="'+(s.h*0.61)+'" x2="'+(s.w*0.57)+'" y2="'+(s.h*0.61)+'" stroke="'+o.accent+'" stroke-width="3"/><text x="'+(s.w/2)+'" y="'+(s.h*0.75)+'" text-anchor="middle" fill="'+o.dark+'" font-family="Fraunces,Georgia,serif" font-size="'+Math.round(s.w*0.032)+'">'+esc(o.nm)+'</text></svg>'; }
+  const head='<svg xmlns="http://www.w3.org/2000/svg" width="'+s.w+'" height="'+s.h+'" viewBox="0 0 '+s.w+' '+s.h+'">', ratio=s.w/s.h;
+  if(s.mode==='badge'){ const bw=s.w*0.5,bh=s.h*0.55; return head+'<rect width="'+s.w+'" height="'+s.h+'" fill="'+o.dark+'"/>'+img((s.w-bw)/2,(s.h-bh)/2,bw,bh,o.wl)+'</svg>'; }
+  if(s.mode==='post'){ const grad='<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+o.dark+'"/><stop offset="1" stop-color="'+o.deep+'"/></linearGradient></defs><rect width="'+s.w+'" height="'+s.h+'" fill="url(#g)"/>';
+    if(ratio>1.7){ const bw=s.w*0.34,bh=s.h*0.62; return head+grad+img((s.w-bw)/2,(s.h-bh)/2,bw,bh,o.wl)+'</svg>'; }
+    const bw=s.w*0.54,bh=s.h*0.32; return head+grad+img((s.w-bw)/2,s.h*0.26,bw,bh,o.wl)+(o.tg?'<text x="'+(s.w/2)+'" y="'+(s.h*0.73)+'" text-anchor="middle" fill="#ffffff" font-family="Inter,sans-serif" font-size="'+Math.round(Math.min(s.w,s.h)*0.04)+'" font-weight="500">'+esc(o.tg.slice(0,42))+'</text>':'')+'</svg>'; }
+  if(s.mode==='transparent'){ const p=s.w*0.09; return head+img(p,p,s.w-2*p,s.h-2*p,o.dl)+'</svg>'; }
+  if(s.mode==='card'){ const bw=s.w*0.42,bh=s.h*0.34; return head+'<rect width="'+s.w+'" height="'+s.h+'" fill="#ffffff"/>'+img((s.w-bw)/2,s.h*0.23,bw,bh,o.dl)+'<line x1="'+(s.w*0.43)+'" y1="'+(s.h*0.61)+'" x2="'+(s.w*0.57)+'" y2="'+(s.h*0.61)+'" stroke="'+o.accent+'" stroke-width="3"/><text x="'+(s.w/2)+'" y="'+(s.h*0.75)+'" text-anchor="middle" fill="'+o.dark+'" font-family="Fraunces,Georgia,serif" font-size="'+Math.round(s.w*0.032)+'">'+esc(o.nm)+'</text></svg>'; }
   return null;
+}
+function renderApplications(root){
+  const box=root.querySelector('[data-applications]'); if(!box) return;
+  if(!pickMark('primaryLogo','wordmark','secondaryLogo')){ box.innerHTML='<p class="apps-empty">Add a logo in <b>Identity</b> and your ready-to-use files appear here.</p>'; return; }
+  const groups={}; Object.keys(APP_SPECS).forEach(k=>{ const s=APP_SPECS[k]; (groups[s.group]=groups[s.group]||[]).push([k,s]); });
+  box.innerHTML=APP_GROUPS.filter(g=>groups[g]).map(g=>
+    '<div class="apps-group"><h4 class="apps-h">'+g+'</h4><div class="apps-grid">'+
+    groups[g].map(([k,s])=>{
+      const onDark=(s.mode==='badge'||s.mode==='post'||s.mode==='signage');
+      return '<div class="appcard'+(onDark?' on-dark':'')+'"><span class="app-dim">'+s.w+' × '+s.h+'</span><b class="app-name">'+esc(s.label)+'</b><i class="app-hint">'+esc(s.hint||'')+'</i><span class="app-dl"><button data-export="'+k+'" data-fmt="png">PNG</button>'+(s.svg?'<button data-export="'+k+'" data-fmt="svg">SVG</button>':'')+'</span></div>';
+    }).join('')+'</div></div>'
+  ).join('');
 }
 function applyHomeColor(){
   // The home keeps its own calm palette. The brand's colours live in the Guide (applyPaletteVars), not the shell.
