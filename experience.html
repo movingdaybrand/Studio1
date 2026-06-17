@@ -4334,27 +4334,55 @@ function activateUploadGlow() {
 }
 
 /* Expand any dropped .zip into its real inner files before staging.
+   Recurses into nested zips and subfolders, extracts every file type,
+   and disambiguates duplicate filenames so nothing is silently dropped.
    JSZip is already loaded at the top of this file. */
+function isZipFile(f) {
+  return /\.zip$/i.test(f.name || '') ||
+    f.type === 'application/zip' || f.type === 'application/x-zip-compressed';
+}
 async function expandZips(fileList) {
   const files = Array.from(fileList || []).filter(Boolean);
-  if (!files.some(f => /\.zip$/i.test(f.name || ''))) return files;
   if (!window.JSZip) return files;            // CDN unavailable: keep the zip as-is
   const out = [];
-  for (const f of files) {
-    if (!/\.zip$/i.test(f.name || '')) { out.push(f); continue; }
-    try {
-      const zip = await JSZip.loadAsync(f);
-      for (const path of Object.keys(zip.files)) {
-        const entry = zip.files[path];
-        if (entry.dir) continue;
-        if (/__MACOSX/.test(path)) continue;        // mac resource forks
-        const base = path.split('/').pop();
-        if (!base || /^\./.test(base)) continue;     // folders, .DS_Store, dotfiles
-        const blob = await entry.async('blob');
-        out.push(new File([blob], base, { type: blob.type || '' }));
-      }
-    } catch (err) { out.push(f); }                   // unreadable zip: keep original
+  const used = new Set();                      // case-insensitive names already taken
+
+  function uniqueName(base, folder) {
+    if (!used.has(base.toLowerCase())) { used.add(base.toLowerCase()); return base; }
+    const dot = base.lastIndexOf('.');
+    const stem = dot > 0 ? base.slice(0, dot) : base;
+    const ext = dot > 0 ? base.slice(dot) : '';
+    const tag = (folder || '').split('/').filter(Boolean).pop();
+    let name = tag ? `${stem}__${tag}${ext}` : `${stem}-2${ext}`;
+    let i = 2;
+    while (used.has(name.toLowerCase())) { name = `${stem}-${i++}${ext}`; }
+    used.add(name.toLowerCase());
+    return name;
   }
+
+  async function expand(file, depth) {
+    if (!isZipFile(file) || depth > 6) { out.push(file); return; }   // not a zip (or nested too deep): keep
+    let zip;
+    try { zip = await JSZip.loadAsync(file); }
+    catch (err) { out.push(file); return; }                          // unreadable: keep original
+    for (const path of Object.keys(zip.files)) {
+      const entry = zip.files[path];
+      if (entry.dir) continue;
+      if (/(^|\/)__MACOSX\//.test(path)) continue;                   // mac resource forks
+      const base = path.split('/').pop();
+      if (!base || /^\./.test(base)) continue;                       // .DS_Store, dotfiles
+      const blob = await entry.async('blob');
+      const when = (entry.date && entry.date.getTime()) || Date.now();
+      if (/\.zip$/i.test(base)) {                                    // nested zip → recurse
+        await expand(new File([blob], base, { type: 'application/zip', lastModified: when }), depth + 1);
+      } else {
+        const folder = path.slice(0, path.length - base.length);
+        out.push(new File([blob], uniqueName(base, folder), { type: blob.type || '', lastModified: when }));
+      }
+    }
+  }
+
+  for (const f of files) { await expand(f, 0); }
   return out;
 }
 async function addFiles(fileList) {
@@ -4428,14 +4456,54 @@ document.addEventListener('dragleave', event => {
   if (dragDepth === 0) document.body.classList.remove('dragging');
 });
 
+/* Walk dropped OS folders (not zips) into their files via the entries API.
+   Entries must be captured synchronously in the drop handler. */
+function dirEntriesFrom(dt) {
+  const items = dt && dt.items ? Array.from(dt.items) : [];
+  return items
+    .filter(it => it.kind === 'file' && it.webkitGetAsEntry)
+    .map(it => it.webkitGetAsEntry())
+    .filter(Boolean);
+}
+function readEntryFile(entry) {
+  return new Promise(res => entry.file(f => res(f || null), () => res(null)));
+}
+function readDirBatch(reader) {
+  return new Promise(res => reader.readEntries(b => res(b || []), () => res([])));
+}
+async function walkEntry(entry, depth) {
+  if (depth > 12) return [];
+  if (entry.isFile) { const f = await readEntryFile(entry); return f ? [f] : []; }
+  if (entry.isDirectory) {
+    const reader = entry.createReader();
+    const all = [];
+    let batch;
+    do { batch = await readDirBatch(reader); all.push(...batch); } while (batch.length); // readEntries returns in chunks
+    const nested = await Promise.all(all.map(e => walkEntry(e, depth + 1)));
+    return nested.flat();
+  }
+  return [];
+}
+async function collectFromEntries(entries) {
+  const lists = await Promise.all(entries.map(e => walkEntry(e, 0)));
+  return lists.flat();
+}
+
 document.addEventListener('drop', event => {
   if (!hasDraggedFiles(event)) return;
   event.preventDefault();
   event.stopPropagation();
   dragDepth = 0;
   document.body.classList.remove('dragging');
-  if ((appState === 'upload' || appState === 'local_preparing') && event.dataTransfer?.files?.length) {
-    addFiles(event.dataTransfer.files);
+  if (appState !== 'upload' && appState !== 'local_preparing') return;
+  const dt = event.dataTransfer;
+  const entries = dirEntriesFrom(dt);            // capture synchronously
+  const flat = Array.from(dt?.files || []);      // capture synchronously (fallback)
+  if (entries.length) {
+    // folders walk into files; loose files come back from the walk too. addFiles → expandZips still unzips any archives inside.
+    collectFromEntries(entries).then(files => { if (files.length || flat.length) addFiles(files.length ? files : flat); });
+  } else if (flat.length) {
+    addFiles(flat);
   }
 });
 
