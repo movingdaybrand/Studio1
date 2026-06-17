@@ -632,7 +632,7 @@ roomBody.addEventListener('click',e=>{
   const sw=e.target.closest('.swatch,.gd-sw');
   if(sw){editTarget=sw;colorInput.value=rgbToHex(getComputedStyle(sw).backgroundColor);colorInput.click();return;}
   const fr=e.target.closest('.vframe');
-  if(fr){editTarget=fr;editAssetId=null;openReplacePicker();return;}
+  if(fr){editTarget=fr;editAssetId=fr.dataset.asset||null;openReplacePicker();return;}
 });
 // asset role assignment (Assets) → connects Identity, Brand Guide, Deliverables
 roomBody.addEventListener('change',e=>{
@@ -669,11 +669,12 @@ roomBody.addEventListener('blur',e=>{
   else if(t.matches('.gd-disp,.gd-bodysample,.spec .big,.spec .body,.gd-use li')){ saveBrand(); announceWorkspaceUpdate('Brand Guide updated.','guide'); }
   else if(t.matches('.asset-name')) updateWorkspaceState({},{source:'assets',announce:'File renamed. Brand Guide and Deliverables refreshed.'});
 },true);
-function setFrameImage(fr,url,contain){
+function setFrameImage(fr,url,contain,assetId){
   const tag=fr.querySelector('.vframe-tag'); const tagHTML=tag?tag.outerHTML:'';
   fr.classList.toggle('contain',!!contain);
   fr.innerHTML='<img alt="">'+tagHTML;
   fr.querySelector('img').src=url;
+  if(assetId) fr.dataset.asset=assetId; else delete fr.dataset.asset;
 }
 fileInput.addEventListener('change',()=>{
   const f=fileInput.files&&fileInput.files[0]; if(!f||(!editTarget&&!editAssetId)){fileInput.value='';return;}
@@ -1101,7 +1102,7 @@ function applyUploads(root){
   applyType(root); applyTypeProse(root); applyDeliverables(root);
   placeLogos(root);
   let pi=0;
-  root.querySelectorAll('.gframe:not(.glogo),.gd-mock').forEach(fr=>{ if(brand.photos[pi]) setFrameImage(fr,brand.photos[pi++].url,false); });
+  root.querySelectorAll('.gframe:not(.glogo),.gd-mock').forEach(fr=>{ const P=brand.photos[pi]; if(P){ setFrameImage(fr,P.url,false,P.id); pi++; } });
   if(brand.colors.length){ legibilityFix(root); applyMockups(root); }
   applyGuideSections(root);
 }
@@ -1347,14 +1348,14 @@ function placeLogos(root){
   const frames=[...root.querySelectorAll('.id-primary,.markframe,.glogo,.gd-logocell')];
   if(!frames.length || !brand.logos.length) return;
   const logos=brand.logos, lum=l=>(l.lum==null?120:l.lum);
-  if(!logos.some(l=>l.lum!=null)){ let li=0; frames.forEach(fr=>{ if(logos[li]) setFrameImage(fr,logos[li++].url,true); }); return; }
+  if(!logos.some(l=>l.lum!=null)){ let li=0; frames.forEach(fr=>{ const L=logos[li]; if(L){ setFrameImage(fr,L.url,true,L.id); li++; } }); return; }
   const primary=logos.find(l=>l.role==='primaryLogo')||logos[0];
   const lightest=[...logos].sort((a,b)=>lum(b)-lum(a))[0];
   const darkest=[...logos].sort((a,b)=>lum(a)-lum(b))[0];
   frames.forEach(fr=>{
     const darkGround=fr.classList.contains('dark')||fr.classList.contains('brand');
     let pick = darkGround ? lightest : (lum(primary)<175 ? primary : darkest);
-    if(pick) setFrameImage(fr,pick.url,true);
+    if(pick) setFrameImage(fr,pick.url,true,pick.id);
   });
 }
 /* ════════════════ STAGE 1 — LOCAL PREPARATION ════════════════
