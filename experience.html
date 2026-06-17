@@ -4539,6 +4539,12 @@ btnMovein.addEventListener('click', event => {
       return true;
     }catch(e){ return true; }
   }
+  function websiteLookupFromBrandHome(){
+    try{ const raw = localStorage.getItem('mdFounderState'); if(!raw) return true;
+      const s = JSON.parse(raw) || {};
+      return s['Website lookup'] !== false;
+    }catch(e){ return true; }
+  }
   const ANALYSIS_MODE = PARAMS.get('mode')
     ? PARAMS.get('mode').toLowerCase()
     : (conciergeFromBrandHome() ? 'auto' : 'local');
@@ -4882,6 +4888,7 @@ btnMovein.addEventListener('click', event => {
         signal: ctrl.signal,
         body: JSON.stringify({
           preparationReport: serializePreparationReport(report),
+          websiteLookup: websiteLookupFromBrandHome(),
           assets: dataUrls.map((url, i) => ({
             id: analyzable[i].uploadId,
             name: analyzable[i].file.name,
