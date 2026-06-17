@@ -59,8 +59,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .welcome{font-family:var(--display);font-weight:300;font-size:clamp(28px,3.8vw,40px);letter-spacing:-.02em;margin:.26em 0 .14em;}
 .welcome .soft{color:var(--ink-faint);}
 .welcome-sub{color:var(--ink-soft);font-weight:300;font-size:14px;}
-.home-logo{display:flex;justify-content:center;margin:0 0 16px;}
-.home-logo img{height:46px;max-width:200px;object-fit:contain;mix-blend-mode:multiply;}
+.home-logo{display:flex;justify-content:center;margin:0 0 clamp(14px,2.4vh,24px);}
+.home-logo img{height:clamp(62px,8vw,96px);max-width:clamp(220px,36vw,400px);object-fit:contain;mix-blend-mode:multiply;}
 .movein{display:flex;flex-direction:column;align-items:center;gap:9px;margin-top:16px;}
 .movein-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--sage);background:rgba(255,255,255,.62);box-shadow:var(--shadow);padding:9px 17px;border-radius:99px;transition:transform .2s,box-shadow .2s;}
 .movein-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover);}
@@ -1154,6 +1154,16 @@ function pickMark(...roles){
   for(const r of roles){ const m=brand.logos.find(l=>l.role===r); if(m) return m; }
   return brand.logos[0]||null;
 }
+function heroMark(){            // the most logo-like mark for the home hero — avoids photo-ish images
+  const L=brand.logos.filter(l=>l&&l.url); if(!L.length) return null;
+  const tr=l=>(l.transparentRatio==null?0.08:l.transparentRatio), vary=l=>(l.variety==null?40:l.variety), asp=l=>(l.aspect==null?1:l.aspect);
+  const photoish=l=> tr(l)<0.03 && vary(l)>120;
+  const score=l=>{ let s=tr(l)*120 + Math.max(0,90-vary(l)); const a=asp(l); if(a>0.6&&a<1.8) s+=20;
+    if(/logo|wordmark|mark|brand|icon|symbol|emblem|monogram|primary/i.test(l.name||'')) s+=40;
+    if(l.role==='primaryLogo') s+=35; else if(l.role==='iconMark') s+=20; else if(l.role==='secondaryLogo') s+=10;
+    if(photoish(l)) s-=200; return s; };
+  return [...L].sort((a,b)=>score(b)-score(a))[0]||L[0];
+}
 function logoForGround(dark){          // use the user's B/W variations when they exist
   if(dark){ const w=brand.logos.find(l=>l.variant==='white'); if(w) return w.url; }
   else { const b=brand.logos.find(l=>l.variant==='black'); if(b) return b.url; }
@@ -1238,7 +1248,7 @@ function applyBrandHome(){
       else { w.style.fontFamily=''; }                                            // otherwise the house display face
     }
     if(sub) sub.textContent=brand.tagline||'Everything has a place. Choose a room to continue.';
-    const mark=pickMark('wordmark','primaryLogo','secondaryLogo');
+    const mark=heroMark();
     let logo=document.getElementById('homeLogo');
     if(mark){
       if(!logo){ logo=document.createElement('div'); logo.id='homeLogo'; logo.className='home-logo'; head.insertBefore(logo,head.firstChild); }
