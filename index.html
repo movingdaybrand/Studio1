@@ -281,6 +281,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .asset-thumb.doc{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;background:rgba(255,255,255,.6);}
 .asset-meta{padding:9px 11px 11px;display:flex;flex-direction:column;gap:7px;}
 .asset-name{font-size:11px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.asset-card{position:relative;}
+.asset-remove{position:absolute;top:6px;right:6px;z-index:6;width:22px;height:22px;border-radius:50%;display:none;place-items:center;font-size:15px;line-height:1;color:var(--ink-soft);background:rgba(255,255,255,.9);box-shadow:var(--shadow);}
+.asset-remove:hover{color:#b3261e;}
+.asset-replace{position:absolute;left:8px;bottom:8px;z-index:4;font-size:9px;letter-spacing:.04em;color:var(--ink-soft);background:rgba(255,255,255,.86);padding:3px 8px;border-radius:99px;box-shadow:inset 0 0 0 1px var(--sage-line);opacity:0;transition:opacity .2s;pointer-events:none;}
+.editing .asset-remove{display:grid;}
+.editing .asset-thumb{cursor:pointer;}
+.editing .asset-thumb:hover .asset-replace{opacity:1;}
+.editing .asset-name{white-space:normal;overflow:visible;text-overflow:clip;cursor:text;}
 .role-select{font-family:inherit;font-size:11px;color:var(--ink);background:rgba(255,255,255,.7);border:none;box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:8px;padding:6px 8px;cursor:pointer;outline:none;}
 .role-select:focus{box-shadow:inset 0 0 0 2px rgba(44,90,60,.3);}
 .asset-empty{grid-column:1/-1;text-align:center;color:var(--ink-faint);font-size:13px;padding:clamp(20px,5vh,48px) 0;}
@@ -492,13 +500,18 @@ document.getElementById('backBtn').addEventListener('click',closeRoom);
 // founder toggles + any future toggle: flip on click
 // ── make every container editable: replace images, pick colors, edit text ──
 const fileInput=document.getElementById('editFile'), colorInput=document.getElementById('editColor');
-let editTarget=null;
+let editTarget=null, editAssetId=null;
+function findAsset(id){ return [...brand.logos,...brand.photos,...brand.docs].find(a=>a.id===id)||null; }
+function removeAsset(id){
+  ['logos','photos','docs'].forEach(k=>{ const i=brand[k].findIndex(a=>a.id===id); if(i>-1) brand[k].splice(i,1); });
+  updateWorkspaceState({},{source:'assets',announce:'Asset removed. Brand Guide and Deliverables refreshed.'});
+}
 function isLogoFrame(f){return f.classList.contains('contain')||!!f.querySelector('.wm,.wm-doc,.wordmark-mini,.mono');}
 function editorActive(){ return !!founderState['Editor mode']; }
 function enableEditing(root){
   const on=editorActive();
   root.classList.toggle('editing', on);
-  root.querySelectorAll('.id-name,.id-tag,.gd-title,.gd-tag,.gd-disp,.gd-bodysample,.spec .big,.spec .body,.gd-use li')
+  root.querySelectorAll('.id-name,.id-tag,.gd-title,.gd-tag,.gd-disp,.gd-bodysample,.spec .big,.spec .body,.gd-use li,.asset-name')
     .forEach(el=>{ if(on){ el.setAttribute('contenteditable','true'); el.setAttribute('spellcheck','false'); } else el.removeAttribute('contenteditable'); });
 }
 function applyFounder(root){
@@ -511,11 +524,14 @@ roomBody.addEventListener('click',e=>{
     if(lab){ const name=lab.textContent.trim(); founderState[name]=on; saveFounderState(); if(name==='Editor mode') enableEditing(roomBody); if(name==='Raw JSON') refreshFounderState(); } return; }
   const deliv=e.target.closest('.vaultcard[data-deliv]'); if(deliv){ handleDeliverable(deliv.dataset.deliv); return; }
   if(!editorActive()) return;                                  // edits only live in Editor mode
+  const rm=e.target.closest('.asset-remove'); if(rm){ removeAsset(rm.dataset.remove); return; }
   if(e.target.isContentEditable) return;                       // editing text, not replacing
+  const at=e.target.closest('.asset-thumb[data-asset]');
+  if(at){ editAssetId=at.dataset.asset; editTarget=null; fileInput.click(); return; }
   const sw=e.target.closest('.swatch,.gd-sw');
   if(sw){editTarget=sw;colorInput.value=rgbToHex(getComputedStyle(sw).backgroundColor);colorInput.click();return;}
   const fr=e.target.closest('.vframe');
-  if(fr){editTarget=fr;fileInput.click();return;}
+  if(fr){editTarget=fr;editAssetId=null;fileInput.click();return;}
 });
 // asset role assignment (Assets) → connects Identity, Brand Guide, Deliverables
 roomBody.addEventListener('change',e=>{
@@ -541,6 +557,8 @@ roomBody.addEventListener('input',e=>{
   } else if(t.classList.contains('id-tag')||t.classList.contains('gd-tag')){
     brand.tagline=t.textContent.trim();
     scheduleSave();
+  } else if(t.classList.contains('asset-name')){
+    const a=findAsset(t.dataset.name); if(a){ a.name=t.textContent.trim(); scheduleSave(); }  // re-render on blur to keep focus
   }
 });
 roomBody.addEventListener('blur',e=>{
@@ -548,6 +566,7 @@ roomBody.addEventListener('blur',e=>{
   if(t.matches('.id-name,.gd-title')) updateWorkspaceState({},{source:'identity',announce:'Brand name updated. Brand Guide refreshed.'});
   else if(t.matches('.id-tag,.gd-tag')) updateWorkspaceState({},{source:'identity',announce:'Tagline updated. Brand Guide refreshed.'});
   else if(t.matches('.gd-disp,.gd-bodysample,.spec .big,.spec .body,.gd-use li')){ saveBrand(); announceWorkspaceUpdate('Brand Guide updated.','guide'); }
+  else if(t.matches('.asset-name')) updateWorkspaceState({},{source:'assets',announce:'File renamed. Brand Guide and Deliverables refreshed.'});
 },true);
 function setFrameImage(fr,url,contain){
   const tag=fr.querySelector('.vframe-tag'); const tagHTML=tag?tag.outerHTML:'';
@@ -556,10 +575,17 @@ function setFrameImage(fr,url,contain){
   fr.querySelector('img').src=url;
 }
 fileInput.addEventListener('change',()=>{
-  const f=fileInput.files&&fileInput.files[0]; if(!f||!editTarget){fileInput.value='';return;}
-  const tgt=editTarget, isLogo=isLogoFrame(tgt), ext=((f.name||'').split('.').pop()||'png').toLowerCase();
+  const f=fileInput.files&&fileInput.files[0]; if(!f||(!editTarget&&!editAssetId)){fileInput.value='';return;}
+  const ext=((f.name||'').split('.').pop()||'png').toLowerCase();
   const rd=new FileReader();
   rd.onload=()=>{
+    if(editAssetId){                                       // replace a specific asset from the Assets room
+      const a=findAsset(editAssetId); if(a){ a.url=rd.result; a.name=f.name; a.ext=ext; }
+      editAssetId=null; fileInput.value='';
+      updateWorkspaceState({},{source:'assets',announce:'Asset replaced. Brand Guide and Deliverables refreshed.'});
+      return;
+    }
+    const tgt=editTarget, isLogo=isLogoFrame(tgt);
     setFrameImage(tgt,rd.result,isLogo);
     if(isLogo){ if(!brand.logos.length) brand.logos.push({id:newId(),name:f.name,url:rd.result,ext,role:'primaryLogo'});
                 else { brand.logos[0].url=rd.result; brand.logos[0].name=f.name; brand.logos[0].ext=ext; if(!brand.logos[0].role) brand.logos[0].role='primaryLogo'; } }
@@ -683,10 +709,14 @@ const ROLE_OPTS=[['','— role —'],['primaryLogo','Primary Logo'],['secondaryL
 function assetCardHTML(a,isLogoGroup){
   if(!a.id) a.id=newId();
   const thumb = a.url
-    ? '<div class="asset-thumb '+(isLogoGroup||a.ext==='svg'?'':'cover')+'"><img alt="" src="'+a.url+'"></div>'
-    : '<div class="asset-thumb doc">'+((a.ext||'file').toUpperCase())+'</div>';
+    ? '<div class="asset-thumb '+(isLogoGroup||a.ext==='svg'?'':'cover')+'" data-asset="'+a.id+'"><img alt="" src="'+a.url+'"><span class="asset-replace">Replace</span></div>'
+    : '<div class="asset-thumb doc" data-asset="'+a.id+'">'+((a.ext||'file').toUpperCase())+'<span class="asset-replace">Replace</span></div>';
   const opts=ROLE_OPTS.map(o=>'<option value="'+o[0]+'"'+(a.role===o[0]?' selected':'')+'>'+o[1]+'</option>').join('');
-  return '<div class="asset-card">'+thumb+'<div class="asset-meta"><div class="asset-name">'+((a.name||'asset')+'')+'</div><select class="role-select" data-asset="'+a.id+'">'+opts+'</select></div></div>';
+  return '<div class="asset-card">'
+    +'<button class="asset-remove" data-remove="'+a.id+'" title="Remove asset" aria-label="Remove asset">\u00d7</button>'
+    +thumb
+    +'<div class="asset-meta"><div class="asset-name" data-name="'+a.id+'" spellcheck="false">'+esc(a.name||'asset')+'</div>'
+    +'<select class="role-select" data-asset="'+a.id+'">'+opts+'</select></div></div>';
 }
 function renderAssetsRoom(){
   const root=document.getElementById('assetRoot'); if(!root) return;
