@@ -617,6 +617,7 @@ function projectWorkspaceState(){
   S.deliverables={htmlReady:!!brand.name,pdfReady:!!brand.name,zipReady:(brand.logos.length+brand.photos.length)>0};
   S.colorSystem=brand.colorSystem||null; S.typeSystem=brand.typeSystem||null;
   S.personality=brand.personality||null; S.guidePlan=brand.guidePlan||null;
+  S.brandHomeImprovements=brand.brandHomeImprovements||null;
   S.updatedAt=new Date().toISOString();
   return S;
 }
@@ -790,16 +791,66 @@ function applyPaletteVars(cols){
 }
 function applyMockups(root){
   if(!brand.colors.length) return;
+  root.querySelectorAll('.gd-mockups .ph, .gd-mock .ph').forEach((el,i)=>{ el.style.background=brandTiles()[i%4]; });
+}
+function brandTiles(){
+  if(!brand.colors.length) return ['#e9ece2','#cdd9cd','#eef1ea','#f3f7f3'];
   const bySat=[...brand.colors].sort((a,b)=>satOf(b.hex)-satOf(a.hex));
   const primary=bySat[0].hex, secondary=(bySat[1]||bySat[0]).hex;
   const hero=(getComputedStyle(document.documentElement).getPropertyValue('--b1').trim())||darkenHex(primary,0.64);
-  const tiles=[
+  return [
     'linear-gradient(135deg,'+hero+','+mixHex(hero,primary,0.5)+')',
     'linear-gradient(135deg,'+primary+','+secondary+')',
     'linear-gradient(135deg,'+lightenHex(primary,0.82)+','+lightenHex(secondary,0.9)+')',
     'linear-gradient(135deg,'+lightenHex(secondary,0.93)+','+lightenHex(primary,0.97)+')'
   ];
-  root.querySelectorAll('.gd-mockups .ph, .gd-mock .ph').forEach((el,i)=>{ el.style.background=tiles[i%4]; });
+}
+/* ── Stage 5: render only the guide sections the assets / Director's plan support ── */
+function esc(s){ return String(s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+function appLabels(section){
+  const s=String(section).toLowerCase();
+  if(/social/.test(s)) return ['Profile','Post','Story','Banner'];
+  if(/packag/.test(s)) return ['Box','Label','Bag','Wrap'];
+  if(/apparel|merch/.test(s)) return ['Tee','Cap','Hoodie','Jersey'];
+  if(/athletic|sport/.test(s)) return ['Jersey','Court','Banner','Social'];
+  if(/environment|signage|vehicle|wrap/.test(s)) return ['Signage','Wrap','Wall','Window'];
+  if(/email/.test(s)) return ['Signature','Header','Footer'];
+  if(/pattern/.test(s)) return ['Pattern','Texture','Tile','Fill'];
+  if(/present|deck/.test(s)) return ['Cover','Slide','Section','Closing'];
+  return ['Application','Application','Application'];
+}
+function planGuideSections(){
+  const core=['Logo System','Color Palette','Typography','Usage','Files'];
+  const plan=brand.guidePlan && Array.isArray(brand.guidePlan.sections)?brand.guidePlan.sections:null;
+  if(plan && plan.length){
+    return plan.filter(s=>s && s.include!==false && !core.includes(s.section)).map(s=>({section:s.section,reason:s.reason||''}));
+  }
+  const out=[], cats=(MDWorkspaceState.preparation&&MDWorkspaceState.preparation.categories)||{};
+  if(cats['Photography']>0 || brand.photos.length) out.push({section:'Photography',reason:''});
+  if(cats['Presentation']>0) out.push({section:'Presentations',reason:''});
+  return out;
+}
+function dynSectionHTML(section, reason, tiles){
+  const label=esc(String(section).toUpperCase());
+  let inner;
+  if(/photograph/i.test(section) && brand.photos.length){
+    inner='<div class="gd-mockups">'+brand.photos.slice(0,4).map(p=>'<div class="vframe gd-mock"><img alt="" src="'+p.url+'"><span class="vframe-tag on-dark">Photography</span></div>').join('')+'</div>';
+  } else {
+    const labels=appLabels(section);
+    inner='<div class="gd-mockups">'+labels.map((l,i)=>'<div class="vframe gd-mock"><div class="ph" style="width:100%;height:100%;background:'+(tiles[i%4]||'#e9ece2')+'"></div><span class="vframe-tag'+(i<2?' on-dark':'')+'">'+esc(l)+'</span></div>').join('')+'</div>';
+  }
+  const cap = reason ? '<p class="gd-bodysample" style="margin-top:12px">'+esc(reason)+'</p>' : '';
+  return '<div class="gd-section"><div class="gd-num">'+label+'</div>'+inner+cap+'</div>';
+}
+function applyGuideSections(root){
+  const doc=root.querySelector('.guidedoc'); if(!doc) return;
+  const extras=planGuideSections(); if(!extras.length) return;
+  const secs=[...doc.querySelectorAll('.gd-section')];
+  const numText=s=>(s.querySelector('.gd-num')?s.querySelector('.gd-num').textContent:'')||'';
+  const anchor=secs.find(s=>/usage/i.test(numText(s))) || secs.find(s=>/files/i.test(numText(s))) || null;
+  const tiles=brandTiles();
+  const frag=document.createElement('div'); frag.innerHTML=extras.map(e=>dynSectionHTML(e.section,e.reason,tiles)).join('');
+  [...frag.children].forEach(n=>{ anchor?doc.insertBefore(n,anchor):doc.appendChild(n); });
 }
 function paintSwatches(root){
   if(!brand.colors.length) return;
@@ -901,6 +952,7 @@ function applyUploads(root){
   let pi=0;
   root.querySelectorAll('.gframe:not(.glogo),.gd-mock').forEach(fr=>{ if(brand.photos[pi]) setFrameImage(fr,brand.photos[pi++].url,false); });
   if(brand.colors.length){ legibilityFix(root); applyMockups(root); }
+  applyGuideSections(root);
 }
 function applyBrandHome(){
   const head=document.querySelector('.home-head');
@@ -1222,6 +1274,9 @@ async function finishIntake(imgs,folderName){
   saveBrand();
   refreshFounderState();
   if(total) announceWorkspaceUpdate(brand.name? brand.name+' has moved in. Everything has a place.' : 'Your brand has moved in. Everything has a place.','intake');
+  if(Array.isArray(brand.brandHomeImprovements) && brand.brandHomeImprovements.length){
+    const tip=brand.brandHomeImprovements[0]; if(tip) setTimeout(()=>announceWorkspaceUpdate(String(tip),'concierge'), 3400);
+  }
 }
 function resetBrand(){
   if(!confirm('Reset all rooms back to the sample brand? This clears what you moved in.')) return;
