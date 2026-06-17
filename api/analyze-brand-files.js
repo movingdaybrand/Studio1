@@ -265,9 +265,34 @@ technical terms.
     }
   ]
 },
-"brandHomeImprovements": ["2-4 calm, specific, customer-facing suggestions for the customer's Brand Home"]
+"brandHomeImprovements": ["2-4 calm, specific, customer-facing suggestions for the customer's Brand Home"],
+"brandWorld": {
+  "worldName": "string — an evocative-but-restrained name for this brand's environment",
+  "coreFeeling": "string — 2-4 words for how it should feel to be inside this brand",
+  "environmentSummary": "string — one calm sentence describing the space",
+  "lighting": { "primary": "string", "secondary": "string", "atmosphere": "string" },
+  "materials": ["2-4 material words, e.g. frosted glass, brushed brass, warm paper"],
+  "motion": ["2-3 motion words, e.g. slow drift, soft parallax, gentle settle"],
+  "geometry": { "logoInfluence": "string — how the logo's forms inform the space", "shapeLanguage": "string — e.g. soft radii, sharp verticals" },
+  "colorMapping": {
+    "background": "#rrggbb — a near-white or pale tint of the palette (the page stays light)",
+    "glass": "#rrggbb — a pale tint for frosted surfaces",
+    "glow": "#rrggbb — a light tint of the signature color for ambient bloom",
+    "accent": "#rrggbb — the readable signature accent (from the palette)",
+    "shadow": "#rrggbb — a deep brand tone for depth/shadows"
+  },
+  "destinations": {
+    "identity":     { "name": "Identity",      "environmentName": "Arrival",     "feeling": "string", "visualTreatment": "string" },
+    "assets":       { "name": "Assets",        "environmentName": "Archive",     "feeling": "string", "visualTreatment": "string" },
+    "guide":        { "name": "Brand Guide",   "environmentName": "Gallery",     "feeling": "string", "visualTreatment": "string" },
+    "typography":   { "name": "Typography",    "environmentName": "Library",     "feeling": "string", "visualTreatment": "string" },
+    "deliverables": { "name": "Deliverables",  "environmentName": "Departure",   "feeling": "string", "visualTreatment": "string" },
+    "founderTools": { "name": "Founder Tools", "environmentName": "Control Room","feeling": "string", "visualTreatment": "string" }
+  }
+}
 
 Rules for these additional fields:
+- brandWorld is an environmental design system, not fantasy writing. Keep it premium, concrete, and design-directable. colorMapping hex values must come from the real palette; background/glass/glow stay LIGHT (the home is light-first), accent is the readable signature color, shadow is the deepest brand tone. Each destination keeps its fixed environmentName but gets a feeling and visualTreatment specific to THIS brand. If brand info is thin, derive a refined world from the available colors and files.
 - colorSystem hex values must come from the real uploaded colors (reuse palette where possible). background defaults to a clean near-white and text to a legible dark, unless the brand clearly dictates otherwise. Never wash the whole guide in one color — the page stays light; brand color lives in accents, hero grounds, and swatches.
 - Only set guidePlan.sections.include = true for sections actually supported by the prepared assets or clear brand context: add Photography only when photography exists, Packaging only when packaging files exist, Apparel only for apparel, Athletics only for sports brands, Environmental Graphics only for signage/vehicle wraps, Email Signatures only when present. Always include Logo System, Color Palette, Typography, Usage, and Files. NEVER include every possible section.
 - personality, voice, positioning, and visualDirection must be specific to THIS brand, never generic boilerplate.
@@ -629,6 +654,76 @@ async function maybeEnrichFromWebsite(parsed, apiKey, model) {
   }
 }
 
+/* ── brandWorld: environmental design system (always present, derived if the model is thin) ── */
+function _hexToRgb(h){ h=String(h||"").replace("#",""); if(h.length===3) h=h.split("").map(x=>x+x).join(""); const n=parseInt(h||"000000",16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+function _rgb2hex(r,g,b){ const c=x=>("0"+Math.max(0,Math.min(255,Math.round(x))).toString(16)).slice(-2); return "#"+c(r)+c(g)+c(b); }
+function _mix(a,b,t){ const A=_hexToRgb(a),B=_hexToRgb(b); return _rgb2hex(A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t,A[2]+(B[2]-A[2])*t); }
+function _lighten(h,t){ return _mix(h,"#ffffff",t); }
+function _darken(h,t){ return _mix(h,"#0b0b0c",t); }
+function _lum(h){ const c=_hexToRgb(h); return 0.299*c[0]+0.587*c[1]+0.114*c[2]; }
+function _sat(h){ const c=_hexToRgb(h),mx=Math.max(...c),mn=Math.min(...c); return mx?(mx-mn)/mx:0; }
+function _normHex(h){ if(typeof h!=="string"||!/^#?[0-9a-f]{6}$/i.test(h.trim())) return null; h=h.trim(); return (h[0]==="#"?h:"#"+h).toLowerCase(); }
+
+const DEFAULT_WORLD = {
+  worldName:"Moving Day", coreFeeling:"calm, premium, considered",
+  environmentSummary:"A quiet, light-filled space with frosted glass and soft sage light.",
+  lighting:{ primary:"soft daylight", secondary:"low sage glow", atmosphere:"still and bright" },
+  materials:["frosted glass","warm paper","brushed stone"],
+  motion:["slow drift","gentle settle"],
+  geometry:{ logoInfluence:"rounded, humanist forms", shapeLanguage:"soft radii" },
+  colorMapping:{ background:"#f4f2ec", glass:"#eef1ea", glow:"#cfe0d2", accent:"#2c5a3c", shadow:"#14291f" },
+  destinations:{
+    identity:{ name:"Identity", environmentName:"Arrival", feeling:"a calm welcome", visualTreatment:"soft light, centered logo" },
+    assets:{ name:"Assets", environmentName:"Archive", feeling:"ordered and quiet", visualTreatment:"shelved, gridded calm" },
+    guide:{ name:"Brand Guide", environmentName:"Gallery", feeling:"considered and spacious", visualTreatment:"gallery walls, generous margins" },
+    typography:{ name:"Typography", environmentName:"Library", feeling:"studied and warm", visualTreatment:"specimen pages, quiet rows" },
+    deliverables:{ name:"Deliverables", environmentName:"Departure", feeling:"ready and resolved", visualTreatment:"packed, labeled, set to leave" },
+    founderTools:{ name:"Founder Tools", environmentName:"Control Room", feeling:"precise and in-control", visualTreatment:"instrument-panel restraint" }
+  }
+};
+
+function buildFallbackBrandWorld(parsed){
+  const cols=((parsed && (parsed.colors||parsed.palette)) || []).map(c=>_normHex(c && c.hex)).filter(Boolean);
+  const w=JSON.parse(JSON.stringify(DEFAULT_WORLD));
+  const name=(parsed && parsed.guide && parsed.guide.clientName) || (parsed && parsed.brand && parsed.brand.name) || "";
+  if(name) w.worldName=name;
+  if(!cols.length) return w;
+  const bySat=[...cols].sort((a,b)=>_sat(b)-_sat(a));
+  const byLum=[...cols].sort((a,b)=>_lum(a)-_lum(b));
+  let accent=bySat[0];
+  if(_lum(accent)>196) accent=_darken(accent,0.34); else if(_lum(accent)<40) accent=_lighten(accent,0.30);
+  const deep=_lum(byLum[0])<82 ? byLum[0] : _darken(bySat[0],0.62);
+  w.colorMapping={ background:_lighten(bySat[0],0.92), glass:_lighten(bySat[0],0.84), glow:_lighten(bySat[0],0.5), accent, shadow:deep };
+  return w;
+}
+
+function normalizeBrandWorld(parsed){
+  const fb=buildFallbackBrandWorld(parsed);
+  const bw=(parsed && parsed.brandWorld && typeof parsed.brandWorld==="object") ? parsed.brandWorld : {};
+  const out=Object.assign({}, fb, bw);
+  out.lighting=Object.assign({}, fb.lighting, bw.lighting||{});
+  out.geometry=Object.assign({}, fb.geometry, bw.geometry||{});
+  out.colorMapping=Object.assign({}, fb.colorMapping, bw.colorMapping||{});
+  for(const k of Object.keys(out.colorMapping)){ out.colorMapping[k]=_normHex(out.colorMapping[k]) || fb.colorMapping[k]; }
+  // the home is light-first: never let the model drag background/glass/glow dark
+  if(_lum(out.colorMapping.background)<210) out.colorMapping.background=fb.colorMapping.background;
+  if(_lum(out.colorMapping.glass)<170) out.colorMapping.glass=fb.colorMapping.glass;
+  if(_lum(out.colorMapping.glow)<120) out.colorMapping.glow=fb.colorMapping.glow;
+  out.materials=Array.isArray(bw.materials)&&bw.materials.length ? bw.materials.slice(0,4) : fb.materials;
+  out.motion=Array.isArray(bw.motion)&&bw.motion.length ? bw.motion.slice(0,3) : fb.motion;
+  out.destinations=(out.destinations && typeof out.destinations==="object") ? out.destinations : {};
+  for(const key of Object.keys(fb.destinations)){
+    const d=(bw.destinations && bw.destinations[key]) || {};
+    out.destinations[key]={
+      name: fb.destinations[key].name,
+      environmentName: fb.destinations[key].environmentName,
+      feeling: (typeof d.feeling==="string" && d.feeling.trim()) ? d.feeling.trim() : fb.destinations[key].feeling,
+      visualTreatment: (typeof d.visualTreatment==="string" && d.visualTreatment.trim()) ? d.visualTreatment.trim() : fb.destinations[key].visualTreatment
+    };
+  }
+  return out;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -895,6 +990,9 @@ export default async function handler(req, res) {
   } else {
     parsed.websiteEnriched = false;
   }
+
+  // brandWorld is always present and complete — derived from the palette if the model was thin.
+  parsed.brandWorld = normalizeBrandWorld(parsed);
 
   return res.status(200).json(parsed);
 }
