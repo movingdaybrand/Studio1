@@ -20,6 +20,10 @@
   --halo-a:rgba(180,205,185,.34);--halo-b:rgba(196,214,198,.28);
   --mark-ink:rgba(20,60,36,.62);
   --ice-1:rgba(255,255,255,.62);--ice-2:rgba(255,255,255,.4);
+  --surface:rgba(255,255,255,.7);--light:rgba(255,255,255,.9);--fog:rgba(247,248,243,.6);
+  --stone:rgba(20,60,36,.10);--reflection:rgba(255,255,255,.5);
+  --transition:.6s cubic-bezier(.22,1,.36,1);--radius:15px;
+  --portal-glow:rgba(180,205,185,.34);--environment-tint:transparent;
   --display:'Fraunces',Georgia,serif;--body:'Inter',-apple-system,system-ui,sans-serif;
   --b1:#1c2b22;--b2:#f3efe6;--b3:#b4915a;--b4:#4e6b5a;--b5:#0e1a14;
 }
@@ -71,15 +75,22 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 @media(max-width:720px){.rooms{grid-template-columns:1fr 1fr;}}
 @media(max-width:460px){.rooms{grid-template-columns:1fr;}}
 .room-card{text-align:left;display:flex;flex-direction:column;min-height:112px;padding:clamp(13px,1.5vw,16px);border-radius:var(--r-md);background:var(--glass);backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);box-shadow:var(--shadow);transition:transform .55s cubic-bezier(.22,1,.36,1),box-shadow .4s ease,background .4s ease,opacity .5s ease,filter .5s ease;position:relative;overflow:hidden;}
-.room-card::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(120% 82% at 50% 124%,var(--halo-a),transparent 70%);opacity:0;transition:opacity .4s ease;pointer-events:none;}
+.room-card::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(120% 82% at 50% 124%,var(--portal-glow),transparent 70%);opacity:0;transition:opacity .4s ease;pointer-events:none;}
 .room-card:hover{transform:translateY(-4px);background:var(--ice-1);box-shadow:var(--shadow-hover);}
 .room-card:hover::after{opacity:.85;}
 .room-env{margin-top:auto;font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);font-weight:600;opacity:.82;}
 .room-env + b{margin-top:1px;}
+/* ambient environment: a slow breathing glow + faint brand tint behind the home */
+#home{position:relative;}
+#home::before{content:"";position:absolute;inset:-12% -12% 34% -12%;z-index:0;pointer-events:none;
+  background:radial-gradient(58% 50% at 50% 2%,var(--portal-glow),transparent 70%);opacity:.5;animation:breathe 15s ease-in-out infinite;}
+.home-head,#home .rooms{position:relative;z-index:1;}
+@keyframes breathe{0%,100%{opacity:.4;transform:translateY(0) scale(1);}50%{opacity:.68;transform:translateY(-1.5%) scale(1.03);}}
+@media (prefers-reduced-motion: reduce){#home::before{animation:none;}.rooms,.room-card{transition:none;}}
 /* cinematic enter: the other portals recede as one opens */
 #home.entering .rooms{opacity:0;filter:blur(9px);transform:scale(.975) translateY(6px);}
 #home.entering .home-head{opacity:0;transition:opacity .35s ease;}
-.room-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px var(--sage-line);}
+.room-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--surface);box-shadow:inset 0 0 0 1px var(--sage-line);}
 .room-ic svg{width:18px;height:18px;stroke:var(--mark-ink);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
 .room-card b{display:block;font-weight:400;font-size:1rem;letter-spacing:-.01em;margin-top:auto;}
 .room-card i{display:block;font-style:normal;font-size:.76rem;font-weight:300;color:var(--ink-soft);margin-top:2px;}
@@ -974,7 +985,7 @@ function pickMark(...roles){
 }
 function applyHomeColor(){
   const rs=document.documentElement.style;
-  const VARS=['--bg-1','--bg-2','--bg-3','--halo-a','--halo-b','--sage','--sage-line','--mark-ink','--shadow','--shadow-hover','--ice-1','--ice-2','--glass'];
+  const VARS=['--bg-1','--bg-2','--bg-3','--halo-a','--halo-b','--sage','--sage-line','--mark-ink','--shadow','--shadow-hover','--ice-1','--ice-2','--glass','--surface','--light','--fog','--stone','--reflection','--portal-glow','--environment-tint'];
   if(!brand.colors.length){ VARS.forEach(p=>rs.removeProperty(p)); return; }   // reset → default sage home
   const cs=brand.colorSystem, N=v=>normHex(v&&v.hex!==undefined?v.hex:v);
   const cm=(brand.brandWorld&&brand.brandWorld.colorMapping)||{}, cmh=k=>normHex(cm[k]);
@@ -999,6 +1010,13 @@ function applyHomeColor(){
   rs.setProperty('--mark-ink','rgba('+rg(darkenHex(accent,0.2))+',.66)');
   rs.setProperty('--shadow','0 0 0 1px rgba('+rg(deep)+',.08),0 6px 18px rgba('+rg(deep)+',.06)');
   rs.setProperty('--shadow-hover','0 0 0 1px rgba('+rg(deep)+',.16),0 12px 30px rgba('+rg(deep)+',.10)');
+  rs.setProperty('--surface','rgba('+rg(ice)+',.72)');
+  rs.setProperty('--light','rgba('+rg(lightenHex(sig,0.94))+',.9)');
+  rs.setProperty('--fog','rgba('+rg(lightenHex(sig,0.9))+',.6)');
+  rs.setProperty('--stone','rgba('+rg(deep)+',.12)');
+  rs.setProperty('--reflection','rgba(255,255,255,.5)');
+  rs.setProperty('--portal-glow','rgba('+rg(glow)+',.34)');
+  rs.setProperty('--environment-tint','rgba('+rg(glow)+',.12)');
 }
 const DEST_ENV={
   identity:{env:'Arrival',dflt:'Logo, name & palette',key:'identity'},
