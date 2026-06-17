@@ -217,6 +217,60 @@ Rules:
 - Avoid generic software language.
 - Avoid saying only "I found X colors" unless paired with a real recommendation.
 - Do not use words like processing, model, JSON, AI, confidence score, or algorithm inside any customer-facing fields.
+
+══════════════════════════════════════════════════════════════════════
+ADDITIONAL BRAND INTELLIGENCE — the Creative Director layer
+══════════════════════════════════════════════════════════════════════
+ALSO include the following top-level fields, in addition to everything above.
+Do not remove or rename any field above. These extend the analysis; they do
+not replace it. Keep all of this calm and concierge-level — no scores, no
+technical terms.
+
+"brand": {
+  "name": "string — same as guide.clientName",
+  "industry": "string — same as guide.category",
+  "positioning": "string — one sentence on where this brand sits in its market",
+  "personality": ["3-5 single-word traits specific to THIS brand, e.g. refined, energetic, grounded"],
+  "voice": "string — one sentence on how the brand should sound",
+  "visualDirection": "string — 1-2 sentences of forward art-direction for this brand"
+},
+"colorSystem": {
+  "primary":    { "hex": "#rrggbb", "name": "string" },
+  "secondary":  { "hex": "#rrggbb", "name": "string" },
+  "accent":     { "hex": "#rrggbb", "name": "string" },
+  "neutral":    { "hex": "#rrggbb", "name": "string" },
+  "background": { "hex": "#rrggbb", "name": "string — recommended page background, usually a clean near-white" },
+  "text":       { "hex": "#rrggbb", "name": "string — recommended body text color, legible on the background" },
+  "light":      { "hex": "#rrggbb", "name": "string — lightest brand tone" },
+  "dark":       { "hex": "#rrggbb", "name": "string — darkest brand tone, suited to deep hero grounds" },
+  "accessibility": "string — one calm sentence on legibility/contrast, no scores",
+  "recommendation": "string — one sentence only if the palette should be refined; otherwise empty"
+},
+"typographySystem": {
+  "display":  { "name": "string", "usage": "string" },
+  "heading":  { "name": "string", "usage": "string" },
+  "body":     { "name": "string", "usage": "string" },
+  "accent":   { "name": "string — optional, may be empty", "usage": "string" },
+  "fallbacks": "string — a web-safe fallback stack, e.g. Georgia, serif",
+  "hierarchy": "string — one sentence on how the type scale should be used",
+  "recommendation": "string — if a font is missing or weak, suggest a high-quality alternative; otherwise empty"
+},
+"guidePlan": {
+  "sections": [
+    {
+      "section": "string — one of: Logo System, Color Palette, Typography, Photography, Social Applications, Packaging, Apparel, Email Signatures, Athletics, Environmental Graphics, Patterns, Presentations, Usage, Files",
+      "include": true,
+      "reason": "string — why, grounded in the prepared assets or clear brand context"
+    }
+  ]
+},
+"brandHomeImprovements": ["2-4 calm, specific, customer-facing suggestions for the customer's Brand Home"]
+
+Rules for these additional fields:
+- colorSystem hex values must come from the real uploaded colors (reuse palette where possible). background defaults to a clean near-white and text to a legible dark, unless the brand clearly dictates otherwise. Never wash the whole guide in one color — the page stays light; brand color lives in accents, hero grounds, and swatches.
+- Only set guidePlan.sections.include = true for sections actually supported by the prepared assets or clear brand context: add Photography only when photography exists, Packaging only when packaging files exist, Apparel only for apparel, Athletics only for sports brands, Environmental Graphics only for signage/vehicle wraps, Email Signatures only when present. Always include Logo System, Color Palette, Typography, Usage, and Files. NEVER include every possible section.
+- personality, voice, positioning, and visualDirection must be specific to THIS brand, never generic boilerplate.
+- Keep every customer-facing string calm and concierge-level. Confidence and scores remain internal (assetReport only); never surface them here.
 `;
 
 function cleanModelJson(rawText) {
@@ -555,7 +609,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || "gpt-4o",
         temperature: 0.25,
-        max_tokens: 3000,
+        max_tokens: 6000,
         response_format: { type: "json_object" },
         messages: [
           {
