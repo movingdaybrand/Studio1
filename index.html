@@ -575,12 +575,23 @@ function assignRoles(){
   brand.logos.forEach(l=>{ if(!l.id) l.id=newId(); });
   brand.photos.forEach(p=>{ if(!p.id) p.id=newId(); if(!p.role) p.role='photography'; });
   brand.docs.forEach(d=>{ if(!d.id) d.id=newId(); if(!d.role) d.role=/guide|brand/i.test(d.name||'')?'guideline':'document'; });
-  const L=brand.logos;
-  if(L.length && !L.some(l=>l.role==='primaryLogo')){ (L.find(l=>/primary|^logo|wordmark/i.test(l.name||''))||L[0]).role='primaryLogo'; }
-  const free=l=>!l.role;
-  if(!L.some(l=>l.role==='iconMark')){ const x=L.find(l=>free(l)&&/icon|mark|symbol|emblem/i.test(l.name||'')); if(x) x.role='iconMark'; }
-  if(!L.some(l=>l.role==='wordmark')){ const x=L.find(l=>free(l)&&/wordmark|logotype/i.test(l.name||'')); if(x) x.role='wordmark'; }
-  if(!L.some(l=>l.role==='secondaryLogo')){ const x=L.find(l=>free(l)); if(x) x.role='secondaryLogo'; }
+  const L=brand.logos; if(!L.length) return;
+  L.forEach(l=>{ if(l._autoRole){ l.role=''; l._autoRole=false; } });   // recompute auto roles, keep manual ones
+  const taken=()=>L.filter(l=>l.role).map(l=>l.role);
+  const lum=l=>(l.lum==null?128:l.lum), asp=l=>(l.aspect==null?1:l.aspect), vary=l=>(l.variety==null?40:l.variety);
+  // PRIMARY: the most complete mark — colourful, balanced shape, named, not a pale reversed version
+  function score(l){ let s=vary(l); const a=asp(l);
+    if(a>0.7&&a<1.7) s+=28; if(lum(l)<185) s+=22; if(/primary|^logo|brand/i.test(l.name||'')) s+=40; return s; }
+  if(!L.some(l=>l.role==='primaryLogo')){ const p=[...L].sort((a,b)=>score(b)-score(a))[0]; if(p){ p.role='primaryLogo'; p._autoRole=true; } }
+  const free=()=>L.filter(l=>!l.role);
+  // WORDMARK: widest free mark (or named)
+  if(!taken().includes('wordmark')){ const w=[...free()].sort((a,b)=>asp(b)-asp(a))[0]; if(w && (asp(w)>1.7||/wordmark|logotype/i.test(w.name||''))){ w.role='wordmark'; w._autoRole=true; } }
+  // REVERSED / SECONDARY: lightest free mark (suits dark grounds)
+  if(!taken().includes('secondaryLogo')){ const s=[...free()].sort((a,b)=>lum(b)-lum(a))[0]; if(s && lum(s)>170){ s.role='secondaryLogo'; s._autoRole=true; } }
+  // ICON: squarest free mark
+  if(!taken().includes('iconMark')){ const i=[...free()].sort((a,b)=>Math.abs(1-asp(a))-Math.abs(1-asp(b)))[0]; if(i){ i.role='iconMark'; i._autoRole=true; } }
+  // keep the primary first for any sequential consumers
+  L.sort((a,b)=>((b.role==='primaryLogo')-(a.role==='primaryLogo')));
 }
 function projectWorkspaceState(){
   const S=MDWorkspaceState;
@@ -861,8 +872,7 @@ function applyUploads(root){
     const meta=root.querySelectorAll('.gd-meta div span'); if(meta[2]) meta[2].textContent=brand.colors.length+' colors';
   }
   applyType(root); applyTypeProse(root); applyDeliverables(root);
-  let li=0;
-  root.querySelectorAll('.id-primary,.markframe,.glogo,.gd-logocell').forEach(fr=>{ if(brand.logos[li]) setFrameImage(fr,brand.logos[li++].url,true); });
+  placeLogos(root);
   let pi=0;
   root.querySelectorAll('.gframe:not(.glogo),.gd-mock').forEach(fr=>{ if(brand.photos[pi]) setFrameImage(fr,brand.photos[pi++].url,false); });
   if(brand.colors.length){ legibilityFix(root); applyMockups(root); }
@@ -1004,11 +1014,58 @@ async function extractPalette(urls){            // EXACT hex codes pulled from t
   const names=['Primary','Secondary','Accent','Tint','Deep'];
   return dedupeColors(sorted).slice(0,5).map((c,i)=>({hex:c.hex,name:names[i]||('Color '+(i+1))}));
 }
+/* ── read the actual pixels so the intake can reason about each logo ── */
+async function analyzeAsset(url){
+  let img; try{ img=await loadImg(url); }catch(e){ return null; }
+  const aspect=(img.naturalWidth||img.width||1)/(img.naturalHeight||img.height||1);
+  const S=48, c=document.createElement('canvas'); c.width=S; c.height=S;
+  const x=c.getContext('2d'); try{ x.clearRect(0,0,S,S); x.drawImage(img,0,0,S,S); }catch(e){ return {aspect}; }
+  let d; try{ d=x.getImageData(0,0,S,S).data; }catch(e){ return {aspect}; }
+  let opaque=0, soft=0, lumSum=0; const hues=new Set(); const total=d.length/4;
+  for(let i=0;i<d.length;i+=4){ const a=d[i+3];
+    if(a<24) continue; opaque++; if(a<250) soft++;
+    const r=d[i],g=d[i+1],b=d[i+2]; lumSum+=0.299*r+0.587*g+0.114*b;
+    hues.add((r>>5)+'·'+(g>>5)+'·'+(b>>5));
+  }
+  return { aspect, lum: opaque?lumSum/opaque:255, variety: hues.size,
+           transparentRatio:(total-opaque)/total, softRatio: opaque?soft/opaque:0 };
+}
+async function analyzeAssets(list){
+  for(const a of list.slice(0,16)){ if(!a||!a.url||a._an) continue;
+    const r=await analyzeAsset(a.url);
+    if(r){ if(r.lum!=null) a.lum=r.lum; a.aspect=r.aspect; a.variety=r.variety; a.transparentRatio=r.transparentRatio; a.softRatio=r.softRatio; a._an=true; }
+  }
+}
+/* ── place the right logo on the right ground (dark mark on light, light mark on dark) ── */
+function placeLogos(root){
+  const frames=[...root.querySelectorAll('.id-primary,.markframe,.glogo,.gd-logocell')];
+  if(!frames.length || !brand.logos.length) return;
+  const logos=brand.logos, lum=l=>(l.lum==null?120:l.lum);
+  if(!logos.some(l=>l.lum!=null)){ let li=0; frames.forEach(fr=>{ if(logos[li]) setFrameImage(fr,logos[li++].url,true); }); return; }
+  const primary=logos.find(l=>l.role==='primaryLogo')||logos[0];
+  const lightest=[...logos].sort((a,b)=>lum(b)-lum(a))[0];
+  const darkest=[...logos].sort((a,b)=>lum(a)-lum(b))[0];
+  frames.forEach(fr=>{
+    const darkGround=fr.classList.contains('dark')||fr.classList.contains('brand');
+    let pick = darkGround ? lightest : (lum(primary)<175 ? primary : darkest);
+    if(pick) setFrameImage(fr,pick.url,true);
+  });
+}
 async function finishIntake(imgs,folderName){
   // baseline local sort — also the fallback if the AI route isn't reachable
+  await analyzeAssets(imgs);                         // look at the pixels first
   brand.logos=[]; brand.photos=[];
-  imgs.forEach(im=>{ (/(logo|mark|icon|brand|wordmark|symbol|emblem)/i.test(im.name)||im.ext==='svg') ? brand.logos.push(im) : brand.photos.push(im); });
-  if(!brand.logos.length && imgs.length){ brand.logos=imgs.slice(0,4); brand.photos=imgs.slice(4); }
+  imgs.forEach(im=>{
+    const fnLogo=/(logo|mark|icon|brand|wordmark|symbol|emblem|badge|crest|seal|type)/i.test(im.name)||im.ext==='svg';
+    const tr=im.transparentRatio, va=im.variety;
+    const pixelLogo  = (tr!=null && tr>0.06) || (va!=null && va<70);     // transparency or few flat colours → a mark
+    const pixelPhoto = (tr!=null && tr<0.03) && (va!=null && va>120);    // opaque + rich colour → a photo
+    (((fnLogo||pixelLogo) && !pixelPhoto) ? brand.logos : brand.photos).push(im);
+  });
+  if(!brand.logos.length && imgs.length){            // nothing obvious → most logo-like by transparency / fewest colours
+    const ranked=[...imgs].sort((a,b)=>((b.transparentRatio||0)-(a.transparentRatio||0))||((a.variety||999)-(b.variety||999)));
+    brand.logos=ranked.slice(0,3); brand.photos=ranked.slice(3);
+  }
   if(folderName && !brand.name) brand.name=cleanBrandName(folderName);
   const total=imgs.length+brand.docs.length;
 
@@ -1167,6 +1224,7 @@ async function importFromExperience(){
     });
   }
   if(!(brand.name||brand.logos.length||brand.photos.length||brand.colors.length)) return false;
+  await analyzeAssets(brand.logos.concat(brand.photos));
   assignRoles();
   brand.logos.sort((x,y)=>((y.role==='primaryLogo')-(x.role==='primaryLogo')));
   projectWorkspaceState();
