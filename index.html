@@ -567,7 +567,7 @@ function rgbToHex(rgb){const m=(rgb||'').match(/\d+/g); if(!m) return '#888888';
 function readableOn(hex){const r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16); return (0.299*r+0.587*g+0.114*b)/255>0.6?'#1c2b22':'#f3efe6';}
 
 // ── upload & set: a dropped .zip unzips and populates the rooms ──
-const brand={name:'',tagline:'',category:'',logos:[],photos:[],docs:[],colors:[],type:null};
+const brand={name:'',tagline:'',category:'',logos:[],photos:[],docs:[],colors:[],type:null,colorSystem:null,typeSystem:null,personality:null,visualDirection:'',guidePlan:null,brandHomeImprovements:null};
 
 /* ════════════════ SHARED BRAND HOME STATE (single source of truth) ════════════════
    `brand` is the working store; MDWorkspaceState is its canonical, serializable view.
@@ -615,6 +615,8 @@ function projectWorkspaceState(){
   const byRole=r=>(brand.logos.find(l=>l.role===r)||{}).id||'';
   S.identity={primaryLogoId:byRole('primaryLogo'),secondaryLogoId:byRole('secondaryLogo'),iconMarkId:byRole('iconMark'),wordmarkId:byRole('wordmark')};
   S.deliverables={htmlReady:!!brand.name,pdfReady:!!brand.name,zipReady:(brand.logos.length+brand.photos.length)>0};
+  S.colorSystem=brand.colorSystem||null; S.typeSystem=brand.typeSystem||null;
+  S.personality=brand.personality||null; S.guidePlan=brand.guidePlan||null;
   S.updatedAt=new Date().toISOString();
   return S;
 }
@@ -754,6 +756,20 @@ function mixHex(a,b,t){ const A=hexToRgb(a),B=hexToRgb(b); return rgb2hex(A[0]+(
 function darkenHex(h,t){ return mixHex(h,'#0b0b0c',t); }
 function lightenHex(h,t){ return mixHex(h,'#ffffff',t); }
 function applyPaletteVars(cols){
+  const rs=document.documentElement.style;
+  const cs=brand.colorSystem;
+  if(cs && (cs.dark||cs.primary||cs.background)){            // Stage 6: use the Director's role-based system
+    const N=(v,fb)=>normHex(v&&v.hex!==undefined?v.hex:v)||fb;
+    const primary=N(cs.primary, (cols[0]&&cols[0].hex)||null);
+    let hero=N(cs.dark,null), paper=N(cs.background,null), accent=N(cs.accent,null)||primary, mid=N(cs.secondary,null)||primary;
+    if(!hero || lumOf(hero)>108) hero = primary? darkenHex(primary,0.62) : (hero||'#16201a');     // hero stays genuinely deep
+    if(!paper || lumOf(paper)<232) paper = primary? lightenHex(primary,0.955) : '#fbfbfa';        // paper stays near-white — never a wash
+    if(!accent) accent = primary||'#777'; if(lumOf(accent)>198) accent=darkenHex(accent,0.34);    // accent readable on white
+    if(!mid) mid = primary||hero;
+    rs.setProperty('--b1',hero); rs.setProperty('--b5',hero);
+    rs.setProperty('--b2',paper); rs.setProperty('--b3',accent); rs.setProperty('--b4',mid);
+    return;
+  }
   if(!cols.length) return;
   const byLum=[...cols].sort((a,b)=>lumOf(a.hex)-lumOf(b.hex));
   const bySat=[...cols].sort((a,b)=>satOf(b.hex)-satOf(a.hex));
@@ -768,9 +784,9 @@ function applyPaletteVars(cols){
   const mid = midc? midc.hex : mixHex(hero,primary,0.5);
   // Paper STAYS a clean near-white — a whisper of the brand, never a wash.
   const paper = lightenHex(primary,0.955);
-  const rs=document.documentElement.style;
-  rs.setProperty('--b1',hero); rs.setProperty('--b5',hero);
-  rs.setProperty('--b2',paper); rs.setProperty('--b3',accent); rs.setProperty('--b4',mid);
+  const rs2=document.documentElement.style;
+  rs2.setProperty('--b1',hero); rs2.setProperty('--b5',hero);
+  rs2.setProperty('--b2',paper); rs2.setProperty('--b3',accent); rs2.setProperty('--b4',mid);
 }
 function applyMockups(root){
   if(!brand.colors.length) return;
@@ -804,8 +820,9 @@ function ensureFont(name){
   document.head.appendChild(l);
 }
 function applyType(root){
-  if(!brand.type) return; const t=brand.type;
+  if(!brand.type) return; const t=brand.type, ts=brand.typeSystem;
   ensureFont(t.display); ensureFont(t.body);
+  if(ts){ ensureFont(ts.heading&&ts.heading.name); ensureFont(ts.accent&&ts.accent.name); }
   if(t.display){ const f='"'+t.display+'", var(--display)'; root.querySelectorAll('.gd-disp,.spec .big').forEach(e=>e.style.fontFamily=f); }
   if(t.body){ const f='"'+t.body+'", var(--body)'; root.querySelectorAll('.gd-bodysample,.spec .body').forEach(e=>e.style.fontFamily=f); }
   const fn=root.querySelectorAll('.gd-fname');
@@ -950,6 +967,17 @@ function mapAiToBrand(d, picked){     // map the AI's response into the brand �
   const ty=d.typography||{};
   const disp=ty.displayFont||(ty.display&&ty.display.name)||''; const body=ty.bodyFont||(ty.body&&ty.body.name)||'';
   if(disp||body) brand.type={display:disp,displayUsage:(ty.display&&ty.display.usage)||'',body:body,bodyUsage:(ty.body&&ty.body.usage)||''};
+  // ── Creative-Director intelligence (Stage 6 consumes colorSystem + typographySystem) ──
+  if(d.colorSystem && typeof d.colorSystem==='object') brand.colorSystem=d.colorSystem;
+  if(d.typographySystem && typeof d.typographySystem==='object'){
+    brand.typeSystem=d.typographySystem; const ts=d.typographySystem;
+    const tdisp=(ts.display&&ts.display.name)||disp, tbody=(ts.body&&ts.body.name)||body;
+    if(tdisp||tbody) brand.type={display:tdisp||'',displayUsage:(ts.display&&ts.display.usage)||(ty.display&&ty.display.usage)||'',
+                                 body:tbody||'',bodyUsage:(ts.body&&ts.body.usage)||(ty.body&&ty.body.usage)||''};
+  }
+  if(d.brand && typeof d.brand==='object'){ if(d.brand.personality) brand.personality=d.brand.personality; if(d.brand.visualDirection) brand.visualDirection=d.brand.visualDirection; }
+  if(d.guidePlan) brand.guidePlan=d.guidePlan;
+  if(Array.isArray(d.brandHomeImprovements)) brand.brandHomeImprovements=d.brandHomeImprovements;
   // roles + logo/photo split straight from the AI's assignments, exactly like Experience
   const asg = Array.isArray(d.assetAssignments) ? d.assetAssignments
             : (Array.isArray(d.assetReport) ? d.assetReport.map(a=>({fileId:a.fileId||a.id, slot:a.assetRole||a.role||a.slot, name:a.name})) : []);
@@ -1221,10 +1249,11 @@ pane.addEventListener('drop',e=>{
 const SAVE_DB='mdBrandHomeSave', SAVE_STORE='brand', SAVE_KEY='current';
 function _db(){return new Promise((res,rej)=>{ if(typeof indexedDB==='undefined') return rej(new Error('no idb')); const r=indexedDB.open(SAVE_DB,1); r.onupgradeneeded=()=>{ try{r.result.createObjectStore(SAVE_STORE);}catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });}
 function saveBrand(){
-  const snap={name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type};
+  const snap={name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type,
+    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null};
   if(!snap.name && !snap.logos.length && !snap.photos.length && !(snap.colors&&snap.colors.length)) return;
   _db().then(db=>{ try{ db.transaction(SAVE_STORE,'readwrite').objectStore(SAVE_STORE).put(snap,SAVE_KEY); }catch(e){} })
-       .catch(()=>{ try{ localStorage.setItem('mdBrandHomeSaveLight', JSON.stringify({name:snap.name,tagline:snap.tagline,category:snap.category,colors:snap.colors,type:snap.type,logos:snap.logos.slice(0,3),photos:[],docs:snap.docs})); }catch(e){} });
+       .catch(()=>{ try{ localStorage.setItem('mdBrandHomeSaveLight', JSON.stringify({name:snap.name,tagline:snap.tagline,category:snap.category,colors:snap.colors,type:snap.type,colorSystem:snap.colorSystem,typeSystem:snap.typeSystem,logos:snap.logos.slice(0,3),photos:[],docs:snap.docs})); }catch(e){} });
 }
 function loadBrand(){
   return _db().then(db=>new Promise(res=>{ let rq; try{ rq=db.transaction(SAVE_STORE,'readonly').objectStore(SAVE_STORE).get(SAVE_KEY); }catch(e){ return res(null); } rq.onsuccess=()=>res(rq.result||null); rq.onerror=()=>res(null); }))
@@ -1235,6 +1264,8 @@ function restoreBrand(snap){
   brand.name=snap.name||''; brand.tagline=snap.tagline||''; brand.category=snap.category||'';
   brand.logos=snap.logos||[]; brand.photos=snap.photos||[]; brand.docs=snap.docs||[];
   brand.colors=snap.colors||[]; brand.type=snap.type||null;
+  brand.colorSystem=snap.colorSystem||null; brand.typeSystem=snap.typeSystem||null;
+  brand.personality=snap.personality||null; brand.guidePlan=snap.guidePlan||null; brand.brandHomeImprovements=snap.brandHomeImprovements||null;
   assignRoles(); projectWorkspaceState();
   if(brand.name||brand.logos.length||brand.photos.length||brand.colors.length){
     setStatus('Welcome back'+(brand.name?', '+brand.name:'')+' — your guide is saved.');
