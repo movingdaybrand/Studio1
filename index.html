@@ -76,20 +76,12 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 @media(max-width:460px){.rooms{grid-template-columns:1fr;}}
 .room-card{text-align:left;display:flex;flex-direction:column;min-height:112px;padding:clamp(13px,1.5vw,16px);border-radius:var(--r-md);background:var(--glass);backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);box-shadow:var(--shadow);transition:transform .55s cubic-bezier(.22,1,.36,1),box-shadow .4s ease,background .4s ease,opacity .5s ease,filter .5s ease;position:relative;overflow:hidden;}
 .room-card::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(120% 82% at 50% 124%,var(--portal-glow),transparent 70%);opacity:0;transition:opacity .4s ease;pointer-events:none;}
-.room-card:hover{transform:translateY(-4px);background:var(--ice-1);box-shadow:var(--shadow-hover);}
-.room-card:hover::after{opacity:.85;}
-.room-env{margin-top:auto;font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);font-weight:600;opacity:.82;}
-.room-env + b{margin-top:1px;}
-/* ambient environment: a slow breathing glow + faint brand tint behind the home */
-#home{position:relative;}
-#home::before{content:"";position:absolute;inset:-12% -12% 34% -12%;z-index:0;pointer-events:none;
-  background:radial-gradient(58% 50% at 50% 2%,var(--portal-glow),transparent 70%);opacity:.5;animation:breathe 15s ease-in-out infinite;}
-.home-head,#home .rooms{position:relative;z-index:1;}
-@keyframes breathe{0%,100%{opacity:.4;transform:translateY(0) scale(1);}50%{opacity:.68;transform:translateY(-1.5%) scale(1.03);}}
-@media (prefers-reduced-motion: reduce){#home::before{animation:none;}.rooms,.room-card{transition:none;}}
+.room-card:hover{transform:translateY(-4px);background:var(--light);box-shadow:var(--shadow-hover);}
+.room-card:hover::after{opacity:.7;}
 /* cinematic enter: the other portals recede as one opens */
 #home.entering .rooms{opacity:0;filter:blur(9px);transform:scale(.975) translateY(6px);}
 #home.entering .home-head{opacity:0;transition:opacity .35s ease;}
+@media (prefers-reduced-motion: reduce){.rooms,.room-card{transition:none;}}
 .room-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--surface);box-shadow:inset 0 0 0 1px var(--sage-line);}
 .room-ic svg{width:18px;height:18px;stroke:var(--mark-ink);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
 .room-card b{display:block;font-weight:400;font-size:1rem;letter-spacing:-.01em;margin-top:auto;}
@@ -994,29 +986,28 @@ function applyHomeColor(){
   const accent = lumOf(sig)>196 ? darkenHex(sig,0.34) : (lumOf(sig)<40 ? lightenHex(sig,0.30) : sig);
   const deep = cmh('shadow') || (cs&&N(cs.dark)) || darkenHex(sig,0.62);
   const glow = cmh('glow') || lightenHex(sig,0.5);
-  let ice = lightenHex(sig,0.84);
-  const cg=cmh('glass'); if(cg && lumOf(cg)>150) ice=cg;     // honor an explicitly light glass tone
+  const tint = lightenHex(sig,0.93);                         // a near-white whisper of the brand
   const rg=h=>hexToRgb(h).join(',');
-  rs.setProperty('--bg-1', lightenHex(sig,0.90));
-  rs.setProperty('--bg-2', lightenHex(sig,0.955));
-  rs.setProperty('--bg-3', lightenHex(sig,0.88));
-  rs.setProperty('--halo-a','rgba('+rg(glow)+',.30)');
-  rs.setProperty('--halo-b','rgba('+rg(lightenHex(glow,0.3))+',.24)');
-  rs.setProperty('--ice-1','rgba('+rg(ice)+',.66)');
-  rs.setProperty('--ice-2','rgba('+rg(ice)+',.42)');
-  rs.setProperty('--glass','rgba('+rg(ice)+',.54)');
-  rs.setProperty('--sage', accent);
-  rs.setProperty('--sage-line','rgba('+rg(accent)+',.14)');
-  rs.setProperty('--mark-ink','rgba('+rg(darkenHex(accent,0.2))+',.66)');
-  rs.setProperty('--shadow','0 0 0 1px rgba('+rg(deep)+',.08),0 6px 18px rgba('+rg(deep)+',.06)');
-  rs.setProperty('--shadow-hover','0 0 0 1px rgba('+rg(deep)+',.16),0 12px 30px rgba('+rg(deep)+',.10)');
-  rs.setProperty('--surface','rgba('+rg(ice)+',.72)');
-  rs.setProperty('--light','rgba('+rg(lightenHex(sig,0.94))+',.9)');
-  rs.setProperty('--fog','rgba('+rg(lightenHex(sig,0.9))+',.6)');
-  rs.setProperty('--stone','rgba('+rg(deep)+',.12)');
+  rs.setProperty('--bg-1', lightenHex(sig,0.93));
+  rs.setProperty('--bg-2', lightenHex(sig,0.97));
+  rs.setProperty('--bg-3', lightenHex(sig,0.915));
+  rs.setProperty('--halo-a','rgba('+rg(glow)+',.18)');       // gentle ambient, never a wash
+  rs.setProperty('--halo-b','rgba('+rg(lightenHex(glow,0.3))+',.13)');
+  rs.setProperty('--ice-1','rgba('+rg(tint)+',.6)');         // pane: a faint tint, still bright
+  rs.setProperty('--ice-2','rgba('+rg(tint)+',.4)');
+  rs.setProperty('--glass','rgba(255,255,255,.66)');         // cards stay crisp white frost
+  rs.setProperty('--surface','rgba(255,255,255,.8)');
+  rs.setProperty('--light','rgba(255,255,255,.92)');
+  rs.setProperty('--fog','rgba('+rg(tint)+',.5)');
+  rs.setProperty('--stone','rgba('+rg(deep)+',.10)');
   rs.setProperty('--reflection','rgba(255,255,255,.5)');
-  rs.setProperty('--portal-glow','rgba('+rg(glow)+',.34)');
-  rs.setProperty('--environment-tint','rgba('+rg(glow)+',.12)');
+  rs.setProperty('--portal-glow','rgba('+rg(glow)+',.22)');
+  rs.setProperty('--environment-tint','rgba('+rg(glow)+',.08)');
+  rs.setProperty('--sage', accent);
+  rs.setProperty('--sage-line','rgba('+rg(accent)+',.12)');
+  rs.setProperty('--mark-ink','rgba('+rg(darkenHex(accent,0.2))+',.6)');
+  rs.setProperty('--shadow','0 0 0 1px rgba('+rg(deep)+',.07),0 6px 18px rgba('+rg(deep)+',.05)');
+  rs.setProperty('--shadow-hover','0 0 0 1px rgba('+rg(deep)+',.13),0 12px 30px rgba('+rg(deep)+',.09)');
 }
 const DEST_ENV={
   identity:{env:'Arrival',dflt:'Logo, name & palette',key:'identity'},
@@ -1027,19 +1018,10 @@ const DEST_ENV={
   founder:{env:'Control Room',dflt:'Advanced controls',key:'founderTools'}
 };
 function applyDestinations(){
-  const bw=brand.brandWorld;
   document.querySelectorAll('.room-card').forEach(card=>{
     const meta=DEST_ENV[card.dataset.open]; if(!meta) return;
-    const i=card.querySelector('i'); let env=card.querySelector('.room-env');
-    if(brand.name){
-      if(!env){ env=document.createElement('span'); env.className='room-env'; card.insertBefore(env, card.querySelector('b')); }
-      const d=bw&&bw.destinations&&bw.destinations[meta.key];
-      env.textContent=(d&&d.environmentName)||meta.env;
-      if(i) i.textContent=(d&&d.feeling)||meta.dflt;
-    } else {
-      if(env) env.remove();
-      if(i) i.textContent=meta.dflt;
-    }
+    const env=card.querySelector('.room-env'); if(env) env.remove();   // no environment eyebrows
+    const i=card.querySelector('i'); if(i) i.textContent=meta.dflt;     // plain, calm subtitles
   });
 }
 function applyBrandHome(){
