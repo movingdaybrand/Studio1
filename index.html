@@ -17,21 +17,24 @@
   --r-lg:22px;--r-md:15px;--r-sm:11px;
   --shadow:0 0 0 1px rgba(44,90,60,.07),0 6px 18px rgba(20,60,36,.05);
   --shadow-hover:0 0 0 1px rgba(44,100,66,.14),0 12px 30px rgba(20,60,36,.09);
+  --halo-a:rgba(180,205,185,.34);--halo-b:rgba(196,214,198,.28);
+  --mark-ink:rgba(20,60,36,.62);
+  --ice-1:rgba(255,255,255,.62);--ice-2:rgba(255,255,255,.4);
   --display:'Fraunces',Georgia,serif;--body:'Inter',-apple-system,system-ui,sans-serif;
   --b1:#1c2b22;--b2:#f3efe6;--b3:#b4915a;--b4:#4e6b5a;--b5:#0e1a14;
 }
 *{box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 body{margin:0;min-height:100vh;font-family:var(--body);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden;
-  background:radial-gradient(1100px 640px at 80% -10%,rgba(180,205,185,.34),transparent 60%),radial-gradient(820px 560px at 6% 110%,rgba(196,214,198,.28),transparent 55%),linear-gradient(160deg,var(--bg-1),var(--bg-2) 46%,var(--bg-3));}
+  background:radial-gradient(1100px 640px at 80% -10%,var(--halo-a),transparent 60%),radial-gradient(820px 560px at 6% 110%,var(--halo-b),transparent 55%),linear-gradient(160deg,var(--bg-1),var(--bg-2) 46%,var(--bg-3));transition:background .6s ease;}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
 :focus-visible{outline:2px solid var(--sage);outline-offset:3px;border-radius:6px;}
 
 .env{max-width:1040px;margin:0 auto;padding:clamp(14px,2.2vw,30px);}
 .glasspane{position:relative;border-radius:var(--r-lg);min-height:calc(100vh - 60px);
-  background:linear-gradient(160deg,rgba(255,255,255,.62),rgba(255,255,255,.4));
+  background:linear-gradient(160deg,var(--ice-1),var(--ice-2));
   backdrop-filter:blur(40px) saturate(170%);-webkit-backdrop-filter:blur(40px) saturate(170%);
-  box-shadow:var(--shadow);padding:clamp(20px,3vw,40px);display:flex;flex-direction:column;}
+  box-shadow:var(--shadow);padding:clamp(20px,3vw,40px);display:flex;flex-direction:column;transition:background .6s ease;}
 
 /* reusable clipping-mask container */
 .vframe{position:relative;overflow:hidden;border-radius:var(--r-md);background:rgba(255,255,255,.5);box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease;}
@@ -64,13 +67,20 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .reset-link:hover{opacity:1;color:var(--ink-soft);}
 .glasspane.drag{box-shadow:0 0 0 2px var(--sage),var(--shadow);}
 .glasspane.drag::after{content:'Drop your brand — zip, folder, or files';position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:300;font-size:clamp(22px,3vw,32px);color:var(--sage);background:rgba(247,248,243,.72);backdrop-filter:blur(8px);border-radius:var(--r-lg);z-index:30;pointer-events:none;}
-.rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(9px,1.1vw,14px);max-width:800px;margin:0 auto;}
+.rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(9px,1.1vw,14px);max-width:800px;margin:0 auto;transition:opacity .55s cubic-bezier(.22,1,.36,1),filter .55s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1);}
 @media(max-width:720px){.rooms{grid-template-columns:1fr 1fr;}}
 @media(max-width:460px){.rooms{grid-template-columns:1fr;}}
-.room-card{text-align:left;display:flex;flex-direction:column;min-height:112px;padding:clamp(13px,1.5vw,16px);border-radius:var(--r-md);background:var(--glass);backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease,background .3s ease;position:relative;overflow:hidden;}
-.room-card:hover{transform:translateY(-3px);background:rgba(255,255,255,.66);box-shadow:var(--shadow-hover);}
+.room-card{text-align:left;display:flex;flex-direction:column;min-height:112px;padding:clamp(13px,1.5vw,16px);border-radius:var(--r-md);background:var(--glass);backdrop-filter:blur(30px) saturate(170%);-webkit-backdrop-filter:blur(30px) saturate(170%);box-shadow:var(--shadow);transition:transform .55s cubic-bezier(.22,1,.36,1),box-shadow .4s ease,background .4s ease,opacity .5s ease,filter .5s ease;position:relative;overflow:hidden;}
+.room-card::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(120% 82% at 50% 124%,var(--halo-a),transparent 70%);opacity:0;transition:opacity .4s ease;pointer-events:none;}
+.room-card:hover{transform:translateY(-4px);background:var(--ice-1);box-shadow:var(--shadow-hover);}
+.room-card:hover::after{opacity:.85;}
+.room-env{margin-top:auto;font-size:8.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--sage);font-weight:600;opacity:.82;}
+.room-env + b{margin-top:1px;}
+/* cinematic enter: the other portals recede as one opens */
+#home.entering .rooms{opacity:0;filter:blur(9px);transform:scale(.975) translateY(6px);}
+#home.entering .home-head{opacity:0;transition:opacity .35s ease;}
 .room-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px var(--sage-line);}
-.room-ic svg{width:18px;height:18px;stroke:rgba(20,60,36,.62);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.room-ic svg{width:18px;height:18px;stroke:var(--mark-ink);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
 .room-card b{display:block;font-weight:400;font-size:1rem;letter-spacing:-.01em;margin-top:auto;}
 .room-card i{display:block;font-style:normal;font-size:.76rem;font-weight:300;color:var(--ink-soft);margin-top:2px;}
 .room-card .go{position:absolute;top:16px;right:16px;opacity:0;transform:translateX(-4px);transition:.25s;color:var(--ink-faint);}
@@ -463,11 +473,12 @@ function openRoom(key){
   if(!ROOMS[key]) return;
   currentRoom=key; activeRoom=key; setShellRoom(key);
   renderActiveRoom();
-  home.classList.remove('show'); room.classList.remove('leaving'); room.classList.add('show');
+  home.classList.add('entering');
+  setTimeout(()=>{ home.classList.remove('show','entering'); room.classList.remove('leaving'); room.classList.add('show'); }, 300);
 }
 function closeRoom(){
   activeRoom='home'; currentRoom=null; setShellRoom('home');
-  room.classList.remove('show'); home.classList.add('show');
+  room.classList.remove('show'); home.classList.remove('entering'); home.classList.add('show');
 }
 document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openRoom(b.dataset.open)));
 document.querySelectorAll('[data-action="edit"]').forEach(b=>b.addEventListener('click',()=>{
@@ -570,7 +581,7 @@ function rgbToHex(rgb){const m=(rgb||'').match(/\d+/g); if(!m) return '#888888';
 function readableOn(hex){const r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16); return (0.299*r+0.587*g+0.114*b)/255>0.6?'#1c2b22':'#f3efe6';}
 
 // ── upload & set: a dropped .zip unzips and populates the rooms ──
-const brand={name:'',tagline:'',category:'',logos:[],photos:[],docs:[],colors:[],type:null,colorSystem:null,typeSystem:null,personality:null,visualDirection:'',guidePlan:null,brandHomeImprovements:null};
+const brand={name:'',tagline:'',category:'',logos:[],photos:[],docs:[],colors:[],type:null,colorSystem:null,typeSystem:null,personality:null,visualDirection:'',guidePlan:null,brandHomeImprovements:null,brandWorld:null};
 
 /* ════════════════ SHARED BRAND HOME STATE (single source of truth) ════════════════
    `brand` is the working store; MDWorkspaceState is its canonical, serializable view.
@@ -619,7 +630,7 @@ function projectWorkspaceState(){
   S.identity={primaryLogoId:byRole('primaryLogo'),secondaryLogoId:byRole('secondaryLogo'),iconMarkId:byRole('iconMark'),wordmarkId:byRole('wordmark')};
   S.deliverables={htmlReady:!!brand.name,pdfReady:!!brand.name,zipReady:(brand.logos.length+brand.photos.length)>0};
   S.colorSystem=brand.colorSystem||null; S.typeSystem=brand.typeSystem||null;
-  S.personality=brand.personality||null; S.guidePlan=brand.guidePlan||null;
+  S.personality=brand.personality||null; S.guidePlan=brand.guidePlan||null; S.brandWorld=brand.brandWorld||null;
   S.brandHomeImprovements=brand.brandHomeImprovements||null;
   S.updatedAt=new Date().toISOString();
   return S;
@@ -957,6 +968,62 @@ function applyUploads(root){
   if(brand.colors.length){ legibilityFix(root); applyMockups(root); }
   applyGuideSections(root);
 }
+function pickMark(...roles){
+  for(const r of roles){ const m=brand.logos.find(l=>l.role===r); if(m) return m; }
+  return brand.logos[0]||null;
+}
+function applyHomeColor(){
+  const rs=document.documentElement.style;
+  const VARS=['--bg-1','--bg-2','--bg-3','--halo-a','--halo-b','--sage','--sage-line','--mark-ink','--shadow','--shadow-hover','--ice-1','--ice-2','--glass'];
+  if(!brand.colors.length){ VARS.forEach(p=>rs.removeProperty(p)); return; }   // reset → default sage home
+  const cs=brand.colorSystem, N=v=>normHex(v&&v.hex!==undefined?v.hex:v);
+  const cm=(brand.brandWorld&&brand.brandWorld.colorMapping)||{}, cmh=k=>normHex(cm[k]);
+  let sig=cmh('accent') || (cs&&(N(cs.accent)||N(cs.primary))) || [...brand.colors].sort((a,b)=>satOf(b.hex)-satOf(a.hex))[0].hex;
+  sig=normHex(sig)||brand.colors[0].hex;
+  const accent = lumOf(sig)>196 ? darkenHex(sig,0.34) : (lumOf(sig)<40 ? lightenHex(sig,0.30) : sig);
+  const deep = cmh('shadow') || (cs&&N(cs.dark)) || darkenHex(sig,0.62);
+  const glow = cmh('glow') || lightenHex(sig,0.5);
+  let ice = lightenHex(sig,0.84);
+  const cg=cmh('glass'); if(cg && lumOf(cg)>150) ice=cg;     // honor an explicitly light glass tone
+  const rg=h=>hexToRgb(h).join(',');
+  rs.setProperty('--bg-1', lightenHex(sig,0.90));
+  rs.setProperty('--bg-2', lightenHex(sig,0.955));
+  rs.setProperty('--bg-3', lightenHex(sig,0.88));
+  rs.setProperty('--halo-a','rgba('+rg(glow)+',.30)');
+  rs.setProperty('--halo-b','rgba('+rg(lightenHex(glow,0.3))+',.24)');
+  rs.setProperty('--ice-1','rgba('+rg(ice)+',.66)');
+  rs.setProperty('--ice-2','rgba('+rg(ice)+',.42)');
+  rs.setProperty('--glass','rgba('+rg(ice)+',.54)');
+  rs.setProperty('--sage', accent);
+  rs.setProperty('--sage-line','rgba('+rg(accent)+',.14)');
+  rs.setProperty('--mark-ink','rgba('+rg(darkenHex(accent,0.2))+',.66)');
+  rs.setProperty('--shadow','0 0 0 1px rgba('+rg(deep)+',.08),0 6px 18px rgba('+rg(deep)+',.06)');
+  rs.setProperty('--shadow-hover','0 0 0 1px rgba('+rg(deep)+',.16),0 12px 30px rgba('+rg(deep)+',.10)');
+}
+const DEST_ENV={
+  identity:{env:'Arrival',dflt:'Logo, name & palette',key:'identity'},
+  assets:{env:'Archive',dflt:"The brand's archive",key:'assets'},
+  guide:{env:'Gallery',dflt:'The living document',key:'guide'},
+  typography:{env:'Library',dflt:'The voice in type',key:'typography'},
+  deliverables:{env:'Departure',dflt:'Everything ready to leave',key:'deliverables'},
+  founder:{env:'Control Room',dflt:'Advanced controls',key:'founderTools'}
+};
+function applyDestinations(){
+  const bw=brand.brandWorld;
+  document.querySelectorAll('.room-card').forEach(card=>{
+    const meta=DEST_ENV[card.dataset.open]; if(!meta) return;
+    const i=card.querySelector('i'); let env=card.querySelector('.room-env');
+    if(brand.name){
+      if(!env){ env=document.createElement('span'); env.className='room-env'; card.insertBefore(env, card.querySelector('b')); }
+      const d=bw&&bw.destinations&&bw.destinations[meta.key];
+      env.textContent=(d&&d.environmentName)||meta.env;
+      if(i) i.textContent=(d&&d.feeling)||meta.dflt;
+    } else {
+      if(env) env.remove();
+      if(i) i.textContent=meta.dflt;
+    }
+  });
+}
 function applyBrandHome(){
   const head=document.querySelector('.home-head');
   if(head && brand.name){
@@ -964,13 +1031,22 @@ function applyBrandHome(){
     if(k) k.textContent='Brand home';
     if(w) w.textContent=brand.name;
     if(sub) sub.textContent=brand.tagline||'Everything has a place. Choose a room to continue.';
+    const mark=pickMark('wordmark','primaryLogo','secondaryLogo');
     let logo=document.getElementById('homeLogo');
-    if(brand.logos[0]){
+    if(mark){
       if(!logo){ logo=document.createElement('div'); logo.id='homeLogo'; logo.className='home-logo'; head.insertBefore(logo,head.firstChild); }
-      logo.innerHTML='<img alt="">'; logo.querySelector('img').src=brand.logos[0].url; logo.style.display='';
+      logo.innerHTML='<img alt="">'; logo.querySelector('img').src=mark.url; logo.style.display='';
     } else if(logo){ logo.style.display='none'; }
+  } else if(head){                                   // no brand → restore the default greeting
+    const k=head.querySelector('.kicker'), w=head.querySelector('.welcome'), sub=head.querySelector('.welcome-sub');
+    if(k) k.textContent='Good evening';
+    if(w) w.innerHTML='Welcome <span class="soft">home.</span>';
+    if(sub) sub.textContent="Everything has a place. Choose where you'd like to continue.";
+    const logo=document.getElementById('homeLogo'); if(logo) logo.style.display='none';
   }
-  if(brand.colors.length) applyPaletteVars(brand.colors);   // keep accents consistent on home too
+  applyHomeColor();          // the whole home — including the ice — takes on the brand's tone
+  applyDestinations();       // environment names + feelings on each portal
+  if(brand.colors.length) applyPaletteVars(brand.colors);   // keep the guide doc's vars in sync too
   showReset();
 }
 function showReset(){ const b=document.getElementById('resetBtn'); if(b) b.hidden=!(brand.name||brand.logos.length||brand.photos.length||brand.colors.length); }
@@ -1032,6 +1108,7 @@ function mapAiToBrand(d, picked){     // map the AI's response into the brand �
   }
   if(d.brand && typeof d.brand==='object'){ if(d.brand.personality) brand.personality=d.brand.personality; if(d.brand.visualDirection) brand.visualDirection=d.brand.visualDirection; }
   if(d.guidePlan) brand.guidePlan=d.guidePlan;
+  if(d.brandWorld && typeof d.brandWorld==='object') brand.brandWorld=d.brandWorld;
   if(Array.isArray(d.brandHomeImprovements)) brand.brandHomeImprovements=d.brandHomeImprovements;
   // roles + logo/photo split straight from the AI's assignments, exactly like Experience
   const asg = Array.isArray(d.assetAssignments) ? d.assetAssignments
@@ -1308,7 +1385,7 @@ const SAVE_DB='mdBrandHomeSave', SAVE_STORE='brand', SAVE_KEY='current';
 function _db(){return new Promise((res,rej)=>{ if(typeof indexedDB==='undefined') return rej(new Error('no idb')); const r=indexedDB.open(SAVE_DB,1); r.onupgradeneeded=()=>{ try{r.result.createObjectStore(SAVE_STORE);}catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });}
 function saveBrand(){
   const snap={name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type,
-    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null};
+    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null};
   if(!snap.name && !snap.logos.length && !snap.photos.length && !(snap.colors&&snap.colors.length)) return;
   _db().then(db=>{ try{ db.transaction(SAVE_STORE,'readwrite').objectStore(SAVE_STORE).put(snap,SAVE_KEY); }catch(e){} })
        .catch(()=>{ try{ localStorage.setItem('mdBrandHomeSaveLight', JSON.stringify({name:snap.name,tagline:snap.tagline,category:snap.category,colors:snap.colors,type:snap.type,colorSystem:snap.colorSystem,typeSystem:snap.typeSystem,logos:snap.logos.slice(0,3),photos:[],docs:snap.docs})); }catch(e){} });
@@ -1324,6 +1401,7 @@ function restoreBrand(snap){
   brand.colors=snap.colors||[]; brand.type=snap.type||null;
   brand.colorSystem=snap.colorSystem||null; brand.typeSystem=snap.typeSystem||null;
   brand.personality=snap.personality||null; brand.guidePlan=snap.guidePlan||null; brand.brandHomeImprovements=snap.brandHomeImprovements||null;
+  brand.brandWorld=snap.brandWorld||null;
   assignRoles(); projectWorkspaceState();
   if(brand.name||brand.logos.length||brand.photos.length||brand.colors.length){
     setStatus('Welcome back'+(brand.name?', '+brand.name:'')+' — your guide is saved.');
@@ -1402,6 +1480,7 @@ async function importFromExperience(){
       if(td||tb) brand.type={display:td||'',displayUsage:(ts.display&&ts.display.usage)||(ty.display&&ty.display.usage)||'',body:tb||'',bodyUsage:(ts.body&&ts.body.usage)||(ty.body&&ty.body.usage)||''};
     }
     if(dna.guidePlan) brand.guidePlan=dna.guidePlan;
+    if(dna.brandWorld) brand.brandWorld=dna.brandWorld;
     if(Array.isArray(dna.brandHomeImprovements)) brand.brandHomeImprovements=dna.brandHomeImprovements;
     if(dna.personality) brand.personality=dna.personality;
     if(dna.visualDirection) brand.visualDirection=dna.visualDirection;
