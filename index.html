@@ -549,14 +549,17 @@ function applyReplacement(src){
     return;
   }
   if(editTarget){
-    const isLogo=isLogoFrame(editTarget); setFrameImage(editTarget,src.url,isLogo);
-    if(isLogo){ if(!brand.logos.length) brand.logos.push({id:newId(),name:src.name||'logo',url:src.url,ext:src.ext||'png',role:'primaryLogo'});
-                else { brand.logos[0].url=src.url; if(src.ext) brand.logos[0].ext=src.ext; if(!brand.logos[0].role) brand.logos[0].role='primaryLogo'; } }
-    else { if(!brand.photos.length) brand.photos.push({id:newId(),name:src.name||'photo',url:src.url,ext:src.ext||'png',role:'photography'});
-           else { brand.photos[0].url=src.url; if(src.ext) brand.photos[0].ext=src.ext; } }
+    const isLogo=fillFrameWithAsset(editTarget,src);
     editTarget=null;
-    updateWorkspaceState({},{source:'identity',announce:'Updated from your library.'});
+    updateWorkspaceState({},{source:isLogo?'identity':'guide',announce:'Added from your library.'});
   }
+}
+function fillFrameWithAsset(fr,src){          // an untagged/empty frame → bind a fresh asset of the right kind
+  const isLogo=isLogoFrame(fr), id=newId();
+  if(isLogo) brand.logos.push({id,name:src.name||'logo',url:src.url,ext:src.ext||'png',role:brand.logos.length?'':'primaryLogo'});
+  else brand.photos.push({id,name:src.name||'photo',url:src.url,ext:src.ext||'png',role:'photography'});
+  setFrameImage(fr,src.url,isLogo,id);
+  return isLogo;
 }
 libGrid.addEventListener('click',e=>{ const b=e.target.closest('[data-pick]'); if(!b) return; const a=findAsset(b.dataset.pick); closeLib(); applyReplacement(a); });
 document.getElementById('libClose').addEventListener('click',closeLib);
@@ -687,14 +690,10 @@ fileInput.addEventListener('change',()=>{
       updateWorkspaceState({},{source:'assets',announce:'Asset replaced. Brand Guide and Deliverables refreshed.'});
       return;
     }
-    const tgt=editTarget, isLogo=isLogoFrame(tgt);
-    setFrameImage(tgt,rd.result,isLogo);
-    if(isLogo){ if(!brand.logos.length) brand.logos.push({id:newId(),name:f.name,url:rd.result,ext,role:'primaryLogo'});
-                else { brand.logos[0].url=rd.result; brand.logos[0].name=f.name; brand.logos[0].ext=ext; if(!brand.logos[0].role) brand.logos[0].role='primaryLogo'; } }
-    else { if(!brand.photos.length) brand.photos.push({id:newId(),name:f.name,url:rd.result,ext,role:'photography'});
-           else { brand.photos[0].url=rd.result; brand.photos[0].name=f.name; brand.photos[0].ext=ext; } }
+    const tgt=editTarget;
+    fillFrameWithAsset(tgt,{url:rd.result,name:f.name,ext});
     editTarget=null; fileInput.value='';
-    updateWorkspaceState({},{source:'identity',announce:isLogo?'Primary logo updated. Brand Guide and Deliverables refreshed.':'Photo updated. Brand Guide refreshed.'});
+    updateWorkspaceState({},{source:'identity',announce:isLogoFrame(tgt)?'Logo added. Brand Guide and Deliverables refreshed.':'Photo added. Brand Guide refreshed.'});
   };
   rd.readAsDataURL(f);
 });
@@ -972,13 +971,13 @@ function appLabels(section){
   return ['Application','Application','Application'];
 }
 function planGuideSections(){
-  const core=['Logo System','Color Palette','Typography','Usage','Files'];
+  // Photography is shown in the In Use mockups already — never add a separate, duplicate section for it.
+  const core=['Logo System','Color Palette','Typography','Usage','Files','Photography'];
   const plan=brand.guidePlan && Array.isArray(brand.guidePlan.sections)?brand.guidePlan.sections:null;
   if(plan && plan.length){
     return plan.filter(s=>s && s.include!==false && !core.includes(s.section)).map(s=>({section:s.section,reason:s.reason||''}));
   }
   const out=[], cats=(MDWorkspaceState.preparation&&MDWorkspaceState.preparation.categories)||{};
-  if(cats['Photography']>0 || brand.photos.length) out.push({section:'Photography',reason:''});
   if(cats['Presentation']>0) out.push({section:'Presentations',reason:''});
   return out;
 }
@@ -986,7 +985,7 @@ function dynSectionHTML(section, reason, tiles){
   const label=esc(String(section).toUpperCase());
   let inner;
   if(/photograph/i.test(section) && brand.photos.length){
-    inner='<div class="gd-mockups">'+brand.photos.slice(0,4).map(p=>'<div class="vframe gd-mock"><img alt="" src="'+p.url+'"><span class="vframe-tag on-dark">Photography</span></div>').join('')+'</div>';
+    inner='<div class="gd-mockups">'+brand.photos.slice(0,4).map(p=>{ if(!p.id) p.id=newId(); return '<div class="vframe gd-mock" data-asset="'+p.id+'"><img alt="" src="'+p.url+'"><span class="vframe-tag on-dark">Photography</span></div>'; }).join('')+'</div>';
   } else {
     const labels=appLabels(section);
     inner='<div class="gd-mockups">'+labels.map((l,i)=>'<div class="vframe gd-mock"><div class="ph" style="width:100%;height:100%;background:'+(tiles[i%4]||'#e9ece2')+'"></div><span class="vframe-tag'+(i<2?' on-dark':'')+'">'+esc(l)+'</span></div>').join('')+'</div>';
