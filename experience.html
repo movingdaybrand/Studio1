@@ -4964,12 +4964,29 @@ btnMovein.addEventListener('click', event => {
     try {
       setPreparingLine('Reviewing your assets');
       stepActive(1);
-      const analyzable = allFiles
+      let analyzable = allFiles
         .map((file, index) => ({ file, uploadId: `asset_${index + 1}` }))
         .filter(item => isAnalyzableFile(item.file));
 
       if (!analyzable.length) {
         throw new Error('Please include at least one PNG, JPG, WEBP, or SVG so Moving Day can prepare a visual review.');
+      }
+
+      // Important files first: prioritize logos/icons/wordmarks, screenshots, palettes; drop duplicates; cap the payload.
+      {
+        const rank = f => { const n = (f.name || '').toLowerCase(); let s = 0;
+          if (/logo|wordmark|logotype|icon|mark|brand|symbol|emblem|monogram/.test(n)) s += 6;
+          if (/screenshot|screen-?shot|site|web|home|hero/.test(n)) s += 3;
+          if (/palette|colou?r|swatch|guide|brand-?book|style/.test(n)) s += 3;
+          if (/\.svg$/.test(n)) s += 3; else if (/\.png$/.test(n)) s += 2; else if (/\.(jpe?g|webp)$/.test(n)) s += 1;
+          if (/(copy|\(\d\)|duplicate|untitled|img_?\d|image\d)/.test(n)) s -= 1;
+          return s;
+        };
+        const seen = new Set();
+        analyzable = analyzable
+          .filter(it => { const k = (it.file.name || '') + ':' + (it.file.size || 0); if (seen.has(k)) return false; seen.add(k); return true; })
+          .map(it => ({ it, s: rank(it.file) })).sort((a, b) => b.s - a.s).map(x => x.it)
+          .slice(0, 10);
       }
 
       const dataUrls = await Promise.all(analyzable.map(item => fileToDataUrl(item.file)));
@@ -5292,6 +5309,7 @@ btnMovein.addEventListener('click', event => {
       typographySystem: d.typographySystem || null,
       guidePlan: d.guidePlan || null,
       brandHomeImprovements: Array.isArray(d.brandHomeImprovements) ? d.brandHomeImprovements : [],
+      brandWorld: (d.brandWorld && typeof d.brandWorld === 'object') ? d.brandWorld : null,
       personality: (d.brand && d.brand.personality) || null,
       visualDirection: (d.brand && d.brand.visualDirection) || '',
       recommendations: Array.isArray(d.recommendations) ? d.recommendations : [],
