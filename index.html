@@ -399,8 +399,7 @@ const ROOMS={
           <button class="gd-file"><b>Full guide</b><span>PDF</span></button>
         </div>
       </div>
-    </div>
-    <p class="note">The whole guide renders here, and only here — your real editor, sections, live preview, and placement tools plug into this room untouched.</p>`},
+    </div>`},
   typography:{kicker:'Typography',title:'The voice, in type.',html:`
     <div class="spec">
       <div class="big">Considered counsel.</div>
@@ -714,19 +713,58 @@ function normHex(c){
   if(/^[0-9a-f]{3}$/i.test(c)) c=c.split('').map(x=>x+x).join('');
   return /^[0-9a-f]{6}$/i.test(c) ? '#'+c.toLowerCase() : null;
 }
+function cleanBrandName(n){          // tidy file-derived names: "Body by Maddie 01 (1).png" → "Body by Maddie"
+  if(!n) return n||'';
+  let s=String(n).replace(/\.[a-z0-9]{2,4}$/i,'').replace(/[_]+/g,' ');
+  s=s.replace(/\s*\((?:\d+|copy)\)\s*$/ig,'');     // trailing (1) / (copy)
+  s=s.replace(/\s+copy\s*$/i,'');                  // trailing "copy"
+  s=s.replace(/\s+0\d\b\s*$/i,'');                 // trailing zero-padded counter (01, 02…) — not "Studio 54"
+  s=s.replace(/\s{2,}/g,' ').trim();
+  return s||String(n);
+}
+function looksGenericTag(t){         // suppress Moving-Day/AI filler so the client guide stays theirs
+  if(!t) return false;
+  return /prepared brand package|organized from the files|files provided|brand package organized/i.test(String(t));
+}
 function lumOf(h){const n=parseInt(h.slice(1),16);return 0.299*((n>>16)&255)+0.587*((n>>8)&255)+0.114*(n&255);}
 function satOf(h){const n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255,mx=Math.max(r,g,b),mn=Math.min(r,g,b);return mx?(mx-mn)/mx:0;}
 function readOn(h){return lumOf(h)<140?'#f3efe6':'#1c2b22';}
+function hexToRgb(h){ h=String(h||'').replace('#',''); if(h.length===3) h=h.split('').map(x=>x+x).join(''); const n=parseInt(h||'000000',16); return [(n>>16)&255,(n>>8)&255,n&255]; }
+function rgb2hex(r,g,b){ return '#'+[r,g,b].map(x=>Math.max(0,Math.min(255,Math.round(x))).toString(16).padStart(2,'0')).join(''); }
+function mixHex(a,b,t){ const A=hexToRgb(a),B=hexToRgb(b); return rgb2hex(A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t,A[2]+(B[2]-A[2])*t); }
+function darkenHex(h,t){ return mixHex(h,'#0b0b0c',t); }
+function lightenHex(h,t){ return mixHex(h,'#ffffff',t); }
 function applyPaletteVars(cols){
   if(!cols.length) return;
-  const s=[...cols].sort((a,b)=>lumOf(a.hex)-lumOf(b.hex));
-  const dark=s[0].hex, light=s[s.length-1].hex;
-  let accent=[...cols].sort((a,b)=>satOf(b.hex)-satOf(a.hex))[0].hex;
-  if(lumOf(accent)<110) accent=light;              // keep the accent visible on the dark hero
+  const byLum=[...cols].sort((a,b)=>lumOf(a.hex)-lumOf(b.hex));
+  const bySat=[...cols].sort((a,b)=>satOf(b.hex)-satOf(a.hex));
+  const primary=bySat[0].hex, darkest=byLum[0].hex;
+  // Hero: a genuinely deep ground. Use a truly dark brand colour, else deepen the signature colour.
+  let hero = lumOf(darkest)<82 ? darkest : darkenHex(primary,0.64);
+  if(lumOf(hero)>108) hero=darkenHex(hero,0.5);
+  // Accent (eyebrows, numbers) must read on white paper — darken pale tints.
+  let accent = primary; if(lumOf(accent)>198) accent=darkenHex(accent,0.34);
+  // Mid tone for "on brand" cells.
+  const midc = byLum.find(c=>lumOf(c.hex)>=60 && lumOf(c.hex)<=150);
+  const mid = midc? midc.hex : mixHex(hero,primary,0.5);
+  // Paper STAYS a clean near-white — a whisper of the brand, never a wash.
+  const paper = lightenHex(primary,0.955);
   const rs=document.documentElement.style;
-  rs.setProperty('--b1',dark); rs.setProperty('--b5',dark);
-  rs.setProperty('--b2',light); rs.setProperty('--b3',accent);
-  rs.setProperty('--b4',(s[1]||s[0]).hex);
+  rs.setProperty('--b1',hero); rs.setProperty('--b5',hero);
+  rs.setProperty('--b2',paper); rs.setProperty('--b3',accent); rs.setProperty('--b4',mid);
+}
+function applyMockups(root){
+  if(!brand.colors.length) return;
+  const bySat=[...brand.colors].sort((a,b)=>satOf(b.hex)-satOf(a.hex));
+  const primary=bySat[0].hex, secondary=(bySat[1]||bySat[0]).hex;
+  const hero=(getComputedStyle(document.documentElement).getPropertyValue('--b1').trim())||darkenHex(primary,0.64);
+  const tiles=[
+    'linear-gradient(135deg,'+hero+','+mixHex(hero,primary,0.5)+')',
+    'linear-gradient(135deg,'+primary+','+secondary+')',
+    'linear-gradient(135deg,'+lightenHex(primary,0.82)+','+lightenHex(secondary,0.9)+')',
+    'linear-gradient(135deg,'+lightenHex(secondary,0.93)+','+lightenHex(primary,0.97)+')'
+  ];
+  root.querySelectorAll('.gd-mockups .ph, .gd-mock .ph').forEach((el,i)=>{ el.style.background=tiles[i%4]; });
 }
 function paintSwatches(root){
   if(!brand.colors.length) return;
@@ -777,7 +815,9 @@ function applyNameMarks(root){
 }
 function applyTypeProse(root){
   const t=brand.type;
-  if(brand.tagline) root.querySelectorAll('.gd-disp,.spec .big').forEach(e=>e.textContent=brand.tagline);
+  const tag=looksGenericTag(brand.tagline)?'':brand.tagline;
+  const specimen = tag || brand.name || '';
+  if(specimen) root.querySelectorAll('.gd-disp,.spec .big').forEach(e=>e.textContent=specimen);
   if(t){
     const pl=root.querySelector('.pairline');
     if(pl) pl.innerHTML='<span><b>Display</b> '+(t.display||'—')+(t.displayUsage?' · '+t.displayUsage:'')+'</span>'
@@ -801,7 +841,7 @@ function legibilityFix(root){            // guarantee readable text on any palet
     h.querySelectorAll('.gd-tag').forEach(e=>e.style.color=dark?'rgba(28,43,34,.66)':'rgba(243,239,230,.72)');
     h.querySelectorAll('.gd-meta span').forEach(e=>e.style.color=ink);
     h.querySelectorAll('.gd-meta b').forEach(e=>e.style.color=dark?'rgba(28,43,34,.5)':'rgba(243,239,230,.5)');
-    const eb=h.querySelector('.gd-eyebrow'); if(eb) eb.style.color=dark?'rgba(28,43,34,.55)':'var(--b3)';
+    const eb=h.querySelector('.gd-eyebrow'); if(eb) eb.style.color=dark?'rgba(28,43,34,.55)':'rgba(255,255,255,.74)';
   });
   root.querySelectorAll('.markframe.dark,.markframe.brand,.gd-logocell.dark,.gd-logocell.brand,.glogo').forEach(cell=>{
     if(cell.querySelector('img')) return;
@@ -813,7 +853,8 @@ function applyUploads(root){
   if(!(brand.logos.length||brand.photos.length||brand.name||brand.colors.length)) return;   // nothing moved in yet
   if(brand.name) root.querySelectorAll('.id-name,.gd-title').forEach(e=>e.textContent=brand.name);
   applyNameMarks(root);
-  if(brand.tagline) root.querySelectorAll('.id-tag,.gd-tag').forEach(e=>e.textContent=brand.tagline);
+  const tag = looksGenericTag(brand.tagline) ? '' : brand.tagline;
+  root.querySelectorAll('.id-tag,.gd-tag').forEach(e=>{ if(tag) e.textContent=tag; else if(brand.name){ e.textContent=''; e.style.display='none'; } });
   if(brand.category){ const m=root.querySelector('.gd-meta div span'); if(m) m.textContent=brand.category; }
   if(brand.colors.length){
     applyPaletteVars(brand.colors); paintSwatches(root);
@@ -824,7 +865,7 @@ function applyUploads(root){
   root.querySelectorAll('.id-primary,.markframe,.glogo,.gd-logocell').forEach(fr=>{ if(brand.logos[li]) setFrameImage(fr,brand.logos[li++].url,true); });
   let pi=0;
   root.querySelectorAll('.gframe:not(.glogo),.gd-mock').forEach(fr=>{ if(brand.photos[pi]) setFrameImage(fr,brand.photos[pi++].url,false); });
-  if(brand.colors.length) legibilityFix(root);
+  if(brand.colors.length){ legibilityFix(root); applyMockups(root); }
 }
 function applyBrandHome(){
   const head=document.querySelector('.home-head');
@@ -873,9 +914,9 @@ async function requestReview(assets){
 function mapAiToBrand(d){            // map the AI's response into the brand the rooms read from
   if(!d||typeof d!=='object') return false;
   const g=d.guide||{}, br=d.brand||{};
-  const nm=g.clientName||br.name; if(nm) brand.name=String(nm);
+  const nm=g.clientName||br.name; if(nm) brand.name=cleanBrandName(String(nm));
   const tag=g.description||(d.copySuggestions&&d.copySuggestions.tagline)||br.positioning||d.voice||d.tone;
-  if(tag) brand.tagline=String(tag);
+  if(tag) brand.tagline=looksGenericTag(tag)?'':String(tag);
   const cat=g.category||br.industry; if(cat) brand.category=String(cat);
   const pal=dedupeColors((d.palette||d.colors||[]).map(c=>({hex:normHex(c),name:(c&&c.name)||'Color'})).filter(c=>c.hex)).slice(0,5);
   if(pal.length) brand.colors=pal;
@@ -968,7 +1009,7 @@ async function finishIntake(imgs,folderName){
   brand.logos=[]; brand.photos=[];
   imgs.forEach(im=>{ (/(logo|mark|icon|brand|wordmark|symbol|emblem)/i.test(im.name)||im.ext==='svg') ? brand.logos.push(im) : brand.photos.push(im); });
   if(!brand.logos.length && imgs.length){ brand.logos=imgs.slice(0,4); brand.photos=imgs.slice(4); }
-  if(folderName && !brand.name) brand.name=folderName;
+  if(folderName && !brand.name) brand.name=cleanBrandName(folderName);
   const total=imgs.length+brand.docs.length;
 
   // prep the images once — used for both the AI call and the local colour read
@@ -1104,8 +1145,8 @@ async function importFromExperience(){
   const recs=await bridgeReadAll();
   if(!dna && !(recs&&recs.length)) return false;          // no handoff waiting
   if(dna){
-    if(dna.brandName) brand.name=dna.brandName;
-    if(dna.tagline) brand.tagline=dna.tagline;
+    if(dna.brandName) brand.name=cleanBrandName(dna.brandName);
+    if(dna.tagline) brand.tagline=looksGenericTag(dna.tagline)?'':dna.tagline;
     if(dna.category) brand.category=dna.category;
     if(Array.isArray(dna.colors)&&dna.colors.length)
       brand.colors=dna.colors.map(c=>({hex:normHex(c&&c.hex)||(c&&c.hex)||'',name:(c&&c.name)||'Color'})).filter(c=>c.hex).slice(0,5);
