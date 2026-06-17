@@ -98,7 +98,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .id-name:focus{box-shadow:0 0 0 2px rgba(44,90,60,.22);}
 .id-tag{font-family:var(--display);font-style:italic;font-weight:300;font-size:clamp(15px,1.5vw,18px);color:var(--ink-soft);margin-top:12px;max-width:30ch;outline:none;border-radius:6px;line-height:1.3;}
 .id-tag:focus{box-shadow:0 0 0 2px rgba(44,90,60,.22);}
-.edit-hint{font-size:10px;color:var(--ink-faint);margin-top:16px;}
+.edit-hint{font-size:10px;color:var(--ink-faint);margin-top:16px;display:none;}
+.editing .edit-hint{display:block;}
 .id-marks{display:grid;grid-template-columns:1fr 1fr 1fr;gap:clamp(10px,1.2vw,15px);}
 @media(max-width:640px){.id-marks{grid-template-columns:1fr 1fr;}}
 .markframe{aspect-ratio:4/3;display:grid;place-items:center;}
@@ -202,11 +203,80 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .gd-sw{position:relative;}
 .vframe::after,.swatch::after,.gd-sw::after{content:'Replace';position:absolute;top:8px;right:8px;z-index:4;font-size:9px;letter-spacing:.02em;color:var(--ink-soft);background:rgba(255,255,255,.86);backdrop-filter:blur(6px);padding:3px 8px;border-radius:99px;opacity:0;transform:translateY(-3px);transition:opacity .2s,transform .2s;box-shadow:inset 0 0 0 1px rgba(44,90,60,.1);pointer-events:none;}
 .swatch::after,.gd-sw::after{content:'Color';}
-.vframe:hover::after,.swatch:hover::after,.gd-sw:hover::after{opacity:1;transform:none;}
+.editing .vframe:hover::after,.editing .swatch:hover::after,.editing .gd-sw:hover::after{opacity:1;transform:none;}
 [contenteditable="true"]{outline:none;border-radius:6px;transition:box-shadow .15s;}
 [contenteditable="true"]:hover{box-shadow:0 0 0 1px rgba(44,90,60,.16);}
 [contenteditable="true"]:focus{box-shadow:0 0 0 2px rgba(44,90,60,.25);}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;}html{scroll-behavior:auto;}}
+
+/* ── connected Brand Home: hierarchy, header, toast, deliverables, asset roles ── */
+.home-actions{display:grid;grid-template-columns:1fr 1fr;gap:clamp(10px,1.4vw,16px);max-width:680px;margin:0 auto clamp(10px,1.6vh,16px);}
+@media(max-width:560px){.home-actions{grid-template-columns:1fr;}}
+.primary-card{position:relative;text-align:left;padding:clamp(18px,2.2vw,26px);border-radius:var(--r-md);min-height:128px;display:flex;flex-direction:column;justify-content:flex-end;gap:4px;
+  background:linear-gradient(160deg,rgba(255,255,255,.72),rgba(255,255,255,.46));backdrop-filter:blur(34px) saturate(180%);-webkit-backdrop-filter:blur(34px) saturate(180%);
+  box-shadow:var(--shadow);transition:transform .5s cubic-bezier(.22,1,.36,1),box-shadow .5s ease,background .5s ease;overflow:hidden;}
+.primary-card:hover{transform:translateY(-3px);background:rgba(255,255,255,.8);box-shadow:var(--shadow-hover);}
+.primary-card .pc-ic{width:30px;height:30px;color:var(--sage);margin-bottom:auto;}
+.primary-card .pc-ic svg{width:100%;height:100%;stroke:currentColor;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.primary-card b{font-family:var(--display);font-weight:400;font-size:1.18rem;letter-spacing:-.01em;}
+.primary-card i{font-style:normal;font-size:.8rem;color:var(--ink-soft);}
+.primary-card.lead{background:linear-gradient(160deg,rgba(44,90,60,.92),rgba(28,70,46,.86));color:#f3efe6;}
+.primary-card.lead .pc-ic,.primary-card.lead b{color:#f3efe6;}
+.primary-card.lead i{color:rgba(243,239,230,.72);}
+.secondary-rooms{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(8px,1vw,12px);max-width:680px;margin:0 auto;}
+@media(max-width:560px){.secondary-rooms{grid-template-columns:1fr 1fr;}}
+.sroom{text-align:center;padding:13px 8px;border-radius:var(--r-sm);background:var(--glass);box-shadow:var(--shadow);transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s ease,background .4s ease;font-size:.82rem;color:var(--ink-soft);}
+.sroom:hover{transform:translateY(-2px);background:rgba(255,255,255,.7);box-shadow:var(--shadow-hover);color:var(--ink);}
+.sroom svg{display:block;margin:0 auto 6px;width:17px;height:17px;stroke:rgba(20,60,36,.6);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.founder-pill{display:inline-flex;align-items:center;gap:6px;margin:clamp(14px,2.4vh,22px) auto 0;font-size:11px;letter-spacing:.04em;color:var(--ink-faint);background:rgba(255,255,255,.5);box-shadow:var(--shadow);padding:6px 13px;border-radius:99px;transition:.25s;}
+.founder-pill:hover{color:var(--ink-soft);box-shadow:var(--shadow-hover);}
+.founder-pill svg{width:12px;height:12px;stroke:currentColor;stroke-width:1.6;fill:none;}
+.home-foot{display:flex;justify-content:center;margin-top:6px;}
+
+/* room header */
+.room-desc{font-size:12px;color:var(--ink-soft);font-weight:300;margin:.2em 0 0;}
+.room-status{display:inline-flex;align-items:center;gap:7px;margin-top:10px;font-size:10.5px;letter-spacing:.02em;color:var(--ink-faint);}
+.room-status .dot{width:6px;height:6px;border-radius:50%;background:var(--sage);box-shadow:0 0 0 0 rgba(44,90,60,.5);}
+.room-status .dot.pulse{animation:dotpulse 1.2s ease;}
+@keyframes dotpulse{0%{box-shadow:0 0 0 0 rgba(44,90,60,.45);}100%{box-shadow:0 0 0 9px rgba(44,90,60,0);}}
+
+/* quiet floating confirmation */
+.md-toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(14px);z-index:80;
+  display:flex;align-items:center;gap:9px;max-width:min(90vw,420px);padding:11px 18px;border-radius:99px;
+  background:rgba(20,40,28,.9);color:#f3efe6;font-size:12.5px;letter-spacing:.01em;
+  box-shadow:0 10px 34px rgba(20,60,36,.28);backdrop-filter:blur(10px);
+  opacity:0;pointer-events:none;transition:opacity .5s ease,transform .55s cubic-bezier(.22,1,.36,1);}
+.md-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.md-toast .tk{width:7px;height:7px;border-radius:50%;background:#9ec6a8;flex:0 0 auto;}
+
+/* brand guide preview: calm update glow */
+#roomBody .guidedoc{transition:box-shadow .8s ease;}
+#roomBody.refreshed .guidedoc{box-shadow:0 0 0 1px rgba(44,120,70,.35),0 0 34px rgba(44,120,70,.18),var(--shadow);}
+
+/* deliverables status line */
+.deliv-note{font-size:11.5px;color:var(--ink-faint);text-align:center;margin-top:clamp(12px,2vh,18px);}
+.deliv-note b{font-weight:500;color:var(--ink-soft);}
+
+/* assets: real asset cards with role assignment */
+.asset-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(9px,1.1vw,13px);}
+@media(max-width:820px){.asset-grid{grid-template-columns:1fr 1fr;}}
+.asset-card{border-radius:var(--r-md);background:rgba(255,255,255,.5);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s ease;}
+.asset-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover);}
+.asset-thumb{aspect-ratio:4/3;background:var(--b2);display:grid;place-items:center;overflow:hidden;}
+.asset-thumb img{width:100%;height:100%;object-fit:contain;padding:12%;}
+.asset-thumb.cover img{object-fit:cover;padding:0;}
+.asset-thumb.doc{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;background:rgba(255,255,255,.6);}
+.asset-meta{padding:9px 11px 11px;display:flex;flex-direction:column;gap:7px;}
+.asset-name{font-size:11px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.role-select{font-family:inherit;font-size:11px;color:var(--ink);background:rgba(255,255,255,.7);border:none;box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:8px;padding:6px 8px;cursor:pointer;outline:none;}
+.role-select:focus{box-shadow:inset 0 0 0 2px rgba(44,90,60,.3);}
+.asset-empty{grid-column:1/-1;text-align:center;color:var(--ink-faint);font-size:13px;padding:clamp(20px,5vh,48px) 0;}
+
+/* founder: quiet live state */
+.founder-state{margin-top:14px;border-radius:var(--r-sm);background:rgba(12,24,16,.92);color:#cfe3d4;box-shadow:var(--shadow);overflow:hidden;display:none;}
+.founder-state.show{display:block;}
+.founder-state .fs-bar{display:flex;align-items:center;justify-content:space-between;padding:9px 13px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(207,227,212,.6);border-bottom:1px solid rgba(207,227,212,.1);}
+.founder-state pre{margin:0;padding:13px;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.5;max-height:300px;overflow:auto;white-space:pre-wrap;word-break:break-word;}
 </style>
 </head>
 <body>
@@ -243,6 +313,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 
 </div></div>
 
+<div class="md-toast" id="mdToast"><span class="tk"></span><span id="mdToastText"></span></div>
+
 <input type="file" id="editFile" accept="image/*" hidden>
 <input type="color" id="editColor" hidden>
 <input type="file" id="zipInput" accept=".zip,.pdf,.svg,.png,.jpg,.jpeg,.webp,.gif,image/*,application/pdf,application/zip" multiple hidden>
@@ -275,21 +347,7 @@ const ROOMS={
         <div class="swatch" style="background:#0e1a14;color:#f3efe6"><span class="hex">#0E1A14</span><span>Deep</span></div>
       </div>
     </div>`},
-  assets:{kicker:'Assets',title:'Everything the brand owns.',html:`
-    <div class="sect-label">Logos</div>
-    <div class="gallery">
-      <div class="vframe gframe glogo"><div class="wordmark-mini">MF</div><span class="vframe-tag">Primary</span></div>
-      <div class="vframe gframe glogo" style="background:#1c2b22"><div class="wordmark-mini" style="color:#f3efe6">MF</div><span class="vframe-tag on-dark">Reversed</span></div>
-      <div class="vframe gframe"><div class="ph c"></div><span class="vframe-tag on-dark">Icon · SVG</span></div>
-      <div class="vframe gframe glogo" style="background:#4e6b5a"><div class="wordmark-mini" style="color:#f3efe6">MF</div><span class="vframe-tag on-dark">On brand</span></div>
-    </div>
-    <div class="sect-label">Photography &amp; documents</div>
-    <div class="gallery">
-      <div class="vframe gframe"><div class="ph a"></div><span class="vframe-tag on-dark">Photography</span></div>
-      <div class="vframe gframe"><div class="ph b"></div><span class="vframe-tag on-dark">Photography</span></div>
-      <div class="vframe gframe"><div class="ph d"></div><span class="vframe-tag">Guidelines.pdf</span></div>
-      <div class="vframe gframe"><div class="ph c"></div><span class="vframe-tag on-dark">Deck.key</span></div>
-    </div>`},
+  assets:{kicker:'Assets',title:'Organize what belongs where.',html:`<div id="assetRoot"></div>`},
   guide:{kicker:'Brand Guide',title:'The living document.',html:`
     <div class="guidedoc">
       <div class="gd-hero">
@@ -350,43 +408,74 @@ const ROOMS={
       <p class="body">Body copy set in Inter — quiet, readable, built for long passages and interface labels. The display face carries the character; the body face stays out of the way.</p>
       <div class="pairline"><span><b>Display</b> Fraunces · 300–500</span><span><b>Body</b> Inter · 300–400</span></div>
     </div>`},
-  deliverables:{kicker:'Deliverables',title:'Everything ready to leave.',html:`
+  deliverables:{kicker:'Deliverables',title:'Prepare the handoff.',html:`
     <div class="vault">
-      <button class="vaultcard"><span class="vic">Document</span><b>PDF</b><i>Printable guide</i></button>
-      <button class="vaultcard"><span class="vic">Web</span><b>HTML</b><i>Standalone page</i></button>
-      <button class="vaultcard"><span class="vic">Bundle</span><b>ZIP</b><i>All assets</i></button>
-      <button class="vaultcard"><span class="vic">Link</span><b>Share</b><i>A living URL</i></button>
-      <button class="vaultcard"><span class="vic">Finalize</span><b>Publish</b><i>Lock the version</i></button>
-      <button class="vaultcard"><span class="vic">History</span><b>Versions</b><i>Every save, kept</i></button>
-    </div>`},
+      <button class="vaultcard" data-deliv="pdf"><span class="vic">Document</span><b>Download PDF</b><i>Printable guide</i></button>
+      <button class="vaultcard" data-deliv="html"><span class="vic">Web</span><b>Publish Guide</b><i>Standalone page</i></button>
+      <button class="vaultcard" data-deliv="zip"><span class="vic">Bundle</span><b>Download Package</b><i>All assets &amp; palette</i></button>
+      <button class="vaultcard" data-deliv="save"><span class="vic">Workspace</span><b>Save Brand Home</b><i>Your working file</i></button>
+      <button class="vaultcard" data-deliv="palette"><span class="vic">Color</span><b>Color styles</b><i>HEX values</i></button>
+      <button class="vaultcard" data-deliv="versions"><span class="vic">History</span><b>Versions</b><i>Every save, kept</i></button>
+    </div>
+    <p class="deliv-note">Deliverables always use the <b>latest version</b> of your Brand Home — current logo, colors, type, and assets.</p>`},
   founder:{kicker:'Founder Tools',title:'Advanced controls.',html:`
     <div class="flist">
       <div class="frow"><div><b>Editor mode</b><i>Section editing &amp; placement tools</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>AI Brand Concierge</b><i>Analyze uploads on intake</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>Local-only mode</b><i>Skip the AI route, organize on-device</i></div><div class="toggle"></div></div>
-      <div class="frow"><div><b>Raw JSON</b><i>Inspect the brand data model</i></div><div class="toggle"></div></div>
-    </div>`}
+      <div class="frow"><div><b>Raw JSON</b><i>Inspect the live workspace state</i></div><div class="toggle"></div></div>
+    </div>
+    <div class="founder-state" id="founderState"><div class="fs-bar"><span>Live workspace state</span><span id="fsUpdated"></span></div><pre id="fsJson"></pre></div>`}
 };
 const home=document.getElementById('home'), room=document.getElementById('room'),
-      roomBody=document.getElementById('roomBody'), roomTitle=document.getElementById('roomTitle'), roomKicker=document.getElementById('roomKicker');
-let currentRoom=null; const founderState={};
-function openRoom(key){
-  const r=ROOMS[key]; if(!r) return;
-  currentRoom=key;
+      roomBody=document.getElementById('roomBody'), roomTitle=document.getElementById('roomTitle'), roomKicker=document.getElementById('roomKicker'),
+      roomDesc=document.getElementById('roomDesc'), statusDot=document.getElementById('statusDot'), statusText=document.getElementById('statusText');
+let activeRoom='home', currentRoom=null; const founderState={};
+const SHELL=document.querySelector('.glasspane');
+const ROOM_META={
+  identity:{desc:'Name, logos, and color foundation.'},
+  assets:{desc:'Organize what belongs where.'},
+  guide:{desc:'Your living guide.'},
+  typography:{desc:'Display and body type.'},
+  deliverables:{desc:'Prepare the handoff.'},
+  founder:{desc:'Advanced controls.'}
+};
+function setShellRoom(key){ SHELL.className=SHELL.className.replace(/\bmd-room-\S+/g,'').replace(/\s+/g,' ').trim(); SHELL.classList.add('md-room-'+key); }
+function renderActiveRoom(){
+  const key=currentRoom, r=ROOMS[key]; if(!r) return;
   roomBody.innerHTML=r.html; roomTitle.innerHTML=r.title; roomKicker.textContent=r.kicker;
+  if(roomDesc) roomDesc.textContent=(ROOM_META[key]&&ROOM_META[key].desc)||'';
+  if(key==='assets') renderAssetsRoom();
   enableEditing(roomBody); applyUploads(roomBody); applyFounder(roomBody);
-  home.classList.remove('show'); room.classList.add('show'); window.scrollTo({top:0,behavior:'auto'});
+  if(key==='founder') refreshFounderState();
+}
+function openRoom(key){
+  if(!ROOMS[key]) return;
+  currentRoom=key; activeRoom=key; setShellRoom(key);
+  renderActiveRoom();
+  home.classList.remove('show'); room.classList.remove('leaving'); room.classList.add('show');
+}
+function closeRoom(){
+  activeRoom='home'; currentRoom=null; setShellRoom('home');
+  room.classList.remove('show'); home.classList.add('show');
 }
 document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openRoom(b.dataset.open)));
-document.getElementById('backBtn').addEventListener('click',()=>{room.classList.remove('show');home.classList.add('show');window.scrollTo({top:0,behavior:'auto'});});
+document.querySelectorAll('[data-action="edit"]').forEach(b=>b.addEventListener('click',()=>{
+  founderState['Editor mode']=true; openRoom('identity');
+  announceWorkspaceUpdate('Editing your Brand Home. Changes save as you go.','edit');
+}));
+document.getElementById('backBtn').addEventListener('click',closeRoom);
 // founder toggles + any future toggle: flip on click
 // ── make every container editable: replace images, pick colors, edit text ──
 const fileInput=document.getElementById('editFile'), colorInput=document.getElementById('editColor');
 let editTarget=null;
 function isLogoFrame(f){return f.classList.contains('contain')||!!f.querySelector('.wm,.wm-doc,.wordmark-mini,.mono');}
+function editorActive(){ return !!founderState['Editor mode']; }
 function enableEditing(root){
+  const on=editorActive();
+  root.classList.toggle('editing', on);
   root.querySelectorAll('.id-name,.id-tag,.gd-title,.gd-tag,.gd-disp,.gd-bodysample,.spec .big,.spec .body,.gd-use li')
-    .forEach(el=>{el.setAttribute('contenteditable','true');el.setAttribute('spellcheck','false');});
+    .forEach(el=>{ if(on){ el.setAttribute('contenteditable','true'); el.setAttribute('spellcheck','false'); } else el.removeAttribute('contenteditable'); });
 }
 function applyFounder(root){
   root.querySelectorAll('.frow').forEach(row=>{ const lab=row.querySelector('b'), tg=row.querySelector('.toggle');
@@ -395,12 +484,25 @@ function applyFounder(root){
 roomBody.addEventListener('click',e=>{
   const tog=e.target.closest('.toggle');
   if(tog){ const on=tog.classList.toggle('on'); const row=tog.closest('.frow'), lab=row&&row.querySelector('b');
-    if(lab) founderState[lab.textContent.trim()]=on; return; }
+    if(lab){ const name=lab.textContent.trim(); founderState[name]=on; if(name==='Editor mode') enableEditing(roomBody); if(name==='Raw JSON') refreshFounderState(); } return; }
+  const deliv=e.target.closest('.vaultcard[data-deliv]'); if(deliv){ handleDeliverable(deliv.dataset.deliv); return; }
+  if(!editorActive()) return;                                  // edits only live in Editor mode
   if(e.target.isContentEditable) return;                       // editing text, not replacing
   const sw=e.target.closest('.swatch,.gd-sw');
   if(sw){editTarget=sw;colorInput.value=rgbToHex(getComputedStyle(sw).backgroundColor);colorInput.click();return;}
   const fr=e.target.closest('.vframe');
   if(fr){editTarget=fr;fileInput.click();return;}
+});
+// asset role assignment (Assets) → connects Identity, Brand Guide, Deliverables
+roomBody.addEventListener('change',e=>{
+  const sel=e.target.closest('.role-select'); if(!sel) return;
+  const id=sel.dataset.asset, role=sel.value;
+  const all=[...brand.logos,...brand.photos,...brand.docs];
+  const asset=all.find(a=>a.id===id); if(!asset) return;
+  if(['primaryLogo','secondaryLogo','iconMark','wordmark'].includes(role)) all.forEach(a=>{ if(a!==asset && a.role===role) a.role=''; });
+  asset.role=role;
+  brand.logos.sort((x,y)=>((y.role==='primaryLogo')-(x.role==='primaryLogo')));
+  updateWorkspaceState({},{source:'assets',announce:'Asset role updated. Brand Guide refreshed.'});
 });
 // ── live text editing → flows back into the brand + autosaves ──
 let saveTimer=null;
@@ -418,7 +520,10 @@ roomBody.addEventListener('input',e=>{
   }
 });
 roomBody.addEventListener('blur',e=>{
-  if(e.target.matches&&e.target.matches('.id-name,.gd-title,.id-tag,.gd-tag')) saveBrand();   // final save on leaving the field
+  const t=e.target; if(!(t&&t.matches)) return;
+  if(t.matches('.id-name,.gd-title')) updateWorkspaceState({},{source:'identity',announce:'Brand name updated. Brand Guide refreshed.'});
+  else if(t.matches('.id-tag,.gd-tag')) updateWorkspaceState({},{source:'identity',announce:'Tagline updated. Brand Guide refreshed.'});
+  else if(t.matches('.gd-disp,.gd-bodysample,.spec .big,.spec .body,.gd-use li')){ saveBrand(); announceWorkspaceUpdate('Brand Guide updated.','guide'); }
 },true);
 function setFrameImage(fr,url,contain){
   const tag=fr.querySelector('.vframe-tag'); const tagHTML=tag?tag.outerHTML:'';
@@ -428,8 +533,17 @@ function setFrameImage(fr,url,contain){
 }
 fileInput.addEventListener('change',()=>{
   const f=fileInput.files&&fileInput.files[0]; if(!f||!editTarget){fileInput.value='';return;}
+  const tgt=editTarget, isLogo=isLogoFrame(tgt), ext=((f.name||'').split('.').pop()||'png').toLowerCase();
   const rd=new FileReader();
-  rd.onload=()=>{ setFrameImage(editTarget,rd.result,isLogoFrame(editTarget)); editTarget=null; fileInput.value=''; };
+  rd.onload=()=>{
+    setFrameImage(tgt,rd.result,isLogo);
+    if(isLogo){ if(!brand.logos.length) brand.logos.push({id:newId(),name:f.name,url:rd.result,ext,role:'primaryLogo'});
+                else { brand.logos[0].url=rd.result; brand.logos[0].name=f.name; brand.logos[0].ext=ext; if(!brand.logos[0].role) brand.logos[0].role='primaryLogo'; } }
+    else { if(!brand.photos.length) brand.photos.push({id:newId(),name:f.name,url:rd.result,ext,role:'photography'});
+           else { brand.photos[0].url=rd.result; brand.photos[0].name=f.name; brand.photos[0].ext=ext; } }
+    editTarget=null; fileInput.value='';
+    updateWorkspaceState({},{source:'identity',announce:isLogo?'Primary logo updated. Brand Guide and Deliverables refreshed.':'Photo updated. Brand Guide refreshed.'});
+  };
   rd.readAsDataURL(f);
 });
 colorInput.addEventListener('input',()=>{
@@ -441,11 +555,155 @@ colorInput.addEventListener('input',()=>{
   if(parent && brand.colors.length){ const idx=Array.from(parent.children).indexOf(editTarget);
     if(idx>-1 && brand.colors[idx]){ brand.colors[idx].hex=hex.toLowerCase(); scheduleSave(); } }
 });
+colorInput.addEventListener('change',()=>{ editTarget=null; updateWorkspaceState({},{source:'identity',announce:'Color system updated. Brand Guide refreshed.'}); });
 function rgbToHex(rgb){const m=(rgb||'').match(/\d+/g); if(!m) return '#888888'; return '#'+m.slice(0,3).map(n=>(+n).toString(16).padStart(2,'0')).join('');}
 function readableOn(hex){const r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16); return (0.299*r+0.587*g+0.114*b)/255>0.6?'#1c2b22':'#f3efe6';}
 
 // ── upload & set: a dropped .zip unzips and populates the rooms ──
 const brand={name:'',tagline:'',category:'',logos:[],photos:[],docs:[],colors:[],type:null};
+
+/* ════════════════ SHARED BRAND HOME STATE (single source of truth) ════════════════
+   `brand` is the working store; MDWorkspaceState is its canonical, serializable view.
+   Every meaningful edit flows through updateWorkspaceState → save → sync → announce. */
+let _idc=0; function newId(){ return 'a'+Date.now().toString(36)+'_'+(_idc++); }
+const MDWorkspaceState={
+  brand:{name:'',category:'',tagline:''},
+  identity:{primaryLogoId:'',secondaryLogoId:'',iconMarkId:'',wordmarkId:''},
+  colors:[], typography:{displayFont:'',bodyFont:'',displayNote:'',bodyNote:''},
+  sections:[], assets:[], deliverables:{htmlReady:false,pdfReady:false,zipReady:false}, updatedAt:''
+};
+function assignRoles(){
+  brand.logos.forEach(l=>{ if(!l.id) l.id=newId(); });
+  brand.photos.forEach(p=>{ if(!p.id) p.id=newId(); if(!p.role) p.role='photography'; });
+  brand.docs.forEach(d=>{ if(!d.id) d.id=newId(); if(!d.role) d.role=/guide|brand/i.test(d.name||'')?'guideline':'document'; });
+  const L=brand.logos;
+  if(L.length && !L.some(l=>l.role==='primaryLogo')){ (L.find(l=>/primary|^logo|wordmark/i.test(l.name||''))||L[0]).role='primaryLogo'; }
+  const free=l=>!l.role;
+  if(!L.some(l=>l.role==='iconMark')){ const x=L.find(l=>free(l)&&/icon|mark|symbol|emblem/i.test(l.name||'')); if(x) x.role='iconMark'; }
+  if(!L.some(l=>l.role==='wordmark')){ const x=L.find(l=>free(l)&&/wordmark|logotype/i.test(l.name||'')); if(x) x.role='wordmark'; }
+  if(!L.some(l=>l.role==='secondaryLogo')){ const x=L.find(l=>free(l)); if(x) x.role='secondaryLogo'; }
+}
+function projectWorkspaceState(){
+  const S=MDWorkspaceState;
+  S.brand={name:brand.name,category:brand.category,tagline:brand.tagline};
+  S.colors=brand.colors.map(c=>({hex:c.hex,name:c.name}));
+  const t=brand.type||{};
+  S.typography={displayFont:t.display||'',bodyFont:t.body||'',displayNote:t.displayUsage||'',bodyNote:t.bodyUsage||''};
+  const A=[];
+  brand.logos.forEach(l=>{ if(!l.id) l.id=newId(); A.push({id:l.id,name:l.name,ext:l.ext,category:'logo',role:l.role||''}); });
+  brand.photos.forEach(p=>{ if(!p.id) p.id=newId(); A.push({id:p.id,name:p.name,ext:p.ext,category:'photo',role:p.role||'photography'}); });
+  brand.docs.forEach(d=>{ if(!d.id) d.id=newId(); A.push({id:d.id,name:d.name,ext:d.ext,category:'document',role:d.role||'document'}); });
+  S.assets=A;
+  const byRole=r=>(brand.logos.find(l=>l.role===r)||{}).id||'';
+  S.identity={primaryLogoId:byRole('primaryLogo'),secondaryLogoId:byRole('secondaryLogo'),iconMarkId:byRole('iconMark'),wordmarkId:byRole('wordmark')};
+  S.deliverables={htmlReady:!!brand.name,pdfReady:!!brand.name,zipReady:(brand.logos.length+brand.photos.length)>0};
+  S.updatedAt=new Date().toISOString();
+  return S;
+}
+function updateWorkspaceState(patch={},options={}){
+  if(patch.name!=null) brand.name=patch.name;
+  if(patch.tagline!=null) brand.tagline=patch.tagline;
+  if(patch.category!=null) brand.category=patch.category;
+  if(patch.colors) brand.colors=patch.colors;
+  if(patch.sections) MDWorkspaceState.sections=patch.sections;
+  projectWorkspaceState();
+  if(options.save!==false) saveWorkspaceState();
+  try{ window.dispatchEvent(new CustomEvent('md:workspace-update',{detail:{source:options.source||'',state:MDWorkspaceState}})); }catch(e){}
+  if(options.sync!==false) syncWorkspaceRooms(options.source||'');
+  if(options.announce) announceWorkspaceUpdate(options.announce,options.source||'');
+}
+function saveWorkspaceState(){ try{ saveBrand(); }catch(e){} }
+function loadWorkspaceState(){ return loadBrand(); }
+function syncWorkspaceRooms(source){
+  if(currentRoom && currentRoom!=='home' && room.classList.contains('show')) renderActiveRoom();
+  applyBrandHome();
+  refreshFounderState();
+  renderBrandGuidePreview();
+}
+function renderBrandGuidePreview(){
+  if(currentRoom==='guide'){ roomBody.classList.add('refreshed'); setTimeout(()=>roomBody.classList.remove('refreshed'),900); }
+}
+function refreshDeliverablesState(){ projectWorkspaceState(); }   // deliverables read live at click time
+function pulseStatus(){ if(statusDot){ statusDot.classList.remove('pulse'); void statusDot.offsetWidth; statusDot.classList.add('pulse'); } }
+function announceWorkspaceUpdate(message,source){
+  const t=document.getElementById('mdToast'), tx=document.getElementById('mdToastText'); if(!t||!tx) return;
+  tx.textContent=message; t.classList.add('show'); pulseStatus();
+  clearTimeout(announceWorkspaceUpdate._t); announceWorkspaceUpdate._t=setTimeout(()=>t.classList.remove('show'),2600);
+}
+function refreshFounderState(){
+  const box=document.getElementById('founderState'); if(!box) return;
+  const on=!!founderState['Raw JSON']; box.classList.toggle('show',on);
+  if(!on) return;
+  projectWorkspaceState();
+  const pre=document.getElementById('fsJson'), up=document.getElementById('fsUpdated');
+  if(pre) pre.textContent=JSON.stringify(MDWorkspaceState,(k,v)=> (k==='url'&&typeof v==='string') ? '[asset data]' : v, 2);
+  if(up) up.textContent='updated '+new Date().toLocaleTimeString();
+}
+
+/* ── Assets room: real assets, categorized, with role assignment ── */
+const ROLE_OPTS=[['','— role —'],['primaryLogo','Primary Logo'],['secondaryLogo','Secondary Logo'],['iconMark','Icon Mark'],['wordmark','Wordmark'],['photography','Photography'],['guideline','Guideline'],['document','Document']];
+function assetCardHTML(a,isLogoGroup){
+  if(!a.id) a.id=newId();
+  const thumb = a.url
+    ? '<div class="asset-thumb '+(isLogoGroup||a.ext==='svg'?'':'cover')+'"><img alt="" src="'+a.url+'"></div>'
+    : '<div class="asset-thumb doc">'+((a.ext||'file').toUpperCase())+'</div>';
+  const opts=ROLE_OPTS.map(o=>'<option value="'+o[0]+'"'+(a.role===o[0]?' selected':'')+'>'+o[1]+'</option>').join('');
+  return '<div class="asset-card">'+thumb+'<div class="asset-meta"><div class="asset-name">'+((a.name||'asset')+'')+'</div><select class="role-select" data-asset="'+a.id+'">'+opts+'</select></div></div>';
+}
+function renderAssetsRoom(){
+  const root=document.getElementById('assetRoot'); if(!root) return;
+  if(!(brand.logos.length||brand.photos.length||brand.docs.length)){
+    root.innerHTML='<div class="asset-empty">No assets yet — move your brand in from Home, and everything will find its place here.</div>'; return;
+  }
+  let html='';
+  if(brand.logos.length){ html+='<div class="sect-label">Logos &amp; marks</div><div class="asset-grid">'+brand.logos.map(a=>assetCardHTML(a,true)).join('')+'</div>'; }
+  if(brand.photos.length){ html+='<div class="sect-label">Photography</div><div class="asset-grid">'+brand.photos.map(a=>assetCardHTML(a,false)).join('')+'</div>'; }
+  if(brand.docs.length){ html+='<div class="sect-label">Documents</div><div class="asset-grid">'+brand.docs.map(a=>assetCardHTML(a,false)).join('')+'</div>'; }
+  root.innerHTML=html;
+}
+
+/* ── Deliverables: real exports, always from the latest state ── */
+function dl(filename,content,mime){
+  const blob=content instanceof Blob?content:new Blob([content],{type:mime||'text/plain'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename;
+  document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1500);
+}
+function brandSlug(){ return (brand.name||'brand-home').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')||'brand-home'; }
+function buildGuideHTML(){
+  const tmp=document.createElement('div'); tmp.style.cssText='position:absolute;left:-9999px;top:0;width:900px;';
+  tmp.innerHTML=ROOMS.guide.html; document.body.appendChild(tmp);
+  try{ applyUploads(tmp); }catch(e){}
+  const node=tmp.querySelector('.guidedoc'); const inner=node?node.outerHTML:''; tmp.remove();
+  const rs=getComputedStyle(document.documentElement);
+  const vars=['--b1','--b2','--b3','--b4','--b5'].map(v=>v+':'+(rs.getPropertyValue(v).trim()||'')).join(';');
+  const css=document.querySelector('style').textContent;
+  return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+(brand.name||'Brand Guide')+'</title>'
+    +'<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">'
+    +'<style>'+css+'\nbody{padding:24px}:root{'+vars+'}</style></head><body>'+inner+'</body></html>';
+}
+async function downloadPackage(){
+  if(typeof JSZip==='undefined'){ announceWorkspaceUpdate('Packaging needs the live site.','deliverables'); return; }
+  announceWorkspaceUpdate('Preparing your package…','deliverables');
+  const zip=new JSZip(), root=zip.folder(brandSlug());
+  const lf=root.folder('logos'), pf=root.folder('photography');
+  const put=(folder,a,fallback)=>{ if(!a.url) return; const m=/^data:[^;]+;base64,(.+)$/.exec(a.url); if(!m) return;
+    let n=a.name||fallback; if(!/\.[a-z0-9]+$/i.test(n)) n+='.'+(a.ext||'png'); folder.file(n,m[1],{base64:true}); };
+  brand.logos.forEach((a,i)=>put(lf,a,'logo_'+(i+1))); brand.photos.forEach((a,i)=>put(pf,a,'photo_'+(i+1)));
+  root.file('colors.txt', brand.colors.length?brand.colors.map(c=>(c.name||'Color')+'  '+c.hex.toUpperCase()).join('\n'):'No colours yet');
+  root.file('guide.html', buildGuideHTML());
+  projectWorkspaceState(); root.file('brand-home.json', JSON.stringify(MDWorkspaceState,(k,v)=>k==='url'?undefined:v,2));
+  try{ const blob=await zip.generateAsync({type:'blob'}); dl(brandSlug()+'-deliverables.zip',blob,'application/zip'); announceWorkspaceUpdate('Package downloaded — built from the latest version.','deliverables'); }
+  catch(e){ announceWorkspaceUpdate('Could not build the package.','deliverables'); }
+}
+function handleDeliverable(kind){
+  refreshDeliverablesState();
+  if(kind==='save'){ dl(brandSlug()+'-brand-home.json', JSON.stringify(MDWorkspaceState,(k,v)=>k==='url'?undefined:v,2), 'application/json'); announceWorkspaceUpdate('Brand Home saved to a file.','deliverables'); }
+  else if(kind==='html'){ dl(brandSlug()+'-guide.html', buildGuideHTML(), 'text/html'); announceWorkspaceUpdate('Guide published — current logo, colors, and type included.','deliverables'); }
+  else if(kind==='zip'){ downloadPackage(); }
+  else if(kind==='palette'){ const css=':root{\n'+(brand.colors.map((c,i)=>'  --brand-'+(i+1)+': '+c.hex+'; /* '+(c.name||'Color')+' */').join('\n')||'  /* no colours yet */')+'\n}'; dl(brandSlug()+'-colors.css', css, 'text/css'); announceWorkspaceUpdate('Color styles downloaded.','deliverables'); }
+  else if(kind==='pdf'){ announceWorkspaceUpdate('Opening print — choose “Save as PDF”.','deliverables'); if(currentRoom!=='guide') openRoom('guide'); setTimeout(()=>window.print(),650); }
+  else if(kind==='versions'){ announceWorkspaceUpdate('Every save is kept in this browser.','deliverables'); }
+}
 function prettify(s){return s.replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()).trim();}
 function setStatus(t){const el=document.getElementById('moveinStatus'); if(el) el.textContent=t||'';}
 
@@ -619,7 +877,7 @@ function mapAiToBrand(d){            // map the AI's response into the brand the
   const tag=g.description||(d.copySuggestions&&d.copySuggestions.tagline)||br.positioning||d.voice||d.tone;
   if(tag) brand.tagline=String(tag);
   const cat=g.category||br.industry; if(cat) brand.category=String(cat);
-  const pal=(d.palette||d.colors||[]).map(c=>({hex:normHex(c),name:(c&&c.name)||'Color'})).filter(c=>c.hex).slice(0,5);
+  const pal=dedupeColors((d.palette||d.colors||[]).map(c=>({hex:normHex(c),name:(c&&c.name)||'Color'})).filter(c=>c.hex)).slice(0,5);
   if(pal.length) brand.colors=pal;
   const ty=d.typography||{};
   const disp=ty.displayFont||(ty.display&&ty.display.name)||''; const body=ty.bodyFont||(ty.body&&ty.body.name)||'';
@@ -675,6 +933,36 @@ async function moveInFiles(fileList){
   }
   await finishIntake(imgs,folderName);
 }
+function loadImg(url){ return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=url; }); }
+function dedupeColors(list){            // drop identical + near-identical so no duplicates slip through
+  const out=[];
+  for(const c of list){
+    const h=normHex(c&&c.hex!==undefined?c.hex:c); if(!h) continue;
+    const r=parseInt(h.slice(1,3),16),g=parseInt(h.slice(3,5),16),b=parseInt(h.slice(5,7),16);
+    if(out.some(o=>Math.abs(o.r-r)+Math.abs(o.g-g)+Math.abs(o.b-b)<36)) continue;
+    out.push({hex:h,name:(c&&c.name)||'Color',r,g,b});
+  }
+  return out.map(o=>({hex:o.hex,name:o.name}));
+}
+async function extractPalette(urls){            // EXACT hex codes pulled from the uploaded pixels — nothing averaged or invented
+  const counts=new Map();
+  for(const url of urls.slice(0,6)){
+    let img; try{ img=await loadImg(url); }catch(e){ continue; }
+    const S=64, c=document.createElement('canvas'); c.width=S; c.height=S; const x=c.getContext('2d');
+    try{ x.drawImage(img,0,0,S,S); }catch(e){ continue; }
+    let d; try{ d=x.getImageData(0,0,S,S).data; }catch(e){ continue; }
+    for(let i=0;i<d.length;i+=4){
+      if(d[i+3]<250) continue;                                   // fully opaque only → real fills, not anti-aliased edges
+      const r=d[i],g=d[i+1],b=d[i+2];
+      if(r>=245&&g>=245&&b>=245) continue;                       // ignore white/paper background
+      const key=(r<<16)|(g<<8)|b; counts.set(key,(counts.get(key)||0)+1);   // count EXACT colours
+    }
+  }
+  const sorted=[...counts.entries()].sort((a,b)=>b[1]-a[1])
+    .map(([k])=>({hex:'#'+[(k>>16)&255,(k>>8)&255,k&255].map(n=>n.toString(16).padStart(2,'0')).join('')}));
+  const names=['Primary','Secondary','Accent','Tint','Deep'];
+  return dedupeColors(sorted).slice(0,5).map((c,i)=>({hex:c.hex,name:names[i]||('Color '+(i+1))}));
+}
 async function finishIntake(imgs,folderName){
   // baseline local sort — also the fallback if the AI route isn't reachable
   brand.logos=[]; brand.photos=[];
@@ -683,28 +971,37 @@ async function finishIntake(imgs,folderName){
   if(folderName && !brand.name) brand.name=folderName;
   const total=imgs.length+brand.docs.length;
 
-  // ── call the real Brand Concierge and apply its understanding ──
-  let aiOK=false;
+  // prep the images once — used for both the AI call and the local colour read
+  let urls=null;
   if(imgs.length){
+    const picked=[...imgs].sort((a,b)=>scoreForVision(b.name)-scoreForVision(a.name)).slice(0,14);
+    urls=await Promise.all(picked.map(prepDataUrl));
     setStatus('Reading your brand…');
+    let aiOK=false;
     try{
-      const picked=[...imgs].sort((a,b)=>scoreForVision(b.name)-scoreForVision(a.name)).slice(0,14);
-      const urls=await Promise.all(picked.map(prepDataUrl));
       const assets=picked.map((im,i)=>({ id:'asset_'+(i+1), name:im.name,
         type:(/^data:([^;,]+)/.exec(urls[i]||'')||[])[1]||('image/'+im.ext),
         category:im.ext==='svg'?'logo':'image', dataUrl:urls[i] }));
       aiOK=mapAiToBrand(await requestReview(assets));
     }catch(e){ console.warn('Brand Concierge unavailable — organized locally:',e); }
+    // colours come from the actual uploads even when the AI didn't run/return them
+    if(!brand.colors.length){ try{ const pal=await extractPalette(urls); if(pal.length) brand.colors=pal; }catch(e){} }
+    setStatus(total
+      ? (aiOK ? (brand.name?brand.name+' is moved in — rooms set from your brand.':'Moved in — rooms set from your brand.')
+              : (brand.colors.length?`${total} file${total===1?'':'s'} moved in — colours read from your logos (full AI runs on your live site).`
+                                     :`${total} file${total===1?'':'s'} moved in — organized locally (AI runs on your live site).`))
+      : 'Nothing readable found — try images, a PDF, a folder, or a .zip.');
+  } else {
+    setStatus(total? `${total} file${total===1?'':'s'} moved in.` : 'Nothing readable found — try images, a PDF, a folder, or a .zip.');
   }
-  setStatus(total
-    ? (aiOK ? (brand.name?brand.name+' is moved in — rooms set from your brand.':'Moved in — rooms set from your brand.')
-            : `${total} file${total===1?'':'s'} moved in — organized locally (AI runs on your live site).`)
-    : 'Nothing readable found — try images, a PDF, a folder, or a .zip.');
+  assignRoles();
   if(currentRoom && room.classList.contains('show')) openRoom(currentRoom);
   applyBrandHome();
+  projectWorkspaceState();
   saveBrand();
+  refreshFounderState();
+  if(total) announceWorkspaceUpdate(brand.name? brand.name+' has moved in. Everything has a place.' : 'Your brand has moved in. Everything has a place.','intake');
 }
-async function handleZip(file){ return moveInFiles([file]); }   // back-compat
 function resetBrand(){
   if(!confirm('Reset all rooms back to the sample brand? This clears what you moved in.')) return;
   try{ indexedDB.deleteDatabase(SAVE_DB); }catch(e){}
@@ -745,6 +1042,7 @@ function restoreBrand(snap){
   brand.name=snap.name||''; brand.tagline=snap.tagline||''; brand.category=snap.category||'';
   brand.logos=snap.logos||[]; brand.photos=snap.photos||[]; brand.docs=snap.docs||[];
   brand.colors=snap.colors||[]; brand.type=snap.type||null;
+  assignRoles(); projectWorkspaceState();
   if(brand.name||brand.logos.length||brand.photos.length||brand.colors.length){
     setStatus('Welcome back'+(brand.name?', '+brand.name:'')+' — your guide is saved.');
     applyBrandHome();
@@ -762,9 +1060,83 @@ function storageProbe(){
   })).catch(()=>false);
 }
 storageProbe().then(ok=>{
-  if(!ok){ setStatus("Saving is off in this view — it works once this page is on your live site."); return; }
-  loadBrand().then(restoreBrand);
+  importFromExperience().then(imported=>{
+    if(imported){ if(currentRoom && room.classList.contains('show')) openRoom(currentRoom); refreshFounderState(); return; }
+    if(!ok){ setStatus("Saving is off in this view — it works once this page is on your live site."); return; }
+    loadBrand().then(restoreBrand);
+  }).catch(()=>{ if(ok) loadBrand().then(restoreBrand); });
 });
+
+/* ════════════════ INTAKE BRIDGE: receive what experience.html prepared ════════════════
+   experience.html writes the analysis to localStorage('movingDay_brandDNA_v1') and the real
+   files (with role/folder) to IndexedDB('movingDayBridge' → store 'assets', keyPath 'idx').
+   We read both, populate the rooms, persist into Brand Home's own store, then clear the bridge. */
+const BRIDGE_DB='movingDayBridge', BRIDGE_STORE='assets', BRIDGE_DB_VER=1, BRAND_DNA_KEY='movingDay_brandDNA_v1';
+function bridgeOpen(){ return new Promise((res,rej)=>{ if(typeof indexedDB==='undefined') return rej(new Error('no idb'));
+  const r=indexedDB.open(BRIDGE_DB,BRIDGE_DB_VER);
+  r.onupgradeneeded=()=>{ try{ const db=r.result; if(!db.objectStoreNames.contains(BRIDGE_STORE)) db.createObjectStore(BRIDGE_STORE,{keyPath:'idx'}); }catch(e){} };
+  r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+function bridgeReadAll(){ return bridgeOpen().then(db=>new Promise(res=>{
+  const out=[]; try{ const st=db.transaction(BRIDGE_STORE,'readonly').objectStore(BRIDGE_STORE);
+    if(st.getAll){ const rq=st.getAll(); rq.onsuccess=()=>{ res(rq.result||[]); try{db.close();}catch(e){} }; rq.onerror=()=>{ res([]); try{db.close();}catch(e){} }; }
+    else { const cur=st.openCursor(); cur.onsuccess=e=>{ const c=e.target.result; if(c){ out.push(c.value); c.continue(); } else { res(out); try{db.close();}catch(_){} } }; cur.onerror=()=>{ res(out); try{db.close();}catch(_){} }; }
+  }catch(e){ res([]); try{db.close();}catch(_){} } })).catch(()=>[]); }
+function bridgeClear(){ return bridgeOpen().then(db=>new Promise(res=>{ try{ const tx=db.transaction(BRIDGE_STORE,'readwrite'); tx.objectStore(BRIDGE_STORE).clear(); tx.oncomplete=()=>{res();try{db.close();}catch(e){}}; tx.onerror=()=>{res();try{db.close();}catch(e){}}; }catch(e){ res(); } })).catch(()=>{}); }
+function blobToDataURL(blob){ return new Promise(res=>{ if(!blob) return res(null); try{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=()=>res(null); r.readAsDataURL(blob); }catch(e){ res(null); } }); }
+function bridgeCat(rec){
+  const ext=(((rec.name||'').split('.').pop())||'').toLowerCase();
+  const hay=((rec.role||'')+' '+(rec.label||'')+' '+(rec.folder||'')+' '+(rec.name||'')+' '+(rec.type||'')).toLowerCase();
+  if(['pdf','doc','docx','ppt','pptx','key','txt'].includes(ext)) return 'document';
+  if(ext==='svg' || /logo|mark|icon|wordmark|symbol|emblem|logotype/.test(hay)) return 'logo';
+  return 'photo';
+}
+function bridgeRole(rec){
+  const hay=((rec.role||'')+' '+(rec.label||'')).toLowerCase();
+  if(/primary/.test(hay)) return 'primaryLogo';
+  if(/icon|mark/.test(hay)) return 'iconMark';
+  if(/wordmark|logotype/.test(hay)) return 'wordmark';
+  if(/secondary/.test(hay)) return 'secondaryLogo';
+  return '';
+}
+async function importFromExperience(){
+  let dna=null;
+  try{ const raw=localStorage.getItem(BRAND_DNA_KEY); if(raw) dna=JSON.parse(raw); }catch(e){}
+  const recs=await bridgeReadAll();
+  if(!dna && !(recs&&recs.length)) return false;          // no handoff waiting
+  if(dna){
+    if(dna.brandName) brand.name=dna.brandName;
+    if(dna.tagline) brand.tagline=dna.tagline;
+    if(dna.category) brand.category=dna.category;
+    if(Array.isArray(dna.colors)&&dna.colors.length)
+      brand.colors=dna.colors.map(c=>({hex:normHex(c&&c.hex)||(c&&c.hex)||'',name:(c&&c.name)||'Color'})).filter(c=>c.hex).slice(0,5);
+    const ty=dna.typography||{};
+    const disp=(ty.display&&ty.display.name)||''; const body=(ty.body&&ty.body.name)||'';
+    if(disp||body) brand.type={display:disp,displayUsage:(ty.display&&ty.display.usage)||'',body:body,bodyUsage:(ty.body&&ty.body.usage)||''};
+  }
+  brand.logos=[]; brand.photos=[]; brand.docs=[];
+  for(const rec of (recs||[])){
+    const cat=bridgeCat(rec), ext=(((rec.name||'').split('.').pop())||'').toLowerCase();
+    if(cat==='document'){ brand.docs.push({id:newId(),name:rec.name||'document',ext,role:bridgeRole(rec)||'document'}); continue; }
+    const url=await blobToDataURL(rec.blob); if(!url) continue;
+    (cat==='logo'?brand.logos:brand.photos).push({id:newId(),name:rec.name||(cat+' asset'),url,ext,role:bridgeRole(rec)});
+  }
+  if(!brand.logos.length && dna){                          // no blobs crossed — use DNA's embedded logo data URLs
+    [['primaryLogo','primaryLogo'],['iconMark','iconMark'],['wordmark','wordmark']].forEach(([k,role])=>{
+      const m=dna[k]; if(m&&m.dataUrl) brand.logos.push({id:newId(),name:m.name||k,url:m.dataUrl,ext:((m.name||'').split('.').pop()||'png').toLowerCase(),role});
+    });
+  }
+  if(!(brand.name||brand.logos.length||brand.photos.length||brand.colors.length)) return false;
+  assignRoles();
+  brand.logos.sort((x,y)=>((y.role==='primaryLogo')-(x.role==='primaryLogo')));
+  projectWorkspaceState();
+  applyBrandHome();
+  saveBrand();
+  await bridgeClear(); try{ localStorage.removeItem(BRAND_DNA_KEY); }catch(e){}
+  const n=brand.logos.length+brand.photos.length+brand.docs.length;
+  setStatus((brand.name?brand.name+' moved in from your intake':'Your brand moved in from intake')+(n?` — ${n} file${n===1?'':'s'} placed.`:'.'));
+  setTimeout(()=>announceWorkspaceUpdate((brand.name?brand.name+' has moved in.':'Your brand has moved in.')+' Everything has a place.','intake'),300);
+  return true;
+}
 </script>
 </body>
 </html>
