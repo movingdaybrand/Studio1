@@ -52,6 +52,8 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .welcome{font-family:var(--display);font-weight:300;font-size:clamp(28px,3.8vw,40px);letter-spacing:-.02em;margin:.26em 0 .14em;}
 .welcome .soft{color:var(--ink-faint);}
 .welcome-sub{color:var(--ink-soft);font-weight:300;font-size:14px;}
+.home-logo{display:flex;justify-content:center;margin:0 0 16px;}
+.home-logo img{height:46px;max-width:200px;object-fit:contain;mix-blend-mode:multiply;}
 .movein{display:flex;flex-direction:column;align-items:center;gap:9px;margin-top:16px;}
 .movein-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--sage);background:rgba(255,255,255,.62);box-shadow:var(--shadow);padding:9px 17px;border-radius:99px;transition:transform .2s,box-shadow .2s;}
 .movein-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover);}
@@ -61,7 +63,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .reset-link:not([hidden]){display:inline-flex;}
 .reset-link:hover{opacity:1;color:var(--ink-soft);}
 .glasspane.drag{box-shadow:0 0 0 2px var(--sage),var(--shadow);}
-.glasspane.drag::after{content:'Drop your brand .zip';position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:300;font-size:clamp(22px,3vw,32px);color:var(--sage);background:rgba(247,248,243,.72);backdrop-filter:blur(8px);border-radius:var(--r-lg);z-index:30;pointer-events:none;}
+.glasspane.drag::after{content:'Drop your brand — zip, folder, or files';position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:300;font-size:clamp(22px,3vw,32px);color:var(--sage);background:rgba(247,248,243,.72);backdrop-filter:blur(8px);border-radius:var(--r-lg);z-index:30;pointer-events:none;}
 .rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(9px,1.1vw,14px);max-width:800px;margin:0 auto;}
 @media(max-width:720px){.rooms{grid-template-columns:1fr 1fr;}}
 @media(max-width:460px){.rooms{grid-template-columns:1fr;}}
@@ -216,7 +218,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
       <h1 class="welcome">Welcome <span class="soft">home.</span></h1>
       <p class="welcome-sub">Everything has a place. Choose where you'd like to continue.</p>
       <div class="movein">
-        <button class="movein-btn" id="moveinBtn"><svg viewBox="0 0 24 24"><path d="M12 16V4"/><polyline points="7 9 12 4 17 9"/><path d="M5 20h14"/></svg>Move in your brand (.zip)</button>
+        <button class="movein-btn" id="moveinBtn"><svg viewBox="0 0 24 24"><path d="M12 16V4"/><polyline points="7 9 12 4 17 9"/><path d="M5 20h14"/></svg>Move in your brand</button>
         <p class="movein-status" id="moveinStatus"></p>
         <button class="reset-link" id="resetBtn" hidden>Reset rooms</button>
       </div>
@@ -243,7 +245,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 
 <input type="file" id="editFile" accept="image/*" hidden>
 <input type="color" id="editColor" hidden>
-<input type="file" id="zipInput" accept=".zip,application/zip" hidden>
+<input type="file" id="zipInput" accept=".zip,.pdf,.svg,.png,.jpg,.jpeg,.webp,.gif,image/*,application/pdf,application/zip" multiple hidden>
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
@@ -367,12 +369,12 @@ const ROOMS={
 };
 const home=document.getElementById('home'), room=document.getElementById('room'),
       roomBody=document.getElementById('roomBody'), roomTitle=document.getElementById('roomTitle'), roomKicker=document.getElementById('roomKicker');
-let currentRoom=null;
+let currentRoom=null; const founderState={};
 function openRoom(key){
   const r=ROOMS[key]; if(!r) return;
   currentRoom=key;
   roomBody.innerHTML=r.html; roomTitle.innerHTML=r.title; roomKicker.textContent=r.kicker;
-  enableEditing(roomBody); applyUploads(roomBody);
+  enableEditing(roomBody); applyUploads(roomBody); applyFounder(roomBody);
   home.classList.remove('show'); room.classList.add('show'); window.scrollTo({top:0,behavior:'auto'});
   const bName=document.getElementById('bName'), wmBig=document.getElementById('wmBig');
   if(bName&&wmBig) bName.addEventListener('input',()=>{wmBig.childNodes[0].nodeValue=(bName.textContent.trim()||'Your Brand');});
@@ -388,8 +390,14 @@ function enableEditing(root){
   root.querySelectorAll('.id-name,.id-tag,.gd-title,.gd-tag,.gd-disp,.gd-bodysample,.spec .big,.spec .body,.gd-use li')
     .forEach(el=>{el.setAttribute('contenteditable','true');el.setAttribute('spellcheck','false');});
 }
+function applyFounder(root){
+  root.querySelectorAll('.frow').forEach(row=>{ const lab=row.querySelector('b'), tg=row.querySelector('.toggle');
+    if(lab&&tg) tg.classList.toggle('on', !!founderState[lab.textContent.trim()]); });
+}
 roomBody.addEventListener('click',e=>{
-  const tog=e.target.closest('.toggle'); if(tog){tog.classList.toggle('on');return;}
+  const tog=e.target.closest('.toggle');
+  if(tog){ const on=tog.classList.toggle('on'); const row=tog.closest('.frow'), lab=row&&row.querySelector('b');
+    if(lab) founderState[lab.textContent.trim()]=on; return; }
   if(e.target.isContentEditable) return;                       // editing text, not replacing
   const sw=e.target.closest('.swatch,.gd-sw');
   if(sw){editTarget=sw;colorInput.value=rgbToHex(getComputedStyle(sw).backgroundColor);colorInput.click();return;}
@@ -470,28 +478,91 @@ function applyType(root){
   if(fn[0]&&t.display) fn[0].textContent=t.display+(t.displayUsage?' · '+t.displayUsage:'');
   if(fn[1]&&t.body)    fn[1].textContent=t.body+(t.bodyUsage?' · '+t.bodyUsage:'');
 }
+function initialsOf(n){
+  const p=String(n||'').replace(/[&+]/g,' ').split(/\s+/).filter(w=>/[a-z0-9]/i.test(w));
+  if(p.length>=2) return (p[0][0]+p[1][0]).toUpperCase();
+  return ((p[0]||'').slice(0,2)||'·').toUpperCase();
+}
+function readOnRGB(s){ const m=/(\d+)[,\s]+(\d+)[,\s]+(\d+)/.exec(s||''); if(!m) return '#1c2b22';
+  return (0.299*+m[1]+0.587*+m[2]+0.114*+m[3])<140 ? '#f3efe6' : '#1c2b22'; }
+function applyNameMarks(root){
+  if(!brand.name) return; const ini=initialsOf(brand.name);
+  root.querySelectorAll('#wmBig,.wm-doc').forEach(e=>{
+    if(e.childNodes[0]&&e.childNodes[0].nodeType===3) e.childNodes[0].nodeValue=brand.name;
+    const s=e.querySelector('small'); if(s&&brand.category) s.textContent=brand.category;
+  });
+  root.querySelectorAll('.wordmark-mini').forEach(e=>{
+    const s=e.querySelector('small');
+    if(s){ if(e.childNodes[0]&&e.childNodes[0].nodeType===3) e.childNodes[0].nodeValue=brand.name; if(brand.category) s.textContent=brand.category; }
+    else e.textContent=ini;
+  });
+  root.querySelectorAll('.mono').forEach(e=>{ e.textContent=ini; });
+}
+function applyTypeProse(root){
+  const t=brand.type;
+  if(brand.tagline) root.querySelectorAll('.gd-disp,.spec .big').forEach(e=>e.textContent=brand.tagline);
+  if(t){
+    const pl=root.querySelector('.pairline');
+    if(pl) pl.innerHTML='<span><b>Display</b> '+(t.display||'—')+(t.displayUsage?' · '+t.displayUsage:'')+'</span>'
+                       +'<span><b>Body</b> '+(t.body||'—')+(t.bodyUsage?' · '+t.bodyUsage:'')+'</span>';
+    const bp=root.querySelector('.spec .body');
+    if(bp&&(t.body||t.display)) bp.textContent='Body copy set in '+(t.body||'the body face')+' — quiet and readable for long passages and interface labels. '+(t.display||'The display face')+' carries the character.';
+  }
+}
+function applyDeliverables(root){
+  if(!brand.name && !brand.logos.length) return;
+  const n=brand.logos.length+brand.photos.length+brand.docs.length;
+  root.querySelectorAll('.vaultcard i').forEach(i=>{ const t=i.textContent.toLowerCase();
+    if(/printable/.test(t)&&brand.name) i.textContent=brand.name+' guide';
+    else if(/all assets/.test(t)&&n) i.textContent=n+' files, packaged';
+    else if(/standalone/.test(t)&&brand.name) i.textContent=brand.name+' microsite';
+  });
+}
+function legibilityFix(root){            // guarantee readable text on any palette; the page itself stays light
+  root.querySelectorAll('.gd-hero,.guidehero').forEach(h=>{
+    const ink=readOnRGB(getComputedStyle(h).backgroundColor); const dark=ink==='#1c2b22'; h.style.color=ink;
+    h.querySelectorAll('.gd-tag').forEach(e=>e.style.color=dark?'rgba(28,43,34,.66)':'rgba(243,239,230,.72)');
+    h.querySelectorAll('.gd-meta span').forEach(e=>e.style.color=ink);
+    h.querySelectorAll('.gd-meta b').forEach(e=>e.style.color=dark?'rgba(28,43,34,.5)':'rgba(243,239,230,.5)');
+    const eb=h.querySelector('.gd-eyebrow'); if(eb) eb.style.color=dark?'rgba(28,43,34,.55)':'var(--b3)';
+  });
+  root.querySelectorAll('.markframe.dark,.markframe.brand,.gd-logocell.dark,.gd-logocell.brand,.glogo').forEach(cell=>{
+    if(cell.querySelector('img')) return;
+    const ink=readOnRGB(getComputedStyle(cell).backgroundColor);
+    cell.querySelectorAll('.mono,.wordmark-mini,.wm-doc').forEach(t=>t.style.color=ink);
+  });
+}
 function applyUploads(root){
   if(!(brand.logos.length||brand.photos.length||brand.name||brand.colors.length)) return;   // nothing moved in yet
-  if(brand.name){
-    root.querySelectorAll('.id-name,.gd-title').forEach(e=>e.textContent=brand.name);
-    const wm=root.querySelector('#wmBig'); if(wm&&wm.childNodes[0]) wm.childNodes[0].nodeValue=brand.name;
-    root.querySelectorAll('.wm-doc').forEach(e=>{ if(e.childNodes[0]) e.childNodes[0].nodeValue=brand.name; });
-  }
+  if(brand.name) root.querySelectorAll('.id-name,.gd-title').forEach(e=>e.textContent=brand.name);
+  applyNameMarks(root);
   if(brand.tagline) root.querySelectorAll('.id-tag,.gd-tag').forEach(e=>e.textContent=brand.tagline);
   if(brand.category){ const m=root.querySelector('.gd-meta div span'); if(m) m.textContent=brand.category; }
   if(brand.colors.length){
     applyPaletteVars(brand.colors); paintSwatches(root);
     const meta=root.querySelectorAll('.gd-meta div span'); if(meta[2]) meta[2].textContent=brand.colors.length+' colors';
   }
-  applyType(root);
+  applyType(root); applyTypeProse(root); applyDeliverables(root);
   let li=0;
   root.querySelectorAll('.id-primary,.markframe,.glogo,.gd-logocell').forEach(fr=>{ if(brand.logos[li]) setFrameImage(fr,brand.logos[li++].url,true); });
   let pi=0;
   root.querySelectorAll('.gframe:not(.glogo),.gd-mock').forEach(fr=>{ if(brand.photos[pi]) setFrameImage(fr,brand.photos[pi++].url,false); });
+  if(brand.colors.length) legibilityFix(root);
 }
 function applyBrandHome(){
-  const sub=document.querySelector('.welcome-sub');
-  if(sub && brand.name) sub.textContent=brand.name+' is moved in. Choose a room to continue.';
+  const head=document.querySelector('.home-head');
+  if(head && brand.name){
+    const k=head.querySelector('.kicker'), w=head.querySelector('.welcome'), sub=head.querySelector('.welcome-sub');
+    if(k) k.textContent='Brand home';
+    if(w) w.textContent=brand.name;
+    if(sub) sub.textContent=brand.tagline||'Everything has a place. Choose a room to continue.';
+    let logo=document.getElementById('homeLogo');
+    if(brand.logos[0]){
+      if(!logo){ logo=document.createElement('div'); logo.id='homeLogo'; logo.className='home-logo'; head.insertBefore(logo,head.firstChild); }
+      logo.innerHTML='<img alt="">'; logo.querySelector('img').src=brand.logos[0].url; logo.style.display='';
+    } else if(logo){ logo.style.display='none'; }
+  }
+  if(brand.colors.length) applyPaletteVars(brand.colors);   // keep accents consistent on home too
   showReset();
 }
 function showReset(){ const b=document.getElementById('resetBtn'); if(b) b.hidden=!(brand.name||brand.logos.length||brand.photos.length||brand.colors.length); }
@@ -541,52 +612,80 @@ function mapAiToBrand(d){            // map the AI's response into the brand the
   }
   return true;
 }
-async function handleZip(file){
-  if(typeof JSZip==='undefined'){ setStatus('Unzip library still loading — try again in a second.'); return; }
-  setStatus('Unzipping '+file.name+'…');
-  try{
-    const zip=await JSZip.loadAsync(file);
-    const files=Object.values(zip.files).filter(f=>!f.dir && !/(^|\/)(__MACOSX\/|\.)/.test(f.name));
-    const imgs=[]; brand.docs=[];
-    for(const f of files){
-      const base=f.name.split('/').pop(); if(!base) continue;
-      const ext=(base.split('.').pop()||'').toLowerCase();
-      if(['png','jpg','jpeg','webp','gif','svg'].includes(ext)){
-        const b64=await f.async('base64');
-        const mime=ext==='svg'?'image/svg+xml':'image/'+(ext==='jpg'?'jpeg':ext);
-        imgs.push({name:base,url:'data:'+mime+';base64,'+b64,ext});
-      } else if(['pdf','key','ppt','pptx','doc','docx','txt'].includes(ext)){ brand.docs.push({name:base,ext}); }
-    }
-    // baseline local sort — also the fallback if the AI route isn't reachable
-    brand.logos=[]; brand.photos=[];
-    imgs.forEach(im=>{ (/(logo|mark|icon|brand|wordmark|symbol|emblem)/i.test(im.name)||im.ext==='svg') ? brand.logos.push(im) : brand.photos.push(im); });
-    if(!brand.logos.length && imgs.length){ brand.logos=imgs.slice(0,4); brand.photos=imgs.slice(4); }
-    const tops=[...new Set(files.map(f=>f.name.includes('/')?f.name.split('/')[0]:null).filter(Boolean))];
-    if(tops.length===1) brand.name=prettify(tops[0]);
-    const total=imgs.length+brand.docs.length;
-
-    // ── call the real Brand Concierge and apply its understanding ──
-    let aiOK=false;
-    if(imgs.length){
-      setStatus('Reading your brand…');
-      try{
-        const picked=[...imgs].sort((a,b)=>scoreForVision(b.name)-scoreForVision(a.name)).slice(0,14);
-        const urls=await Promise.all(picked.map(prepDataUrl));
-        const assets=picked.map((im,i)=>({ id:'asset_'+(i+1), name:im.name,
-          type:(/^data:([^;,]+)/.exec(urls[i]||'')||[])[1]||('image/'+im.ext),
-          category:im.ext==='svg'?'logo':'image', dataUrl:urls[i] }));
-        aiOK=mapAiToBrand(await requestReview(assets));
-      }catch(e){ console.warn('Brand Concierge unavailable — organized locally:',e); }
-    }
-    setStatus(total
-      ? (aiOK ? (brand.name?brand.name+' is moved in — rooms set from your brand.':'Moved in — rooms set from your brand.')
-              : `${total} file${total===1?'':'s'} moved in — organized locally (AI runs on your live site).`)
-      : 'No images found in that .zip.');
-    if(currentRoom && room.classList.contains('show')) openRoom(currentRoom);
-    applyBrandHome();
-    saveBrand();
-  }catch(err){ setStatus("That didn't unzip cleanly — try another .zip."); }
+const IMG_EXT=['png','jpg','jpeg','webp','gif','svg'], DOC_EXT=['pdf','key','ppt','pptx','doc','docx','txt'];
+async function collectFromZip(file){
+  const zip=await JSZip.loadAsync(file);
+  const entries=Object.values(zip.files).filter(f=>!f.dir && !/(^|\/)(__MACOSX\/|\.)/.test(f.name));
+  const imgs=[], docs=[];
+  for(const f of entries){
+    const base=f.name.split('/').pop(); if(!base) continue;
+    const ext=(base.split('.').pop()||'').toLowerCase();
+    if(IMG_EXT.includes(ext)){
+      const b64=await f.async('base64'); const mime=ext==='svg'?'image/svg+xml':'image/'+(ext==='jpg'?'jpeg':ext);
+      imgs.push({name:base,url:'data:'+mime+';base64,'+b64,ext});
+    } else if(DOC_EXT.includes(ext)){ docs.push({name:base,ext}); }
+  }
+  const tops=[...new Set(entries.map(f=>f.name.includes('/')?f.name.split('/')[0]:null).filter(Boolean))];
+  return {imgs,docs,top:tops.length===1?prettify(tops[0]):''};
 }
+function fileToImg(file){ return new Promise(res=>{ const r=new FileReader();
+  r.onload=()=>res({name:(file.name||'image').split('/').pop(),url:r.result,ext:((file.name||'').split('.').pop()||'').toLowerCase()});
+  r.onerror=()=>res(null); r.readAsDataURL(file); }); }
+/* dropped-folder support: flatten directory entries into a flat File list */
+function entryFile(en){ return new Promise(res=>{ try{ en.file(f=>res(f),()=>res(null)); }catch(e){ res(null); } }); }
+function readDir(rd){ return new Promise(res=>{ try{ rd.readEntries(es=>res(es||[]),()=>res([])); }catch(e){ res([]); } }); }
+async function walkEntry(en,out,depth){
+  if(!en||depth>12) return;
+  if(en.isFile){ const f=await entryFile(en); if(f) out.push(f); }
+  else if(en.isDirectory){ const rd=en.createReader(); let batch; do{ batch=await readDir(rd); for(const e of batch) await walkEntry(e,out,depth+1); }while(batch.length); }
+}
+async function moveInFiles(fileList){
+  if(typeof JSZip==='undefined'){ setStatus('Still loading — try again in a second.'); return; }
+  const files=Array.from(fileList||[]).filter(Boolean);
+  if(!files.length) return;
+  setStatus('Moving in '+files.length+' item'+(files.length===1?'':'s')+'…');
+  const imgs=[]; brand.docs=[]; let folderName='';
+  for(const f of files){
+    const name=f.name||''; const ext=(name.split('.').pop()||'').toLowerCase();
+    if(f.webkitRelativePath && f.webkitRelativePath.includes('/') && !folderName) folderName=prettify(f.webkitRelativePath.split('/')[0]);
+    if(ext==='zip' || /zip/.test(f.type||'')){
+      try{ const z=await collectFromZip(f); imgs.push(...z.imgs); brand.docs.push(...z.docs); if(!folderName&&z.top) folderName=z.top; }
+      catch(e){ console.warn('zip failed',name,e); }
+    } else if(IMG_EXT.includes(ext)){ const im=await fileToImg(f); if(im) imgs.push(im); }
+    else if(DOC_EXT.includes(ext)){ brand.docs.push({name:name.split('/').pop(),ext}); }
+  }
+  await finishIntake(imgs,folderName);
+}
+async function finishIntake(imgs,folderName){
+  // baseline local sort — also the fallback if the AI route isn't reachable
+  brand.logos=[]; brand.photos=[];
+  imgs.forEach(im=>{ (/(logo|mark|icon|brand|wordmark|symbol|emblem)/i.test(im.name)||im.ext==='svg') ? brand.logos.push(im) : brand.photos.push(im); });
+  if(!brand.logos.length && imgs.length){ brand.logos=imgs.slice(0,4); brand.photos=imgs.slice(4); }
+  if(folderName && !brand.name) brand.name=folderName;
+  const total=imgs.length+brand.docs.length;
+
+  // ── call the real Brand Concierge and apply its understanding ──
+  let aiOK=false;
+  if(imgs.length){
+    setStatus('Reading your brand…');
+    try{
+      const picked=[...imgs].sort((a,b)=>scoreForVision(b.name)-scoreForVision(a.name)).slice(0,14);
+      const urls=await Promise.all(picked.map(prepDataUrl));
+      const assets=picked.map((im,i)=>({ id:'asset_'+(i+1), name:im.name,
+        type:(/^data:([^;,]+)/.exec(urls[i]||'')||[])[1]||('image/'+im.ext),
+        category:im.ext==='svg'?'logo':'image', dataUrl:urls[i] }));
+      aiOK=mapAiToBrand(await requestReview(assets));
+    }catch(e){ console.warn('Brand Concierge unavailable — organized locally:',e); }
+  }
+  setStatus(total
+    ? (aiOK ? (brand.name?brand.name+' is moved in — rooms set from your brand.':'Moved in — rooms set from your brand.')
+            : `${total} file${total===1?'':'s'} moved in — organized locally (AI runs on your live site).`)
+    : 'Nothing readable found — try images, a PDF, a folder, or a .zip.');
+  if(currentRoom && room.classList.contains('show')) openRoom(currentRoom);
+  applyBrandHome();
+  saveBrand();
+}
+async function handleZip(file){ return moveInFiles([file]); }   // back-compat
 function resetBrand(){
   if(!confirm('Reset all rooms back to the sample brand? This clears what you moved in.')) return;
   try{ indexedDB.deleteDatabase(SAVE_DB); }catch(e){}
@@ -596,11 +695,17 @@ function resetBrand(){
 const zipInput=document.getElementById('zipInput');
 document.getElementById('moveinBtn').addEventListener('click',()=>zipInput.click());
 document.getElementById('resetBtn').addEventListener('click',resetBrand);
-zipInput.addEventListener('change',()=>{ const f=zipInput.files&&zipInput.files[0]; if(f) handleZip(f); zipInput.value=''; });
+zipInput.addEventListener('change',()=>{ if(zipInput.files&&zipInput.files.length) moveInFiles(zipInput.files); zipInput.value=''; });
 const pane=document.querySelector('.glasspane');
 ['dragenter','dragover'].forEach(ev=>pane.addEventListener(ev,e=>{e.preventDefault();pane.classList.add('drag');}));
 ['dragleave','drop'].forEach(ev=>pane.addEventListener(ev,e=>{e.preventDefault();pane.classList.remove('drag');}));
-pane.addEventListener('drop',e=>{ const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f&&/\.zip$/i.test(f.name)) handleZip(f); });
+pane.addEventListener('drop',e=>{
+  const dt=e.dataTransfer; if(!dt) return;
+  const items=dt.items?Array.from(dt.items):[];
+  const entries=items.map(it=>it.webkitGetAsEntry&&it.webkitGetAsEntry()).filter(Boolean);   // capture sync, folders included
+  const flat=dt.files?Array.from(dt.files):[];
+  (async()=>{ let out=[]; for(const en of entries) await walkEntry(en,out,0); if(!out.length) out=flat; if(out.length) moveInFiles(out); })();
+});
 
 // ── autosave: the brand persists in THIS browser so a returning visitor sees their guide.
 //    (This is local only — it is NOT login or sharing. See note below the build.) ──
