@@ -440,9 +440,9 @@ async function handleZip(file){
       const base=f.name.split('/').pop(); if(!base) continue;
       const ext=(base.split('.').pop()||'').toLowerCase();
       if(['png','jpg','jpeg','webp','gif','svg'].includes(ext)){
-        const blob=await f.async('blob');
+        const b64=await f.async('base64');
         const mime=ext==='svg'?'image/svg+xml':'image/'+(ext==='jpg'?'jpeg':ext);
-        imgs.push({name:base,url:URL.createObjectURL(new Blob([blob],{type:mime})),ext});
+        imgs.push({name:base,url:'data:'+mime+';base64,'+b64,ext});
       } else if(['pdf','key','ppt','pptx','doc','docx','txt'].includes(ext)){ brand.docs.push({name:base,ext}); }
     }
     brand.logos=[]; brand.photos=[];
@@ -453,6 +453,7 @@ async function handleZip(file){
     const total=imgs.length+brand.docs.length;
     setStatus(total?`${total} file${total===1?'':'s'} moved in — your rooms are set.`:'No images found in that .zip.');
     if(currentRoom && room.classList.contains('show')) openRoom(currentRoom);
+    saveBrand();
   }catch(err){ setStatus("That didn't unzip cleanly — try another .zip."); }
 }
 const zipInput=document.getElementById('zipInput');
@@ -462,6 +463,32 @@ const pane=document.querySelector('.glasspane');
 ['dragenter','dragover'].forEach(ev=>pane.addEventListener(ev,e=>{e.preventDefault();pane.classList.add('drag');}));
 ['dragleave','drop'].forEach(ev=>pane.addEventListener(ev,e=>{e.preventDefault();pane.classList.remove('drag');}));
 pane.addEventListener('drop',e=>{ const f=e.dataTransfer&&e.dataTransfer.files&&e.dataTransfer.files[0]; if(f&&/\.zip$/i.test(f.name)) handleZip(f); });
+
+// ── autosave: the brand persists in THIS browser so a returning visitor sees their guide.
+//    (This is local only — it is NOT login or sharing. See note below the build.) ──
+const SAVE_DB='mdBrandHomeSave', SAVE_STORE='brand', SAVE_KEY='current';
+function _db(){return new Promise((res,rej)=>{ if(typeof indexedDB==='undefined') return rej(new Error('no idb')); const r=indexedDB.open(SAVE_DB,1); r.onupgradeneeded=()=>{ try{r.result.createObjectStore(SAVE_STORE);}catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });}
+function saveBrand(){
+  const snap={name:brand.name,logos:brand.logos,photos:brand.photos,docs:brand.docs};
+  if(!snap.name && !snap.logos.length && !snap.photos.length) return;
+  _db().then(db=>{ try{ db.transaction(SAVE_STORE,'readwrite').objectStore(SAVE_STORE).put(snap,SAVE_KEY); }catch(e){} })
+       .catch(()=>{ try{ localStorage.setItem('mdBrandHomeSaveLight', JSON.stringify({name:snap.name,logos:snap.logos.slice(0,3),photos:[],docs:snap.docs})); }catch(e){} });
+}
+function loadBrand(){
+  return _db().then(db=>new Promise(res=>{ let rq; try{ rq=db.transaction(SAVE_STORE,'readonly').objectStore(SAVE_STORE).get(SAVE_KEY); }catch(e){ return res(null); } rq.onsuccess=()=>res(rq.result||null); rq.onerror=()=>res(null); }))
+            .catch(()=>{ try{ const raw=localStorage.getItem('mdBrandHomeSaveLight'); return raw?JSON.parse(raw):null; }catch(e){ return null; } });
+}
+function restoreBrand(snap){
+  if(!snap) return;
+  brand.name=snap.name||''; brand.logos=snap.logos||[]; brand.photos=snap.photos||[]; brand.docs=snap.docs||[];
+  if(brand.name||brand.logos.length||brand.photos.length){
+    setStatus('Welcome back'+(brand.name?', '+brand.name:'')+' — your guide is saved.');
+    if(currentRoom && room.classList.contains('show')) openRoom(currentRoom);
+  }
+}
+window.addEventListener('beforeunload', saveBrand);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') saveBrand(); });
+loadBrand().then(restoreBrand);
 </script>
 </body>
 </html>
