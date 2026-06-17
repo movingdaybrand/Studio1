@@ -376,8 +376,6 @@ function openRoom(key){
   roomBody.innerHTML=r.html; roomTitle.innerHTML=r.title; roomKicker.textContent=r.kicker;
   enableEditing(roomBody); applyUploads(roomBody); applyFounder(roomBody);
   home.classList.remove('show'); room.classList.add('show'); window.scrollTo({top:0,behavior:'auto'});
-  const bName=document.getElementById('bName'), wmBig=document.getElementById('wmBig');
-  if(bName&&wmBig) bName.addEventListener('input',()=>{wmBig.childNodes[0].nodeValue=(bName.textContent.trim()||'Your Brand');});
 }
 document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>openRoom(b.dataset.open)));
 document.getElementById('backBtn').addEventListener('click',()=>{room.classList.remove('show');home.classList.add('show');window.scrollTo({top:0,behavior:'auto'});});
@@ -404,6 +402,24 @@ roomBody.addEventListener('click',e=>{
   const fr=e.target.closest('.vframe');
   if(fr){editTarget=fr;fileInput.click();return;}
 });
+// ── live text editing → flows back into the brand + autosaves ──
+let saveTimer=null;
+function scheduleSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(()=>saveBrand(),500); }
+roomBody.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.classList.contains('id-name')||t.classList.contains('gd-title')){
+    brand.name=t.textContent.trim();
+    applyNameMarks(roomBody);     // update wordmark, initials, doc marks (not the field being typed in)
+    applyBrandHome();             // keep the home headline in sync
+    scheduleSave();
+  } else if(t.classList.contains('id-tag')||t.classList.contains('gd-tag')){
+    brand.tagline=t.textContent.trim();
+    scheduleSave();
+  }
+});
+roomBody.addEventListener('blur',e=>{
+  if(e.target.matches&&e.target.matches('.id-name,.gd-title,.id-tag,.gd-tag')) saveBrand();   // final save on leaving the field
+},true);
 function setFrameImage(fr,url,contain){
   const tag=fr.querySelector('.vframe-tag'); const tagHTML=tag?tag.outerHTML:'';
   fr.classList.toggle('contain',!!contain);
@@ -421,6 +437,9 @@ colorInput.addEventListener('input',()=>{
   const hex=colorInput.value.toUpperCase();
   editTarget.style.background=hex; editTarget.style.color=readableOn(hex);
   const hexEl=editTarget.querySelector('.hex,i'); if(hexEl) hexEl.textContent=hex;
+  const parent=editTarget.parentElement;                       // persist into the brand palette
+  if(parent && brand.colors.length){ const idx=Array.from(parent.children).indexOf(editTarget);
+    if(idx>-1 && brand.colors[idx]){ brand.colors[idx].hex=hex.toLowerCase(); scheduleSave(); } }
 });
 function rgbToHex(rgb){const m=(rgb||'').match(/\d+/g); if(!m) return '#888888'; return '#'+m.slice(0,3).map(n=>(+n).toString(16).padStart(2,'0')).join('');}
 function readableOn(hex){const r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16); return (0.299*r+0.587*g+0.114*b)/255>0.6?'#1c2b22':'#f3efe6';}
