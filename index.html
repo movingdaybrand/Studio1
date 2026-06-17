@@ -57,6 +57,9 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .movein-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover);}
 .movein-btn svg{width:15px;height:15px;stroke:currentColor;stroke-width:1.6;fill:none;stroke-linecap:round;stroke-linejoin:round;}
 .movein-status{font-size:12px;color:var(--ink-faint);min-height:1.1em;text-align:center;}
+.reset-link{display:none;font-size:11px;color:var(--ink-faint);background:none;padding:4px 10px;border-radius:99px;opacity:.8;transition:opacity .2s,color .2s;margin-top:2px;}
+.reset-link:not([hidden]){display:inline-flex;}
+.reset-link:hover{opacity:1;color:var(--ink-soft);}
 .glasspane.drag{box-shadow:0 0 0 2px var(--sage),var(--shadow);}
 .glasspane.drag::after{content:'Drop your brand .zip';position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:300;font-size:clamp(22px,3vw,32px);color:var(--sage);background:rgba(247,248,243,.72);backdrop-filter:blur(8px);border-radius:var(--r-lg);z-index:30;pointer-events:none;}
 .rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(9px,1.1vw,14px);max-width:800px;margin:0 auto;}
@@ -215,6 +218,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
       <div class="movein">
         <button class="movein-btn" id="moveinBtn"><svg viewBox="0 0 24 24"><path d="M12 16V4"/><polyline points="7 9 12 4 17 9"/><path d="M5 20h14"/></svg>Move in your brand (.zip)</button>
         <p class="movein-status" id="moveinStatus"></p>
+        <button class="reset-link" id="resetBtn" hidden>Reset rooms</button>
       </div>
     </header>
     <div class="rooms">
@@ -414,20 +418,128 @@ function rgbToHex(rgb){const m=(rgb||'').match(/\d+/g); if(!m) return '#888888';
 function readableOn(hex){const r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16); return (0.299*r+0.587*g+0.114*b)/255>0.6?'#1c2b22':'#f3efe6';}
 
 // ── upload & set: a dropped .zip unzips and populates the rooms ──
-const brand={name:'',logos:[],photos:[],docs:[]};
+const brand={name:'',tagline:'',category:'',logos:[],photos:[],docs:[],colors:[],type:null};
 function prettify(s){return s.replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()).trim();}
 function setStatus(t){const el=document.getElementById('moveinStatus'); if(el) el.textContent=t||'';}
+
+/* ── colour + type helpers: apply the client's real palette and fonts everywhere ── */
+function normHex(c){
+  if(c&&typeof c==='object') c=c.hex||c.value||'';
+  c=String(c||'').trim().replace(/^#/,'');
+  if(/^[0-9a-f]{3}$/i.test(c)) c=c.split('').map(x=>x+x).join('');
+  return /^[0-9a-f]{6}$/i.test(c) ? '#'+c.toLowerCase() : null;
+}
+function lumOf(h){const n=parseInt(h.slice(1),16);return 0.299*((n>>16)&255)+0.587*((n>>8)&255)+0.114*(n&255);}
+function satOf(h){const n=parseInt(h.slice(1),16),r=(n>>16)&255,g=(n>>8)&255,b=n&255,mx=Math.max(r,g,b),mn=Math.min(r,g,b);return mx?(mx-mn)/mx:0;}
+function readOn(h){return lumOf(h)<140?'#f3efe6':'#1c2b22';}
+function applyPaletteVars(cols){
+  if(!cols.length) return;
+  const s=[...cols].sort((a,b)=>lumOf(a.hex)-lumOf(b.hex));
+  const dark=s[0].hex, light=s[s.length-1].hex;
+  let accent=[...cols].sort((a,b)=>satOf(b.hex)-satOf(a.hex))[0].hex;
+  if(lumOf(accent)<110) accent=light;              // keep the accent visible on the dark hero
+  const rs=document.documentElement.style;
+  rs.setProperty('--b1',dark); rs.setProperty('--b5',dark);
+  rs.setProperty('--b2',light); rs.setProperty('--b3',accent);
+  rs.setProperty('--b4',(s[1]||s[0]).hex);
+}
+function paintSwatches(root){
+  if(!brand.colors.length) return;
+  root.querySelectorAll('.swatch').forEach((el,i)=>{ const c=brand.colors[i]; if(!c) return;
+    el.style.background=c.hex; el.style.color=readOn(c.hex);
+    const h=el.querySelector('.hex'); if(h) h.textContent=c.hex.toUpperCase();
+    const nm=el.querySelector('span:not(.hex)'); if(nm) nm.textContent=c.name; });
+  root.querySelectorAll('.gd-sw').forEach((el,i)=>{ const c=brand.colors[i]; if(!c) return;
+    el.style.background=c.hex; el.style.color=readOn(c.hex);
+    const nm=el.querySelector('span'); if(nm) nm.textContent=c.name;
+    const hx=el.querySelector('i'); if(hx) hx.textContent=c.hex.toUpperCase(); });
+}
+function ensureFont(name){
+  if(!name) return; const id='dynfont-'+name.replace(/[^a-z0-9]/gi,'');
+  if(document.getElementById(id)) return;
+  const l=document.createElement('link'); l.id=id; l.rel='stylesheet';
+  l.href='https://fonts.googleapis.com/css2?family='+encodeURIComponent(name.trim())+':wght@300;400;500&display=swap';
+  document.head.appendChild(l);
+}
+function applyType(root){
+  if(!brand.type) return; const t=brand.type;
+  ensureFont(t.display); ensureFont(t.body);
+  if(t.display){ const f='"'+t.display+'", var(--display)'; root.querySelectorAll('.gd-disp,.spec .big').forEach(e=>e.style.fontFamily=f); }
+  if(t.body){ const f='"'+t.body+'", var(--body)'; root.querySelectorAll('.gd-bodysample,.spec .body').forEach(e=>e.style.fontFamily=f); }
+  const fn=root.querySelectorAll('.gd-fname');
+  if(fn[0]&&t.display) fn[0].textContent=t.display+(t.displayUsage?' · '+t.displayUsage:'');
+  if(fn[1]&&t.body)    fn[1].textContent=t.body+(t.bodyUsage?' · '+t.bodyUsage:'');
+}
 function applyUploads(root){
-  if(!brand.logos.length && !brand.photos.length && !brand.name) return;   // nothing moved in yet
+  if(!(brand.logos.length||brand.photos.length||brand.name||brand.colors.length)) return;   // nothing moved in yet
   if(brand.name){
     root.querySelectorAll('.id-name,.gd-title').forEach(e=>e.textContent=brand.name);
     const wm=root.querySelector('#wmBig'); if(wm&&wm.childNodes[0]) wm.childNodes[0].nodeValue=brand.name;
     root.querySelectorAll('.wm-doc').forEach(e=>{ if(e.childNodes[0]) e.childNodes[0].nodeValue=brand.name; });
   }
+  if(brand.tagline) root.querySelectorAll('.id-tag,.gd-tag').forEach(e=>e.textContent=brand.tagline);
+  if(brand.category){ const m=root.querySelector('.gd-meta div span'); if(m) m.textContent=brand.category; }
+  if(brand.colors.length){
+    applyPaletteVars(brand.colors); paintSwatches(root);
+    const meta=root.querySelectorAll('.gd-meta div span'); if(meta[2]) meta[2].textContent=brand.colors.length+' colors';
+  }
+  applyType(root);
   let li=0;
   root.querySelectorAll('.id-primary,.markframe,.glogo,.gd-logocell').forEach(fr=>{ if(brand.logos[li]) setFrameImage(fr,brand.logos[li++].url,true); });
   let pi=0;
   root.querySelectorAll('.gframe:not(.glogo),.gd-mock').forEach(fr=>{ if(brand.photos[pi]) setFrameImage(fr,brand.photos[pi++].url,false); });
+}
+function applyBrandHome(){
+  const sub=document.querySelector('.welcome-sub');
+  if(sub && brand.name) sub.textContent=brand.name+' is moved in. Choose a room to continue.';
+  showReset();
+}
+function showReset(){ const b=document.getElementById('resetBtn'); if(b) b.hidden=!(brand.name||brand.logos.length||brand.photos.length||brand.colors.length); }
+/* ── Brand Concierge API: same contract experience.html uses ── */
+function scoreForVision(n){ n=n.toLowerCase(); let s=0;
+  if(/logo|wordmark|icon|mark|brand|symbol|emblem/.test(n)) s+=5;
+  if(/\.svg$/.test(n)) s+=2; if(/\.png$/.test(n)) s+=1;
+  if(/photo|image|img|dsc|banner|hero|cover|background|screenshot/.test(n)) s-=3;
+  return s; }
+function prepDataUrl(im){            // rasterize SVGs + flatten transparency so the vision model can see them
+  return new Promise(res=>{
+    if(im.ext!=='svg' && /^data:image\/(png|jpeg|jpg|webp)/i.test(im.url)) return res(im.url);
+    try{ const img=new Image();
+      img.onload=()=>{ try{ const max=1024; let w=img.width||512,h=img.height||512; const sc=Math.min(1,max/Math.max(w,h));
+          w=Math.round(w*sc); h=Math.round(h*sc); const c=document.createElement('canvas'); c.width=w; c.height=h;
+          const x=c.getContext('2d'); x.fillStyle='#808080'; x.fillRect(0,0,w,h); x.drawImage(img,0,0,w,h); res(c.toDataURL('image/png'));
+        }catch(e){ res(im.url); } };
+      img.onerror=()=>res(im.url); img.src=im.url;
+    }catch(e){ res(im.url); }
+  });
+}
+async function requestReview(assets){
+  const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(),60000);
+  try{
+    const res=await fetch('/api/analyze-brand-files',{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,
+      body:JSON.stringify({preparationReport:{preparedFileCount:assets.length,assets:assets.map(a=>({uploadId:a.id,category:a.category}))},assets})});
+    if(!res.ok) throw new Error('route '+res.status);
+    return await res.json();
+  } finally { clearTimeout(t); }
+}
+function mapAiToBrand(d){            // map the AI's response into the brand the rooms read from
+  if(!d||typeof d!=='object') return false;
+  const g=d.guide||{}, br=d.brand||{};
+  const nm=g.clientName||br.name; if(nm) brand.name=String(nm);
+  const tag=g.description||(d.copySuggestions&&d.copySuggestions.tagline)||br.positioning||d.voice||d.tone;
+  if(tag) brand.tagline=String(tag);
+  const cat=g.category||br.industry; if(cat) brand.category=String(cat);
+  const pal=(d.palette||d.colors||[]).map(c=>({hex:normHex(c),name:(c&&c.name)||'Color'})).filter(c=>c.hex).slice(0,5);
+  if(pal.length) brand.colors=pal;
+  const ty=d.typography||{};
+  const disp=ty.displayFont||(ty.display&&ty.display.name)||''; const body=ty.bodyFont||(ty.body&&ty.body.name)||'';
+  if(disp||body) brand.type={display:disp,displayUsage:(ty.display&&ty.display.usage)||'',body:body,bodyUsage:(ty.body&&ty.body.usage)||''};
+  const rep=Array.isArray(d.assetReport)?d.assetReport:[];     // let an AI-flagged primary logo lead
+  if(rep.length && brand.logos.length){
+    const p=rep.find(a=>/primary|lead|logo|wordmark/i.test(a.assetRole||a.role||''));
+    if(p&&p.name){ const idx=brand.logos.findIndex(l=>l.name===p.name); if(idx>0){ const [x]=brand.logos.splice(idx,1); brand.logos.unshift(x); } }
+  }
+  return true;
 }
 async function handleZip(file){
   if(typeof JSZip==='undefined'){ setStatus('Unzip library still loading — try again in a second.'); return; }
@@ -445,19 +557,45 @@ async function handleZip(file){
         imgs.push({name:base,url:'data:'+mime+';base64,'+b64,ext});
       } else if(['pdf','key','ppt','pptx','doc','docx','txt'].includes(ext)){ brand.docs.push({name:base,ext}); }
     }
+    // baseline local sort — also the fallback if the AI route isn't reachable
     brand.logos=[]; brand.photos=[];
     imgs.forEach(im=>{ (/(logo|mark|icon|brand|wordmark|symbol|emblem)/i.test(im.name)||im.ext==='svg') ? brand.logos.push(im) : brand.photos.push(im); });
     if(!brand.logos.length && imgs.length){ brand.logos=imgs.slice(0,4); brand.photos=imgs.slice(4); }
     const tops=[...new Set(files.map(f=>f.name.includes('/')?f.name.split('/')[0]:null).filter(Boolean))];
     if(tops.length===1) brand.name=prettify(tops[0]);
     const total=imgs.length+brand.docs.length;
-    setStatus(total?`${total} file${total===1?'':'s'} moved in — your rooms are set.`:'No images found in that .zip.');
+
+    // ── call the real Brand Concierge and apply its understanding ──
+    let aiOK=false;
+    if(imgs.length){
+      setStatus('Reading your brand…');
+      try{
+        const picked=[...imgs].sort((a,b)=>scoreForVision(b.name)-scoreForVision(a.name)).slice(0,14);
+        const urls=await Promise.all(picked.map(prepDataUrl));
+        const assets=picked.map((im,i)=>({ id:'asset_'+(i+1), name:im.name,
+          type:(/^data:([^;,]+)/.exec(urls[i]||'')||[])[1]||('image/'+im.ext),
+          category:im.ext==='svg'?'logo':'image', dataUrl:urls[i] }));
+        aiOK=mapAiToBrand(await requestReview(assets));
+      }catch(e){ console.warn('Brand Concierge unavailable — organized locally:',e); }
+    }
+    setStatus(total
+      ? (aiOK ? (brand.name?brand.name+' is moved in — rooms set from your brand.':'Moved in — rooms set from your brand.')
+              : `${total} file${total===1?'':'s'} moved in — organized locally (AI runs on your live site).`)
+      : 'No images found in that .zip.');
     if(currentRoom && room.classList.contains('show')) openRoom(currentRoom);
+    applyBrandHome();
     saveBrand();
   }catch(err){ setStatus("That didn't unzip cleanly — try another .zip."); }
 }
+function resetBrand(){
+  if(!confirm('Reset all rooms back to the sample brand? This clears what you moved in.')) return;
+  try{ indexedDB.deleteDatabase(SAVE_DB); }catch(e){}
+  try{ localStorage.removeItem('mdBrandHomeSaveLight'); }catch(e){}
+  location.reload();
+}
 const zipInput=document.getElementById('zipInput');
 document.getElementById('moveinBtn').addEventListener('click',()=>zipInput.click());
+document.getElementById('resetBtn').addEventListener('click',resetBrand);
 zipInput.addEventListener('change',()=>{ const f=zipInput.files&&zipInput.files[0]; if(f) handleZip(f); zipInput.value=''; });
 const pane=document.querySelector('.glasspane');
 ['dragenter','dragover'].forEach(ev=>pane.addEventListener(ev,e=>{e.preventDefault();pane.classList.add('drag');}));
@@ -469,10 +607,10 @@ pane.addEventListener('drop',e=>{ const f=e.dataTransfer&&e.dataTransfer.files&&
 const SAVE_DB='mdBrandHomeSave', SAVE_STORE='brand', SAVE_KEY='current';
 function _db(){return new Promise((res,rej)=>{ if(typeof indexedDB==='undefined') return rej(new Error('no idb')); const r=indexedDB.open(SAVE_DB,1); r.onupgradeneeded=()=>{ try{r.result.createObjectStore(SAVE_STORE);}catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });}
 function saveBrand(){
-  const snap={name:brand.name,logos:brand.logos,photos:brand.photos,docs:brand.docs};
-  if(!snap.name && !snap.logos.length && !snap.photos.length) return;
+  const snap={name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type};
+  if(!snap.name && !snap.logos.length && !snap.photos.length && !(snap.colors&&snap.colors.length)) return;
   _db().then(db=>{ try{ db.transaction(SAVE_STORE,'readwrite').objectStore(SAVE_STORE).put(snap,SAVE_KEY); }catch(e){} })
-       .catch(()=>{ try{ localStorage.setItem('mdBrandHomeSaveLight', JSON.stringify({name:snap.name,logos:snap.logos.slice(0,3),photos:[],docs:snap.docs})); }catch(e){} });
+       .catch(()=>{ try{ localStorage.setItem('mdBrandHomeSaveLight', JSON.stringify({name:snap.name,tagline:snap.tagline,category:snap.category,colors:snap.colors,type:snap.type,logos:snap.logos.slice(0,3),photos:[],docs:snap.docs})); }catch(e){} });
 }
 function loadBrand(){
   return _db().then(db=>new Promise(res=>{ let rq; try{ rq=db.transaction(SAVE_STORE,'readonly').objectStore(SAVE_STORE).get(SAVE_KEY); }catch(e){ return res(null); } rq.onsuccess=()=>res(rq.result||null); rq.onerror=()=>res(null); }))
@@ -480,9 +618,12 @@ function loadBrand(){
 }
 function restoreBrand(snap){
   if(!snap) return;
-  brand.name=snap.name||''; brand.logos=snap.logos||[]; brand.photos=snap.photos||[]; brand.docs=snap.docs||[];
-  if(brand.name||brand.logos.length||brand.photos.length){
+  brand.name=snap.name||''; brand.tagline=snap.tagline||''; brand.category=snap.category||'';
+  brand.logos=snap.logos||[]; brand.photos=snap.photos||[]; brand.docs=snap.docs||[];
+  brand.colors=snap.colors||[]; brand.type=snap.type||null;
+  if(brand.name||brand.logos.length||brand.photos.length||brand.colors.length){
     setStatus('Welcome back'+(brand.name?', '+brand.name:'')+' — your guide is saved.');
+    applyBrandHome();
     if(currentRoom && room.classList.contains('show')) openRoom(currentRoom);
   }
 }
