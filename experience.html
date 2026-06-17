@@ -5281,6 +5281,12 @@ btnMovein.addEventListener('click', event => {
         body:    { name: typo.bodyFont    || (typo.body&&typo.body.name)    || '', usage: (typo.body&&typo.body.usage)    || '' }
       },
       assets: assetsSummary,
+      colorSystem: d.colorSystem || null,
+      typographySystem: d.typographySystem || null,
+      guidePlan: d.guidePlan || null,
+      brandHomeImprovements: Array.isArray(d.brandHomeImprovements) ? d.brandHomeImprovements : [],
+      personality: (d.brand && d.brand.personality) || null,
+      visualDirection: (d.brand && d.brand.visualDirection) || '',
       recommendations: Array.isArray(d.recommendations) ? d.recommendations : [],
       sourceFiles: {
         count: report.preparedFileCount || report.preparedCount || assetsSummary.length || 0,
