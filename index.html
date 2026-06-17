@@ -904,7 +904,7 @@ function prepDataUrl(im){            // rasterize SVGs + flatten transparency so
   return new Promise(res=>{
     if(im.ext!=='svg' && /^data:image\/(png|jpeg|jpg|webp)/i.test(im.url)) return res(im.url);
     try{ const img=new Image();
-      img.onload=()=>{ try{ const max=1024; let w=img.width||512,h=img.height||512; const sc=Math.min(1,max/Math.max(w,h));
+      img.onload=()=>{ try{ const max=768; let w=img.width||512,h=img.height||512; const sc=Math.min(1,max/Math.max(w,h));
           w=Math.round(w*sc); h=Math.round(h*sc); const c=document.createElement('canvas'); c.width=w; c.height=h;
           const x=c.getContext('2d'); x.fillStyle='#808080'; x.fillRect(0,0,w,h); x.drawImage(img,0,0,w,h); res(c.toDataURL('image/png'));
         }catch(e){ res(im.url); } };
@@ -921,7 +921,15 @@ async function requestReview(assets){
     return await res.json();
   } finally { clearTimeout(t); }
 }
-function mapAiToBrand(d){            // map the AI's response into the brand the rooms read from
+function slotToRole(slot){            // Experience's slot vocabulary → Brand Home roles
+  const s=(slot||'').toLowerCase();
+  if(s.includes('secondary')||s.includes('alternate')||s.includes('alt')) return 'secondaryLogo';
+  if(s.includes('wordmark')||s.includes('logotype')) return 'wordmark';
+  if(s.includes('icon')||s.includes('mark')||s.includes('favicon')||s.includes('symbol')) return 'iconMark';
+  if(s.includes('primary')||s.includes('hero')||s.includes('lead')||s.includes('logo')) return 'primaryLogo';
+  return '';                          // header/social/avatar/card/print/extra → not a logo
+}
+function mapAiToBrand(d, picked){     // map the AI's response into the brand — same fields Experience reads
   if(!d||typeof d!=='object') return false;
   const g=d.guide||{}, br=d.brand||{};
   const nm=g.clientName||br.name; if(nm) brand.name=cleanBrandName(String(nm));
@@ -933,10 +941,28 @@ function mapAiToBrand(d){            // map the AI's response into the brand the
   const ty=d.typography||{};
   const disp=ty.displayFont||(ty.display&&ty.display.name)||''; const body=ty.bodyFont||(ty.body&&ty.body.name)||'';
   if(disp||body) brand.type={display:disp,displayUsage:(ty.display&&ty.display.usage)||'',body:body,bodyUsage:(ty.body&&ty.body.usage)||''};
-  const rep=Array.isArray(d.assetReport)?d.assetReport:[];     // let an AI-flagged primary logo lead
-  if(rep.length && brand.logos.length){
-    const p=rep.find(a=>/primary|lead|logo|wordmark/i.test(a.assetRole||a.role||''));
-    if(p&&p.name){ const idx=brand.logos.findIndex(l=>l.name===p.name); if(idx>0){ const [x]=brand.logos.splice(idx,1); brand.logos.unshift(x); } }
+  // roles + logo/photo split straight from the AI's assignments, exactly like Experience
+  const asg = Array.isArray(d.assetAssignments) ? d.assetAssignments
+            : (Array.isArray(d.assetReport) ? d.assetReport.map(a=>({fileId:a.fileId||a.id, slot:a.assetRole||a.role||a.slot, name:a.name})) : []);
+  if(asg.length && picked && picked.length){
+    const byId={}; picked.forEach((im,i)=>{ byId['asset_'+(i+1)]=im; });
+    const reLog=[], rePho=[], seen=new Set();
+    asg.forEach(a=>{ let im=(a.fileId&&byId[a.fileId])||(a.name&&picked.find(p=>p.name===a.name)); if(!im||seen.has(im)) return; seen.add(im);
+      const role=slotToRole(a.slot);
+      if(role){ im.role=role; im._autoRole=false; reLog.push(im); } else { im.role='photography'; rePho.push(im); }
+    });
+    if(reLog.length||rePho.length){
+      brand.logos.forEach(im=>{ if(!seen.has(im)) reLog.push(im); });
+      brand.photos.forEach(im=>{ if(!seen.has(im)) rePho.push(im); });
+      brand.logos=reLog; brand.photos=rePho;
+      brand.logos.sort((x,y)=>((y.role==='primaryLogo')-(x.role==='primaryLogo')));
+    }
+  } else {
+    const rep=Array.isArray(d.assetReport)?d.assetReport:[];
+    if(rep.length && brand.logos.length){
+      const p=rep.find(a=>/primary|lead|logo|wordmark/i.test(a.assetRole||a.role||''));
+      if(p&&p.name){ const idx=brand.logos.findIndex(l=>l.name===p.name); if(idx>0){ const [x]=brand.logos.splice(idx,1); brand.logos.unshift(x); } }
+    }
   }
   return true;
 }
@@ -1072,20 +1098,20 @@ async function finishIntake(imgs,folderName){
   // prep the images once — used for both the AI call and the local colour read
   let urls=null;
   if(imgs.length){
-    const picked=[...imgs].sort((a,b)=>scoreForVision(b.name)-scoreForVision(a.name)).slice(0,14);
+    const picked=[...imgs].sort((a,b)=>scoreForVision(b.name)-scoreForVision(a.name)).slice(0,8);  // quick test: lean set
     urls=await Promise.all(picked.map(prepDataUrl));
-    setStatus('Reading your brand…');
+    setStatus('Quick read of your brand…');
     let aiOK=false;
     try{
       const assets=picked.map((im,i)=>({ id:'asset_'+(i+1), name:im.name,
         type:(/^data:([^;,]+)/.exec(urls[i]||'')||[])[1]||('image/'+im.ext),
         category:im.ext==='svg'?'logo':'image', dataUrl:urls[i] }));
-      aiOK=mapAiToBrand(await requestReview(assets));
+      aiOK=mapAiToBrand(await requestReview(assets), picked);
     }catch(e){ console.warn('Brand Concierge unavailable — organized locally:',e); }
     // colours come from the actual uploads even when the AI didn't run/return them
     if(!brand.colors.length){ try{ const pal=await extractPalette(urls); if(pal.length) brand.colors=pal; }catch(e){} }
     setStatus(total
-      ? (aiOK ? (brand.name?brand.name+' is moved in — rooms set from your brand.':'Moved in — rooms set from your brand.')
+      ? (aiOK ? (brand.name?brand.name+' is moved in — same read as your Experience flow.':'Moved in — same read as your Experience flow.')
               : (brand.colors.length?`${total} file${total===1?'':'s'} moved in — colours read from your logos (full AI runs on your live site).`
                                      :`${total} file${total===1?'':'s'} moved in — organized locally (AI runs on your live site).`))
       : 'Nothing readable found — try images, a PDF, a folder, or a .zip.');
