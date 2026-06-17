@@ -1391,6 +1391,17 @@ async function importFromExperience(){
     const ty=dna.typography||{};
     const disp=(ty.display&&ty.display.name)||''; const body=(ty.body&&ty.body.name)||'';
     if(disp||body) brand.type={display:disp,displayUsage:(ty.display&&ty.display.usage)||'',body:body,bodyUsage:(ty.body&&ty.body.usage)||''};
+    // Creative-Director systems carried across the handoff (parity with the direct move-in)
+    if(dna.colorSystem) brand.colorSystem=dna.colorSystem;
+    if(dna.typographySystem){
+      brand.typeSystem=dna.typographySystem; const ts=dna.typographySystem;
+      const td=(ts.display&&ts.display.name)||disp, tb=(ts.body&&ts.body.name)||body;
+      if(td||tb) brand.type={display:td||'',displayUsage:(ts.display&&ts.display.usage)||(ty.display&&ty.display.usage)||'',body:tb||'',bodyUsage:(ts.body&&ts.body.usage)||(ty.body&&ty.body.usage)||''};
+    }
+    if(dna.guidePlan) brand.guidePlan=dna.guidePlan;
+    if(Array.isArray(dna.brandHomeImprovements)) brand.brandHomeImprovements=dna.brandHomeImprovements;
+    if(dna.personality) brand.personality=dna.personality;
+    if(dna.visualDirection) brand.visualDirection=dna.visualDirection;
   }
   brand.logos=[]; brand.photos=[]; brand.docs=[];
   for(const rec of (recs||[])){
@@ -1415,6 +1426,9 @@ async function importFromExperience(){
   const n=brand.logos.length+brand.photos.length+brand.docs.length;
   setStatus((brand.name?brand.name+' moved in from your intake':'Your brand moved in from intake')+(n?` — ${n} file${n===1?'':'s'} placed.`:'.'));
   setTimeout(()=>announceWorkspaceUpdate((brand.name?brand.name+' has moved in.':'Your brand has moved in.')+' Everything has a place.','intake'),300);
+  if(Array.isArray(brand.brandHomeImprovements) && brand.brandHomeImprovements.length){
+    const tip=brand.brandHomeImprovements[0]; if(tip) setTimeout(()=>announceWorkspaceUpdate(String(tip),'concierge'), 3400);
+  }
   return true;
 }
 </script>
