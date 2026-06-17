@@ -1245,10 +1245,17 @@ const APP_SPECS={
   'signage':{w:1600,h:1000,mode:'signage',label:'Signage / backdrop',hint:'Large format',group:'Print'}
 };
 const APP_GROUPS=['Social','Web & email','Print'];
-async function exportLogoFor(ground){   // 'color' → light logo for dark grounds; 'plain' → real/black logo for light & transparent grounds
-  const find=v=>brand.logos.find(l=>l.variant===v);
-  if(ground==='color'){ const w=find('white'); if(w) return w.url; const p=pickMark('primaryLogo','wordmark','secondaryLogo'); if(!p) return ''; const r=await recolorLogo(p.url,'white',/svg/i.test(p.ext||'')); return r||p.url; }
-  const b=find('black'); if(b) return b.url; const p=pickMark('primaryLogo','wordmark','secondaryLogo'); return p?p.url:'';
+async function exportLogoFor(ground){   // 'color' → best logo for DARK grounds; 'plain' → best for light & transparent grounds
+  const m=(logoSystemMarks().primary) || pickMark('primaryLogo','wordmark','secondaryLogo'); if(!m) return '';
+  const isSvg=/svg/i.test(m.ext||'');
+  if(ground==='color'){           // dark background: reverse only when it stays crisp, otherwise keep the real mark
+    const t=chooseTreatment(m,'dark');
+    if(t==='white'){ const w=brand.logos.find(l=>l.variant==='white'); return w?w.url:(await recolorLogo(m.url,'white',isSvg)||m.url); }
+    return m.url;
+  }
+  const t=chooseTreatment(m,'light');
+  if(t==='black'){ const b=brand.logos.find(l=>l.variant==='black'); return b?b.url:(await recolorLogo(m.url,'black',isSvg)||m.url); }
+  return m.url;
 }
 function imgToDataURL(url,isSvg){        // portable copy for embedding inside downloadable SVG (keeps real colours)
   return new Promise(res=>{ if(!url) return res(''); if(/^data:/.test(url)) return res(url);
@@ -1314,7 +1321,7 @@ function renderApplications(root){
     '<div class="apps-group"><h4 class="apps-h">'+g+'</h4><div class="apps-grid">'+
     groups[g].map(([k,s])=>{
       const onDark=(s.mode==='badge'||s.mode==='post'||s.mode==='signage');
-      return '<div class="appcard'+(onDark?' on-dark':'')+'"><span class="app-dim">'+s.w+' × '+s.h+'</span><b class="app-name">'+esc(s.label)+'</b><i class="app-hint">'+esc(s.hint||'')+'</i><span class="app-dl"><button data-export="'+k+'" data-fmt="png">PNG</button>'+(s.svg?'<button data-export="'+k+'" data-fmt="svg">SVG</button>':'')+'</span></div>';
+      return '<div class="appcard'+(onDark?' on-dark':'')+'"><span class="app-dim">'+s.w+' × '+s.h+'</span><b class="app-name">'+esc(s.label)+'</b><i class="app-hint">'+esc(s.hint||'')+'</i><span class="app-dl"><button data-export="'+k+'" data-fmt="png">Download</button></span></div>';
     }).join('')+'</div></div>'
   ).join('');
 }
@@ -1581,36 +1588,50 @@ function logoSystemMarks(){
   const icon=pool.find(l=>l.role==='iconMark'&&l!==primary) || pool.find(l=>l!==primary&&asp(l)>0.7&&asp(l)<1.4&&!/wordmark/i.test(l.name||''));
   return {primary, icon};
 }
-async function logoCell(mark,kind,treatment,label){
+/* ── the concierge's logo design decisions: when to reverse, recolor, or keep the real mark ── */
+function markProfile(m){
+  const tr=m.transparentRatio==null?0.1:m.transparentRatio, vy=m.variety==null?40:m.variety, lum=m.lum==null?128:m.lum;
+  const cleanReverse = tr>0.45 && vy<26;     // open line-art with few colors → a flat recolor stays crisp (won't blob)
+  const worksOnDark  = lum>120 || vy>=22;    // has bright or colourful elements that read on a dark ground
+  const worksOnLight = lum<236;              // not a near-white-only mark
+  return {cleanReverse, worksOnDark, worksOnLight};
+}
+function chooseTreatment(m,slot){            // slot: 'light' | 'dark'
+  const p=markProfile(m);
+  if(slot==='dark'){ if(p.cleanReverse) return 'white'; if(p.worksOnDark) return 'color'; return 'white'; }
+  if(p.worksOnLight) return 'color'; return 'black';
+}
+const TREAT_WORD={color:'full color',white:'reversed',black:'one-color'};
+async function logoCell(mark,kind,treatment,ground,label){   // ground: 'paper' | 'dark'
   const isSvg=/svg/i.test(mark.ext||''); let url;
-  if(treatment==='white') url=await recolorLogo(mark.url,'white',isSvg)||mark.url;
-  else if(treatment==='black') url=await recolorLogo(mark.url,'black',isSvg)||mark.url;
+  if(treatment==='white') url=(brand.logos.find(l=>l.variant==='white')||{}).url || await recolorLogo(mark.url,'white',isSvg) || mark.url;
+  else if(treatment==='black') url=(brand.logos.find(l=>l.variant==='black')||{}).url || await recolorLogo(mark.url,'black',isSvg) || mark.url;
   else url=await imgToDataURL(mark.url,isSvg)||mark.url;
-  const key=mark.id+'|'+kind+'|'+treatment; LOGOVAR[key]=url;
-  const onD=treatment==='white'; const fname=brandSlug()+'-'+kind+'-'+treatment+'.png';
+  const key=mark.id+'|'+kind+'|'+treatment+'|'+ground; LOGOVAR[key]=url;
+  const onD=ground==='dark'; const fname=brandSlug()+'-'+kind+'-'+treatment+'.png';
   return '<div class="gd-logocell '+(onD?'dark':'paper')+'"><img alt="" src="'+url+'">'
-    +'<button class="gd-logo-dl'+(onD?' on-dark':'')+'" data-logodl="'+key+'" data-fname="'+fname+'" title="Download PNG" aria-label="Download PNG">'+DLICON+'</button>'
+    +'<button class="gd-logo-dl'+(onD?' on-dark':'')+'" data-logodl="'+key+'" data-fname="'+fname+'" title="Download" aria-label="Download">'+DLICON+'</button>'
     +'<span class="gd-logo-label'+(onD?' on-dark':'')+'">'+esc(label)+'</span></div>';
+}
+async function markRow(mark,kind,role){
+  const p=markProfile(mark);
+  const lightTreat=chooseTreatment(mark,'light'), darkTreat=chooseTreatment(mark,'dark');
+  const cells=[
+    await logoCell(mark,kind,lightTreat,'paper',role+' — '+TREAT_WORD[lightTreat]+' · on light'),
+    await logoCell(mark,kind,darkTreat,'dark',role+' — '+TREAT_WORD[darkTreat]+' · on dark')
+  ];
+  if(p.cleanReverse) cells.push(await logoCell(mark,kind,'black','paper',role+' — one-color · single ink'));
+  return '<div class="gd-logos'+(cells.length<3?' two':'')+'">'+cells.join('')+'</div>';
 }
 async function renderLogoSystem(root){
   const wrap=root.querySelector('[data-logosys]'); if(!wrap) return;
   const {primary,icon}=logoSystemMarks(); if(!primary) return;        // keep template placeholder until a real mark exists
-  const intro = icon
-    ? "Your primary logo in approved color and reversed versions, plus a compact mark for tight spaces. Use the full logo wherever there's room; let the compact mark stand alone for avatars, favicons, and small placements. Use the color version on light backgrounds and the reversed version on dark. Hover any mark to download it."
-    : "Your primary logo in its approved versions. Use the full-color logo on light backgrounds, the reversed version on dark backgrounds or photography, and the one-color version for single-ink printing, stamps, and embroidery. Hover any mark to download it.";
-  const primaryRow='<div class="gd-logos">'
-    + await logoCell(primary,'logo','color','Primary — full color · on light')
-    + await logoCell(primary,'logo','white','Primary — reversed · on dark')
-    + await logoCell(primary,'logo','black','Primary — one-color · single ink, stamps')
-    + '</div>';
-  let iconRow='';
-  if(icon && icon.id!==primary.id){
-    iconRow='<div class="gd-logos two">'
-      + await logoCell(icon,'icon','color','Compact mark — color · avatar / favicon')
-      + await logoCell(icon,'icon','white','Compact mark — reversed · on dark')
-      + '</div>';
-  }
-  wrap.innerHTML='<p class="gd-sub">'+esc(intro)+'</p>'+primaryRow+iconRow;
+  const intro = (icon&&icon.id!==primary.id)
+    ? "Your logo, prepared for every background, plus a compact mark for tight spaces. Use the full logo wherever there's room; let the compact mark stand alone for avatars, favicons, and small placements. Each version is chosen to look right on its background — hover any mark to download it."
+    : "Your logo, prepared for every background. Use the version shown for light and for dark grounds — each is chosen to keep the mark sharp and legible. Every file is optimized and ready; hover any mark to download it.";
+  wrap.innerHTML='<p class="gd-sub">'+esc(intro)+'</p>'
+    + await markRow(primary,'logo','Primary')
+    + ((icon&&icon.id!==primary.id) ? await markRow(icon,'icon','Compact mark') : '');
 }
 /* ════════════════ STAGE 1 — LOCAL PREPARATION ════════════════
    Build a full asset inventory, drop exact duplicates, sort into the brand
