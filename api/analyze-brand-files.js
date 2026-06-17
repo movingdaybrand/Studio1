@@ -232,7 +232,8 @@ technical terms.
   "positioning": "string — one sentence on where this brand sits in its market",
   "personality": ["3-5 single-word traits specific to THIS brand, e.g. refined, energetic, grounded"],
   "voice": "string — one sentence on how the brand should sound",
-  "visualDirection": "string — 1-2 sentences of forward art-direction for this brand"
+  "visualDirection": "string — 1-2 sentences of forward art-direction for this brand",
+  "website": "string — if any uploaded artwork shows a web address (business card, packaging, signage, footer), return it normalized as https://domain; otherwise null"
 },
 "colorSystem": {
   "primary":    { "hex": "#rrggbb", "name": "string" },
@@ -463,6 +464,171 @@ function normalizeLogoSystem(parsed) {
   };
 }
 
+/* ── Website enrichment (two-pass) ──────────────────────────────────────────
+   Pass 1 (vision) may return a URL printed in the artwork as brand.website.
+   Here we normalize it, fetch the homepage server-side, pull a few high-signal
+   facts, and (optionally) run a small text-only refine call to blend them in.
+   Every step is best-effort: any failure leaves the Pass-1 analysis untouched. */
+function decodeEntities(s) {
+  return String(s || "")
+    .replace(/&amp;/g, "&").replace(/&lt;/g, "<").replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"').replace(/&#0?39;|&#x27;/gi, "'").replace(/&nbsp;/g, " ");
+}
+
+function normalizeUrl(raw) {
+  if (!raw || typeof raw !== "string") return null;
+  let u = raw.trim().replace(/^["'<([]+|["'>)\]]+$/g, "");
+  if (!u) return null;
+  if (/\s/.test(u)) u = u.split(/\s+/)[0];
+  if (!/^https?:\/\//i.test(u)) {
+    if (/^[\w.-]+\.[a-z]{2,}(\/|$)/i.test(u)) u = "https://" + u;
+    else return null;
+  }
+  try {
+    const url = new URL(u);
+    if (!/^https?:$/.test(url.protocol)) return null;
+    if (!url.hostname.includes(".")) return null;
+    return url.origin + url.pathname.replace(/\/+$/, "");
+  } catch {
+    return null;
+  }
+}
+
+function metaContent(html, key) {
+  const safe = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const re = new RegExp('<meta[^>]+(?:name|property)=["\']' + safe + '["\'][^>]*>', "i");
+  const tag = html.match(re);
+  if (!tag) return "";
+  const c = tag[0].match(/content=["']([^"']*)["']/i);
+  return c ? decodeEntities(c[1]).replace(/\s+/g, " ").trim() : "";
+}
+
+async function fetchSiteContext(url, timeoutMs) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs || 5000);
+  try {
+    const r = await fetch(url, {
+      signal: ctrl.signal,
+      redirect: "follow",
+      headers: {
+        "User-Agent": "MovingDayBrandBot/1.0 (+https://movingdaybrand.com)",
+        Accept: "text/html,application/xhtml+xml"
+      }
+    });
+    clearTimeout(t);
+    if (!r.ok) return null;
+    const ct = r.headers.get("content-type") || "";
+    if (ct && !/text\/html|application\/xhtml/i.test(ct)) return null;
+    let html = await r.text();
+    if (html.length > 300000) html = html.slice(0, 300000);
+    const title = decodeEntities((html.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || "")
+      .replace(/\s+/g, " ").trim().slice(0, 160);
+    const description = (metaContent(html, "description") || metaContent(html, "og:description")).slice(0, 300);
+    const ogImage = metaContent(html, "og:image").slice(0, 500);
+    const siteName = metaContent(html, "og:site_name").slice(0, 120);
+    const themeColor = metaContent(html, "theme-color").slice(0, 32);
+    const h1 = decodeEntities(((html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i) || [])[1] || "").replace(/<[^>]+>/g, " "))
+      .replace(/\s+/g, " ").trim().slice(0, 160);
+    if (!title && !description && !siteName && !h1) return null;
+    return { url, title, description, ogImage, siteName, themeColor, h1 };
+  } catch {
+    clearTimeout(t);
+    return null;
+  }
+}
+
+async function refineWithSite(parsed, site, apiKey, model) {
+  const current = {
+    clientName: parsed?.guide?.clientName || parsed?.brand?.name || "",
+    category: parsed?.guide?.category || parsed?.brand?.industry || "",
+    tagline: parsed?.copySuggestions?.tagline || "",
+    description: parsed?.guide?.description || "",
+    positioning: parsed?.brand?.positioning || ""
+  };
+  const system =
+    "You refine a brand summary using facts scraped from the brand's own website. Stay truthful to the site and never invent. " +
+    'Return ONLY JSON: {"clientName":"","brandName":"","tagline":"","category":"","description":"","positioning":"","extraColors":[{"hex":"#rrggbb","name":""}]}. ' +
+    "Leave any field as \"\" if the website does not clearly improve it. Use extraColors only for a colour the site clearly signals; otherwise [].";
+  const user =
+    "CURRENT SUMMARY:\n" + JSON.stringify(current) +
+    "\n\nWEBSITE FACTS:\n" + JSON.stringify(site) +
+    "\n\nRefine only where the website gives better signal.";
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), 8000);
+  try {
+    const r = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      signal: ctrl.signal,
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model,
+        temperature: 0.2,
+        max_tokens: 600,
+        response_format: { type: "json_object" },
+        messages: [{ role: "system", content: system }, { role: "user", content: user }]
+      })
+    });
+    clearTimeout(t);
+    if (!r.ok) return null;
+    const j = await r.json();
+    const txt = j?.choices?.[0]?.message?.content || "";
+    try { return JSON.parse(txt); } catch { return null; }
+  } catch {
+    clearTimeout(t);
+    return null;
+  }
+}
+
+async function maybeEnrichFromWebsite(parsed, apiKey, model) {
+  const url = normalizeUrl((parsed && parsed.brand && parsed.brand.website) || (parsed && parsed.website) || "");
+  parsed.websiteEnriched = false;
+  if (!url) return;
+  parsed.brand = parsed.brand || {};
+  parsed.brand.website = url;
+
+  const site = await fetchSiteContext(url, 5000);
+  if (!site) return;
+  parsed.websiteContext = site;
+
+  const addColor = (hex, name) => {
+    const h = String(hex || "").trim();
+    if (!/^#?[0-9a-f]{6}$/i.test(h)) return;
+    const norm = h[0] === "#" ? h : "#" + h;
+    parsed.colors = Array.isArray(parsed.colors) ? parsed.colors : [];
+    parsed.palette = Array.isArray(parsed.palette) ? parsed.palette : [];
+    if (parsed.colors.some(c => String(c.hex || "").toLowerCase() === norm.toLowerCase())) return;
+    if (parsed.colors.length >= 6) return;
+    const entry = { hex: norm, name: name || "Web" };
+    parsed.colors.push(entry);
+    parsed.palette.push(entry);
+  };
+
+  if (site.themeColor) addColor(site.themeColor, "Web");
+  if (site.ogImage) parsed.websitePreview = site.ogImage;
+
+  const ref = apiKey ? await refineWithSite(parsed, site, apiKey, model) : null;
+  if (ref) {
+    const set = v => typeof v === "string" && v.trim();
+    parsed.guide = parsed.guide || {};
+    parsed.brand = parsed.brand || {};
+    parsed.copySuggestions = parsed.copySuggestions || {};
+    if (set(ref.clientName)) parsed.guide.clientName = ref.clientName.trim();
+    if (set(ref.brandName)) {
+      parsed.brand.name = ref.brandName.trim();
+      if (!set(parsed.guide.clientName)) parsed.guide.clientName = ref.brandName.trim();
+    }
+    if (set(ref.category)) {
+      parsed.guide.category = ref.category.trim();
+      parsed.brand.industry = ref.category.trim();
+    }
+    if (set(ref.tagline)) parsed.copySuggestions.tagline = ref.tagline.trim();
+    if (set(ref.description)) parsed.guide.description = ref.description.trim();
+    if (set(ref.positioning)) parsed.brand.positioning = ref.positioning.trim();
+    if (Array.isArray(ref.extraColors)) ref.extraColors.slice(0, 3).forEach(c => addColor(c && c.hex, (c && c.name) || "Web"));
+    parsed.websiteEnriched = true;
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -594,6 +760,7 @@ export default async function handler(req, res) {
       "Perform brand understanding from the uploaded visual assets and the local preparation report. " +
       "Classify each asset by its image content, not its filename. Identify the primary logo, icon mark, and wordmark from the actual artwork, " +
       "and give every logo a tone and a contrasting recommendedBackground. " +
+      "If any artwork shows a web address, return it as brand.website (normalized https://…), else null. " +
       "Return the full structured JSON exactly in the required shape. Use exact filenames. Do not include markdown."
   });
 
@@ -714,6 +881,19 @@ export default async function handler(req, res) {
 
   if (!Array.isArray(parsed.usage.dont)) {
     parsed.usage.dont = [];
+  }
+
+  // Two-pass website enrichment — best-effort, never blocks intake.
+  // Off when the request opts out (websiteLookup:false) or env WEBSITE_ENRICHMENT=off.
+  const websiteLookup = body?.websiteLookup !== false && process.env.WEBSITE_ENRICHMENT !== "off";
+  if (websiteLookup) {
+    try {
+      await maybeEnrichFromWebsite(parsed, apiKey, process.env.OPENAI_MODEL || "gpt-4o");
+    } catch (e) {
+      parsed.websiteEnriched = false;
+    }
+  } else {
+    parsed.websiteEnriched = false;
   }
 
   return res.status(200).json(parsed);
