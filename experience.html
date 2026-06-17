@@ -4655,6 +4655,25 @@ btnMovein.addEventListener('click', event => {
     return (file.type || '').startsWith('image/') || ['svg','png','jpg','jpeg','webp'].includes(e);
   }
 
+  // Cap and prioritize what the AI actually sees. Folders and zips can now stage
+  // dozens of images; the vision review should focus on the few that define the
+  // brand, not every photo and duplicate — that keeps it fast and on-target.
+  // (All files still stage for the asset library; this only bounds the AI call.)
+  const MAX_VISION_FILES = 14;
+  function scoreForVision(file) {
+    const n = (file.name || '').toLowerCase();
+    const e = ext(file.name);
+    let s = 0;
+    if (/logo|wordmark|logotype|lockup/.test(n)) s += 6;
+    if (/icon|mark|symbol|emblem|favicon|avatar|monogram/.test(n)) s += 4;
+    if (/brand|identity/.test(n)) s += 3;
+    if (e === 'svg') s += 3;                      // logos are often vector
+    if (e === 'png') s += 1;                      // often transparent marks
+    if (/photo|image|img|dsc|shot|banner|cover|hero|background|bg|stock|scene|team|headshot/.test(n)) s -= 4;
+    if (/^(img|dsc|photo)[\W_]/.test(n)) s -= 2;  // camera-roll naming
+    return s;
+  }
+
   function isPreviewableImage(asset) {
     const e = asset.extension;
     return (asset.file?.type || '').startsWith('image/') || ['svg','png','jpg','jpeg','webp','gif'].includes(e);
@@ -5066,7 +5085,9 @@ btnMovein.addEventListener('click', event => {
       stepActive(1);
       const analyzable = allFiles
         .map((file, index) => ({ file, uploadId: `asset_${index + 1}` }))
-        .filter(item => isAnalyzableFile(item.file));
+        .filter(item => isAnalyzableFile(item.file))
+        .sort((a, b) => scoreForVision(b.file) - scoreForVision(a.file))
+        .slice(0, MAX_VISION_FILES);
 
       if (!analyzable.length) {
         throw new Error('Please include at least one PNG, JPG, WEBP, or SVG so Moving Day can prepare a visual review.');
