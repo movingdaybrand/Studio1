@@ -1000,7 +1000,13 @@ function applyBrandHome(){
   if(head && brand.name){
     const k=head.querySelector('.kicker'), w=head.querySelector('.welcome'), sub=head.querySelector('.welcome-sub');
     if(k) k.textContent='Brand home';
-    if(w){ w.style.display=''; w.textContent=brand.name; }
+    if(w){
+      w.style.display=''; w.textContent=brand.name;
+      const t=brand.type||{}, ts=brand.typeSystem||{};
+      const df=t.display || (ts.display&&ts.display.name) || (ts.heading&&ts.heading.name) || '';
+      if(df){ ensureFont(df); w.style.fontFamily='"'+df+'", var(--display)'; }   // wear the brand's own type when we know it
+      else { w.style.fontFamily=''; }                                            // otherwise the house display face
+    }
     if(sub) sub.textContent=brand.tagline||'Everything has a place. Choose a room to continue.';
     const mark=pickMark('wordmark','primaryLogo','secondaryLogo');
     let logo=document.getElementById('homeLogo');
@@ -1011,7 +1017,7 @@ function applyBrandHome(){
   } else if(head){                                   // no brand → restore the default greeting
     const k=head.querySelector('.kicker'), w=head.querySelector('.welcome'), sub=head.querySelector('.welcome-sub');
     if(k) k.textContent='Good evening';
-    if(w){ w.style.display=''; w.innerHTML='Welcome <span class="soft">home.</span>'; }
+    if(w){ w.style.display=''; w.style.fontFamily=''; w.innerHTML='Welcome <span class="soft">home.</span>'; }
     if(sub) sub.textContent="Everything has a place. Choose where you'd like to continue.";
     const logo=document.getElementById('homeLogo'); if(logo) logo.style.display='none';
   }
