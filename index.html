@@ -422,6 +422,7 @@ const ROOMS={
       <div class="frow"><div><b>Editor mode</b><i>Section editing &amp; placement tools</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>AI Brand Concierge</b><i>Analyze uploads on intake</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>Local-only mode</b><i>Skip the AI route, organize on-device</i></div><div class="toggle"></div></div>
+      <div class="frow"><div><b>Website lookup</b><i>Read a URL from the files &amp; check the live site</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>Raw JSON</b><i>Inspect the live workspace state</i></div><div class="toggle"></div></div>
     </div>
     <div class="founder-state" id="founderState"><div class="fs-bar"><span>Live workspace state</span><span id="fsUpdated"></span></div><pre id="fsJson"></pre></div>`}
@@ -434,10 +435,12 @@ function loadFounderState(){
   let s={};
   try{ const raw=localStorage.getItem('mdFounderState'); if(raw) s=JSON.parse(raw)||{}; }catch(e){}
   if(s['AI Brand Concierge']===undefined) s['AI Brand Concierge']=true;   // Concierge is on by default
+  if(s['Website lookup']===undefined) s['Website lookup']=true;           // website enrichment on by default
   return s;
 }
 function saveFounderState(){ try{ localStorage.setItem('mdFounderState', JSON.stringify(founderState)); }catch(e){} }
 function conciergeOn(){ return !!founderState['AI Brand Concierge'] && !founderState['Local-only mode']; }
+function websiteLookupOn(){ return founderState['Website lookup']!==false; }
 const SHELL=document.querySelector('.glasspane');
 const ROOM_META={
   identity:{desc:'Name, logos, and color foundation.'},
@@ -994,7 +997,7 @@ async function requestReview(assets, report){
   const preparationReport = report || {preparedFileCount:assets.length, assets:assets.map(a=>({uploadId:a.id,category:a.category}))};
   try{
     const res=await fetch('/api/analyze-brand-files',{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,
-      body:JSON.stringify({preparationReport, assets})});
+      body:JSON.stringify({preparationReport, assets, websiteLookup: websiteLookupOn()})});
     if(!res.ok) throw new Error('route '+res.status);
     return await res.json();
   } finally { clearTimeout(t); }
