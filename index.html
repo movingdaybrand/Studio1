@@ -795,7 +795,7 @@ function rgbToHex(rgb){const m=(rgb||'').match(/\d+/g); if(!m) return '#888888';
 function readableOn(hex){const r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16); return (0.299*r+0.587*g+0.114*b)/255>0.6?'#1c2b22':'#f3efe6';}
 
 // ── upload & set: a dropped .zip unzips and populates the rooms ──
-const brand={name:'',tagline:'',category:'',logos:[],photos:[],docs:[],colors:[],type:null,colorSystem:null,typeSystem:null,personality:null,visualDirection:'',guidePlan:null,brandHomeImprovements:null,brandWorld:null};
+const brand={name:'',tagline:'',category:'',logos:[],photos:[],docs:[],colors:[],type:null,colorSystem:null,typeSystem:null,personality:null,visualDirection:'',guidePlan:null,brandHomeImprovements:null,brandWorld:null,designStrategy:null};
 
 /* ════════════════ SHARED BRAND HOME STATE (single source of truth) ════════════════
    `brand` is the working store; MDWorkspaceState is its canonical, serializable view.
@@ -844,7 +844,7 @@ function projectWorkspaceState(){
   S.identity={primaryLogoId:byRole('primaryLogo'),secondaryLogoId:byRole('secondaryLogo'),iconMarkId:byRole('iconMark'),wordmarkId:byRole('wordmark')};
   S.deliverables={htmlReady:!!brand.name,pdfReady:!!brand.name,zipReady:(brand.logos.length+brand.photos.length)>0};
   S.colorSystem=brand.colorSystem||null; S.typeSystem=brand.typeSystem||null;
-  S.personality=brand.personality||null; S.guidePlan=brand.guidePlan||null; S.brandWorld=brand.brandWorld||null;
+  S.personality=brand.personality||null; S.guidePlan=brand.guidePlan||null; S.brandWorld=brand.brandWorld||null; S.designStrategy=brand.designStrategy||null;
   S.brandHomeImprovements=brand.brandHomeImprovements||null;
   S.updatedAt=new Date().toISOString();
   return S;
@@ -1245,6 +1245,19 @@ const APP_SPECS={
   'signage':{w:1600,h:1000,mode:'signage',label:'Signage / backdrop',hint:'Large format',group:'Print'}
 };
 const APP_GROUPS=['Social','Web & email','Print'];
+const DS_VOICE={bold:"Bold and high-contrast — built to be seen.",refined:"Quiet, refined, and confident — nothing shouts.",editorial:"Editorial and considered — type-led and calm.",warm:"Warm and approachable.",classic:"Clean and timeless.",technical:"Precise and modern."};
+function activeStrategy(){
+  const ds=brand.designStrategy;
+  if(ds && ds.personality) return ds;
+  const cols=(brand.colors||[]).map(c=>c.hex).filter(Boolean);
+  const hx=h=>{h=String(h||'').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h||'000000',16);return[(n>>16)&255,(n>>8)&255,n&255];};
+  const lum=h=>{const c=hx(h);return .299*c[0]+.587*c[1]+.114*c[2];}, sat=h=>{const c=hx(h),mx=Math.max(...c),mn=Math.min(...c);return mx?(mx-mn)/mx:0;};
+  if(!cols.length) return {personality:'refined',cardLayout:'centered',postLayout:'gradient',corner:'round',voice:DS_VOICE.refined};
+  const bySat=[...cols].sort((a,b)=>sat(b)-sat(a)), byLum=[...cols].sort((a,b)=>lum(a)-lum(b));
+  const sigSat=sat(bySat[0]), contrast=lum(byLum[byLum.length-1])-lum(byLum[0]);
+  const personality=(sigSat>0.55&&contrast>120)?'bold':(sigSat<0.25?'refined':'classic');
+  return {personality, cardLayout:personality==='bold'?'left':'centered', postLayout:personality==='bold'?'badge':'gradient', corner:personality==='bold'?'sharp':'round', voice:DS_VOICE[personality]};
+}
 async function exportLogoFor(ground){   // 'color' → best logo for DARK grounds; 'plain' → best for light & transparent grounds
   const m=(logoSystemMarks().primary) || pickMark('primaryLogo','wordmark','secondaryLogo'); if(!m) return '';
   const isSvg=/svg/i.test(m.ext||'');
@@ -1436,6 +1449,7 @@ function mapAiToBrand(d, picked){     // map the AI's response into the brand �
   if(d.brand && typeof d.brand==='object'){ if(d.brand.personality) brand.personality=d.brand.personality; if(d.brand.visualDirection) brand.visualDirection=d.brand.visualDirection; }
   if(d.guidePlan) brand.guidePlan=d.guidePlan;
   if(d.brandWorld && typeof d.brandWorld==='object') brand.brandWorld=d.brandWorld;
+  if(d.designStrategy && typeof d.designStrategy==='object') brand.designStrategy=d.designStrategy;
   if(Array.isArray(d.brandHomeImprovements)) brand.brandHomeImprovements=d.brandHomeImprovements;
   // roles + logo/photo split straight from the AI's assignments, exactly like Experience
   const asg = Array.isArray(d.assetAssignments) ? d.assetAssignments
@@ -1772,7 +1786,7 @@ const SAVE_DB='mdBrandHomeSave', SAVE_STORE='brand', SAVE_KEY='current';
 function _db(){return new Promise((res,rej)=>{ if(typeof indexedDB==='undefined') return rej(new Error('no idb')); const r=indexedDB.open(SAVE_DB,1); r.onupgradeneeded=()=>{ try{r.result.createObjectStore(SAVE_STORE);}catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });}
 function saveBrand(){
   const snap={name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type,
-    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null};
+    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null,designStrategy:brand.designStrategy||null};
   if(!snap.name && !snap.logos.length && !snap.photos.length && !(snap.colors&&snap.colors.length)) return;
   _db().then(db=>{ try{ db.transaction(SAVE_STORE,'readwrite').objectStore(SAVE_STORE).put(snap,SAVE_KEY); }catch(e){} })
        .catch(()=>{ try{ localStorage.setItem('mdBrandHomeSaveLight', JSON.stringify({name:snap.name,tagline:snap.tagline,category:snap.category,colors:snap.colors,type:snap.type,colorSystem:snap.colorSystem,typeSystem:snap.typeSystem,logos:snap.logos.slice(0,3),photos:[],docs:snap.docs})); }catch(e){} });
@@ -1788,7 +1802,7 @@ function restoreBrand(snap){
   brand.colors=snap.colors||[]; brand.type=snap.type||null;
   brand.colorSystem=snap.colorSystem||null; brand.typeSystem=snap.typeSystem||null;
   brand.personality=snap.personality||null; brand.guidePlan=snap.guidePlan||null; brand.brandHomeImprovements=snap.brandHomeImprovements||null;
-  brand.brandWorld=snap.brandWorld||null;
+  brand.brandWorld=snap.brandWorld||null; brand.designStrategy=snap.designStrategy||null;
   assignRoles(); projectWorkspaceState();
   if(brand.name||brand.logos.length||brand.photos.length||brand.colors.length){
     setStatus('Welcome back'+(brand.name?', '+brand.name:'')+' — your guide is saved.');
@@ -1868,6 +1882,7 @@ async function importFromExperience(){
     }
     if(dna.guidePlan) brand.guidePlan=dna.guidePlan;
     if(dna.brandWorld) brand.brandWorld=dna.brandWorld;
+    if(dna.designStrategy) brand.designStrategy=dna.designStrategy;
     if(Array.isArray(dna.brandHomeImprovements)) brand.brandHomeImprovements=dna.brandHomeImprovements;
     if(dna.personality) brand.personality=dna.personality;
     if(dna.visualDirection) brand.visualDirection=dna.visualDirection;
