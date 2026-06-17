@@ -510,13 +510,17 @@ function removeAsset(id){
   ['logos','photos','docs'].forEach(k=>{ const i=brand[k].findIndex(a=>a.id===id); if(i>-1) brand[k].splice(i,1); });
   updateWorkspaceState({},{source:'assets',announce:'Asset removed. Brand Guide and Deliverables refreshed.'});
 }
-function recolorLogo(url, mode){          // recolor opaque pixels, keep the transparency intact
+function recolorLogo(url, mode, isSvg){          // recolor opaque pixels, keep the transparency intact
   return new Promise(res=>{
     const img=new Image();
     img.onload=()=>{
       try{
-        let w=img.naturalWidth||img.width||512, h=img.naturalHeight||img.height||512;
-        if(!w||!h){ w=h=512; }
+        let w=img.naturalWidth||img.width||0, h=img.naturalHeight||img.height||0;
+        if(isSvg){                                 // vector source → render up for a crisp export
+          const TARGET=1024;
+          if(!w||!h){ w=h=TARGET; }
+          else { const s=TARGET/Math.max(w,h); if(s>1){ w=Math.round(w*s); h=Math.round(h*s); } }
+        } else if(!w||!h){ w=h=512; }
         const c=document.createElement('canvas'); c.width=w; c.height=h;
         const x=c.getContext('2d'); x.drawImage(img,0,0,w,h);
         const d=x.getImageData(0,0,w,h), p=d.data;
@@ -537,9 +541,10 @@ async function makeLogoVariations(id){
   const a=findAsset(id); if(!a||!a.url) return;
   announceWorkspaceUpdate('Creating logo variations…','assets');
   const base=(a.name||'logo').replace(/\.[a-z0-9]+$/i,'');
+  const isSvg=/svg/i.test(a.ext||'') || /^data:image\/svg/i.test(a.url);
   let made=0;
   for(const [mode,label] of [['black','Black'],['white','White'],['grey','Greyscale']]){
-    const url=await recolorLogo(a.url, mode);
+    const url=await recolorLogo(a.url, mode, isSvg);
     if(url){ brand.logos.push({id:newId(),name:base+' — '+label+'.png',url,ext:'png',role:'',variant:mode}); made++; }
   }
   updateWorkspaceState({},{source:'assets',announce: made ? 'Black, white, and greyscale variations added.' : 'Couldn’t read that image for variations.'});
