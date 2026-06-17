@@ -293,6 +293,22 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .asset-var{display:none;margin-top:7px;width:100%;font-family:inherit;font-size:10px;letter-spacing:.04em;color:var(--ink-soft);background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:8px;padding:6px 8px;cursor:pointer;transition:color .2s,box-shadow .2s;}
 .asset-var:hover{color:var(--ink);box-shadow:inset 0 0 0 1px rgba(44,90,60,.28);}
 .editing .asset-var{display:block;}
+.lib-overlay{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(20,40,28,.28);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:24px;}
+.lib-overlay[hidden]{display:none;}
+.lib-panel{width:min(720px,94vw);max-height:84vh;display:flex;flex-direction:column;border-radius:var(--r-lg);padding:clamp(18px,2.4vw,28px);background:linear-gradient(160deg,rgba(255,255,255,.88),rgba(255,255,255,.72));backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);box-shadow:0 24px 70px rgba(20,50,34,.22);}
+.lib-head{display:flex;justify-content:space-between;align-items:center;font-size:12px;letter-spacing:.04em;color:var(--ink-soft);margin-bottom:14px;}
+.lib-head span{font-weight:500;}
+.lib-x{font-size:18px;line-height:1;color:var(--ink-faint);width:28px;height:28px;border-radius:50%;}
+.lib-x:hover{color:var(--ink);background:rgba(0,0,0,.05);}
+.lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px;overflow:auto;padding:2px;}
+.lib-item{display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:var(--r-sm);background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 1px var(--sage-line);cursor:pointer;text-align:left;transition:transform .2s,box-shadow .2s;}
+.lib-item:hover{transform:translateY(-2px);box-shadow:inset 0 0 0 1px rgba(44,90,60,.3),var(--shadow);}
+.lib-thumb{position:relative;aspect-ratio:1/1;border-radius:8px;overflow:hidden;background:#fff;}
+.lib-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:10%;}
+.lib-item.on-dark .lib-thumb{background:#1c2b22;}
+.lib-name{font-size:10px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.lib-upload{margin-top:14px;align-self:center;font-size:12px;color:var(--sage);background:rgba(255,255,255,.7);box-shadow:var(--shadow);padding:9px 18px;border-radius:99px;transition:transform .2s;}
+.lib-upload:hover{transform:translateY(-1px);}
 .role-select{font-family:inherit;font-size:11px;color:var(--ink);background:rgba(255,255,255,.7);border:none;box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:8px;padding:6px 8px;cursor:pointer;outline:none;}
 .role-select:focus{box-shadow:inset 0 0 0 2px rgba(44,90,60,.3);}
 .asset-empty{grid-column:1/-1;text-align:center;color:var(--ink-faint);font-size:13px;padding:clamp(20px,5vh,48px) 0;}
@@ -339,6 +355,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 </div></div>
 
 <div class="md-toast" id="mdToast"><span class="tk"></span><span id="mdToastText"></span></div>
+
+<div class="lib-overlay" id="libOverlay" hidden>
+  <div class="lib-panel">
+    <div class="lib-head"><span>Choose from your library</span><button class="lib-x" id="libClose" aria-label="Close">&times;</button></div>
+    <div class="lib-grid" id="libGrid"></div>
+    <button class="lib-upload" id="libUpload">Upload from device instead</button>
+  </div>
+</div>
 
 <input type="file" id="editFile" accept="image/*" hidden>
 <input type="color" id="editColor" hidden>
@@ -506,6 +530,39 @@ document.getElementById('backBtn').addEventListener('click',closeRoom);
 const fileInput=document.getElementById('editFile'), colorInput=document.getElementById('editColor');
 let editTarget=null, editAssetId=null;
 function findAsset(id){ return [...brand.logos,...brand.photos,...brand.docs].find(a=>a.id===id)||null; }
+/* ── replace from the uploaded asset library (no re-upload needed) ── */
+const libOverlay=document.getElementById('libOverlay'), libGrid=document.getElementById('libGrid');
+function libraryImages(){ return [...brand.logos,...brand.photos,...brand.docs].filter(a=>a.url && (/^data:image/i.test(a.url) || /\.(png|jpe?g|webp|svg|gif)$/i.test(a.ext||''))); }
+function openReplacePicker(){
+  const items=libraryImages();
+  if(!items.length){ fileInput.click(); return; }                 // nothing to pick from → straight to upload
+  libGrid.innerHTML=items.map(a=>'<button class="lib-item'+(a.variant==='white'?' on-dark':'')+'" data-pick="'+a.id+'"><span class="lib-thumb"><img alt="" src="'+a.url+'"></span><span class="lib-name">'+esc(a.name||'asset')+'</span></button>').join('');
+  libOverlay.hidden=false;
+}
+function closeLib(){ libOverlay.hidden=true; }
+function applyReplacement(src){
+  if(!src) return;
+  if(editAssetId){
+    const a=findAsset(editAssetId); if(a){ a.url=src.url; if(src.ext) a.ext=src.ext; }
+    editAssetId=null;
+    updateWorkspaceState({},{source:'assets',announce:'Replaced from your library.'});
+    return;
+  }
+  if(editTarget){
+    const isLogo=isLogoFrame(editTarget); setFrameImage(editTarget,src.url,isLogo);
+    if(isLogo){ if(!brand.logos.length) brand.logos.push({id:newId(),name:src.name||'logo',url:src.url,ext:src.ext||'png',role:'primaryLogo'});
+                else { brand.logos[0].url=src.url; if(src.ext) brand.logos[0].ext=src.ext; if(!brand.logos[0].role) brand.logos[0].role='primaryLogo'; } }
+    else { if(!brand.photos.length) brand.photos.push({id:newId(),name:src.name||'photo',url:src.url,ext:src.ext||'png',role:'photography'});
+           else { brand.photos[0].url=src.url; if(src.ext) brand.photos[0].ext=src.ext; } }
+    editTarget=null;
+    updateWorkspaceState({},{source:'identity',announce:'Updated from your library.'});
+  }
+}
+libGrid.addEventListener('click',e=>{ const b=e.target.closest('[data-pick]'); if(!b) return; const a=findAsset(b.dataset.pick); closeLib(); applyReplacement(a); });
+document.getElementById('libClose').addEventListener('click',closeLib);
+libOverlay.addEventListener('click',e=>{ if(e.target===libOverlay) closeLib(); });
+document.getElementById('libUpload').addEventListener('click',()=>{ closeLib(); fileInput.click(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !libOverlay.hidden) closeLib(); });
 function removeAsset(id){
   ['logos','photos','docs'].forEach(k=>{ const i=brand[k].findIndex(a=>a.id===id); if(i>-1) brand[k].splice(i,1); });
   updateWorkspaceState({},{source:'assets',announce:'Asset removed. Brand Guide and Deliverables refreshed.'});
@@ -571,11 +628,11 @@ roomBody.addEventListener('click',e=>{
   const vb=e.target.closest('.asset-var'); if(vb){ makeLogoVariations(vb.dataset.var); return; }
   if(e.target.isContentEditable) return;                       // editing text, not replacing
   const at=e.target.closest('.asset-thumb[data-asset]');
-  if(at){ editAssetId=at.dataset.asset; editTarget=null; fileInput.click(); return; }
+  if(at){ editAssetId=at.dataset.asset; editTarget=null; openReplacePicker(); return; }
   const sw=e.target.closest('.swatch,.gd-sw');
   if(sw){editTarget=sw;colorInput.value=rgbToHex(getComputedStyle(sw).backgroundColor);colorInput.click();return;}
   const fr=e.target.closest('.vframe');
-  if(fr){editTarget=fr;editAssetId=null;fileInput.click();return;}
+  if(fr){editTarget=fr;editAssetId=null;openReplacePicker();return;}
 });
 // asset role assignment (Assets) → connects Identity, Brand Guide, Deliverables
 roomBody.addEventListener('change',e=>{
