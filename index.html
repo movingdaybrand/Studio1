@@ -1260,6 +1260,12 @@ function legibilityFix(root){            // guarantee readable text on any palet
     h.querySelectorAll('.gd-meta span').forEach(e=>e.style.color=ink);
     h.querySelectorAll('.gd-meta b').forEach(e=>e.style.color=dark?'rgba(28,43,34,.5)':'rgba(235,229,214,.46)');
   });
+  root.querySelectorAll('.markframe.dark,.markframe.brand,.gd-logocell.dark,.gd-logocell.brand,.glogo').forEach(cell=>{
+    if(cell.querySelector('img')) return;
+    const ink=readOnRGB(getComputedStyle(cell).backgroundColor);
+    cell.querySelectorAll('.mono,.wordmark-mini,.wm-doc').forEach(t=>t.style.color=ink);
+  });
+}
 async function fillHeroLogo(root){
   const slot=root.querySelector('[data-herologo]'); const title=root.querySelector('.gd-title'); if(!slot) return;
   const m=(logoSystemMarks().primary)||pickMark('primaryLogo','wordmark','secondaryLogo');
@@ -1267,12 +1273,6 @@ async function fillHeroLogo(root){
   try{ const url=await exportLogoFor('color'); if(url){ slot.className='gd-herologo on'; slot.innerHTML='<img alt="">'; slot.querySelector('img').src=url;
     if(title) title.style.display=(m.aspect!=null && m.aspect>2.4) ? 'none' : '';   // a wordmark already says the name
   } }catch(e){}
-}
-  root.querySelectorAll('.markframe.dark,.markframe.brand,.gd-logocell.dark,.gd-logocell.brand,.glogo').forEach(cell=>{
-    if(cell.querySelector('img')) return;
-    const ink=readOnRGB(getComputedStyle(cell).backgroundColor);
-    cell.querySelectorAll('.mono,.wordmark-mini,.wm-doc').forEach(t=>t.style.color=ink);
-  });
 }
 function applyUploads(root){
   if(!(brand.logos.length||brand.photos.length||brand.name||brand.colors.length)) return;   // nothing moved in yet
