@@ -523,6 +523,9 @@ body.deep-immerse .vframe-tag,body.deep-immerse .mk-tag,body.deep-immerse .asset
 body.deep-immerse .vframe::after,body.deep-immerse .swatch::after,body.deep-immerse .gd-sw::after,
 body.deep-immerse .asset-remove,body.deep-immerse .mk-dl button{background:rgba(16,20,26,.74)!important;color:rgba(246,248,244,.86)!important;}
 body.deep-immerse .sig-preview{box-shadow:0 14px 34px rgba(0,0,0,.45);}   /* the email card stays a real white card */
+body.deep-immerse .id-hero .id-primary{background:transparent!important;}                 /* the primary logo keeps floating — no frame box */
+body.deep-immerse .id-primary .wm{color:#f3efe6!important;}                                 /* text-fallback wordmark reads on the dark room */
+body.deep-immerse .id-primary .wm small{color:rgba(243,239,230,.62)!important;}
 </style>
 </head>
 <body>
@@ -926,7 +929,7 @@ function applyFounder(root){
 roomBody.addEventListener('click',e=>{
   const tog=e.target.closest('.toggle');
   if(tog){ const on=tog.classList.toggle('on'); const row=tog.closest('.frow'), lab=row&&row.querySelector('b');
-    if(lab){ const name=lab.textContent.trim(); founderState[name]=on; saveFounderState(); if(name==='Editor mode') enableEditing(roomBody); if(name==='Brand immersion'||name==='Deep mode'||name==='Adaptive atmosphere') applyBrandHome(); if(name==='Raw JSON') refreshFounderState(); } return; }
+    if(lab){ const name=lab.textContent.trim(); founderState[name]=on; saveFounderState(); if(name==='Editor mode') enableEditing(roomBody); if(name==='Brand immersion'||name==='Deep mode'||name==='Adaptive atmosphere'){ applyBrandHome(); try{ placeLogos(roomBody); renderIdMarks(roomBody); }catch(e){} } if(name==='Raw JSON') refreshFounderState(); } return; }
   const deliv=e.target.closest('.vaultcard[data-deliv]'); if(deliv){ handleDeliverable(deliv.dataset.deliv); return; }
   const ex=e.target.closest('[data-export]'); if(ex){ exportApplication(ex.dataset.export, ex.dataset.fmt||'png'); return; }
   const ld=e.target.closest('[data-logodl]'); if(ld){ const u=LOGOVAR[ld.dataset.logodl]; if(u) dlDataURL(ld.dataset.fname||'logo.png',u); return; }
@@ -2240,8 +2243,9 @@ async function placeLogos(root){
   const primaryMark = primary || logos.find(l=>l.role==='primaryLogo') || logos[0];
   const darkest=[...logos].sort((a,b)=>lum(a)-lum(b))[0];
   const reversed = async m => { const isSvg=/svg/i.test(m.ext||''); return (brand.logos.find(l=>l.variant==='white')||{}).url || await recolorLogo(m.url,'white',isSvg) || m.url; };
+  const roomDark = document.body.classList.contains('deep-immerse');   // pedestal floats on the room ground, so match it
   for(const fr of frames){
-    const darkGround=fr.classList.contains('dark')||fr.classList.contains('brand');
+    const darkGround=fr.classList.contains('dark')||fr.classList.contains('brand')||roomDark;
     const pick = darkGround ? primaryMark : (lum(primaryMark)<175 ? primaryMark : darkest);
     if(pick){ const url=darkGround?await reversed(pick):pick.url; setFrameImage(fr,url,true,pick.id); }
   }
