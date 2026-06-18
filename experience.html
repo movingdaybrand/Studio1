@@ -778,6 +778,37 @@ body.founder-mode .developer-files { display: block; }
   background: rgba(255,255,255,.48);
   border: .5px solid rgba(44,90,60,.12);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.78);
+  transition: transform .5s cubic-bezier(0.22,1,0.36,1), box-shadow .5s cubic-bezier(0.22,1,0.36,1);
+}
+/* ═══════════════ CONCIERGE TRANSITION ═══════════════
+   Cards arrive one by one, as if laid on the table; lift gently on hover. */
+.concierge.on .concierge-card {
+  opacity: 0; transform: translateY(9px);
+  animation: conciergeCardIn .62s cubic-bezier(0.22,1,0.36,1) forwards;
+  animation-delay: .18s;
+}
+.concierge.on .concierge-card:nth-child(2) { animation-delay: .27s; }
+.concierge.on .concierge-card:nth-child(3) { animation-delay: .36s; }
+.concierge.on .concierge-card:nth-child(4) { animation-delay: .45s; }
+.concierge.on .concierge-card:nth-child(5) { animation-delay: .54s; }
+.concierge.on .concierge-card:nth-child(6) { animation-delay: .63s; }
+.concierge.on .concierge-card:nth-child(7) { animation-delay: .72s; }
+.concierge.on .concierge-card:nth-child(n+8) { animation-delay: .81s; }
+@keyframes conciergeCardIn { to { opacity: 1; transform: none; } }
+.concierge-card:hover {
+  transform: translateY(-3px);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.78), 0 14px 34px rgba(20,60,36,.14);
+}
+/* Respect reduced motion for everything added in this and recent passes:
+   keep the calm fades, drop the long movement, loops, and progress fills. */
+@media (prefers-reduced-motion: reduce) {
+  .prep-obs li, .prep-autocue, .prep-progress, .wh-line, .wh-inner,
+  .concierge.on .concierge-card {
+    animation: none !important; opacity: 1 !important; transform: none !important;
+  }
+  .prep-progress i { animation: none !important; width: 100% !important; }
+  .wh-veil { transition: opacity .4s ease !important; }
+  .wh-line { transition: opacity .35s ease !important; }
 }
 .concierge-preview {
   height: 86px;
@@ -810,6 +841,10 @@ body.founder-mode .developer-files { display: block; }
   color: rgba(14,42,24,.50);
 }
 .concierge-actions { margin-top: auto; display: flex; gap: 6px; }
+.concierge-status { margin-top: auto; padding: 7px 2px 3px; font-size: 10px; letter-spacing: .08em;
+  text-transform: uppercase; color: rgba(14,42,24,.34); }
+.concierge-placeholder.is-empty { color: rgba(14,42,24,.32); }
+.concierge-placeholder.is-type { font-size: 1.15rem; letter-spacing: -.01em; color: rgba(14,42,24,.62); text-transform: none; }
 .concierge-actions button {
   flex: 1;
   border: 0;
@@ -5286,94 +5321,134 @@ btnMovein.addEventListener('click', event => {
     return `<span class="concierge-placeholder">${esc(asset.extension || 'Asset')}</span>`;
   }
 
+  // ── Internal confidence model — graded per element, never shown as numbers.
+  //    Decides how the Concierge speaks; it only makes claims the assets support.
+  function assessFoundation(report) {
+    const c = report.categoryCounts || {};
+    const f = report.foundation || {};
+    const logos = (c['Logos'] || 0) + (c['Icons'] || 0) + (c['Wordmarks'] || 0);
+    const photoish = c['Photography'] || 0;
+    const refish = (c['Presentations'] || 0) + (c['Documents'] || 0) + (c['Miscellaneous'] || 0);
+
+    // LOGO
+    let logo = { state: 'none' };
+    if (f.mainLogo) {
+      const a = f.mainLogo;
+      const isMark = ['Logos', 'Icons', 'Wordmarks'].includes(a.category);
+      const clean = a.transparentBackground === true;
+      const conf = typeof a.confidence === 'number' ? a.confidence : (isMark ? 0.7 : 0.4);
+      if (isMark && (clean || conf >= 0.8)) logo = { state: 'strong', asset: a };
+      else if (isMark) logo = { state: 'tentative', asset: a };
+      else logo = { state: 'mockup', asset: a };          // fell back to a photo/mockup
+    }
+
+    // COLOURS
+    const palArr = (aiData?.palette || aiData?.colors || []).slice(0, 5);
+    const localArr = (report.localPalette || []).slice(0, 5).map(h => ({ hex: h }));
+    const swatches = palArr.length ? palArr : localArr;
+    let colors = { state: 'none' };
+    if (swatches.length >= 4) colors = { state: 'strong', swatches };
+    else if (swatches.length >= 1) colors = { state: 'tentative', swatches };
+
+    // TYPOGRAPHY
+    let typography = { state: 'none' };
+    const t = aiData?.typography || {};
+    const aiTypeName = t.display || t.displayFont || t.heading || t.body || t.bodyFont || '';
+    if ((c['Typography / Fonts'] || 0) > 0) typography = { state: 'found', asset: f.typography };
+    else if (aiTypeName) typography = { state: 'identified', name: aiTypeName };
+    else if ((c['Brand Guidelines'] || 0) > 0) typography = { state: 'in_guideline' };
+
+    // WORDMARK + GUIDELINES
+    const wordmark = (f.mainWordmark && f.mainWordmark !== f.mainLogo) ? { state: 'found', asset: f.mainWordmark } : { state: 'none' };
+    const guidelines = (c['Brand Guidelines'] || 0) > 0 ? { state: 'found', asset: f.guideline } : { state: 'none' };
+
+    // OVERALL
+    const referenceHeavy = logos === 0 && (photoish > 0 || refish > 0);
+    let overall;
+    if (logo.state === 'strong' && colors.state !== 'none' &&
+        (typography.state === 'found' || typography.state === 'identified' || guidelines.state === 'found')) overall = 'high';
+    else if (logo.state === 'none' && referenceHeavy) overall = 'very_low';
+    else if (logo.state === 'none' || logo.state === 'mockup') overall = 'low';
+    else overall = 'medium';
+
+    return { overall, logo, colors, typography, wordmark, guidelines };
+  }
+
+  const CONCIERGE_VOICE = {
+    high:     { title: 'I think I have everything I need.',
+                note: "Here's the foundation I've prepared. Confirm what looks right, and adjust anything you'd like." },
+    medium:   { title: "I'm beginning to understand your identity.",
+                note: "I'd like to confirm a few details before we settle into your Brand Home." },
+    low:      { title: "I haven't found a clear primary logo yet.",
+                note: "I can still prepare your Brand Home — adding your logo will make it considerably stronger." },
+    very_low: { title: 'This looks more like reference material than a complete brand package.',
+                note: "I can organise what's here, but a logo and your core brand files would let me build a proper foundation." }
+  };
+
   function renderConciergeMode(report = preparationReport) {
     if (!conciergeGrid || !report) return;
-    const palette = (aiData?.palette || aiData?.colors || []).slice(0, 5);
-    const foundation = report.foundation || {};
-    const missing = [];
+    const a = assessFoundation(report);
+    const voice = CONCIERGE_VOICE[a.overall] || CONCIERGE_VOICE.medium;
+    const titleEl = document.querySelector('#concierge .concierge-title');
+    if (titleEl) titleEl.textContent = voice.title;
+    const noteEl = document.getElementById('conciergeMessage');
+    if (noteEl) noteEl.textContent = voice.note;
+
+    const emptyPreview = label => `<span class="concierge-placeholder is-empty">${esc(label)}</span>`;
+    const typePreview  = name  => `<span class="concierge-placeholder is-type">${esc(name)}</span>`;
+    const dotsPreview  = sw    => `<div class="color-dots">${sw.map(c => `<span class="color-dot" style="background:${esc(c.hex || c.value || c)}"></span>`).join('')}</div>`;
     const cards = [];
 
-    if (foundation.mainLogo) {
-      cards.push({
-        key: 'logo',
-        title: 'Primary Logo',
-        asset: foundation.mainLogo,
-        copy: 'I believe this is the primary identity asset.'
-      });
-    } else {
-      missing.push('I did not find a clear standalone primary logo yet.');
-    }
+    // LOGO — always present, always honest
+    if (a.logo.state === 'strong')
+      cards.push({ key:'logo', title:'Primary Logo', preview:assetPreviewHTML(a.logo.asset), copy:'This is your primary logo.', actions:[['confirm','Confirm'],['change','Change']] });
+    else if (a.logo.state === 'tentative')
+      cards.push({ key:'logo', title:'Primary Logo', preview:assetPreviewHTML(a.logo.asset), copy:'I believe this is your primary logo. It sits on a solid background — I can clean that up.', actions:[['confirm','Use this'],['change','Change']] });
+    else if (a.logo.state === 'mockup')
+      cards.push({ key:'logo', title:'Primary Logo', preview:assetPreviewHTML(a.logo.asset), copy:'This looks like your logo shown on a product, not the logo file itself. I can isolate the mark — or point me to the original.', actions:[['isolate','Isolate'],['change','Change']] });
+    else
+      cards.push({ key:'logo', title:'Primary Logo', preview:emptyPreview('No logo yet'), copy:"I haven't found a clear primary logo yet.", actions:[['add','Add logo']] });
 
-    if (foundation.mainIcon && foundation.mainIcon !== foundation.mainLogo) {
-      cards.push({
-        key: 'icon',
-        title: 'Icon Mark',
-        asset: foundation.mainIcon,
-        copy: 'This appears to be the mark that can carry the brand at smaller sizes.'
-      });
-    }
+    // COLOURS — only when there's something real to show
+    if (a.colors.state === 'strong')
+      cards.push({ key:'colors', title:'Color System', preview:dotsPreview(a.colors.swatches), copy:'These are the colours your brand uses most consistently.', actions:[['confirm','Confirm'],['adjust','Adjust']] });
+    else if (a.colors.state === 'tentative')
+      cards.push({ key:'colors', title:'Color System', preview:dotsPreview(a.colors.swatches), copy:'These are the colours I can see so far — we can refine them together.', actions:[['confirm','Confirm'],['adjust','Adjust']] });
 
-    if (foundation.mainWordmark && foundation.mainWordmark !== foundation.mainLogo) {
-      cards.push({
-        key: 'wordmark',
-        title: 'Wordmark',
-        asset: foundation.mainWordmark,
-        copy: 'This appears to be the wordmark or lockup.'
-      });
-    } else {
-      missing.push('I did not separate a wordmark yet. I can prepare one later.');
-    }
+    // TYPOGRAPHY — four honest states, no fake confirm
+    if (a.typography.state === 'found')
+      cards.push({ key:'type', title:'Typography', preview:assetPreviewHTML(a.typography.asset), copy:'Your typefaces were included with the files.', actions:[['confirm','Confirm'],['change','Change']] });
+    else if (a.typography.state === 'identified')
+      cards.push({ key:'type', title:'Typography', preview:typePreview(a.typography.name), copy:"I recognised the typography you're using, though the font files weren't included.", actions:[['addfonts','Add fonts']] });
+    else if (a.typography.state === 'in_guideline')
+      cards.push({ key:'type', title:'Typography', preview:emptyPreview('In guidelines'), copy:'Your typography is defined in the guidelines you shared. I can pull it from there.', status:'Defined in your guidelines' });
+    else
+      cards.push({ key:'type', title:'Typography', preview:emptyPreview('Not found'), copy:"I haven't found your typography yet — I can set this up later.", status:"I'll prepare this later" });
 
-    if (palette.length) {
-      cards.push({
-        key: 'colors',
-        title: 'Color System',
-        colors: palette,
-        copy: 'I found the first colors for the visual system.'
-      });
-    }
-
-    const typographyDetected = (report.categoryCounts?.['Typography / Fonts'] || 0) > 0 || Boolean(aiData?.typography?.display || aiData?.typography?.displayFont);
-    const guidelinesDetected = (report.categoryCounts?.['Brand Guidelines'] || 0) > 0;
-
-    if (typographyDetected && cards.length < 4) {
-      cards.push({
-        key: 'type',
-        title: 'Typography',
-        asset: foundation.typography,
-        copy: 'Typography materials were included or detected.'
-      });
-    } else if (!typographyDetected) {
-      missing.push('Typography was not included yet.');
-    }
-
-    if (guidelinesDetected && cards.length < 4) {
-      cards.push({
-        key: 'guides',
-        title: 'Brand Guidelines',
-        asset: foundation.guideline,
-        copy: 'Brand guidance was included with your files.'
-      });
-    }
+    // 4th slot — guidelines (source of truth) takes priority, else wordmark
+    if (a.guidelines.state === 'found')
+      cards.push({ key:'guides', title:'Brand Guidelines', preview:assetPreviewHTML(a.guidelines.asset), copy:"You included brand guidelines — I'll treat them as the source of truth.", status:'Source of truth' });
+    else if (a.wordmark.state === 'found')
+      cards.push({ key:'wordmark', title:'Wordmark', preview:assetPreviewHTML(a.wordmark.asset), copy:'This is your wordmark or lockup.', actions:[['confirm','Confirm'],['change','Change']] });
 
     conciergeGrid.innerHTML = cards.slice(0, 4).map(card => `
       <article class="concierge-card" data-key="${esc(card.key)}">
-        <div class="concierge-preview">
-          ${card.colors ? `<div class="color-dots">${card.colors.map(c => `<span class="color-dot" style="background:${esc(c.hex || c.value || c)}"></span>`).join('')}</div>` : assetPreviewHTML(card.asset)}
-        </div>
+        <div class="concierge-preview">${card.preview}</div>
         <h3>${esc(card.title)}</h3>
         <p>${esc(card.copy)}</p>
-        <div class="concierge-actions">
-          <button type="button" data-action="confirm">Confirm</button>
-          <button type="button" data-action="change">${card.key === 'colors' ? 'Adjust' : 'Change'}</button>
-        </div>
+        ${card.actions
+          ? `<div class="concierge-actions">${card.actions.map(([act, label]) => `<button type="button" data-action="${esc(act)}">${esc(label)}</button>`).join('')}</div>`
+          : `<div class="concierge-status">${esc(card.status || '')}</div>`}
       </article>`).join('');
 
+    // Quiet, honest notes for what's pending (not dressed up as findings)
     conciergeGrid.parentElement.querySelectorAll('.concierge-missing').forEach(el => el.remove());
-    const note = missing.length
-      ? `<div class="concierge-missing">${missing.slice(0, 2).map(esc).join(' ')}</div>`
-      : '';
-    if (note) conciergeGrid.insertAdjacentHTML('afterend', note);
+    const pending = [];
+    if (a.wordmark.state === 'none' && a.logo.state !== 'none')
+      pending.push("I haven't separated a wordmark yet — I can prepare one later.");
+    if (a.overall === 'high' && a.colors.state === 'tentative')
+      pending.push('Your palette is a little thin; we can broaden it inside Brand Home.');
+    if (pending.length) conciergeGrid.insertAdjacentHTML('afterend', `<div class="concierge-missing">${pending.slice(0, 2).map(esc).join(' ')}</div>`);
   }
 
   conciergeGrid?.addEventListener('click', event => {
@@ -5387,7 +5462,14 @@ btnMovein.addEventListener('click', event => {
       btn.textContent = 'Confirmed';
       return;
     }
-    showToast(action === 'adjust' ? 'Color adjustments will live inside Brand Home.' : 'Change controls will live inside Brand Home.');
+    const MSG = {
+      adjust:  'Color adjustments will live inside Brand Home.',
+      isolate: "I'll isolate the mark from the mockup inside Brand Home.",
+      add:     'You can add your logo inside Brand Home.',
+      addfonts:'You can add your font files inside Brand Home.',
+      change:  'Change controls will live inside Brand Home.'
+    };
+    showToast(MSG[action] || MSG.change);
   });
 
   conciergeContinue?.addEventListener('click', event => {
