@@ -1067,14 +1067,28 @@ function normHex(c){
   if(/^[0-9a-f]{3}$/i.test(c)) c=c.split('').map(x=>x+x).join('');
   return /^[0-9a-f]{6}$/i.test(c) ? '#'+c.toLowerCase() : null;
 }
-function cleanBrandName(n){          // tidy file-derived names: "Body by Maddie 01 (1).png" → "Body by Maddie"
-  if(!n) return n||'';
+function looksLikeFileName(s){      // true when this is clearly a file/export name, not a brand
+  if(!s) return true;
+  const t=String(s).trim();
+  if(t.length<2 || t.length>40) return true;
+  if(/^[0-9\s.]+$/.test(t)) return true;                         // digits/punctuation only
+  if(/^[0-9a-f]{6,}$/i.test(t.replace(/\s/g,''))) return true;   // hash / uuid-like
+  if(!/[a-z]/i.test(t)) return true;                             // no letters
+  if(/\b(img|dsc|dscn|image|photo|pic|screenshot|screen\s*shot|untitled|unnamed|download|scan|asset|file|new|render|output|artboard|frame|group|layer|comp|mockup|export|copy)\b/i.test(t)) return true;
+  return false;
+}
+function cleanBrandName(n){          // tidy a candidate; strip logo descriptors; '' if nothing brand-like remains
+  if(!n) return '';
   let s=String(n).replace(/\.[a-z0-9]{2,4}$/i,'').replace(/[_]+/g,' ');
-  s=s.replace(/\s*\((?:\d+|copy)\)\s*$/ig,'');     // trailing (1) / (copy)
-  s=s.replace(/\s+copy\s*$/i,'');                  // trailing "copy"
-  s=s.replace(/\s+0\d\b\s*$/i,'');                 // trailing zero-padded counter (01, 02…) — not "Studio 54"
+  s=s.replace(/\s*\((?:\d+|copy)\)\s*$/ig,'').replace(/\s+copy\s*$/i,'');
+  s=s.replace(/\b(logo|logotype|wordmark|word\s*mark|brandmark|brand\s*mark|favicon|primary|secondary|reverse|transparent|hi-?res|rgb|cmyk|final|draft|export|version|v\d+)\b/ig,' ');  // descriptors, not the name
+  s=s.replace(/[-–—]+/g,' ').replace(/\s+0?\d{1,3}\b\s*$/,'');   // separators + trailing counters (keeps "Studio 54")
   s=s.replace(/\s{2,}/g,' ').trim();
-  return s||String(n);
+  return s;
+}
+function safeBrandName(n){           // a name we'll actually show: tidied, and only if it reads like a brand
+  const c=cleanBrandName(n);
+  return (c && !looksLikeFileName(c)) ? c : '';
 }
 function looksGenericTag(t){         // suppress Moving-Day/AI filler so the client guide stays theirs
   if(!t) return false;
@@ -1552,7 +1566,7 @@ function slotToRole(slot){            // Experience's slot vocabulary → Brand 
 function mapAiToBrand(d, picked){     // map the AI's response into the brand — same fields Experience reads
   if(!d||typeof d!=='object') return false;
   const g=d.guide||{}, br=d.brand||{};
-  const nm=g.clientName||br.name; if(nm) brand.name=cleanBrandName(String(nm));
+  const nm=safeBrandName(g.clientName||br.name); if(nm) brand.name=nm;   // logo-read name, only if it reads like a brand
   const tag=g.description||(d.copySuggestions&&d.copySuggestions.tagline)||br.positioning||d.voice||d.tone;
   if(tag) brand.tagline=looksGenericTag(tag)?'':String(tag);
   const cat=g.category||br.industry; if(cat) brand.category=String(cat);
@@ -1841,7 +1855,7 @@ async function finishIntake(imgs,folderName){
     const ranked=[...imgs].sort((a,b)=>((b.transparentRatio||0)-(a.transparentRatio||0))||((a.variety||999)-(b.variety||999)));
     brand.logos=ranked.slice(0,3); brand.photos=ranked.slice(3);
   }
-  if(folderName && !brand.name) brand.name=cleanBrandName(folderName);
+  if(folderName && !brand.name){ const fn=safeBrandName(folderName); if(fn) brand.name=fn; }   // folder name only as a sane fallback
   const total=imgs.length+brand.docs.length;
 
   // prep the images once — used for both the AI call and the local colour read
@@ -1988,7 +2002,7 @@ async function importFromExperience(){
   const recs=await bridgeReadAll();
   if(!dna && !(recs&&recs.length)) return false;          // no handoff waiting
   if(dna){
-    if(dna.brandName) brand.name=cleanBrandName(dna.brandName);
+    if(dna.brandName){ const bn=safeBrandName(dna.brandName); if(bn) brand.name=bn; }
     if(dna.tagline) brand.tagline=looksGenericTag(dna.tagline)?'':dna.tagline;
     if(dna.category) brand.category=dna.category;
     if(Array.isArray(dna.colors)&&dna.colors.length)
