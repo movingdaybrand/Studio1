@@ -1647,6 +1647,26 @@ function applyHomeColor(){
   const rs=document.documentElement.style;
   ['--bg-1','--bg-2','--bg-3','--halo-a','--halo-b','--sage','--sage-line','--mark-ink','--shadow','--shadow-hover','--ice-1','--ice-2','--glass','--surface','--light','--fog','--stone','--reflection','--portal-glow','--environment-tint'].forEach(p=>rs.removeProperty(p));
 }
+function brandSignalColor(){            // the brand's most characteristic non-neutral colour
+  const list=brand.colors||[], isN=h=>/^#?(000000|ffffff)$/i.test((h||'').replace('#',''));
+  const c=list.find(x=>x.role==='brand' && !/black|white|grey|gray/i.test(x.name||'') && !isN(x.hex));
+  return (c&&c.hex) || (list.find(x=>!isN(x.hex))||{}).hex || '';
+}
+function applyAmbientBrandLight(){
+  // A whisper of the brand's colour in the room's *light* only — the two halos + the portal glow. Surfaces stay calm.
+  const rs=document.documentElement.style, hex=brandSignalColor();
+  if(!hex){ ['--halo-a','--halo-b','--portal-glow'].forEach(p=>rs.removeProperty(p)); return; }
+  const [r,g,b]=hexToRgb(hex);
+  const up=(c,t)=>Math.round(c+(255-c)*t);                 // lift toward white → coloured light, never a dark blob
+  const lr=up(r,.5), lg=up(g,.5), lb=up(b,.5);
+  const sa=[180,205,185], sb=[196,214,198];                // the calm sage base the home ships with
+  const mix=(a,c,t)=>Math.round(a*(1-t)+c*t);
+  const ha=[mix(sa[0],lr,.5),mix(sa[1],lg,.5),mix(sa[2],lb,.5)];
+  const hb=[mix(sb[0],lr,.42),mix(sb[1],lg,.42),mix(sb[2],lb,.42)];
+  rs.setProperty('--halo-a',`rgba(${ha[0]},${ha[1]},${ha[2]},.34)`);
+  rs.setProperty('--halo-b',`rgba(${hb[0]},${hb[1]},${hb[2]},.28)`);
+  rs.setProperty('--portal-glow',`rgba(${ha[0]},${ha[1]},${ha[2]},.36)`);
+}
 const DEST_ENV={
   identity:{env:'Arrival',dflt:'Logo, name & palette',key:'identity'},
   assets:{env:'Archive',dflt:"The brand's archive",key:'assets'},
@@ -1689,6 +1709,7 @@ function applyBrandHome(){
     const logo=document.getElementById('homeLogo'); if(logo) logo.style.display='none';
   }
   applyHomeColor();          // home keeps its default calm palette
+  applyAmbientBrandLight();  // …with a whisper of the brand's colour in the light
   applyDestinations();       // plain room subtitles, no eyebrows
   renderPrepared();          // quiet "already prepared" line
   if(brand.colors.length) applyPaletteVars(brand.colors);   // brand colours only in the Guide doc
