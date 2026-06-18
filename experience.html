@@ -1497,6 +1497,20 @@ body.md-state-local_preparing .btn-movein:disabled {
   letter-spacing: -.018em;
   color: rgba(14,42,24,.58);
 }
+.prep-obs {
+  list-style: none; padding: 0; margin: 1.2rem auto .4rem; max-width: 30rem;
+  text-align: left; display: grid; gap: .7rem;
+}
+.prep-obs li {
+  position: relative; padding-left: 1.25rem;
+  font-size: .98rem; font-weight: 300; line-height: 1.55; letter-spacing: -.015em;
+  color: rgba(14,42,24,.66);
+}
+.prep-obs li::before {
+  content: ""; position: absolute; left: .1rem; top: .62em;
+  width: 5px; height: 5px; border-radius: 50%; background: rgba(14,42,24,.4);
+}
+.prep-autocue { margin: 1.1rem auto 0; font-size: .82rem; letter-spacing: .01em; color: rgba(14,42,24,.5); font-weight: 300; }
 .prep-safe-line {
   display: inline-flex;
   align-items: center;
@@ -3778,11 +3792,11 @@ body.md-state-concierge .concierge-missing {
 
     <div class="progress-strip" id="progressStrip">
       <div class="progress-steps">
-        <div class="progress-step" id="ps1"><span class="step-dot"></span>Reading files</div>
-        <div class="progress-step" id="ps2"><span class="step-dot"></span>Reviewing assets</div>
-        <div class="progress-step" id="ps3"><span class="step-dot"></span>Organizing files</div>
-        <div class="progress-step" id="ps4"><span class="step-dot"></span>Color variants</div>
-        <div class="progress-step" id="ps5"><span class="step-dot"></span>Package ready</div>
+        <div class="progress-step" id="ps1"><span class="step-dot"></span>Getting to know your brand</div>
+        <div class="progress-step" id="ps2"><span class="step-dot"></span>Choosing your strongest marks</div>
+        <div class="progress-step" id="ps3"><span class="step-dot"></span>Setting your colours &amp; type</div>
+        <div class="progress-step" id="ps4"><span class="step-dot"></span>Preparing your assets</div>
+        <div class="progress-step" id="ps5"><span class="step-dot"></span>Your Brand Home is ready</div>
       </div>
     </div>
 
@@ -3882,6 +3896,8 @@ let staged = [];
 let preparationReport = null;
 let dragDepth = 0;
 let uploadGlowTimer = null;
+let autoFlowTimer = null;     // gently continues from the arrival summary into Brand Understanding
+let autoPrepTimer = null;     // begins local preparation on its own once files settle
 
 const intro       = document.getElementById('intro');
 const upload      = document.getElementById('upload');
@@ -4240,33 +4256,35 @@ function renderDeveloperFileTray(report = preparationReport) {
   tray.innerHTML = assets.map(asset => `
     <div class="ti" role="listitem">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-      <span class="tn">${esc(asset.name)}</span><span class="ts">${esc(asset.sizeLabel)}</span>
+      <span class="tn">${esc(asset.displayName || asset.name)}</span>
     </div>`).join('');
+}
+
+function buildObservations(report) {
+  const c = report.categoryCounts || {}, obs = [];
+  const logos = (c['Logos'] || 0) + (c['Wordmarks'] || 0);
+  if (logos > 1) obs.push("I found several versions of your logo and set aside the strongest.");
+  else if (logos === 1) obs.push("I found your logo and made it the centrepiece.");
+  if ((c['Icons'] || 0) > 0) obs.push("I kept your icon ready for avatars, favicons, and tight spaces.");
+  const pal = (report.localPalette || []).length;
+  if (pal >= 3) obs.push("Your colours are already remarkably consistent — I gathered the ones you use most.");
+  else if (pal > 0) obs.push("I identified the colours your brand leans on most.");
+  if ((c['Typography / Fonts'] || 0) > 0) obs.push("I found a typography system that's already working well together.");
+  if ((c['Brand Guidelines'] || 0) > 0) obs.push("I kept the documents that best explain your visual identity close at hand.");
+  else if ((c['Documents'] || 0) > 0) obs.push("I set your documents aside where they'll be easy to find.");
+  if ((c['Photography'] || 0) > 0) obs.push("I grouped your photography so the consistent shots stay together.");
+  if ((report.duplicateCount || 0) > 0) obs.push("I consolidated identical versions so your Brand Home stays uncluttered.");
+  if ((report.renamedCount || 0) > 0) obs.push("I tidied a few file names so they'll be easy to find later.");
+  if (!obs.length) obs.push("I've laid everything out and it's ready to explore.");
+  return obs.slice(0, 5);
 }
 
 function renderPreparationSummary(report) {
   if (!prepSummary) return;
-  const c = report.categoryCounts || {};
-  const total = report.originalFileCount || 0;
-  const safeLine = total === 1 ? '1 asset received safely.' : `${total} assets received safely.`;
   const enoughLine = report.hasEnoughForUnderstanding
-    ? 'I have enough to begin understanding your brand.'
-    : 'I can organize these files now. A logo or guideline will make the brand review stronger.';
-  const capsuleItems = [
-    ['Logos', c['Logos'] || 0, 'none yet'],
-    ['Icons', c['Icons'] || 0, 'none yet'],
-    ['Guidelines', c['Brand Guidelines'] || 0, 'none yet'],
-    ['Typography', c['Typography / Fonts'] || 0, 'none yet'],
-    ['Duplicates', report.duplicateCount || 0, 'none found', 'removed']
-  ];
-  const capsuleHTML = capsuleItems.map(([label, value, emptyText, suffix], index) => {
-    const display = value ? (suffix ? `${value} ${suffix}` : String(value)) : emptyText;
-    return `
-      <span class="prep-capsule" style="--i:${index}">
-        <span class="prep-capsule-label">${esc(label)}</span>
-        <span class="prep-capsule-value">${esc(display)}</span>
-      </span>`;
-  }).join('');
+    ? 'I have everything I need to begin understanding your brand.'
+    : 'I can begin from here — a logo or your guidelines would make the review even sharper.';
+  const obsHTML = buildObservations(report).map(line => `<li>${esc(line)}</li>`).join('');
 
   prepSummary.innerHTML = `
     <div class="prep-arrival">
@@ -4276,31 +4294,14 @@ function renderPreparationSummary(report) {
           <path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/>
         </svg>
       </div>
-      <p class="prep-kicker">Arrival Check</p>
+      <p class="prep-kicker">Arrival</p>
       <h2 class="prep-title">Everything made it in.</h2>
-      <p class="prep-support">I’ve received your files and separated the first layer.</p>
-      <p class="prep-safe-line">${esc(safeLine)}</p>
-      <div class="prep-capsules" aria-label="Preparation summary">
-        ${capsuleHTML}
-      </div>
-      <div class="prep-next-card" aria-label="Next step">
-        <p class="prep-next-kicker">Next</p>
-        <h3>Brand Review</h3>
-        <p>I’ll review logos, identify likely names, and separate reference files from visual assets.</p>
-        <div class="prep-next-rail" aria-hidden="true">
-          <span>Logos</span><i></i><span>Names</span><i></i><span>References</span>
-        </div>
-      </div>
+      <p class="prep-support">I've finished organizing the foundation of your brand. Here's what stood out to me:</p>
+      <ul class="prep-obs">${obsHTML}</ul>
       <p class="prep-ready">${esc(enoughLine)}</p>
+      <p class="prep-autocue" id="prepAutocue">Beginning your brand review&hellip;</p>
       <div class="prep-actions">
-        <button class="prep-next-button" id="prepNextBtn" type="button" aria-label="Next: Brand Review">
-          Next
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <line x1="5" y1="12" x2="19" y2="12"/>
-            <polyline points="13 6 19 12 13 18"/>
-          </svg>
-        </button>
-        <button class="btn-add-more" id="addMoreBtn" type="button">Add more assets</button>
+        <button class="btn-add-more" id="addMoreBtn" type="button">Add more first</button>
       </div>
     </div>`;
   prepSummary.classList.add('on');
@@ -4313,16 +4314,14 @@ function renderPreparationSummary(report) {
   const addMoreBtn = document.getElementById('addMoreBtn');
   if (addMoreBtn) addMoreBtn.addEventListener('click', openFilePicker);
 
-  const prepNextBtn = document.getElementById('prepNextBtn');
-  if (prepNextBtn) {
-    prepNextBtn.addEventListener('click', event => {
-      event.preventDefault();
-      event.stopPropagation();
-      if (!preparationReport?.preparedFileCount) return;
+  // Flow, not buttons: continue into Brand Understanding on its own.
+  clearTimeout(autoFlowTimer);
+  autoFlowTimer = setTimeout(() => {
+    if (preparationReport?.preparedFileCount && appState === 'local_preparing') {
       goToState('preparing');
       runBrandPipeline(preparationReport.preparedFiles, preparationReport);
-    });
-  }
+    }
+  }, 3600);
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -4404,9 +4403,9 @@ async function beginLocalPreparation(files) {
     preparationReport = await prepareFilesLocally(files);
     staged = preparationReport.preparedFiles.slice();
     renderPreparationSummary(preparationReport);
-    setMoveButtonLabel('Next');
-    sTxt.textContent = `${preparationReport.preparedFileCount} prepared · ${preparationReport.duplicateCount} duplicate${preparationReport.duplicateCount === 1 ? '' : 's'} removed`;
-    // Stay in local_preparing so the customer can read the summary before continuing.
+    setMoveButtonLabel('Continue');
+    sTxt.textContent = '';
+    // The arrival summary speaks for itself, then continues into understanding on its own.
   } catch (err) {
     console.error('Local preparation failed:', err);
     sTxt.textContent = 'A little more is needed';
@@ -4430,14 +4429,13 @@ function activateUploadGlow() {
 function addFiles(fileList) {
   const incoming = Array.from(fileList || []).filter(Boolean);
   if (!incoming.length) return;
+  clearTimeout(autoFlowTimer);   // any new files cancel a pending hand-off into understanding
 
   incoming.forEach(file => {
     const exists = staged.some(s => s.name === file.name && s.size === file.size && s.lastModified === file.lastModified);
     if (!exists) staged.push(file);
   });
 
-  // Keep the user in the Move In experience until they intentionally click Move In.
-  // The actual local preparation still happens on the button click.
   preparationReport = null;
   if (prepSummary) {
     prepSummary.classList.remove('on');
@@ -4448,6 +4446,12 @@ function addFiles(fileList) {
   if (appState !== 'upload') goToState('upload');
   renderUploadStagePreview();
   activateUploadGlow();
+
+  // Flow, not buttons: once the drop settles, begin preparing on our own.
+  clearTimeout(autoPrepTimer);
+  autoPrepTimer = setTimeout(() => {
+    if (staged.length && !preparationReport && appState === 'upload') beginLocalPreparation(staged);
+  }, 850);
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
