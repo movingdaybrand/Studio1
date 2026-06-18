@@ -2378,10 +2378,12 @@ function bridgeRole(rec){
   return '';
 }
 async function importFromExperience(){
-  let dna=null;
-  try{ const raw=localStorage.getItem(BRAND_DNA_KEY); if(raw) dna=JSON.parse(raw); }catch(e){}
+  let dna=null, rawLen=0;
+  try{ const raw=localStorage.getItem(BRAND_DNA_KEY); if(raw){ rawLen=raw.length; dna=JSON.parse(raw); } }catch(e){ console.warn('[move-in] DNA present but unreadable:',e); }
   const recs=await bridgeReadAll();
-  if(!dna && !(recs&&recs.length)) return false;          // no handoff waiting
+  const dnaMsg = dna ? ('found, brand="'+(dna.brandName||'?')+'", colors='+((dna.colors||[]).length)+', '+rawLen+' chars') : 'NONE';
+  console.info('[move-in] bridge — DNA:', dnaMsg, '| asset blobs:', (recs&&recs.length)||0);
+  if(!dna && !(recs&&recs.length)){ console.info('[move-in] no handoff found in this origin — run Prepare Brand Home, and make sure intake and the brand home are on the same site/origin.'); return false; }          // no handoff waiting
   if(dna){
     if(dna.brandName){ const bn=safeBrandName(dna.brandName); if(bn) brand.name=bn; }
     if(dna.tagline) brand.tagline=looksGenericTag(dna.tagline)?'':dna.tagline;
