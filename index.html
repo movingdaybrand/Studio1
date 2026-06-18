@@ -439,11 +439,19 @@ body.entering.reveal .room-card:nth-child(6){transition-delay:.95s;}
 </head>
 <body>
 <!-- ═══════════════ HOME ENTRANCE — cinematic arrival ═══════════════
-     Self-contained so an error in the main app can never strand the veil.
-     Covers the home before first paint, then lifts as the environment emerges. -->
+     Plays ONLY on a real intake arrival from onboarding (a one-time flag), or with ?arrive=1 to preview.
+     A plain reload skips it entirely — no veil, no classes, nothing to leave half-finished.
+     Self-contained so an error in the main app can never strand the veil. -->
 <script>
 (function(){
   try {
+    var arriving = false;
+    try {
+      var params = new URLSearchParams(location.search);
+      arriving = sessionStorage.getItem('movingDay_arriving') === '1' || params.get('arrive') === '1';
+      sessionStorage.removeItem('movingDay_arriving');     // consume — never replays on reload
+    } catch (e) {}
+    if (!arriving) return;                                  // not an intake → ordinary load
     if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var b = document.body;
     b.classList.add('entering');
@@ -455,11 +463,12 @@ body.entering.reveal .room-card:nth-child(6){transition-delay:.95s;}
       '</svg></div>';
     b.appendChild(v);
     var done = false;
+    function cleanup(){ if (v && v.parentNode) v.parentNode.removeChild(v); b.classList.remove('entering','reveal'); }
     function reveal(){
       if (done) return; done = true;
       b.classList.add('reveal');
       v.classList.add('lift');
-      setTimeout(function(){ if (v && v.parentNode) v.parentNode.removeChild(v); b.classList.remove('entering','reveal'); }, 2400);
+      setTimeout(cleanup, 2400);
       window.removeEventListener('pointerdown', skip, true);
     }
     function skip(){ reveal(); }                              // a tap skips straight in
@@ -468,10 +477,11 @@ body.entering.reveal .room-card:nth-child(6){transition-delay:.95s;}
     else document.addEventListener('DOMContentLoaded', start);
     window.addEventListener('pointerdown', skip, true);
     setTimeout(reveal, 4200);                                 // hard safety: never strand the veil
-  } catch (e) { try { document.body.classList.remove('entering'); } catch(_){} }
+  } catch (e) { try { document.body.classList.remove('entering'); var lv=document.querySelector('.home-veil'); if(lv) lv.remove(); } catch(_){} }
 })();
 </script>
 <div class="env"><div class="glasspane">
+
 
   <section id="home" class="view show">
     <header class="home-head">
