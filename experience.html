@@ -1505,12 +1505,29 @@ body.md-state-local_preparing .btn-movein:disabled {
   position: relative; padding-left: 1.25rem;
   font-size: .98rem; font-weight: 300; line-height: 1.55; letter-spacing: -.015em;
   color: rgba(14,42,24,.66);
+  opacity: 0; transform: translateY(7px);
+  animation: prepObsIn .65s cubic-bezier(.22,1,.36,1) forwards;
+  animation-delay: calc(var(--i,0) * .62s + .25s);
 }
 .prep-obs li::before {
   content: ""; position: absolute; left: .1rem; top: .62em;
   width: 5px; height: 5px; border-radius: 50%; background: rgba(14,42,24,.4);
 }
-.prep-autocue { margin: 1.1rem auto 0; font-size: .82rem; letter-spacing: .01em; color: rgba(14,42,24,.5); font-weight: 300; }
+@keyframes prepObsIn { to { opacity: 1; transform: none; } }
+.prep-autocue {
+  margin: 1.2rem auto .15rem; font-size: .82rem; letter-spacing: .01em;
+  color: rgba(14,42,24,.5); font-weight: 300; background: none; border: 0; cursor: pointer;
+  opacity: 0; animation: prepObsIn .6s ease forwards; animation-delay: var(--cue-delay, 3s);
+}
+.prep-autocue:hover { color: rgba(14,42,24,.78); }
+.prep-progress {
+  height: 2px; width: 150px; margin: .55rem auto 0; border-radius: 2px; overflow: hidden;
+  background: rgba(14,42,24,.12);
+  opacity: 0; animation: prepObsIn .6s ease forwards; animation-delay: var(--cue-delay, 3s);
+}
+.prep-progress i { display: block; height: 100%; width: 0; background: rgba(14,42,24,.42);
+  animation: prepFill var(--fill, 5s) linear forwards; animation-delay: var(--cue-delay, 3s); }
+@keyframes prepFill { to { width: 100%; } }
 .prep-safe-line {
   display: inline-flex;
   align-items: center;
@@ -4284,7 +4301,13 @@ function renderPreparationSummary(report) {
   const enoughLine = report.hasEnoughForUnderstanding
     ? 'I have everything I need to begin understanding your brand.'
     : 'I can begin from here — a logo or your guidelines would make the review even sharper.';
-  const obsHTML = buildObservations(report).map(line => `<li>${esc(line)}</li>`).join('');
+  const observations = buildObservations(report);
+  const obsHTML = observations.map((line, i) => `<li style="--i:${i}">${esc(line)}</li>`).join('');
+
+  // Pace for reading, not speed: let each line land, then hold a comfortable window before continuing.
+  const revealMs = observations.length * 620 + 450;          // time for the lines to finish appearing
+  const readMs   = 3600 + observations.length * 1500;        // comfortable reading window after that
+  const totalMs  = revealMs + readMs;
 
   prepSummary.innerHTML = `
     <div class="prep-arrival">
@@ -4299,7 +4322,8 @@ function renderPreparationSummary(report) {
       <p class="prep-support">I've finished organizing the foundation of your brand. Here's what stood out to me:</p>
       <ul class="prep-obs">${obsHTML}</ul>
       <p class="prep-ready">${esc(enoughLine)}</p>
-      <p class="prep-autocue" id="prepAutocue">Beginning your brand review&hellip;</p>
+      <button class="prep-autocue" id="prepAutocue" type="button" style="--cue-delay:${revealMs}ms">Take a moment &mdash; I'll continue when you're ready, or tap to begin now</button>
+      <div class="prep-progress" style="--cue-delay:${revealMs}ms;--fill:${readMs}ms" aria-hidden="true"><i></i></div>
       <div class="prep-actions">
         <button class="btn-add-more" id="addMoreBtn" type="button">Add more first</button>
       </div>
@@ -4314,14 +4338,19 @@ function renderPreparationSummary(report) {
   const addMoreBtn = document.getElementById('addMoreBtn');
   if (addMoreBtn) addMoreBtn.addEventListener('click', openFilePicker);
 
-  // Flow, not buttons: continue into Brand Understanding on its own.
-  clearTimeout(autoFlowTimer);
-  autoFlowTimer = setTimeout(() => {
+  const advance = () => {
     if (preparationReport?.preparedFileCount && appState === 'local_preparing') {
+      clearTimeout(autoFlowTimer);
       goToState('preparing');
       runBrandPipeline(preparationReport.preparedFiles, preparationReport);
     }
-  }, 3600);
+  };
+  const cue = document.getElementById('prepAutocue');
+  if (cue) cue.addEventListener('click', advance);   // for those who don't want to wait
+
+  // Flow, not buttons: continue on its own once there's been time to read.
+  clearTimeout(autoFlowTimer);
+  autoFlowTimer = setTimeout(advance, totalMs);
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
