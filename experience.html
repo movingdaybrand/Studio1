@@ -782,19 +782,12 @@ body.founder-mode .developer-files { display: block; }
 }
 /* ═══════════════ CONCIERGE TRANSITION ═══════════════
    Cards arrive one by one, as if laid on the table; lift gently on hover. */
-.concierge.on .concierge-card {
-  opacity: 0; transform: translateY(9px);
-  animation: conciergeCardIn .62s cubic-bezier(0.22,1,0.36,1) forwards;
-  animation-delay: .18s;
+/* Sequential reveal — the Concierge presents one observation at a time, JS-paced with generous pauses. */
+.concierge .concierge-card {
+  opacity: 0; transform: translateY(10px);
+  transition: opacity .85s cubic-bezier(0.22,1,0.36,1), transform .9s cubic-bezier(0.22,1,0.36,1);
 }
-.concierge.on .concierge-card:nth-child(2) { animation-delay: .27s; }
-.concierge.on .concierge-card:nth-child(3) { animation-delay: .36s; }
-.concierge.on .concierge-card:nth-child(4) { animation-delay: .45s; }
-.concierge.on .concierge-card:nth-child(5) { animation-delay: .54s; }
-.concierge.on .concierge-card:nth-child(6) { animation-delay: .63s; }
-.concierge.on .concierge-card:nth-child(7) { animation-delay: .72s; }
-.concierge.on .concierge-card:nth-child(n+8) { animation-delay: .81s; }
-@keyframes conciergeCardIn { to { opacity: 1; transform: none; } }
+.concierge .concierge-card.show { opacity: 1; transform: none; }
 .concierge-card:hover {
   transform: translateY(-3px);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.78), 0 14px 34px rgba(20,60,36,.14);
@@ -803,12 +796,13 @@ body.founder-mode .developer-files { display: block; }
    keep the calm fades, drop the long movement, loops, and progress fills. */
 @media (prefers-reduced-motion: reduce) {
   .prep-obs li, .prep-autocue, .prep-progress, .wh-line, .wh-inner,
-  .concierge.on .concierge-card {
+  .concierge .concierge-card {
     animation: none !important; opacity: 1 !important; transform: none !important;
   }
   .prep-progress i { animation: none !important; width: 100% !important; }
   .wh-veil { transition: opacity .4s ease !important; }
   .wh-line { transition: opacity .35s ease !important; }
+  .concierge-footer { opacity: 1 !important; pointer-events: auto !important; }
 }
 .concierge-preview {
   height: 86px;
@@ -868,7 +862,10 @@ body.founder-mode .developer-files { display: block; }
   gap: 12px;
   align-items: center;
   margin-top: 1.35rem;
+  opacity: 0; pointer-events: none;                 /* appears only after the last observation */
+  transition: opacity .8s cubic-bezier(0.22,1,0.36,1);
 }
+.concierge-footer.show { opacity: 1; pointer-events: auto; }
 .concierge-micro {
   margin: 0;
   font-size: .72rem;
@@ -5449,6 +5446,28 @@ btnMovein.addEventListener('click', event => {
     if (a.overall === 'high' && a.colors.state === 'tentative')
       pending.push('Your palette is a little thin; we can broaden it inside Brand Home.');
     if (pending.length) conciergeGrid.insertAdjacentHTML('afterend', `<div class="concierge-missing">${pending.slice(0, 2).map(esc).join(' ')}</div>`);
+
+    // ── Pacing: the Concierge presents one observation at a time, with generous pauses.
+    //    The continue button appears only after the last observation has landed.
+    const timers = renderConciergeMode._t = renderConciergeMode._t || [];
+    timers.forEach(clearTimeout); timers.length = 0;
+    const cardEls = Array.from(conciergeGrid.querySelectorAll('.concierge-card'));
+    const footer = document.querySelector('#concierge .concierge-footer');
+    const noteEl2 = conciergeGrid.parentElement.querySelector('.concierge-missing');
+    if (footer) footer.classList.remove('show');
+    if (noteEl2) { noteEl2.style.opacity = '0'; noteEl2.style.transition = 'opacity .8s cubic-bezier(0.22,1,0.36,1)'; }
+    const reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      cardEls.forEach(el => el.classList.add('show'));
+      if (noteEl2) noteEl2.style.opacity = '1';
+      if (footer) footer.classList.add('show');
+      return;
+    }
+    const FIRST = 1200, GAP = 2500, AFTER = 2200;     // let the greeting land, then one observation at a time
+    cardEls.forEach((el, i) => timers.push(setTimeout(() => el.classList.add('show'), FIRST + i * GAP)));
+    const endAt = FIRST + Math.max(0, cardEls.length - 1) * GAP + AFTER;
+    timers.push(setTimeout(() => { if (noteEl2) noteEl2.style.opacity = '1'; if (footer) footer.classList.add('show'); }, endAt));
+    timers.push(setTimeout(() => { if (footer) footer.classList.add('show'); }, endAt + 6000));   // failsafe: never strand the button
   }
 
   conciergeGrid?.addEventListener('click', event => {
