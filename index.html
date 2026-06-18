@@ -436,6 +436,32 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .appcard.on-dark .app-dl button{background:rgba(255,255,255,.16);color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.25);}
 .appcard.on-dark .app-dl button:hover{background:rgba(255,255,255,.28);}
 .apps-empty{font-size:13px;color:var(--ink-faint);padding:18px 0;}
+/* Focused application generators */
+.apptool{border-radius:var(--r-md);background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 1px var(--sage-line),var(--shadow);backdrop-filter:blur(8px);padding:20px;margin-bottom:16px;}
+.apptool-h{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-bottom:14px;}
+.apptool-h b{font-family:var(--display);font-weight:400;font-size:16px;color:var(--ink);}
+.apptool-h i{font-style:normal;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);}
+.sig-cols{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:18px;align-items:start;}
+.ig-cols{display:grid;grid-template-columns:auto 1fr;gap:22px;align-items:center;}
+@media(max-width:640px){.sig-cols,.ig-cols{grid-template-columns:1fr;}}
+.sig-fields{display:flex;flex-direction:column;gap:9px;}
+.sig-fields label{display:flex;flex-direction:column;gap:4px;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;}
+.sig-fields input{font-family:inherit;font-size:13px;color:var(--ink);background:rgba(255,255,255,.72);border:none;box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:8px;padding:8px 11px;}
+.sig-fields input:focus{outline:none;box-shadow:inset 0 0 0 1px rgba(44,90,60,.45);}
+.sig-preview-wrap{display:flex;flex-direction:column;gap:10px;}
+.sig-preview{background:#fff;border-radius:10px;box-shadow:inset 0 0 0 1px var(--sage-line);padding:18px 20px;overflow:auto;min-height:96px;display:flex;align-items:center;}
+.sig-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.sig-actions button,.ig-dl{font-family:inherit;font-size:12px;letter-spacing:.03em;color:#fff;background:var(--b1,#1c2b22);border:none;border-radius:8px;padding:9px 16px;cursor:pointer;transition:opacity .15s;}
+.sig-actions button:hover,.ig-dl:hover{opacity:.88;}
+.sig-copied{font-size:11px;color:var(--ink-faint);}
+.sig-hint{font-size:11px;color:var(--ink-faint);line-height:1.5;margin:0;}
+.ig-preview{width:160px;height:160px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--sage-line),0 10px 24px rgba(20,40,28,.16);overflow:hidden;}
+.ig-preview img{width:58%;height:58%;object-fit:contain;}
+.ig-controls{display:flex;flex-direction:column;gap:12px;}
+.ig-bgs{display:flex;gap:8px;}
+.ig-bg{width:30px;height:30px;border-radius:50%;cursor:pointer;box-shadow:inset 0 0 0 1px var(--sage-line);transition:transform .12s,box-shadow .12s;}
+.ig-bg:hover{transform:scale(1.08);}
+.ig-bg.sel{box-shadow:inset 0 0 0 1px var(--sage-line),0 0 0 2px var(--ink);}
 </style>
 </head>
 <body>
@@ -638,7 +664,7 @@ const ROOMS={
     </div>
     <p class="deliv-note">Deliverables always use the <b>latest version</b> of your Brand Home — current logo, colors, type, and assets.</p>
     <div class="apps-wrap">
-      <div class="apps-head"><h3>Brand applications</h3><p>Your logo, sized correctly for each platform. Download and upload anywhere — no design tools needed.</p></div>
+      <div class="apps-head"><h3>Brand applications</h3><p>Two essentials, ready to use: an email signature you can paste straight into Gmail or Outlook, and an Instagram profile icon sized for the circle.</p></div>
       <div data-applications class="apps-body"></div>
     </div>`},
   founder:{kicker:'Founder Tools',title:'Advanced controls.',html:`
@@ -824,6 +850,9 @@ roomBody.addEventListener('click',e=>{
   const deliv=e.target.closest('.vaultcard[data-deliv]'); if(deliv){ handleDeliverable(deliv.dataset.deliv); return; }
   const ex=e.target.closest('[data-export]'); if(ex){ exportApplication(ex.dataset.export, ex.dataset.fmt||'png'); return; }
   const ld=e.target.closest('[data-logodl]'); if(ld){ const u=LOGOVAR[ld.dataset.logodl]; if(u) dlDataURL(ld.dataset.fname||'logo.png',u); return; }
+  const sc=e.target.closest('[data-sig-copy]'); if(sc){ copySignature(); return; }
+  const ib=e.target.closest('[data-ig-bg]'); if(ib){ setIgBg(ib.dataset.igBg); return; }
+  const idl=e.target.closest('[data-ig-download]'); if(idl){ exportInstagramIcon(); return; }
   if(!editorActive()) return;                                  // edits only live in Editor mode
   const rm=e.target.closest('.asset-remove'); if(rm){ removeAsset(rm.dataset.remove); return; }
   const vb=e.target.closest('.asset-var'); if(vb){ makeLogoVariations(vb.dataset.var); return; }
@@ -835,6 +864,8 @@ roomBody.addEventListener('click',e=>{
   const fr=e.target.closest('.vframe');
   if(fr){editTarget=fr;editAssetId=fr.dataset.asset||null;openReplacePicker();return;}
 });
+// live email-signature editing → updates the preview as you type
+roomBody.addEventListener('input',e=>{ const f=e.target.closest('[data-sig-field]'); if(!f) return; if(!brand.signature) brand.signature=defaultSignature(); brand.signature[f.dataset.sigField]=f.value; renderSigPreview(roomBody); });
 // asset role assignment (Assets) → connects Identity, Brand Guide, Deliverables
 roomBody.addEventListener('change',e=>{
   const sel=e.target.closest('.role-select'); if(!sel) return;
@@ -1481,17 +1512,116 @@ function buildAppSVG(kind,s,o){
   if(s.mode==='card'){ const bw=s.w*0.42,bh=s.h*0.34; return head+'<rect width="'+s.w+'" height="'+s.h+'" fill="#ffffff"/>'+img((s.w-bw)/2,s.h*0.23,bw,bh,o.dl)+'<line x1="'+(s.w*0.43)+'" y1="'+(s.h*0.61)+'" x2="'+(s.w*0.57)+'" y2="'+(s.h*0.61)+'" stroke="'+o.accent+'" stroke-width="3"/><text x="'+(s.w/2)+'" y="'+(s.h*0.75)+'" text-anchor="middle" fill="'+o.dark+'" font-family="Fraunces,Georgia,serif" font-size="'+Math.round(s.w*0.032)+'">'+esc(o.nm)+'</text></svg>'; }
   return null;
 }
+function defaultSignature(){
+  const nm=(brand.name && !looksLikeFileName(brand.name)) ? brand.name : '';
+  return { name:nm, title:'Founder', email:'hello@'+brandSlug()+'.com', phone:'', website:'' };
+}
+function sigAccent(){
+  const b=(brand.colors||[]).find(c=>c.role==='brand' && !/black|white/i.test(c.name||''));
+  return (b&&b.hex) || ((brand.colors||[])[0]||{}).hex || '#2c5a3c';
+}
+async function logoSized(url,dispH){          // crisp 2× logo for email; returns {src,w,h} at display size
+  const img=await loadImg(url); if(!img||!img.width) return null;
+  const scale=(dispH*2)/img.height, w=Math.max(1,Math.round(img.width*scale)), h=Math.max(1,Math.round(img.height*scale));
+  const c=document.createElement('canvas'); c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
+  return { src:c.toDataURL('image/png'), w:Math.round(w/2), h:dispH };
+}
+function buildSignatureHTML(logo){            // table + inline styles → pastes cleanly into Gmail/Outlook
+  const s=brand.signature||defaultSignature(), acc=sigAccent(), e=t=>esc(String(t||''));
+  const extra=[];
+  if(s.phone) extra.push('<div style="font-size:12px;line-height:1.55;color:#5b6a62;">'+e(s.phone)+'</div>');
+  if(s.website){ const href=/^https?:/i.test(s.website)?s.website:('https://'+s.website); extra.push('<div style="font-size:12px;line-height:1.55;"><a href="'+e(href)+'" style="color:'+acc+';text-decoration:none;">'+e(s.website.replace(/^https?:\/\//,''))+'</a></div>'); }
+  const logoCell = logo ? '<td style="padding-right:16px;vertical-align:middle;"><img src="'+logo.src+'" width="'+logo.w+'" height="'+logo.h+'" alt="'+e(s.name||brand.name)+'" style="display:block;width:'+logo.w+'px;height:'+logo.h+'px;border:0;"></td>' : '';
+  return '<table cellpadding="0" cellspacing="0" border="0" style="font-family:Arial,Helvetica,sans-serif;color:#1c2b22;border-collapse:collapse;"><tr>'
+    + logoCell
+    + '<td style="border-left:2px solid '+acc+';padding-left:16px;vertical-align:middle;">'
+    + '<div style="font-size:15px;font-weight:bold;color:#1c2b22;line-height:1.3;">'+e(s.name||'Your name')+'</div>'
+    + (s.title?'<div style="font-size:12px;color:#5b6a62;line-height:1.55;padding-bottom:5px;">'+e(s.title)+'</div>':'')
+    + (s.email?'<div style="font-size:12px;line-height:1.55;"><a href="mailto:'+e(s.email)+'" style="color:'+acc+';text-decoration:none;">'+e(s.email)+'</a></div>':'')
+    + extra.join('')
+    + '</td></tr></table>';
+}
+async function renderSigPreview(root){
+  const box=root.querySelector('[data-sig-preview]'); if(!box) return;
+  const pm=pickMark('primaryLogo','wordmark','secondaryLogo');
+  const logo=pm?await logoSized(pm.url,48):null;
+  box.innerHTML=buildSignatureHTML(logo);
+}
+async function copyRichHTML(html){
+  try{ if(navigator.clipboard && window.ClipboardItem){
+    await navigator.clipboard.write([new ClipboardItem({'text/html':new Blob([html],{type:'text/html'}),'text/plain':new Blob([html.replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim()],{type:'text/plain'})})]);
+    return true; } }catch(e){}
+  try{ const tmp=document.createElement('div'); tmp.contentEditable='true'; tmp.style.cssText='position:fixed;left:-9999px;top:0;'; tmp.innerHTML=html; document.body.appendChild(tmp);
+    const r=document.createRange(); r.selectNodeContents(tmp); const sel=getSelection(); sel.removeAllRanges(); sel.addRange(r);
+    const ok=document.execCommand('copy'); sel.removeAllRanges(); tmp.remove(); return ok; }catch(e){ return false; }
+}
+async function copySignature(){
+  const pm=pickMark('primaryLogo','wordmark','secondaryLogo');
+  const logo=pm?await logoSized(pm.url,48):null;
+  const ok=await copyRichHTML(buildSignatureHTML(logo));
+  const note=roomBody.querySelector('[data-sig-copied]');
+  if(note){ note.textContent=ok?'Copied — paste into Gmail or Outlook.':'Select the preview and press ⌘/Ctrl-C.'; setTimeout(()=>{ if(note) note.textContent=''; },4500); }
+}
+let igBgChoice=null;
+function igBgOptions(){
+  const opts=[{name:'Deep',hex:(cssVar('--b1','#14291f')||'#14291f')}];
+  const brandC=(brand.colors||[]).find(c=>c.role==='brand' && !/black|white/i.test(c.name||''));
+  if(brandC&&brandC.hex) opts.push({name:'Brand',hex:brandC.hex});
+  opts.push({name:'Black',hex:'#000000'},{name:'Light',hex:'#F4F1E8'});
+  const seen=new Set(); return opts.filter(o=>{ const h=(o.hex||'').toUpperCase(); if(!h||seen.has(h))return false; seen.add(h); return true; });
+}
+function renderIgBgs(root){
+  const wrap=root.querySelector('[data-ig-bgs]'); if(!wrap) return;
+  const opts=igBgOptions(); if(!igBgChoice) igBgChoice=opts[0].hex;
+  wrap.innerHTML=opts.map(o=>`<span class="ig-bg${o.hex.toUpperCase()===igBgChoice.toUpperCase()?' sel':''}" data-ig-bg="${o.hex}" title="${o.name}" style="background:${o.hex}"></span>`).join('');
+  const prev=root.querySelector('[data-ig-preview]'); if(prev) prev.style.background=igBgChoice;
+}
+function setIgBg(hex){ igBgChoice=hex; renderIgBgs(roomBody); }
+async function exportInstagramIcon(){
+  const pm=pickMark('primaryLogo','wordmark','secondaryLogo'); if(!pm) return;
+  const S=1080, c=document.createElement('canvas'); c.width=S; c.height=S; const x=c.getContext('2d');
+  x.fillStyle=igBgChoice||'#14291f'; x.fillRect(0,0,S,S);
+  const img=await loadImg(pm.url);
+  if(img&&img.width){ const max=S*0.58, r=Math.min(max/img.width,max/img.height), w=img.width*r, h=img.height*r; x.drawImage(img,(S-w)/2,(S-h)/2,w,h); }
+  c.toBlob(b=>{ if(b){ dl(brandSlug()+'-instagram-icon.png',b,'image/png'); announceWorkspaceUpdate('Instagram icon downloaded.','deliverables'); } else announceWorkspaceUpdate('Could not render the icon.','deliverables'); },'image/png');
+}
 function renderApplications(root){
   const box=root.querySelector('[data-applications]'); if(!box) return;
-  if(!pickMark('primaryLogo','wordmark','secondaryLogo')){ box.innerHTML='<p class="apps-empty">Add a logo in <b>Identity</b> and your ready-to-use files appear here.</p>'; return; }
-  const groups={}; Object.keys(APP_SPECS).forEach(k=>{ const s=APP_SPECS[k]; (groups[s.group]=groups[s.group]||[]).push([k,s]); });
-  box.innerHTML=APP_GROUPS.filter(g=>groups[g]).map(g=>
-    '<div class="apps-group"><h4 class="apps-h">'+g+'</h4><div class="apps-grid">'+
-    groups[g].map(([k,s])=>{
-      const onDark=(s.mode==='badge'||s.mode==='post'||s.mode==='signage');
-      return '<div class="appcard'+(onDark?' on-dark':'')+'"><span class="app-dim">'+s.w+' × '+s.h+'</span><b class="app-name">'+esc(s.label)+'</b><i class="app-hint">'+esc(s.hint||'')+'</i><span class="app-dl"><button data-export="'+k+'" data-fmt="png">Download</button></span></div>';
-    }).join('')+'</div></div>'
-  ).join('');
+  const pm=pickMark('primaryLogo','wordmark','secondaryLogo');
+  if(!pm){ box.innerHTML='<p class="apps-empty">Add a logo in <b>Identity</b> and your applications appear here.</p>'; return; }
+  if(!brand.signature) brand.signature=defaultSignature();
+  const s=brand.signature, e=t=>esc(String(t||''));
+  box.innerHTML=`
+    <div class="apptool">
+      <div class="apptool-h"><b>Email signature</b><i>Gmail · Outlook</i></div>
+      <div class="sig-cols">
+        <div class="sig-fields">
+          <label>Name<input data-sig-field="name" value="${e(s.name)}" placeholder="Your name"></label>
+          <label>Title<input data-sig-field="title" value="${e(s.title)}" placeholder="Founder"></label>
+          <label>Email<input data-sig-field="email" value="${e(s.email)}" placeholder="hello@brand.com"></label>
+          <label>Phone<input data-sig-field="phone" value="${e(s.phone)}" placeholder="Optional"></label>
+          <label>Website<input data-sig-field="website" value="${e(s.website)}" placeholder="Optional"></label>
+        </div>
+        <div class="sig-preview-wrap">
+          <div class="sig-preview" data-sig-preview></div>
+          <div class="sig-actions"><button data-sig-copy>Copy signature</button><span class="sig-copied" data-sig-copied></span></div>
+          <p class="sig-hint"><b>Gmail:</b> Settings → Signature → paste. <b>Outlook:</b> Signatures → paste. The logo travels with it.</p>
+        </div>
+      </div>
+    </div>
+    <div class="apptool">
+      <div class="apptool-h"><b>Instagram profile icon</b><i>1080 × 1080</i></div>
+      <div class="ig-cols">
+        <div class="ig-preview" data-ig-preview><img alt="" src="${pm.url}"></div>
+        <div class="ig-controls">
+          <div class="ig-bgs" data-ig-bgs></div>
+          <button class="ig-dl" data-ig-download>Download icon</button>
+          <p class="sig-hint">Centered for Instagram's circular crop. Pick a background, then download.</p>
+        </div>
+      </div>
+    </div>`;
+  renderSigPreview(root);
+  renderIgBgs(root);
 }
 function applyHomeColor(){
   // The home keeps its own calm palette. The brand's colours live in the Guide (applyPaletteVars), not the shell.
@@ -1550,11 +1680,11 @@ function renderPrepared(){
   if(!brand.name){ box.className='home-prepared empty'; box.innerHTML=''; return; }
   const assetN=(brand.logos.length||0)+(brand.photos.length||0)+(brand.docs.length||0);
   const ready=(brand.logos.length>0 && brand.colors.length>0);
-  const appN=heroMark()? Object.keys(APP_SPECS).length : 0;
+  const appN=heroMark()? 2 : 0;
   const items=[];
   if(assetN) items.push(['Archive', assetN+(assetN===1?' asset organized':' assets organized')]);
   items.push(['Guide', ready?'Ready to review':'Taking shape']);
-  if(appN) items.push(['Applications', appN+' prepared']);
+  if(appN) items.push(['Applications', 'Signature & icon ready']);
   box.className='home-prepared'+(items.length?'':' empty');
   box.innerHTML=items.map(([k,v])=>'<span class="prep-item"><span class="prep-k">'+esc(k)+'</span><span class="prep-v">'+esc(v)+'</span></span>').join('');
 }
