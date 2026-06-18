@@ -1528,6 +1528,20 @@ body.md-state-local_preparing .btn-movein:disabled {
 .prep-progress i { display: block; height: 100%; width: 0; background: rgba(14,42,24,.42);
   animation: prepFill var(--fill, 5s) linear forwards; animation-delay: var(--cue-delay, 3s); }
 @keyframes prepFill { to { width: 100%; } }
+/* Welcome Home — the threshold moment into Brand Home (a door, not a page load) */
+.wh-veil { position: fixed; inset: 0; z-index: 99999; display: grid; place-items: center; padding: 24px;
+  background: radial-gradient(125% 125% at 50% 28%, #234534 0%, #1a3326 46%, #12241b 100%);
+  opacity: 0; transition: opacity .95s ease, background 1s ease; pointer-events: none; }
+.wh-veil.on { opacity: 1; pointer-events: auto; }
+.wh-inner { text-align: center; transform: scale(.985); transition: transform 1.5s cubic-bezier(.22,1,.36,1), opacity .8s ease; }
+.wh-veil.opening { background: radial-gradient(125% 125% at 50% 28%, #356046 0%, #20402f 60%, #16281e 100%); }
+.wh-veil.opening .wh-inner { transform: scale(1.07); opacity: 0; }
+.wh-mark { width: 56px; margin: 0 auto 28px; opacity: .9; }
+.wh-mark svg { width: 100%; height: auto; display: block; }
+.wh-mark svg path { fill: #ece6d8; }
+.wh-line { min-height: 1.4em; font-size: clamp(1.5rem, 3.4vw, 2.45rem); font-weight: 250; letter-spacing: -.035em;
+  color: #ece6d8; opacity: 0; transform: translateY(10px); }
+.wh-line.show { opacity: 1; transform: none; transition: opacity .9s ease, transform .9s cubic-bezier(.22,1,.36,1); }
 .prep-safe-line {
   display: inline-flex;
   align-items: center;
@@ -5493,14 +5507,36 @@ btnMovein.addEventListener('click', event => {
     return list.length;
   }
 
-  // Prepare Brand Home → hand off the full asset pack (IndexedDB) + Brand DNA (localStorage), then cross over.
+  // The threshold into Brand Home — a slow, deliberate door opening, not a page load.
+  function crossIntoBrandHome() {
+    const ov = document.createElement('div');
+    ov.className = 'wh-veil';
+    ov.innerHTML = '<div class="wh-inner">' +
+      '<div class="wh-mark"><svg viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg">' +
+      '<path d="M769.4,89.65v111.85h-39.04c.07-25.79-35.02-31.29-50.28-36.68-16.18-5.71,0-14.05,0-14.05l89.32-61.11Z"/>' +
+      '<path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/>' +
+      '</svg></div><p class="wh-line" id="whLine"></p></div>';
+    document.body.appendChild(ov);
+    const el = ov.querySelector('#whLine');
+    const wait = ms => new Promise(r => setTimeout(r, ms));
+    const say = t => { el.classList.remove('show'); el.textContent = t; void el.offsetWidth; el.classList.add('show'); };
+    requestAnimationFrame(() => ov.classList.add('on'));
+    (async () => {
+      await wait(800);  say('Your Brand Home is ready.');
+      await wait(2100); say('Everything has a place.');
+      await wait(2100); say('Welcome home.');
+      await wait(1900); ov.classList.add('opening');
+      await wait(850);  window.location.href = 'index.html';
+    })();
+  }
+
+  // Prepare Brand Home → hand off the full asset pack (IndexedDB) + Brand DNA (localStorage), then cross the threshold.
   document.getElementById('prepareHomeBtn')?.addEventListener('click', async event => {
     event.preventDefault();
     event.stopPropagation();
-    showToast('Preparing your Brand Home…');
     try { await saveBrandAssets(); } catch(e){ console.warn('Brand asset handoff failed:', e); }
     try { await saveBrandDNA(); } catch(e){ console.warn('Brand DNA save failed:', e); }
-    window.location.href = 'index.html';
+    crossIntoBrandHome();
   });
 
 /* ──────────────────────────────────────────────────────────────────────────
