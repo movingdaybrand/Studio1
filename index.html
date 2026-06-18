@@ -1714,7 +1714,18 @@ function homeColorName(hex){                            // name a colour from it
 async function analyzeMarkUpload(newUrl){
   try{
     const urls=[newUrl].concat((brand.logos||[]).map(l=>l.url)).filter(Boolean);
-    const pal=await extractPalette(urls); if(pal.length) brand.colors=pal;
+    const pal=await extractPalette(urls);
+    if(pal.length){
+      const cur=brand.colors||[];
+      if(!cur.length){ brand.colors=pal; }                 // empty palette → take the mark's colours
+      else {                                                // merge: keep existing, never override a colour that already matches
+        const near=(a,b)=>{ const x=hexToRgb(a),y=hexToRgb(b); return (Math.abs(x[0]-y[0])+Math.abs(x[1]-y[1])+Math.abs(x[2]-y[2]))<24; };
+        const merged=cur.slice();
+        pal.filter(c=>c.role!=='neutral').forEach(c=>{ if(!merged.some(m=>near(m.hex,c.hex))) merged.push(c); });   // add only genuinely new colours
+        ['#000000','#FFFFFF'].forEach((hx,i)=>{ if(!merged.some(m=>near(m.hex,hx))) merged.push({hex:hx,name:i?'White':'Black',role:'neutral'}); });
+        brand.colors=merged;
+      }
+    }
   }catch(e){}
   if(conciergeOn()){
     try{
