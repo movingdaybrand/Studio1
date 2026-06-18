@@ -241,7 +241,14 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .gd-fname+.gd-fname,.gd-fdesc{font-weight:300;color:var(--gd-mute);}
 .gd-mockups{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
 .gd-mock{aspect-ratio:1;border-radius:var(--r-sm);}
-/* ── composite application mockups (real logo + brand palette) ── */
+/* ── In Use: two-up showcase (real email signature + Instagram icon) ── */
+.inuse-two{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+@media(max-width:640px){.inuse-two{grid-template-columns:1fr;}}
+.inuse-card{position:relative;border-radius:var(--r-md);overflow:hidden;min-height:clamp(190px,24vw,250px);display:grid;place-items:center;padding:26px 26px 34px;background:linear-gradient(160deg,var(--gd-glass),var(--gd-panel));box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 0 0 1px var(--gd-line);}
+.inuse-sig{background:#fff;border-radius:10px;padding:18px 20px;box-shadow:0 12px 30px rgba(0,0,0,.22);max-width:100%;overflow:auto;}
+.inuse-ig{width:clamp(118px,15vw,150px);height:clamp(118px,15vw,150px);border-radius:50%;display:grid;place-items:center;box-shadow:0 12px 30px rgba(0,0,0,.3);overflow:hidden;}
+.inuse-ig img{width:82%;height:82%;object-fit:contain;}
+.inuse-tag{position:absolute;left:15px;bottom:13px;font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:600;color:var(--gd-mute);}
 .mk-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;}
 .mk{position:relative;aspect-ratio:4/3;min-width:0;min-height:0;border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow);background:var(--b2);display:grid;place-items:center;}
 .mk-tag{position:absolute;left:10px;bottom:9px;z-index:3;font-size:9px;letter-spacing:.12em;text-transform:uppercase;font-weight:500;color:var(--ink-soft);background:rgba(255,255,255,.82);padding:3px 7px;border-radius:6px;backdrop-filter:blur(6px);}
@@ -625,11 +632,9 @@ const ROOMS={
         </div>
       </div>
       <div class="gd-section"><div class="gd-num">04 — In Use</div><h3 class="gd-head"><span class="cap">In the world,</span> <em>in use.</em></h3>
-        <div class="gd-mockups" data-inuse>
-          <div class="vframe gd-mock"><div class="ph c"></div><span class="vframe-tag on-dark">Profile</span></div>
-          <div class="vframe gd-mock"><div class="ph a"></div><span class="vframe-tag on-dark">Website</span></div>
-          <div class="vframe gd-mock"><div class="ph b"></div><span class="vframe-tag">Print</span></div>
-          <div class="vframe gd-mock"><div class="ph d"></div><span class="vframe-tag">Social</span></div>
+        <div class="inuse-two" data-inuse>
+          <div class="inuse-card"><div class="inuse-sig" style="min-width:160px;min-height:54px"></div><span class="inuse-tag">Email signature</span></div>
+          <div class="inuse-card"><div class="inuse-ig" style="background:var(--gd-panel)"></div><span class="inuse-tag">Instagram profile icon</span></div>
         </div>
       </div>
       <div class="gd-section"><div class="gd-num">05 — Usage</div><h3 class="gd-head"><span class="cap">The rules,</span> <em>kept simple.</em></h3>
@@ -1392,23 +1397,19 @@ function logoForGround(dark){          // use the user's B/W variations when the
   else { const b=brand.logos.find(l=>l.variant==='black'); if(b) return b.url; }
   const p=pickMark('primaryLogo','wordmark','secondaryLogo'); return p?p.url:'';
 }
-function renderMockups(root){
+async function renderMockups(root){
   const box=root.querySelector('[data-inuse]'); if(!box) return;
-  const pm=pickMark('primaryLogo','wordmark','secondaryLogo');
-  const dl=pm?pm.url:''; if(!dl) return;            // always the full-colour primary — no B/W swap
-  const wl=dl;
-  const nm=esc(brand.name||'Brand');
-  const tag=esc((looksGenericTag(brand.tagline)?'':brand.tagline)||'');
-  const cfg=[
-    {k:'business-card',label:'Business card',svg:true,inner:'<div class="mk-card"><img alt="" src="'+dl+'"><span class="mk-rule"></span><span class="mk-nm">'+nm+'</span></div>'},
-    {k:'email-signature',label:'Email signature',svg:false,inner:'<div class="mk-sig"><img alt="" src="'+dl+'"><span class="mk-bar"></span><span class="mk-lines"><b>'+nm+'</b><i>Founder</i><i class="mk-accent">hello@'+brandSlug()+'.com</i></span></div>'},
-    {k:'website-header',label:'Website header',svg:false,inner:'<div class="mk-web"><div class="mk-nav"><img alt="" src="'+dl+'"><span class="mk-links"><span></span><span></span><span></span></span></div><div class="mk-hero"></div></div>'},
-    {k:'social-post',label:'Social post',svg:true,dark:true,inner:'<div class="mk-post"><img alt="" src="'+wl+'">'+(tag?'<span class="mk-cap">'+tag+'</span>':'')+'</div>'},
-    {k:'signage',label:'Signage',svg:false,inner:'<div class="mk-sign"><div class="mk-panel"><img alt="" src="'+wl+'"></div></div>'},
-    {k:'social-avatar',label:'Social avatar',svg:true,inner:'<div class="mk-avatar"><div class="mk-circle"><img alt="" src="'+wl+'"></div></div>'}
-  ];
-  box.className='mk-grid';
-  box.innerHTML=cfg.map(c=>'<div class="mk">'+c.inner+'<span class="mk-tag'+(c.dark?' on-dark':'')+'">'+c.label+'</span><span class="mk-dl"><button data-export="'+c.k+'" data-fmt="png">PNG</button>'+(c.svg?'<button data-export="'+c.k+'" data-fmt="svg">SVG</button>':'')+'</span></div>').join('');
+  const pm=pickMark('primaryLogo','wordmark','secondaryLogo'); if(!pm) return;   // no logo yet → keep default tiles
+  if(!brand.signature) brand.signature=defaultSignature();
+  const sigLogo=await logoSized(pm.url,46);
+  const sigHTML=buildSignatureHTML(sigLogo);
+  const igc=await trimmedLogoCanvas(pm.url);
+  const igSrc=igc?igc.toDataURL('image/png'):pm.url;
+  const igBg=igBgChoice || cssVar('--b1','#14291f') || '#14291f';
+  box.className='inuse-two';
+  box.innerHTML=
+    '<div class="inuse-card"><div class="inuse-sig">'+sigHTML+'</div><span class="inuse-tag">Email signature</span></div>'
+    +'<div class="inuse-card"><div class="inuse-ig" style="background:'+igBg+'"><img alt="" src="'+igSrc+'"></div><span class="inuse-tag">Instagram profile icon</span></div>';
 }
 function loadImg(url){ return new Promise(r=>{ if(!url) return r(null); const i=new Image(); i.onload=()=>r(i); i.onerror=()=>r(null); i.src=url; }); }
 function cssVar(n,f){ return (getComputedStyle(document.documentElement).getPropertyValue(n).trim())||f; }
