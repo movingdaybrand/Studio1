@@ -132,21 +132,31 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .review{display:grid;gap:clamp(10px,1.2vw,15px);}
 
 /* identity */
-.id-hero{display:grid;grid-template-columns:1.5fr 1fr;gap:clamp(10px,1.2vw,15px);}
-@media(max-width:820px){.id-hero{grid-template-columns:1fr;}}
-.id-primary{min-height:184px;background:var(--b2);display:grid;place-items:center;}
+.id-hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:clamp(10px,1.6vw,20px);padding:clamp(18px,3vw,40px) 0 clamp(6px,1.2vw,16px);}
+/* the primary logo floats above a soft, glowing pedestal */
+.id-pedestal{position:relative;display:grid;place-items:center;width:100%;padding:clamp(22px,3.4vw,48px) clamp(20px,4vw,60px) clamp(34px,4vw,54px);}
+.id-pedestal::before{content:'';position:absolute;left:50%;top:44%;width:min(60%,380px);height:min(60%,300px);transform:translate(-50%,-50%);background:radial-gradient(ellipse at center,var(--b3,#4e6b5a) 0%,transparent 68%);opacity:.42;filter:blur(34px);z-index:0;pointer-events:none;}
+.id-pedestal::after{content:'';position:absolute;left:50%;bottom:clamp(14px,2vw,22px);width:min(46%,280px);height:24px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(20,30,24,.20),transparent 72%);filter:blur(7px);z-index:0;pointer-events:none;}
+.id-primary{min-height:0;display:grid;place-items:center;}
+.id-hero .id-primary{position:relative;z-index:1;width:min(74%,340px);background:transparent;box-shadow:none;border-radius:0;animation:idFloat 6.5s ease-in-out infinite;}
+.id-hero .id-primary>img{filter:drop-shadow(0 18px 30px rgba(20,30,24,.20));}
+.id-hero .id-primary .vframe-tag{display:none;}
+@keyframes idFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
+@media(prefers-reduced-motion:reduce){.id-hero .id-primary{animation:none;}}
 .id-primary .wm{font-family:var(--display);font-weight:400;font-size:clamp(22px,2.8vw,32px);color:var(--b1);text-align:center;line-height:1.05;}
 .id-primary .wm small{display:block;font-size:.32em;letter-spacing:.32em;text-transform:uppercase;color:var(--b3);margin-top:1em;font-weight:500;}
-.id-namecard{padding:clamp(20px,2.4vw,30px);border-radius:var(--r-md);display:flex;flex-direction:column;justify-content:center;background:linear-gradient(155deg,rgba(255,255,255,.58),rgba(255,255,255,.38));backdrop-filter:blur(26px) saturate(170%);box-shadow:var(--shadow);}
-.id-namecard .lab{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;margin-bottom:12px;}
-.id-name{font-family:var(--display);font-weight:400;font-size:clamp(26px,3vw,38px);line-height:1.02;letter-spacing:-.02em;outline:none;border-radius:6px;}
+.id-namecard{padding:0;display:flex;flex-direction:column;align-items:center;text-align:center;background:none;backdrop-filter:none;box-shadow:none;max-width:46ch;}
+.id-name{font-family:var(--display);font-weight:400;font-size:clamp(22px,2.4vw,30px);line-height:1.04;letter-spacing:-.02em;outline:none;border-radius:6px;}
 .id-name:focus{box-shadow:0 0 0 2px rgba(44,90,60,.22);}
-.id-tag{font-family:var(--display);font-style:italic;font-weight:300;font-size:clamp(15px,1.5vw,18px);color:var(--ink-soft);margin-top:12px;max-width:30ch;outline:none;border-radius:6px;line-height:1.3;}
+.id-tag{font-family:var(--display);font-style:italic;font-weight:300;font-size:clamp(15px,1.5vw,18px);color:var(--ink-soft);margin-top:10px;max-width:34ch;outline:none;border-radius:6px;line-height:1.3;}
 .id-tag:focus{box-shadow:0 0 0 2px rgba(44,90,60,.22);}
-.edit-hint{font-size:10px;color:var(--ink-faint);margin-top:16px;display:none;}
+.edit-hint{font-size:10px;color:var(--ink-faint);margin-top:14px;display:none;}
 .editing .edit-hint{display:block;}
-.id-marks{display:grid;grid-template-columns:1fr 1fr 1fr;gap:clamp(10px,1.2vw,15px);}
-@media(max-width:640px){.id-marks{grid-template-columns:1fr 1fr;}}
+.editing .swatch span:not(.hex){cursor:text;}
+.id-marks{display:flex;flex-direction:column;gap:clamp(12px,1.6vw,18px);}
+.id-markrow{display:flex;flex-wrap:wrap;gap:clamp(10px,1.2vw,15px);}
+.id-markrow>.markframe{flex:1 1 168px;max-width:300px;}
+.mark-sublabel{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;margin-top:2px;}
 .markframe{aspect-ratio:4/3;display:grid;place-items:center;}
 .markframe.dark{background:var(--b1);}.markframe.brand{background:var(--b4);}.markframe.paper{background:var(--b2);}
 .mono{width:58px;height:58px;border-radius:16px;display:grid;place-items:center;font-family:var(--display);font-weight:500;font-size:24px;}
@@ -158,6 +168,30 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .swatch:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);}
 .swatch span{position:absolute;left:10px;bottom:9px;font-size:9px;font-weight:600;}
 .swatch .hex{position:absolute;left:10px;top:9px;font-size:8px;font-family:ui-monospace,monospace;opacity:.7;}
+
+/* in-shell colour picker */
+.cp-overlay{position:fixed;inset:0;z-index:120;display:grid;place-items:center;background:rgba(12,20,15,.42);backdrop-filter:blur(8px);animation:cpFade .2s ease;}
+.cp-overlay[hidden]{display:none;}
+@keyframes cpFade{from{opacity:0}to{opacity:1}}
+.cp-panel{width:min(320px,92vw);padding:18px;border-radius:var(--r-md);display:flex;flex-direction:column;gap:13px;background:linear-gradient(155deg,rgba(255,255,255,.92),rgba(255,255,255,.82));backdrop-filter:blur(30px) saturate(180%);box-shadow:0 30px 70px rgba(12,20,15,.32),inset 0 0 0 1px rgba(255,255,255,.55);}
+.cp-head{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;}
+.cp-x{border:none;background:none;font-size:22px;line-height:1;color:var(--ink-soft);cursor:pointer;padding:0 2px;}
+.cp-sv{position:relative;width:100%;height:158px;border-radius:var(--r-sm);overflow:hidden;cursor:crosshair;touch-action:none;background:hsl(0,100%,50%);}
+.cp-sv-white{position:absolute;inset:0;background:linear-gradient(to right,#fff,rgba(255,255,255,0));}
+.cp-sv-black{position:absolute;inset:0;background:linear-gradient(to top,#000,rgba(0,0,0,0));}
+.cp-hue{position:relative;height:14px;border-radius:99px;cursor:pointer;touch-action:none;background:linear-gradient(to right,#f00 0%,#ff0 17%,#0f0 33%,#0ff 50%,#00f 67%,#f0f 83%,#f00 100%);}
+.cp-handle{position:absolute;width:16px;height:16px;border-radius:50%;box-shadow:0 0 0 2px #fff,0 1px 5px rgba(0,0,0,.45);transform:translate(-50%,-50%);pointer-events:none;}
+.cp-hue-handle{top:50%;}
+.cp-row{display:flex;gap:10px;align-items:center;}
+.cp-preview{width:42px;height:42px;border-radius:10px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.14);}
+.cp-hex{flex:1;font-family:ui-monospace,monospace;font-size:14px;letter-spacing:.05em;text-transform:uppercase;padding:11px 12px;border-radius:10px;border:none;outline:none;color:var(--ink);background:rgba(255,255,255,.72);box-shadow:inset 0 0 0 1px rgba(44,90,60,.18);}
+.cp-hex:focus{box-shadow:inset 0 0 0 2px rgba(44,90,60,.42);}
+.cp-presetlab{font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;margin-top:2px;}
+.cp-presets{display:flex;flex-wrap:wrap;gap:7px;}
+.cp-chip{width:24px;height:24px;border-radius:7px;cursor:pointer;box-shadow:inset 0 0 0 1px rgba(0,0,0,.14);transition:transform .14s ease;}
+.cp-chip:hover{transform:scale(1.14);}
+.cp-done{margin-top:4px;padding:11px;border:none;border-radius:10px;cursor:pointer;font:inherit;font-size:12px;letter-spacing:.04em;font-weight:600;color:var(--paper,#fbf8f0);background:var(--b1,#1c2b22);box-shadow:var(--shadow);}
+.cp-done:hover{filter:brightness(1.08);}
 
 /* assets gallery */
 .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(9px,1.1vw,13px);}
@@ -579,6 +613,18 @@ body.deep-immerse .sig-preview{box-shadow:0 14px 34px rgba(0,0,0,.45);}   /* the
   </div>
 </div>
 
+<div class="cp-overlay" id="mdColorPicker" hidden>
+  <div class="cp-panel">
+    <div class="cp-head"><span id="cpTitle">Edit colour</span><button class="cp-x" id="cpClose" aria-label="Close">&times;</button></div>
+    <div class="cp-sv" id="cpSV"><div class="cp-sv-white"></div><div class="cp-sv-black"></div><div class="cp-handle" id="cpSVHandle"></div></div>
+    <div class="cp-hue" id="cpHue"><div class="cp-handle cp-hue-handle" id="cpHueHandle"></div></div>
+    <div class="cp-row"><div class="cp-preview" id="cpPreview"></div><input class="cp-hex" id="cpHex" maxlength="7" spellcheck="false" aria-label="Hex value"></div>
+    <div class="cp-presetlab">Brand palette</div>
+    <div class="cp-presets" id="cpPresets"></div>
+    <button class="cp-done" id="cpDone">Done</button>
+  </div>
+</div>
+
 <input type="file" id="editFile" accept="image/*" hidden>
 <input type="color" id="editColor" hidden>
 <input type="file" id="zipInput" accept=".zip,.pdf,.svg,.png,.jpg,.jpeg,.webp,.gif,image/*,application/pdf,application/zip" multiple hidden>
@@ -589,18 +635,22 @@ const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
       <div class="id-hero">
-        <div class="vframe contain id-primary"><div class="wm" id="wmBig">${NAME}<small>Private Advisory</small></div><span class="vframe-tag">Primary logo</span></div>
-        <div class="id-namecard"><div class="lab">Name &amp; tagline</div>
+        <div class="id-pedestal">
+          <div class="vframe contain id-primary"><div class="wm" id="wmBig">${NAME}<small>Private Advisory</small></div><span class="vframe-tag">Primary logo</span></div>
+        </div>
+        <div class="id-namecard">
           <div class="id-name" id="bName" contenteditable="true" spellcheck="false">${NAME}</div>
           <div class="id-tag" contenteditable="true" spellcheck="false">${TAG}</div>
-          <span class="edit-hint">Click any text to edit</span>
+          <span class="edit-hint">Editor mode is on — click the logo, name, tagline, a colour, or its name to edit.</span>
         </div>
       </div>
       <div class="sect-label">Marks</div>
       <div class="id-marks">
-        <div class="vframe markframe paper"><div class="wordmark-mini">${NAME}<small>est. 2014</small></div><span class="vframe-tag">Wordmark</span></div>
-        <div class="vframe markframe dark"><div class="mono fill">MF</div><span class="vframe-tag on-dark">Icon · reversed</span></div>
-        <div class="vframe markframe brand"><div class="mono line">MF</div><span class="vframe-tag on-dark">Icon · on brand</span></div>
+        <div class="id-markrow">
+          <div class="vframe markframe paper"><div class="wordmark-mini">${NAME}<small>est. 2014</small></div><span class="vframe-tag">Wordmark</span></div>
+          <div class="vframe markframe dark"><div class="mono fill">MF</div><span class="vframe-tag on-dark">Icon · reversed</span></div>
+          <div class="vframe markframe brand"><div class="mono line">MF</div><span class="vframe-tag on-dark">Icon · on brand</span></div>
+        </div>
       </div>
       <div class="sect-label">Primary colors</div>
       <div class="id-colors">
@@ -866,7 +916,7 @@ function editorActive(){ return !!founderState['Editor mode']; }
 function enableEditing(root){
   const on=editorActive();
   root.classList.toggle('editing', on);
-  root.querySelectorAll('.id-name,.id-tag,.gd-title,.gd-tag,.gd-disp,.gd-bodysample,.spec .big,.spec .body,.gd-use li,.asset-name')
+  root.querySelectorAll('.id-name,.id-tag,.gd-title,.gd-tag,.gd-disp,.gd-bodysample,.spec .big,.spec .body,.gd-use li,.asset-name,.swatch span:not(.hex)')
     .forEach(el=>{ if(on){ el.setAttribute('contenteditable','true'); el.setAttribute('spellcheck','false'); } else el.removeAttribute('contenteditable'); });
 }
 function applyFounder(root){
@@ -890,7 +940,7 @@ roomBody.addEventListener('click',e=>{
   const at=e.target.closest('.asset-thumb[data-asset]');
   if(at){ editAssetId=at.dataset.asset; editTarget=null; openReplacePicker(); return; }
   const sw=e.target.closest('.swatch,.gd-sw');
-  if(sw){editTarget=sw;colorInput.value=rgbToHex(getComputedStyle(sw).backgroundColor);colorInput.click();return;}
+  if(sw){ openColorPicker(sw); return; }
   const fr=e.target.closest('.vframe');
   if(fr){editTarget=fr;editAssetId=fr.dataset.asset||null;openReplacePicker();return;}
 });
@@ -922,6 +972,10 @@ roomBody.addEventListener('input',e=>{
     scheduleSave();
   } else if(t.classList.contains('asset-name')){
     const a=findAsset(t.dataset.name); if(a){ a.name=t.textContent.trim(); scheduleSave(); }  // re-render on blur to keep focus
+  } else if(t.matches&&t.matches('.swatch span:not(.hex)')){
+    const sw=t.closest('.swatch'); const hex=sw&&sw.dataset.hex;
+    if(hex){ const col=brand.colors.find(c=>(c.hex||'').toUpperCase()===hex.toUpperCase());
+      if(col){ const v=t.textContent.trim(); if(v){ col.name=v; col.named=true; } scheduleSave(); } }
   }
 });
 roomBody.addEventListener('blur',e=>{
@@ -930,6 +984,12 @@ roomBody.addEventListener('blur',e=>{
   else if(t.matches('.id-tag,.gd-tag')) updateWorkspaceState({},{source:'identity',announce:'Tagline updated. Brand Guide refreshed.'});
   else if(t.matches('.gd-disp,.gd-bodysample,.spec .big,.spec .body,.gd-use li')){ saveBrand(); announceWorkspaceUpdate('Brand Guide updated.','guide'); }
   else if(t.matches('.asset-name')) updateWorkspaceState({},{source:'assets',announce:'File renamed. Brand Guide and Deliverables refreshed.'});
+  else if(t.matches('.swatch span:not(.hex)')){
+    const sw=t.closest('.swatch'), hex=sw&&sw.dataset.hex;
+    if(hex){ const col=brand.colors.find(c=>(c.hex||'').toUpperCase()===hex.toUpperCase());
+      if(col){ const v=t.textContent.trim(); if(v){ col.name=v; col.named=true; } } }
+    paintSwatches(roomBody); saveBrand(); announceWorkspaceUpdate('Colour renamed. Brand Guide refreshed.','guide');
+  }
 },true);
 function setFrameImage(fr,url,contain,assetId){
   const tag=fr.querySelector('.vframe-tag'); const tagHTML=tag?tag.outerHTML:'';
@@ -971,6 +1031,70 @@ colorInput.addEventListener('input',()=>{
 colorInput.addEventListener('change',()=>{ editTarget=null; updateWorkspaceState({},{source:'identity',announce:'Color system updated. Brand Guide refreshed.'}); });
 function rgbToHex(rgb){const m=(rgb||'').match(/\d+/g); if(!m) return '#888888'; return '#'+m.slice(0,3).map(n=>(+n).toString(16).padStart(2,'0')).join('');}
 function readableOn(hex){const r=parseInt(hex.substr(1,2),16),g=parseInt(hex.substr(3,2),16),b=parseInt(hex.substr(5,2),16); return (0.299*r+0.587*g+0.114*b)/255>0.6?'#1c2b22':'#f3efe6';}
+
+/* ──────────── in-shell colour picker (replaces the OS dialog) ──────────── */
+const CP={el:null,idx:-1,h:0,s:0,v:1};
+function cp01(n){ return Math.max(0,Math.min(1,n)); }
+function cpHexToHsv(hex){ const [r,g,b]=hexToRgb(hex).map(n=>n/255); const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn; let h=0;
+  if(d){ if(mx===r) h=((g-b)/d)%6; else if(mx===g) h=(b-r)/d+2; else h=(r-g)/d+4; h*=60; if(h<0) h+=360; }
+  return {h, s:mx?d/mx:0, v:mx}; }
+function cpHsvToHex(h,s,v){ const c=v*s, x=c*(1-Math.abs((h/60)%2-1)), m=v-c; let r=0,g=0,b=0;
+  if(h<60){r=c;g=x;} else if(h<120){r=x;g=c;} else if(h<180){g=c;b=x;} else if(h<240){g=x;b=c;} else if(h<300){r=x;b=c;} else {r=c;b=x;}
+  const to=n=>Math.round((n+m)*255).toString(16).padStart(2,'0'); return ('#'+to(r)+to(g)+to(b)).toUpperCase(); }
+function cpCur(){ return cpHsvToHex(CP.h,CP.s,CP.v); }
+function cpInit(){
+  if(CP.el) return;
+  CP.el=document.getElementById('mdColorPicker'); if(!CP.el) return;
+  CP.sv=document.getElementById('cpSV'); CP.hue=document.getElementById('cpHue');
+  CP.svH=document.getElementById('cpSVHandle'); CP.hueH=document.getElementById('cpHueHandle');
+  CP.prev=document.getElementById('cpPreview'); CP.hexI=document.getElementById('cpHex'); CP.presets=document.getElementById('cpPresets');
+  document.getElementById('cpClose').addEventListener('click',cpClose);
+  document.getElementById('cpDone').addEventListener('click',cpClose);
+  CP.el.addEventListener('pointerdown',e=>{ if(e.target===CP.el) cpClose(); });
+  const area=(el,cb)=>{ const move=e=>{ const r=el.getBoundingClientRect();
+      cb( cp01((e.clientX-r.left)/r.width), cp01((e.clientY-r.top)/r.height) ); };
+    el.addEventListener('pointerdown',e=>{ e.preventDefault(); el.setPointerCapture&&el.setPointerCapture(e.pointerId); move(e);
+      const up=()=>{ el.removeEventListener('pointermove',move); el.removeEventListener('pointerup',up); cpCommit(); };
+      el.addEventListener('pointermove',move); el.addEventListener('pointerup',up); }); };
+  area(CP.sv,(x,y)=>{ CP.s=x; CP.v=1-y; cpPaint(); cpLive(); });
+  area(CP.hue,x=>{ CP.h=x*360; cpPaint(); cpLive(); });
+  CP.hexI.addEventListener('input',()=>{ let v=CP.hexI.value.trim(); if(v&&v[0]!=='#') v='#'+v;
+    if(/^#[0-9a-f]{6}$/i.test(v)){ const k=cpHexToHsv(v); CP.h=k.h;CP.s=k.s;CP.v=k.v; cpPaint(true); cpLive(); cpCommit(); } });
+  CP.presets.addEventListener('click',e=>{ const c=e.target.closest('[data-cp]'); if(!c) return;
+    const k=cpHexToHsv(c.dataset.cp); CP.h=k.h;CP.s=k.s;CP.v=k.v; cpPaint(); cpLive(); cpCommit(); });
+}
+function cpPaint(skipHexField){
+  if(!CP.el) return;
+  CP.sv.style.background='hsl('+CP.h+',100%,50%)';
+  CP.svH.style.left=(CP.s*100)+'%'; CP.svH.style.top=((1-CP.v)*100)+'%';
+  CP.hueH.style.left=((CP.h/360)*100)+'%';
+  const hex=cpCur(); CP.svH.style.background=hex; CP.hueH.style.background='hsl('+CP.h+',100%,50%)';
+  CP.prev.style.background=hex;
+  if(!skipHexField && document.activeElement!==CP.hexI) CP.hexI.value=hex;
+}
+function cpLive(){                                    // write into the brand palette + repaint, live
+  const hex=cpCur();
+  if(CP.idx>-1 && brand.colors[CP.idx]){ brand.colors[CP.idx].hex=hex.toLowerCase();
+    try{ applyPaletteVars(brand.colors); }catch(e){} paintSwatches(roomBody); }
+}
+function cpCommit(){ scheduleSave(); }
+function openColorPicker(target){
+  cpInit(); if(!CP.el) return;
+  const hex=(target&&target.dataset&&target.dataset.hex) || rgbToHex(getComputedStyle(target).backgroundColor);
+  const H=(hex||'#888888').toUpperCase();
+  CP.idx=brand.colors.findIndex(c=>(c.hex||'').toUpperCase()===H);
+  const col=CP.idx>-1?brand.colors[CP.idx]:null;
+  document.getElementById('cpTitle').textContent=(col&&col.name)?('Edit '+col.name):'Edit colour';
+  const k=cpHexToHsv(H); CP.h=k.h;CP.s=k.s;CP.v=k.v;
+  const chips=[...new Set(brand.colors.map(c=>(c.hex||'').toUpperCase()).filter(Boolean).concat(['#000000','#FFFFFF']))];
+  CP.presets.innerHTML=chips.map(h=>'<div class="cp-chip" data-cp="'+h+'" style="background:'+h+'" title="'+h+'"></div>').join('');
+  cpPaint(); CP.el.hidden=false;
+}
+function cpClose(){
+  if(!CP.el||CP.el.hidden) return;
+  CP.el.hidden=true; CP.idx=-1; saveBrand();
+  try{ announceWorkspaceUpdate('Colour updated. Brand Guide refreshed.','guide'); }catch(e){}
+}
 
 // ── upload & set: a dropped .zip unzips and populates the rooms ──
 const brand={name:'',tagline:'',category:'',logos:[],photos:[],docs:[],colors:[],type:null,colorSystem:null,typeSystem:null,personality:null,visualDirection:'',guidePlan:null,brandHomeImprovements:null,brandWorld:null,designStrategy:null};
@@ -1285,20 +1409,20 @@ function paintSwatches(root){
   if(!brand.colors.length) return;
   // Clean the palette for display: drop exact-duplicate hexes, then disambiguate repeated names by tone.
   const seen=new Set(), list=[];
-  brand.colors.forEach(c=>{ const hex=(c.hex||'').toUpperCase(); if(!hex||seen.has(hex)) return; seen.add(hex); list.push({hex,name:c.name||'Color'}); });
+  brand.colors.forEach(c=>{ const hex=(c.hex||'').toUpperCase(); if(!hex||seen.has(hex)) return; seen.add(hex); list.push({hex,name:c.name||'Color',named:!!c.named}); });
   const lum=h=>{const x=hexToRgb(h);return .299*x[0]+.587*x[1]+.114*x[2];};
-  const groups={}; list.forEach((c,i)=>{ (groups[c.name]=groups[c.name]||[]).push(i); });
+  const groups={}; list.forEach((c,i)=>{ if(c.named) return; (groups[c.name]=groups[c.name]||[]).push(i); });  // never re-prefix a name the founder typed by hand
   Object.values(groups).forEach(idxs=>{ if(idxs.length<2) return;
     const s=[...idxs].sort((a,b)=>lum(list[b].hex)-lum(list[a].hex));
     s.forEach((idx,k)=>{ const base=list[idx].name; list[idx].name = k===0 ? 'Light '+base : (k===s.length-1 ? 'Deep '+base : base); });
   });
-  root.querySelectorAll('.swatch').forEach((el,i)=>{ const c=list[i]; if(!c){ el.style.display='none'; return; } el.style.display='';
-    el.style.background=c.hex; el.style.color=readOn(c.hex);
+  root.querySelectorAll('.swatch').forEach((el,i)=>{ const c=list[i]; if(!c){ el.style.display='none'; el.removeAttribute('data-hex'); return; } el.style.display='';
+    el.style.background=c.hex; el.style.color=readOn(c.hex); el.dataset.hex=c.hex;
     const h=el.querySelector('.hex'); if(h) h.textContent=c.hex;
-    const nm=el.querySelector('span:not(.hex)'); if(nm) nm.textContent=c.name; });
+    const nm=el.querySelector('span:not(.hex)'); if(nm && document.activeElement!==nm) nm.textContent=c.name; });   // don't overwrite while it's being typed
   // Rebuild the guide palette so every real colour shows — including black & white — each named and visibly bordered.
   root.querySelectorAll('.gd-palette').forEach(pal=>{
-    pal.innerHTML = list.map(c=>`<div class="gd-sw" style="background:${c.hex};color:${readOn(c.hex)}"><span>${esc(c.name)}</span><i>${esc(c.hex)}</i></div>`).join('');
+    pal.innerHTML = list.map(c=>`<div class="gd-sw" data-hex="${c.hex}" style="background:${c.hex};color:${readOn(c.hex)}"><span>${esc(c.name)}</span><i>${esc(c.hex)}</i></div>`).join('');
   });
 }
 function ensureFont(name){
@@ -1396,7 +1520,7 @@ function applyUploads(root){
     const a=root.querySelector('[data-k="assets"] span'); if(a) a.textContent=n?(n+(n===1?' file':' files')):'\u2014';
     const p=root.querySelector('[data-k="prepared"] span'); if(p){ try{ p.textContent=new Date().toLocaleDateString(undefined,{month:'long',year:'numeric'}); }catch(e){} } }
   step(()=>applyType(root)); step(()=>applyTypeProse(root)); step(()=>applyDeliverables(root));
-  step(()=>placeLogos(root)); step(()=>renderLogoSystem(root)); step(()=>fillHeroLogo(root));
+  step(()=>placeLogos(root)); step(()=>renderIdMarks(root)); step(()=>renderLogoSystem(root)); step(()=>fillHeroLogo(root));
   step(()=>renderMockups(root));
   step(()=>{ let pi=0;
     root.querySelectorAll('.gframe:not(.glogo),.gd-mock').forEach(fr=>{ const P=brand.photos[pi]; if(P){ setFrameImage(fr,P.url,false,P.id); pi++; } }); });
@@ -2089,22 +2213,73 @@ async function analyzeAssets(list){
     if(r){ if(r.lum!=null) a.lum=r.lum; a.aspect=r.aspect; a.variety=r.variety; a.transparentRatio=r.transparentRatio; a.softRatio=r.softRatio; a._an=true; }
   }
 }
-/* ── place the right logo on the right ground (dark mark on light, light mark on dark) ── */
-function placeLogos(root){
-  const frames=[...root.querySelectorAll('.id-primary,.markframe,.glogo')];   // gd-logocell is owned by renderLogoSystem
+/* ── place the right logo on the right ground, labelled for what it actually is ── */
+function markKind(m){
+  if(!m) return 'Mark';
+  const n=(m.name||'').toLowerCase(), a=(m.aspect==null?1:m.aspect);
+  if(m.role==='wordmark'||/wordmark|logotype/.test(n)||a>2.2) return 'Wordmark';
+  if(m.role==='iconMark'||/\bicon\b|symbol|emblem|favicon/.test(n)||(a>0.78&&a<1.3)) return 'Icon';
+  if(m.role==='secondaryLogo'||/secondary|alt/.test(n)) return 'Secondary';
+  return 'Logo';
+}
+async function placeLogos(root){
+  const frames=[...root.querySelectorAll('.id-primary,.glogo')];   // .markframe is owned by renderIdMarks; gd-logocell by renderLogoSystem
   if(!frames.length || !brand.logos.length) return;
   const all=brand.logos, lum=l=>(l.lum==null?120:l.lum);
   const photoish=l=>(l.transparentRatio!=null&&l.transparentRatio<0.03)&&(l.variety!=null&&l.variety>120);
   const clean=all.filter(l=>!photoish(l)); const logos=clean.length?clean:all;      // never pick document/photo screenshots when a real mark exists
-  if(!logos.some(l=>l.lum!=null)){ let li=0; frames.forEach(fr=>{ const L=logos[li]; if(L){ setFrameImage(fr,L.url,true,L.id); li++; } }); return; }
-  const primary=logos.find(l=>l.role==='primaryLogo')||logos[0];
-  const lightest=[...logos].sort((a,b)=>lum(b)-lum(a))[0];
+  const {primary}=logoSystemMarks();
+  const primaryMark = primary || logos.find(l=>l.role==='primaryLogo') || logos[0];
   const darkest=[...logos].sort((a,b)=>lum(a)-lum(b))[0];
-  frames.forEach(fr=>{
+  const reversed = async m => { const isSvg=/svg/i.test(m.ext||''); return (brand.logos.find(l=>l.variant==='white')||{}).url || await recolorLogo(m.url,'white',isSvg) || m.url; };
+  for(const fr of frames){
     const darkGround=fr.classList.contains('dark')||fr.classList.contains('brand');
-    let pick = darkGround ? lightest : (lum(primary)<175 ? primary : darkest);
-    if(pick) setFrameImage(fr,pick.url,true,pick.id);
-  });
+    const pick = darkGround ? primaryMark : (lum(primaryMark)<175 ? primaryMark : darkest);
+    if(pick){ const url=darkGround?await reversed(pick):pick.url; setFrameImage(fr,url,true,pick.id); }
+  }
+}
+/* ── the brand's most-used marks: one of each real item (logo / wordmark / icon), then its secondary colour versions ── */
+async function renderIdMarks(root){
+  const wrap=root.querySelector('.id-marks'); if(!wrap) return;
+  const lum=l=>(l.lum==null?120:l.lum);
+  const photoish=l=>(l.transparentRatio!=null&&l.transparentRatio<0.03)&&(l.variety!=null&&l.variety>120);
+  const logos=(brand.logos||[]).filter(l=>l&&l.url&&!photoish(l));
+  if(!logos.length) return;                                      // keep the static template until real marks arrive
+  const {primary,icon}=logoSystemMarks();
+  const primaryMark = primary || logos.find(l=>l.role==='primaryLogo') || logos[0];
+  const isSvg=m=>/svg/i.test(m.ext||'');
+  const reversed=async m=> (brand.logos.find(l=>l.variant==='white')||{}).url || await recolorLogo(m.url,'white',isSvg(m)) || m.url;
+  const full=async m=> await imgToDataURL(m.url,isSvg(m)) || m.url;
+  const groundHex=(v,fb)=>{ try{ const x=getComputedStyle(document.documentElement).getPropertyValue(v).trim(); return x||fb; }catch(e){ return fb; } };
+  const lumHex=h=>{ const r=hexToRgb(h); return .299*r[0]+.587*r[1]+.114*r[2]; };
+  const onGround=async (m,gHex)=> (lumHex(gHex)<140 ? await reversed(m) : await full(m));   // reads on whatever ground it lands
+
+  // distinct items — each labelled for what it truly is, no duplicates
+  const items=[], seen=new Set();
+  const add=(m,kind)=>{ if(!m||seen.has(m.id)) return; seen.add(m.id); items.push({mark:m,kind:kind||markKind(m)}); };
+  add(primaryMark);
+  add(logos.find(l=>l.role==='wordmark') || logos.find(l=>l!==primaryMark&&markKind(l)==='Wordmark'),'Wordmark');
+  add(icon&&icon.id!==primaryMark.id?icon:null,'Icon');
+  add(logos.find(l=>l.role==='secondaryLogo'),'Secondary');
+
+  const frame=ground=>{ const d=document.createElement('div'); d.className='vframe markframe '+ground;
+    d.innerHTML='<span class="vframe-tag'+(ground==='paper'?'':' on-dark')+'"></span>'; return d; };
+  const fill=async (d,url,label,assetId)=>{ setFrameImage(d,url,true,assetId); const t=d.querySelector('.vframe-tag'); if(t) t.textContent=label; };
+
+  wrap.innerHTML='';
+  // Row 1 — each real mark in full colour, on the ground that suits it
+  const row1=document.createElement('div'); row1.className='id-markrow';
+  for(const it of items){ const onDark=lum(it.mark)>150; const ground=onDark?'dark':'paper';
+    const url=onDark?await reversed(it.mark):await full(it.mark);
+    const d=frame(ground); row1.appendChild(d); await fill(d,url,it.kind,it.mark.id); }
+  wrap.appendChild(row1);
+  // Row 2 — the primary mark's secondary colour versions
+  const sub=document.createElement('div'); sub.className='mark-sublabel'; sub.textContent='Secondary versions'; wrap.appendChild(sub);
+  const row2=document.createElement('div'); row2.className='id-markrow';
+  const pk=markKind(primaryMark);
+  const dRev=frame('dark'); row2.appendChild(dRev); await fill(dRev, await reversed(primaryMark), pk+' · reversed', primaryMark.id);
+  const dBr=frame('brand'); row2.appendChild(dBr); await fill(dBr, await onGround(primaryMark, groundHex('--b4','#14291f')), pk+' · on brand', primaryMark.id);
+  wrap.appendChild(row2);
 }
 const LOGOVAR={};                          // markId|treatment -> generated data URL (for hover download)
 const DLICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v12"/><path d="M6.5 11l5.5 5.5 5.5-5.5"/><path d="M5 20.5h14"/></svg>';
