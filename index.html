@@ -1190,10 +1190,13 @@ function paintSwatches(root){
     el.style.background=c.hex; el.style.color=readOn(c.hex);
     const h=el.querySelector('.hex'); if(h) h.textContent=c.hex.toUpperCase();
     const nm=el.querySelector('span:not(.hex)'); if(nm) nm.textContent=c.name; });
-  root.querySelectorAll('.gd-sw').forEach((el,i)=>{ const c=brand.colors[i]; if(!c) return;
-    el.style.background=c.hex; el.style.color=readOn(c.hex);
-    const nm=el.querySelector('span'); if(nm) nm.textContent=c.name;
-    const hx=el.querySelector('i'); if(hx) hx.textContent=c.hex.toUpperCase(); });
+  // Rebuild the guide palette so every real colour shows — including black & white — each named.
+  root.querySelectorAll('.gd-palette').forEach(pal=>{
+    pal.innerHTML = brand.colors.map(c=>{
+      const hex=(c.hex||'').toUpperCase();
+      return `<div class="gd-sw" style="background:${c.hex};color:${readOn(c.hex)}"><span>${esc(c.name||'Color')}</span><i>${esc(hex)}</i></div>`;
+    }).join('');
+  });
 }
 function ensureFont(name){
   if(!name) return; const id='dynfont-'+name.replace(/[^a-z0-9]/gi,'');
@@ -1989,7 +1992,7 @@ async function importFromExperience(){
     if(dna.tagline) brand.tagline=looksGenericTag(dna.tagline)?'':dna.tagline;
     if(dna.category) brand.category=dna.category;
     if(Array.isArray(dna.colors)&&dna.colors.length)
-      brand.colors=dna.colors.map(c=>({hex:normHex(c&&c.hex)||(c&&c.hex)||'',name:(c&&c.name)||'Color'})).filter(c=>c.hex).slice(0,5);
+      brand.colors=dna.colors.map(c=>({hex:normHex(c&&c.hex)||(c&&c.hex)||'',name:(c&&c.name)||'Color',role:(c&&c.role)||'brand'})).filter(c=>c.hex).slice(0,8);
     const ty=dna.typography||{};
     const disp=(ty.display&&ty.display.name)||''; const body=(ty.body&&ty.body.name)||'';
     if(disp||body) brand.type={display:disp,displayUsage:(ty.display&&ty.display.usage)||'',body:body,bodyUsage:(ty.body&&ty.body.usage)||''};
