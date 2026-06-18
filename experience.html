@@ -4038,6 +4038,34 @@ function categoryConfidence(file, meta, category) {
   return category === 'Miscellaneous' ? 0.3 : 0.42;
 }
 
+const CLEAN_BASE = { 'Logos':'Logo','Icons':'Icon','Wordmarks':'Wordmark','Photography':'Photograph','Brand Guidelines':'Brand Guidelines','Typography / Fonts':'Typeface','Presentations':'Presentation','Documents':'Document','Video':'Video','Miscellaneous':'Asset' };
+function looksMessy(name) {
+  const base = (name || '').replace(/\.[^.]+$/, '').trim();
+  if (!base) return true;
+  if (/^(img|dsc|dscn|image|photo|pic|screenshot|screen[\s_-]?shot|untitled|unnamed|export|final|asset|file|download|scan|capture|render)[\s_-]*\d*$/i.test(base)) return true;
+  if (/^[0-9a-f]{8,}$/i.test(base)) return true;                 // hash / uuid-like
+  if (/^[0-9._\-\s]+$/.test(base)) return true;                  // numbers/punctuation only
+  if (/\b(copy|duplicate)\b|\(\d+\)|[_\-]v?\d+$|final[_\-]?final/i.test(base)) return true;
+  if (base.length > 42) return true;
+  return false;
+}
+function cleanAssetName(asset, n) {
+  const b = CLEAN_BASE[asset.category] || 'Asset';
+  const num = n > 1 ? ' ' + String(n).padStart(2, '0') : '';
+  return b + num + '.' + String(asset.extension || '').toLowerCase();
+}
+function ahashDistance(a, b) {
+  if (!a || !b || a.length !== b.length) return 99;
+  let d = 0; for (let i = 0; i < a.length; i++) { let x = (parseInt(a[i], 16) ^ parseInt(b[i], 16)); while (x) { d += x & 1; x >>= 1; } } return d;
+}
+function refineNearDuplicates(metas) {                            // keep one copy of visually-identical marks
+  const kept = [], dups = [];
+  metas.forEach(m => {
+    const twin = m.ahash && kept.find(k => k.category === m.category && k.ahash && k.width === m.width && k.height === m.height && ahashDistance(k.ahash, m.ahash) <= 4);
+    if (twin) { m.duplicate = true; m.duplicateOf = twin.id; dups.push(m); } else kept.push(m);
+  });
+  return { kept, dups };
+}
 function detectExactDuplicates(files) {
   const seen = new Map();
   const unique = [];
@@ -4086,6 +4114,17 @@ function getImageMetadata(file) {
         const top = [...buckets.values()].sort((a,b)=>b.n-a.n).slice(0,3)
           .map(o => '#' + [o.r,o.g,o.b].map(v => Math.round(v/o.n).toString(16).padStart(2,'0')).join(''));
         meta.colors = top; meta.dominant = top[0] || null;
+        // perceptual average-hash (8x8, transparency treated as white) for near-duplicate detection
+        try {
+          const hc = document.createElement('canvas'); hc.width = 8; hc.height = 8;
+          const hx = hc.getContext('2d', { willReadFrequently: true }); hx.drawImage(img, 0, 0, 8, 8);
+          const hd = hx.getImageData(0, 0, 8, 8).data; const g = [];
+          for (let i = 0; i < hd.length; i += 4) g.push(hd[i+3] < 40 ? 255 : (0.299*hd[i] + 0.587*hd[i+1] + 0.114*hd[i+2]));
+          const mean = g.reduce((a,b)=>a+b,0) / g.length; let bits = '';
+          for (let i = 0; i < 64; i++) bits += g[i] > mean ? '1' : '0';
+          let hexh = ''; for (let i = 0; i < 64; i += 4) hexh += parseInt(bits.slice(i, i+4), 2).toString(16);
+          meta.ahash = hexh;
+        } catch (e) { meta.ahash = null; }
       } catch (err) {
         meta.transparentBackground = meta.transparentBackground; 
       } finally {
@@ -4121,6 +4160,7 @@ function buildPreparationReport(preparedFiles, duplicateFiles, originalFiles, as
     duplicateFiles: duplicateFiles.map(file => ({ name: file.name, size: file.size, lastModified: file.lastModified })),
     categoryCounts: counts,
     localPalette,
+    renamedCount: assetsMeta.filter(a => a.renamed).length,
     assets: assetsMeta,
     foundation: { mainLogo, mainIcon, mainWordmark, guideline, typography },
     hasEnoughForUnderstanding: preparedFiles.length > 0 && assetsMeta.some(a => ['Logos','Icons','Wordmarks','Brand Guidelines','Photography'].includes(a.category)),
@@ -4156,6 +4196,7 @@ async function prepareFilesLocally(files) {
       transparentBackground: imageMeta.transparentBackground,
       dominant: imageMeta.dominant,
       colors: imageMeta.colors || [],
+      ahash: imageMeta.ahash || null,
       duplicate: false,
       previewable: (file.type || '').startsWith('image/') || ['svg','png','jpg','jpeg','webp','gif'].includes(extension),
       roleGuess: guessRole(file.name, imageMeta),
@@ -4163,7 +4204,15 @@ async function prepareFilesLocally(files) {
     });
   }
 
-  return buildPreparationReport(unique, duplicates, originalFiles, assetsMeta);
+  const { kept, dups: nearDups } = refineNearDuplicates(assetsMeta);
+  const catCount = {};
+  kept.forEach(a => {
+    if (looksMessy(a.name)) { catCount[a.category] = (catCount[a.category] || 0) + 1; a.displayName = cleanAssetName(a, catCount[a.category]); a.renamed = true; }
+    else { a.displayName = a.name; a.renamed = false; }
+  });
+  const keptFiles = kept.map(a => a.file);
+  const allDuplicateFiles = duplicates.concat(nearDups.map(a => a.file));
+  return buildPreparationReport(keptFiles, allDuplicateFiles, originalFiles, kept);
 }
 
 function serializePreparationReport(report) {
@@ -4176,6 +4225,7 @@ function serializePreparationReport(report) {
     duplicateFiles: report.duplicateFiles,
     categoryCounts: report.categoryCounts,
     localPalette: report.localPalette || [],
+    renamedCount: report.renamedCount || 0,
     hasEnoughForUnderstanding: report.hasEnoughForUnderstanding,
     assets: (report.assets || []).map(({ file, ...safe }) => safe),
     foundation: Object.fromEntries(Object.entries(report.foundation || {}).map(([key, asset]) => [key, asset ? { ...asset, file: undefined } : null]))
