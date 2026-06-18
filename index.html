@@ -88,6 +88,37 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .room-card i{display:block;font-style:normal;font-size:.76rem;font-weight:300;color:var(--ink-soft);margin-top:2px;}
 .room-card .go{position:absolute;top:16px;right:16px;opacity:0;transform:translateX(-4px);transition:.25s;color:var(--ink-faint);}
 .room-card:hover .go{opacity:1;transform:none;}
+.room-no{position:absolute;top:14px;left:16px;font-size:.62rem;letter-spacing:.14em;font-variant-numeric:tabular-nums;color:var(--ink-faint);opacity:.55;font-weight:500;}
+.room-card[data-open="founder"]{opacity:.5;}
+.room-card[data-open="founder"]:hover{opacity:1;}
+/* home: quiet "already prepared" line — the concierge speaking */
+.home-prepared{display:flex;justify-content:center;flex-wrap:wrap;gap:clamp(20px,4vw,52px);margin:clamp(14px,2.6vh,26px) auto 0;max-width:640px;}
+.home-prepared.empty{display:none;}
+/* ═══════════════ HOME ENTRANCE — cinematic arrival (walking through the door) ═══════════════ */
+.home-veil{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;
+  background:radial-gradient(125% 125% at 50% 30%,#2e5a40 0%,#1f3d2e 58%,#16281e 100%);
+  opacity:1;transition:opacity .95s cubic-bezier(.22,1,.36,1),transform 1.15s cubic-bezier(.22,1,.36,1);}
+.home-veil .hv-mark{width:56px;}
+.home-veil .hv-mark svg{width:100%;height:auto;display:block;}
+.home-veil .hv-mark svg path{fill:#ece6d8;}
+.home-veil.lift{opacity:0;transform:scale(1.06);pointer-events:none;}
+body.entering .env{opacity:0;transform:scale(.986);}
+body.entering.reveal .env{opacity:1;transform:none;transition:opacity 1s cubic-bezier(.22,1,.36,1),transform 1.2s cubic-bezier(.22,1,.36,1);}
+body.entering .home-head{opacity:0;transform:translateY(10px);}
+body.entering.reveal .home-head{opacity:1;transform:none;transition:opacity .85s ease .25s,transform .95s cubic-bezier(.22,1,.36,1) .25s;}
+body.entering #homePrepared{opacity:0;}
+body.entering.reveal #homePrepared{opacity:1;transition:opacity .8s ease .55s;}
+body.entering .room-card{opacity:0;transform:translateY(13px);}
+body.entering.reveal .room-card{opacity:1;transform:none;transition:opacity .72s ease,transform .82s cubic-bezier(.22,1,.36,1);}
+body.entering.reveal .room-card:nth-child(1){transition-delay:.55s;}
+body.entering.reveal .room-card:nth-child(2){transition-delay:.63s;}
+body.entering.reveal .room-card:nth-child(3){transition-delay:.71s;}
+body.entering.reveal .room-card:nth-child(4){transition-delay:.79s;}
+body.entering.reveal .room-card:nth-child(5){transition-delay:.87s;}
+body.entering.reveal .room-card:nth-child(6){transition-delay:.95s;}
+.prep-item{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.prep-k{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);}
+.prep-v{font-size:.86rem;color:var(--ink-soft);font-weight:300;letter-spacing:.01em;}
 
 /* ROOM chrome */
 .room-top{display:flex;align-items:center;gap:14px;margin-bottom:clamp(16px,3vh,26px);}
@@ -163,39 +194,50 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .guidehero p{font-family:var(--display);font-style:italic;font-weight:300;color:rgba(243,239,230,.68);max-width:34ch;margin-top:.5em;font-size:clamp(15px,1.6vw,20px);}
 
 /* full guide document (the only room that renders the guide) */
-.guidedoc{background:var(--b2);color:var(--b1);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow);}
-.gd-hero{background:var(--b1);color:var(--b2);padding:clamp(24px,4vw,44px);}
-.gd-eyebrow{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--b3);font-weight:500;}
-.gd-title{font-family:var(--display);font-weight:300;font-size:clamp(32px,5vw,60px);letter-spacing:-.03em;line-height:1;margin:.18em 0 0;}
-.gd-tag{font-family:var(--display);font-style:italic;font-weight:300;color:rgba(243,239,230,.7);font-size:clamp(15px,1.6vw,19px);margin-top:.5em;}
-.gd-meta{display:flex;gap:26px;flex-wrap:wrap;margin-top:20px;padding-top:16px;border-top:1px solid rgba(243,239,230,.16);}
-.gd-meta b{display:block;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(243,239,230,.5);font-weight:500;margin-bottom:2px;}
-.gd-meta span{font-size:12.5px;color:var(--b2);}
-.gd-section{padding:clamp(20px,3.2vw,34px);border-top:1px solid rgba(28,43,34,.1);}
-.gd-num{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--b3);font-weight:600;margin-bottom:16px;}
-.gd-sub{font-size:13px;line-height:1.6;color:rgba(28,43,34,.62);max-width:60ch;margin:6px 0 16px;}
-.gd-logos{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:9px;}
+.guidedoc{--gd-paper:#ebe5d6;--gd-faint:rgba(235,229,214,.62);--gd-mute:rgba(235,229,214,.46);--gd-sage:color-mix(in srgb,var(--b3,#9bb0a2) 52%,#e7ede7);--gd-line:rgba(235,229,214,.13);--gd-panel:color-mix(in srgb,var(--b1,#16241c) 68%,#090c09);background:var(--b1);color:var(--gd-paper);border-radius:var(--r-md);overflow:hidden;box-shadow:var(--shadow);}
+.gd-hero{background:color-mix(in srgb,var(--b1,#16241c) 84%,#000);color:var(--gd-paper);padding:clamp(28px,4.5vw,52px);}
+.gd-eyebrow,.gd-num{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--gd-sage);font-weight:600;display:flex;align-items:center;gap:9px;}
+.gd-eyebrow::before,.gd-num::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--gd-sage);flex:none;}
+.gd-num{margin-bottom:14px;}
+.gd-herolock{display:flex;align-items:center;gap:clamp(12px,2vw,20px);margin:.5em 0 .1em;flex-wrap:wrap;}
+.gd-herologo{display:none;}.gd-herologo.on img{display:block;height:clamp(40px,6vw,64px);max-width:min(46vw,260px);object-fit:contain;}
+.gd-herologo.on{display:block;}
+.gd-title{font-family:var(--display);font-weight:300;font-size:clamp(34px,6vw,68px);letter-spacing:-.03em;line-height:.96;margin:0;color:var(--gd-paper);}
+.gd-tag{font-family:var(--display);font-style:italic;font-weight:300;color:var(--gd-faint);font-size:clamp(17px,2vw,24px);margin:.55em 0 0;}
+.gd-herosub{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--gd-sage);margin:1.1em 0 0;line-height:1.6;}
+.gd-meta{display:flex;gap:clamp(20px,3vw,40px) clamp(24px,4vw,46px);flex-wrap:wrap;margin-top:clamp(22px,3vw,34px);padding-top:clamp(18px,2.4vw,24px);border-top:1px solid var(--gd-line);}
+.gd-meta div.wide{flex-basis:100%;}
+.gd-meta b{display:block;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--gd-mute);font-weight:600;margin-bottom:5px;}
+.gd-meta span{font-size:13.5px;color:var(--gd-paper);font-weight:300;}
+.gd-section{padding:clamp(26px,4vw,46px);border-top:1px solid var(--gd-line);}
+.gd-head{font-weight:400;font-size:clamp(26px,4.4vw,46px);line-height:1.02;letter-spacing:-.01em;margin:0 0 .5em;color:var(--gd-paper);}
+.gd-head .cap{font-family:var(--display);text-transform:uppercase;letter-spacing:.005em;font-weight:500;}
+.gd-head em{font-family:var(--display);font-style:italic;font-weight:300;color:var(--gd-sage);letter-spacing:0;}
+.gd-sub{font-size:14px;line-height:1.65;color:var(--gd-faint);max-width:62ch;margin:0 0 22px;}
+.gd-logos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px;}
 .gd-logos.two{grid-template-columns:1fr 1fr;}
-.gd-logocell{position:relative;min-height:132px;display:grid;place-items:center;border-radius:var(--r-sm);padding:24px 18px 32px;}
-.gd-logocell.paper{background:#fff;box-shadow:inset 0 0 0 1px rgba(0,0,0,.05);}.gd-logocell.dark{background:var(--b1);}.gd-logocell.brand{background:var(--b4);}
-.gd-logocell img{max-width:78%;max-height:80px;object-fit:contain;}
-.gd-logo-label{position:absolute;left:0;right:0;bottom:10px;text-align:center;font-size:10px;letter-spacing:.03em;color:rgba(28,43,34,.5);padding:0 10px;}
-.gd-logo-label.on-dark{color:rgba(255,255,255,.6);}
-.gd-logo-dl{position:absolute;top:9px;right:9px;width:27px;height:27px;border-radius:8px;border:none;display:grid;place-items:center;cursor:pointer;opacity:0;transition:opacity .15s,background .15s;background:rgba(0,0,0,.06);color:var(--b1);}
+.gd-logocell{position:relative;min-height:clamp(150px,18vw,200px);display:grid;place-items:center;border-radius:var(--r-sm);padding:30px 22px 40px;}
+.gd-logocell.paper{background:#ebe5d6;}.gd-logocell.dark{background:var(--gd-panel);box-shadow:inset 0 0 0 1px var(--gd-line);}.gd-logocell.brand{background:var(--b4);}
+.gd-logocell img{max-width:74%;max-height:clamp(64px,9vw,104px);object-fit:contain;}
+.gd-logo-label{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(28,43,34,.5);padding:0 10px;}
+.gd-logo-label.on-dark{color:var(--gd-mute);}
+.gd-logo-dl{position:absolute;top:10px;right:10px;width:27px;height:27px;border-radius:8px;border:none;display:grid;place-items:center;cursor:pointer;opacity:0;transition:opacity .15s,background .15s;background:rgba(0,0,0,.08);color:#1c2b22;}
 .gd-logocell:hover .gd-logo-dl{opacity:1;}
-.gd-logo-dl:hover{background:rgba(0,0,0,.12);}
-.gd-logo-dl.on-dark{background:rgba(255,255,255,.16);color:#fff;}.gd-logo-dl.on-dark:hover{background:rgba(255,255,255,.28);}
+.gd-logo-dl:hover{background:rgba(0,0,0,.16);}
+.gd-logo-dl.on-dark{background:rgba(235,229,214,.16);color:var(--gd-paper);}.gd-logo-dl.on-dark:hover{background:rgba(235,229,214,.3);}
 .gd-logo-dl svg{width:15px;height:15px;}
-.wm-doc{font-family:var(--display);font-size:clamp(17px,2vw,25px);color:var(--b1);text-align:center;}
-.wm-doc small{display:block;font-size:.32em;letter-spacing:.3em;text-transform:uppercase;color:var(--b3);margin-top:.9em;}
-.gd-palette{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
-.gd-sw{border-radius:var(--r-sm);aspect-ratio:1;display:flex;flex-direction:column;justify-content:flex-end;padding:10px;}
-.gd-sw span{font-size:11px;font-weight:600;}.gd-sw i{font-style:normal;font-size:9px;font-family:ui-monospace,monospace;opacity:.7;margin-top:2px;}
-.gd-type{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-.gd-typelabel{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--b3);font-weight:600;margin-bottom:9px;}
-.gd-disp{font-family:var(--display);font-weight:300;font-size:clamp(28px,4vw,44px);line-height:1;letter-spacing:-.02em;}
-.gd-bodysample{font-size:14px;line-height:1.6;color:rgba(28,43,34,.7);}
-.gd-fname{display:inline-block;margin-top:10px;font-size:12px;color:var(--b3);}
+.wm-doc{font-family:var(--display);font-size:clamp(17px,2vw,25px);color:#1c2b22;text-align:center;}
+.wm-doc small{display:block;font-size:.32em;letter-spacing:.3em;text-transform:uppercase;color:rgba(28,43,34,.55);margin-top:.9em;}
+.gd-palette{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.gd-sw{position:relative;border-radius:var(--r-sm);min-height:clamp(120px,15vw,168px);display:flex;flex-direction:column;justify-content:space-between;padding:16px 18px;}
+.gd-sw span{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;}.gd-sw i{font-style:normal;font-size:11px;font-family:ui-monospace,monospace;opacity:.78;letter-spacing:.04em;}
+.gd-type{display:grid;grid-template-columns:1fr;gap:12px;}
+.gd-type>div{background:var(--gd-panel);border-radius:var(--r-sm);padding:clamp(20px,3vw,30px);box-shadow:inset 0 0 0 1px var(--gd-line);}
+.gd-typelabel{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--gd-sage);font-weight:600;margin-bottom:16px;}
+.gd-disp{font-family:var(--display);font-weight:400;font-size:clamp(30px,5vw,52px);line-height:1.02;letter-spacing:-.01em;color:var(--gd-paper);}
+.gd-bodysample{font-size:15px;line-height:1.65;color:var(--gd-faint);}
+.gd-fname{display:block;margin-top:14px;font-size:13px;color:var(--gd-paper);font-weight:500;}
+.gd-fname+.gd-fname,.gd-fdesc{font-weight:300;color:var(--gd-mute);}
 .gd-mockups{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;}
 .gd-mock{aspect-ratio:1;border-radius:var(--r-sm);}
 /* ── composite application mockups (real logo + brand palette) ── */
@@ -242,16 +284,16 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .mk-dl button{font-size:9px;letter-spacing:.04em;font-weight:500;color:var(--ink-soft);background:rgba(255,255,255,.92);box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:99px;padding:3px 9px;cursor:pointer;transition:color .2s,box-shadow .2s;}
 .mk-dl button:hover{color:var(--ink);box-shadow:inset 0 0 0 1px rgba(44,90,60,.3);}
 .gd-usage{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.gd-use{padding:16px 18px;border-radius:var(--r-sm);background:#fff;border-top:2px solid var(--b4);}
-.gd-use.dont{border-top-color:#9c3c3c;}
-.gd-use b{font-size:11px;letter-spacing:.12em;text-transform:uppercase;}
-.gd-use.do b{color:var(--b4);}.gd-use.dont b{color:#9c3c3c;}
-.gd-use ul{list-style:none;padding:0;margin:11px 0 0;display:grid;gap:6px;font-size:13px;color:rgba(28,43,34,.72);}
+.gd-use{padding:20px 22px;border-radius:var(--r-sm);background:var(--gd-panel);box-shadow:inset 0 0 0 1px var(--gd-line);border-top:2px solid var(--gd-sage);}
+.gd-use.dont{border-top-color:#c97a6e;}
+.gd-use b{font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
+.gd-use.do b{color:var(--gd-sage);}.gd-use.dont b{color:#d99a8e;}
+.gd-use ul{list-style:none;padding:0;margin:13px 0 0;display:grid;gap:8px;font-size:13.5px;line-height:1.4;color:var(--gd-faint);}
 .gd-files{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;}
-.gd-file{text-align:left;padding:15px 17px;border-radius:var(--r-sm);background:#fff;box-shadow:var(--shadow);cursor:pointer;transition:transform .25s,box-shadow .25s;}
-.gd-file:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover);}
+.gd-file{text-align:left;padding:17px 19px;border-radius:var(--r-sm);background:var(--gd-panel);box-shadow:inset 0 0 0 1px var(--gd-line);cursor:pointer;transition:transform .25s,background .25s;color:var(--gd-paper);}
+.gd-file:hover{transform:translateY(-2px);background:color-mix(in srgb,var(--gd-panel) 80%,var(--gd-paper) 8%);}
 .gd-file b{display:block;font-weight:500;font-size:.9rem;}
-.gd-file span{font-size:11px;color:var(--b3);}
+.gd-file span{font-size:11px;color:var(--gd-sage);}
 @media(max-width:640px){.gd-type,.gd-logos{grid-template-columns:1fr;}.gd-mockups{grid-template-columns:1fr 1fr;}.gd-usage,.gd-files{grid-template-columns:1fr;}}
 
 /* founder list */
@@ -396,6 +438,39 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 </style>
 </head>
 <body>
+<!-- ═══════════════ HOME ENTRANCE — cinematic arrival ═══════════════
+     Self-contained so an error in the main app can never strand the veil.
+     Covers the home before first paint, then lifts as the environment emerges. -->
+<script>
+(function(){
+  try {
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var b = document.body;
+    b.classList.add('entering');
+    var v = document.createElement('div');
+    v.className = 'home-veil';
+    v.innerHTML = '<div class="hv-mark"><svg viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg">' +
+      '<path d="M769.4,89.65v111.85h-39.04c.07-25.79-35.02-31.29-50.28-36.68-16.18-5.71,0-14.05,0-14.05l89.32-61.11Z"/>' +
+      '<path d="M675.81,201.5h-79.21v-111.85l75.54,48.92c1.69,1.09,1.48,3.62-.36,4.43-12.29,5.34-43.75,21.42-9.35,32.79,25.59,8.46,20.29,25.71,13.38,25.71Z"/>' +
+      '</svg></div>';
+    b.appendChild(v);
+    var done = false;
+    function reveal(){
+      if (done) return; done = true;
+      b.classList.add('reveal');
+      v.classList.add('lift');
+      setTimeout(function(){ if (v && v.parentNode) v.parentNode.removeChild(v); b.classList.remove('entering','reveal'); }, 2400);
+      window.removeEventListener('pointerdown', skip, true);
+    }
+    function skip(){ reveal(); }                              // a tap skips straight in
+    function start(){ setTimeout(reveal, 650); }              // brief hold, then the door opens
+    if (document.readyState === 'interactive' || document.readyState === 'complete') start();
+    else document.addEventListener('DOMContentLoaded', start);
+    window.addEventListener('pointerdown', skip, true);
+    setTimeout(reveal, 4200);                                 // hard safety: never strand the veil
+  } catch (e) { try { document.body.classList.remove('entering'); } catch(_){} }
+})();
+</script>
 <div class="env"><div class="glasspane">
 
   <section id="home" class="view show">
@@ -403,6 +478,7 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
       <p class="kicker">Good evening</p>
       <h1 class="welcome">Welcome <span class="soft">home.</span></h1>
       <p class="welcome-sub">Everything has a place. Choose where you'd like to continue.</p>
+      <div class="home-prepared empty" id="homePrepared"></div>
       <div class="movein">
         <button class="movein-btn" id="moveinBtn"><svg viewBox="0 0 24 24"><path d="M12 16V4"/><polyline points="7 9 12 4 17 9"/><path d="M5 20h14"/></svg>Move in your brand</button>
         <p class="movein-status" id="moveinStatus"></p>
@@ -410,12 +486,12 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
       </div>
     </header>
     <div class="rooms">
-      <button class="room-card" data-open="identity"><span class="room-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><b>Identity</b><i>Logo, name &amp; palette</i><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
-      <button class="room-card" data-open="assets"><span class="room-ic"><svg viewBox="0 0 24 24"><path d="M3 7l2-2h5l2 2h8v12H3z"/></svg></span><b>Assets</b><i>The brand's archive</i><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
-      <button class="room-card" data-open="guide"><span class="room-ic"><svg viewBox="0 0 24 24"><path d="M4 5h7a3 3 0 0 1 3 3v11a2.5 2.5 0 0 0-2.5-2.5H4z"/><path d="M20 5h-3a3 3 0 0 0-3 3v11a2.5 2.5 0 0 1 2.5-2.5H20z"/></svg></span><b>Brand Guide</b><i>The living document</i><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
-      <button class="room-card" data-open="typography"><span class="room-ic"><svg viewBox="0 0 24 24"><path d="M5 7V5h14v2"/><line x1="12" y1="5" x2="12" y2="19"/><line x1="9" y1="19" x2="15" y2="19"/></svg></span><b>Typography</b><i>The voice in type</i><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
-      <button class="room-card" data-open="deliverables"><span class="room-ic"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="8 11 12 15 16 11"/><path d="M5 19h14"/></svg></span><b>Deliverables</b><i>Everything ready to leave</i><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
-      <button class="room-card" data-open="founder"><span class="room-ic"><svg viewBox="0 0 24 24"><line x1="4" y1="8" x2="20" y2="8"/><circle cx="9" cy="8" r="2.4"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="15" cy="16" r="2.4"/></svg></span><b>Founder Tools</b><i>Advanced controls</i><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
+      <button class="room-card" data-open="identity"><span class="room-no">01</span><span class="room-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></span><b>Identity</b><i>Logo, name &amp; palette</i><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
+      <button class="room-card" data-open="assets"><span class="room-no">02</span><span class="room-ic"><svg viewBox="0 0 24 24"><path d="M3 7l2-2h5l2 2h8v12H3z"/></svg></span><b>Assets</b><i>The brand's archive</i><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
+      <button class="room-card" data-open="guide"><span class="room-no">03</span><span class="room-ic"><svg viewBox="0 0 24 24"><path d="M4 5h7a3 3 0 0 1 3 3v11a2.5 2.5 0 0 0-2.5-2.5H4z"/><path d="M20 5h-3a3 3 0 0 0-3 3v11a2.5 2.5 0 0 1 2.5-2.5H20z"/></svg></span><b>Brand Guide</b><i>The living document</i><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
+      <button class="room-card" data-open="typography"><span class="room-no">04</span><span class="room-ic"><svg viewBox="0 0 24 24"><path d="M5 7V5h14v2"/><line x1="12" y1="5" x2="12" y2="19"/><line x1="9" y1="19" x2="15" y2="19"/></svg></span><b>Typography</b><i>The voice in type</i><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
+      <button class="room-card" data-open="deliverables"><span class="room-no">05</span><span class="room-ic"><svg viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="8 11 12 15 16 11"/><path d="M5 19h14"/></svg></span><b>Deliverables</b><i>Everything ready to leave</i><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
+      <button class="room-card" data-open="founder"><span class="room-no">06</span><span class="room-ic"><svg viewBox="0 0 24 24"><line x1="4" y1="8" x2="20" y2="8"/><circle cx="9" cy="8" r="2.4"/><line x1="4" y1="16" x2="20" y2="16"/><circle cx="15" cy="16" r="2.4"/></svg></span><b>Founder Tools</b><i>Advanced controls</i><span class="go"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></span></button>
     </div>
   </section>
 
@@ -475,12 +551,19 @@ const ROOMS={
   guide:{kicker:'Brand Guide',title:'The living document.',html:`
     <div class="guidedoc">
       <div class="gd-hero">
-        <div class="gd-eyebrow">Brand Guide</div>
-        <h2 class="gd-title">Marlowe &amp; Finch</h2>
+        <div class="gd-eyebrow">Brand Identity Guide</div>
+        <div class="gd-herolock"><span class="gd-herologo" data-herologo></span><h2 class="gd-title">Marlowe &amp; Finch</h2></div>
         <p class="gd-tag">Considered counsel for considered lives.</p>
-        <div class="gd-meta"><div><b>Category</b><span>Private Advisory</span></div><div><b>Established</b><span>2014</span></div><div><b>Palette</b><span>5 colors</span></div></div>
+        <p class="gd-herosub">A sharper brand, prepared and ready to use.</p>
+        <div class="gd-meta">
+          <div class="wide" data-k="includes"><b>Includes</b><span>Logo · Color · Typography · Guidelines · Files</span></div>
+          <div data-k="prepared"><b>Prepared</b><span>2026</span></div>
+          <div data-k="assets"><b>Assets</b><span>&mdash;</span></div>
+          <div data-k="category"><b>Category</b><span>Brand</span></div>
+          <div data-k="by"><b>Designed with</b><span>Moving Day</span></div>
+        </div>
       </div>
-      <div class="gd-section"><div class="gd-num">01 — Logo System</div>
+      <div class="gd-section"><div class="gd-num">01 — Logo</div><h3 class="gd-head"><span class="cap">Your logo,</span> <em>every version.</em></h3>
         <div data-logosys>
           <div class="gd-logos">
             <div class="gd-logocell paper"><div class="wm-doc">Marlowe &amp; Finch<small>Private Advisory</small></div></div>
@@ -489,7 +572,7 @@ const ROOMS={
           </div>
         </div>
       </div>
-      <div class="gd-section"><div class="gd-num">02 — Color Palette</div>
+      <div class="gd-section"><div class="gd-num">02 — Color</div><h3 class="gd-head"><span class="cap">Your palette,</span> <em>one system.</em></h3>
         <div class="gd-palette">
           <div class="gd-sw" style="background:#1c2b22;color:#f3efe6"><span>Ink</span><i>#1C2B22</i></div>
           <div class="gd-sw" style="background:#4e6b5a;color:#f3efe6"><span>Sage</span><i>#4E6B5A</i></div>
@@ -498,13 +581,13 @@ const ROOMS={
           <div class="gd-sw" style="background:#0e1a14;color:#f3efe6"><span>Deep</span><i>#0E1A14</i></div>
         </div>
       </div>
-      <div class="gd-section"><div class="gd-num">03 — Typography</div>
+      <div class="gd-section"><div class="gd-num">03 — Typography</div><h3 class="gd-head"><span class="cap">Your type,</span> <em>one voice.</em></h3>
         <div class="gd-type">
           <div><div class="gd-typelabel">Display</div><div class="gd-disp">Considered counsel.</div><span class="gd-fname">Fraunces · 300–500</span></div>
           <div><div class="gd-typelabel">Body</div><div class="gd-bodysample">Clear, readable copy for pages, captions, and interface labels — set to stay out of the way so the words do the work.</div><span class="gd-fname">Inter · 300–400</span></div>
         </div>
       </div>
-      <div class="gd-section"><div class="gd-num">04 — In Use</div>
+      <div class="gd-section"><div class="gd-num">04 — In Use</div><h3 class="gd-head"><span class="cap">In the world,</span> <em>in use.</em></h3>
         <div class="gd-mockups" data-inuse>
           <div class="vframe gd-mock"><div class="ph c"></div><span class="vframe-tag on-dark">Profile</span></div>
           <div class="vframe gd-mock"><div class="ph a"></div><span class="vframe-tag on-dark">Website</span></div>
@@ -512,13 +595,13 @@ const ROOMS={
           <div class="vframe gd-mock"><div class="ph d"></div><span class="vframe-tag">Social</span></div>
         </div>
       </div>
-      <div class="gd-section"><div class="gd-num">05 — Usage</div>
+      <div class="gd-section"><div class="gd-num">05 — Usage</div><h3 class="gd-head"><span class="cap">The rules,</span> <em>kept simple.</em></h3>
         <div class="gd-usage">
           <div class="gd-use do"><b>Do</b><ul><li>Use the approved logo files only</li><li>Keep clear space around every mark</li><li>Reverse to white on dark backgrounds</li><li>Use the compact mark for avatars and favicons</li><li>Use one-color black for single-ink printing</li></ul></div>
           <div class="gd-use dont"><b>Don't</b><ul><li>Stretch, skew, rotate, or distort the marks</li><li>Place a dark mark on a dark or low-contrast field</li><li>Recolor outside the approved palette</li><li>Add shadows, gradients, or effects</li><li>Crowd the logo with other elements</li></ul></div>
         </div>
       </div>
-      <div class="gd-section"><div class="gd-num">06 — Files</div>
+      <div class="gd-section"><div class="gd-num">06 — Files</div><h3 class="gd-head"><span class="cap">Everything,</span> <em>ready to use.</em></h3>
         <div class="gd-files">
           <button class="gd-file"><b>Logo package</b><span>PNG · SVG</span></button>
           <button class="gd-file"><b>Color styles</b><span>HEX · ASE</span></button>
@@ -930,6 +1013,7 @@ async function buildGuideHTML(){
   tmp.innerHTML=ROOMS.guide.html; document.body.appendChild(tmp);
   try{ applyUploads(tmp); }catch(e){}
   try{ await renderLogoSystem(tmp); }catch(e){}        // recolored logo cells must be in place before the snapshot
+  try{ await fillHeroLogo(tmp); }catch(e){}
   const node=tmp.querySelector('.guidedoc'); if(node) node.querySelectorAll('.mk-dl,.gd-logo-dl').forEach(n=>n.remove()); const inner=node?node.outerHTML:''; tmp.remove();
   const rs=getComputedStyle(document.documentElement);
   const vars=['--b1','--b2','--b3','--b4','--b5'].map(v=>v+':'+(rs.getPropertyValue(v).trim()||'')).join(';');
@@ -1110,7 +1194,7 @@ function applyType(root){
   if(!brand.type) return; const t=brand.type, ts=brand.typeSystem;
   ensureFont(t.display); ensureFont(t.body);
   if(ts){ ensureFont(ts.heading&&ts.heading.name); ensureFont(ts.accent&&ts.accent.name); }
-  if(t.display){ const f='"'+t.display+'", var(--display)'; root.querySelectorAll('.gd-disp,.spec .big').forEach(e=>e.style.fontFamily=f); }
+  if(t.display){ const f='"'+t.display+'", var(--display)'; root.querySelectorAll('.gd-disp,.spec .big,.gd-head .cap').forEach(e=>e.style.fontFamily=f); }
   if(t.body){ const f='"'+t.body+'", var(--body)'; root.querySelectorAll('.gd-bodysample,.spec .body').forEach(e=>e.style.fontFamily=f); }
   const fn=root.querySelectorAll('.gd-fname');
   if(fn[0]&&t.display) fn[0].textContent=t.display+(t.displayUsage?' · '+t.displayUsage:'');
@@ -1163,9 +1247,16 @@ function legibilityFix(root){            // guarantee readable text on any palet
     const ink=readOnRGB(getComputedStyle(h).backgroundColor); const dark=ink==='#1c2b22'; h.style.color=ink;
     h.querySelectorAll('.gd-tag').forEach(e=>e.style.color=dark?'rgba(28,43,34,.66)':'rgba(243,239,230,.72)');
     h.querySelectorAll('.gd-meta span').forEach(e=>e.style.color=ink);
-    h.querySelectorAll('.gd-meta b').forEach(e=>e.style.color=dark?'rgba(28,43,34,.5)':'rgba(243,239,230,.5)');
-    const eb=h.querySelector('.gd-eyebrow'); if(eb) eb.style.color=dark?'rgba(28,43,34,.55)':'rgba(255,255,255,.74)';
+    h.querySelectorAll('.gd-meta b').forEach(e=>e.style.color=dark?'rgba(28,43,34,.5)':'rgba(235,229,214,.46)');
   });
+async function fillHeroLogo(root){
+  const slot=root.querySelector('[data-herologo]'); const title=root.querySelector('.gd-title'); if(!slot) return;
+  const m=(logoSystemMarks().primary)||pickMark('primaryLogo','wordmark','secondaryLogo');
+  if(!m){ slot.className='gd-herologo'; slot.innerHTML=''; if(title) title.style.display=''; return; }
+  try{ const url=await exportLogoFor('color'); if(url){ slot.className='gd-herologo on'; slot.innerHTML='<img alt="">'; slot.querySelector('img').src=url;
+    if(title) title.style.display=(m.aspect!=null && m.aspect>2.4) ? 'none' : '';   // a wordmark already says the name
+  } }catch(e){}
+}
   root.querySelectorAll('.markframe.dark,.markframe.brand,.gd-logocell.dark,.gd-logocell.brand,.glogo').forEach(cell=>{
     if(cell.querySelector('img')) return;
     const ink=readOnRGB(getComputedStyle(cell).backgroundColor);
@@ -1178,13 +1269,13 @@ function applyUploads(root){
   applyNameMarks(root);
   const tag = looksGenericTag(brand.tagline) ? '' : brand.tagline;
   root.querySelectorAll('.id-tag,.gd-tag').forEach(e=>{ if(tag) e.textContent=tag; else if(brand.name){ e.textContent=''; e.style.display='none'; } });
-  if(brand.category){ const m=root.querySelector('.gd-meta div span'); if(m) m.textContent=brand.category; }
-  if(brand.colors.length){
-    applyPaletteVars(brand.colors); paintSwatches(root);
-    const meta=root.querySelectorAll('.gd-meta div span'); if(meta[2]) meta[2].textContent=brand.colors.length+' colors';
-  }
+  if(brand.category){ const m=root.querySelector('[data-k="category"] span'); if(m) m.textContent=brand.category; }
+  if(brand.colors.length){ applyPaletteVars(brand.colors); paintSwatches(root); }
+  { const n=(brand.logos.length||0)+(brand.photos.length||0)+(brand.docs.length||0);
+    const a=root.querySelector('[data-k="assets"] span'); if(a) a.textContent=n?(n+(n===1?' file':' files')):'\u2014';
+    const p=root.querySelector('[data-k="prepared"] span'); if(p){ try{ p.textContent=new Date().toLocaleDateString(undefined,{month:'long',year:'numeric'}); }catch(e){} } }
   applyType(root); applyTypeProse(root); applyDeliverables(root);
-  placeLogos(root); renderLogoSystem(root);
+  placeLogos(root); renderLogoSystem(root); fillHeroLogo(root);
   renderMockups(root);
   let pi=0;
   root.querySelectorAll('.gframe:not(.glogo),.gd-mock').forEach(fr=>{ const P=brand.photos[pi]; if(P){ setFrameImage(fr,P.url,false,P.id); pi++; } });
@@ -1386,8 +1477,22 @@ function applyBrandHome(){
   }
   applyHomeColor();          // home keeps its default calm palette
   applyDestinations();       // plain room subtitles, no eyebrows
+  renderPrepared();          // quiet "already prepared" line
   if(brand.colors.length) applyPaletteVars(brand.colors);   // brand colours only in the Guide doc
   showReset();
+}
+function renderPrepared(){
+  const box=document.getElementById('homePrepared'); if(!box) return;
+  if(!brand.name){ box.className='home-prepared empty'; box.innerHTML=''; return; }
+  const assetN=(brand.logos.length||0)+(brand.photos.length||0)+(brand.docs.length||0);
+  const ready=(brand.logos.length>0 && brand.colors.length>0);
+  const appN=heroMark()? Object.keys(APP_SPECS).length : 0;
+  const items=[];
+  if(assetN) items.push(['Archive', assetN+(assetN===1?' asset organized':' assets organized')]);
+  items.push(['Guide', ready?'Ready to review':'Taking shape']);
+  if(appN) items.push(['Applications', appN+' prepared']);
+  box.className='home-prepared'+(items.length?'':' empty');
+  box.innerHTML=items.map(([k,v])=>'<span class="prep-item"><span class="prep-k">'+esc(k)+'</span><span class="prep-v">'+esc(v)+'</span></span>').join('');
 }
 function showReset(){ const b=document.getElementById('resetBtn'); if(b) b.hidden=!(brand.name||brand.logos.length||brand.photos.length||brand.colors.length); }
 /* ── Brand Concierge API: same contract experience.html uses ── */
