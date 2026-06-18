@@ -5612,6 +5612,8 @@ btnMovein.addEventListener('click', event => {
       guidePlan: d.guidePlan || null,
       brandHomeImprovements: Array.isArray(d.brandHomeImprovements) ? d.brandHomeImprovements : [],
       brandWorld: (d.brandWorld && typeof d.brandWorld === 'object') ? d.brandWorld : null,
+      designStrategy: (d.designStrategy && typeof d.designStrategy === 'object') ? d.designStrategy : null,
+      environmentProfile: (d.environmentProfile && typeof d.environmentProfile === 'object') ? d.environmentProfile : null,
       personality: (d.brand && d.brand.personality) || null,
       visualDirection: (d.brand && d.brand.visualDirection) || '',
       recommendations: Array.isArray(d.recommendations) ? d.recommendations : [],
