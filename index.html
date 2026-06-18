@@ -2233,9 +2233,26 @@ function markKind(m){
   if(m.role==='secondaryLogo'||/secondary|alt/.test(n)) return 'Secondary';
   return 'Logo';
 }
+function pedestalGroundDark(){          // is the room ground behind the floating logo dark/brand-washed?
+  try{
+    if(document.body.classList.contains('deep-immerse')) return true;
+    const rs=getComputedStyle(document.documentElement);
+    const toRGB=s=>{ s=String(s||'').trim(); if(!s) return null; if(s[0]==='#') return hexToRgb(s);
+      const m=s.match(/-?\d+\.?\d*/g); return (m&&m.length>=3)?[+m[0],+m[1],+m[2]]:null; };
+    const L=c=>0.299*c[0]+0.587*c[1]+0.114*c[2];
+    const a=toRGB(rs.getPropertyValue('--bg-2')), b=toRGB(rs.getPropertyValue('--bg-3'));   // pedestal sits mid-to-foot
+    let lum; if(a&&b) lum=L(a)*0.45+L(b)*0.55; else if(a) lum=L(a); else if(b) lum=L(b); else return false;
+    return lum<170;                      // a brand wash or a dark room → reverse the floating mark
+  }catch(e){ return false; }
+}
 async function placeLogos(root){
   const frames=[...root.querySelectorAll('.id-primary,.glogo')];   // .markframe is owned by renderIdMarks; gd-logocell by renderLogoSystem
-  if(!frames.length || !brand.logos.length) return;
+  if(!frames.length) return;
+  const roomDark = pedestalGroundDark();
+  // text fallback (before any logo is placed): keep the wordmark legible on a brand-washed/dark ground
+  root.querySelectorAll('.id-primary .wm').forEach(w=>{ const fr=w.closest('.id-primary'); if(fr&&fr.querySelector('img')) return;
+    w.style.color=roomDark?'#f3efe6':''; const s=w.querySelector('small'); if(s) s.style.color=roomDark?'rgba(243,239,230,.62)':''; });
+  if(!brand.logos.length) return;
   const all=brand.logos, lum=l=>(l.lum==null?120:l.lum);
   const photoish=l=>(l.transparentRatio!=null&&l.transparentRatio<0.03)&&(l.variety!=null&&l.variety>120);
   const clean=all.filter(l=>!photoish(l)); const logos=clean.length?clean:all;      // never pick document/photo screenshots when a real mark exists
@@ -2243,7 +2260,6 @@ async function placeLogos(root){
   const primaryMark = primary || logos.find(l=>l.role==='primaryLogo') || logos[0];
   const darkest=[...logos].sort((a,b)=>lum(a)-lum(b))[0];
   const reversed = async m => { const isSvg=/svg/i.test(m.ext||''); return (brand.logos.find(l=>l.variant==='white')||{}).url || await recolorLogo(m.url,'white',isSvg) || m.url; };
-  const roomDark = document.body.classList.contains('deep-immerse');   // pedestal floats on the room ground, so match it
   for(const fr of frames){
     const darkGround=fr.classList.contains('dark')||fr.classList.contains('brand')||roomDark;
     const pick = darkGround ? primaryMark : (lum(primaryMark)<175 ? primaryMark : darkest);
@@ -2627,3 +2643,4 @@ async function importFromExperience(){
 </script>
 </body>
 </html>
+  
