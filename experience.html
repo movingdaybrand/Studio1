@@ -3993,8 +3993,9 @@ function categoryOrder() {
   return ['Logos', 'Icons', 'Wordmarks', 'Brand Guidelines', 'Typography / Fonts', 'Photography', 'Presentations', 'Documents', 'Video', 'Miscellaneous'];
 }
 
-function categorizeFile(file) {
+function categorizeFile(file, meta) {
   const name = (file.name || '').toLowerCase();
+  const path = (file.webkitRelativePath || '').toLowerCase();
   const e = ext(file.name);
   if (['ttf','otf','woff','woff2'].includes(e) || /font|typeface|typography/.test(name)) return 'Typography / Fonts';
   if (['ppt','pptx','key'].includes(e) || /presentation|deck|slides/.test(name)) return 'Presentations';
@@ -4004,14 +4005,37 @@ function categorizeFile(file) {
     return 'Documents';
   }
   if (['jpg','jpeg','png','webp','gif','svg','ai','eps'].includes(e)) {
+    // explicit filename intent wins
     if (/wordmark|word[\s_-]?mark|logotype/.test(name)) return 'Wordmarks';
-    if (/favicon|icon|mark|symbol|badge|avatar/.test(name)) return 'Icons';
+    if (/favicon|icon|symbol|badge|avatar/.test(name) || /(^|[\s_-])mark([\s_-]|$)/.test(name)) return 'Icons';
     if (/logo|lockup|primary|secondary|alternate|alt/.test(name)) return 'Logos';
-    if (/photo|image|photography|portrait|headshot|building|team|hero|background/.test(name)) return 'Photography';
+    if (/photo|photography|portrait|headshot|building|team|hero|background|banner|cover/.test(name)) return 'Photography';
+    // folder context next
+    if (/wordmark/.test(path)) return 'Wordmarks';
+    if (/icon|favicon/.test(path)) return 'Icons';
+    if (/logo|brand[\s_-]?mark/.test(path)) return 'Logos';
+    if (/photo|image|photography/.test(path)) return 'Photography';
+    // fall back to what the pixels tell us
+    const ar = (meta && meta.width && meta.height) ? (meta.width / meta.height) : null;
+    const tr = meta ? meta.transparentBackground : null;
+    if (tr === true) {
+      if (ar != null && ar > 2.2) return 'Wordmarks';
+      if (ar != null && ar >= 0.75 && ar <= 1.34) return 'Icons';
+      return 'Logos';
+    }
+    if (tr === false && (e === 'jpg' || e === 'jpeg')) return 'Photography';   // opaque photo formats
+    if (tr === false && ar != null && (ar > 1.7 || ar < 0.6)) return 'Photography';
     return 'Logos';
   }
   if (['zip','fig','sketch'].includes(e)) return 'Miscellaneous';
   return 'Miscellaneous';
+}
+function categoryConfidence(file, meta, category) {
+  const name = (file.name || '').toLowerCase(), path = (file.webkitRelativePath || '').toLowerCase();
+  if (/wordmark|logotype|favicon|icon|symbol|badge|avatar|logo|lockup|primary|secondary|photo|photography|portrait|headshot|guideline|font|typeface|presentation|deck/.test(name)) return 0.92;
+  if (/logo|icon|wordmark|photo|image|font/.test(path)) return 0.76;
+  if (meta && (meta.transparentBackground != null || meta.width)) return 0.62;   // inferred from pixels
+  return category === 'Miscellaneous' ? 0.3 : 0.42;
 }
 
 function detectExactDuplicates(files) {
@@ -4029,40 +4053,47 @@ function detectExactDuplicates(files) {
 function getImageMetadata(file) {
   const e = ext(file.name);
   const isImage = (file.type || '').startsWith('image/') || ['svg','png','jpg','jpeg','webp','gif'].includes(e);
-  if (!isImage) return Promise.resolve({ width: null, height: null, transparentBackground: null });
+  if (!isImage) return Promise.resolve({ width: null, height: null, transparentBackground: null, dominant: null, colors: [] });
 
   return new Promise(resolve => {
     const url = URL.createObjectURL(file);
     const img = new Image();
     img.onload = () => {
-      const meta = { width: img.naturalWidth || null, height: img.naturalHeight || null, transparentBackground: null };
+      const meta = { width: img.naturalWidth || null, height: img.naturalHeight || null, transparentBackground: null, dominant: null, colors: [] };
       try {
+        const max = 96;
+        const ratio = Math.min(max / (img.naturalWidth || max), max / (img.naturalHeight || max), 1);
+        const c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round((img.naturalWidth || max) * ratio));
+        c.height = Math.max(1, Math.round((img.naturalHeight || max) * ratio));
+        const ctx = c.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        const data = ctx.getImageData(0, 0, c.width, c.height).data;
         if (['png','webp','gif','svg'].includes(e)) {
-          const max = 96;
-          const ratio = Math.min(max / (img.naturalWidth || max), max / (img.naturalHeight || max), 1);
-          const c = document.createElement('canvas');
-          c.width = Math.max(1, Math.round((img.naturalWidth || max) * ratio));
-          c.height = Math.max(1, Math.round((img.naturalHeight || max) * ratio));
-          const ctx = c.getContext('2d', { willReadFrequently: true });
-          ctx.drawImage(img, 0, 0, c.width, c.height);
-          const data = ctx.getImageData(0, 0, c.width, c.height).data;
           let transparent = false;
-          for (let i = 3; i < data.length; i += 16) {
-            if (data[i] < 245) { transparent = true; break; }
-          }
+          for (let i = 3; i < data.length; i += 16) { if (data[i] < 245) { transparent = true; break; } }
           meta.transparentBackground = transparent;
         }
+        // dominant colours — quantise opaque, non-extreme pixels and keep the top buckets
+        const buckets = new Map();
+        for (let i = 0; i < data.length; i += 16) {
+          if (data[i+3] < 160) continue;
+          const r = data[i], g = data[i+1], b = data[i+2], mx = Math.max(r,g,b), mn = Math.min(r,g,b);
+          if (mx > 244 && mn > 244) continue; if (mx < 14) continue;           // skip near-white / near-black
+          const key = (r>>4<<8) | (g>>4<<4) | (b>>4);
+          const e2 = buckets.get(key) || { n:0, r:0, g:0, b:0 }; e2.n++; e2.r+=r; e2.g+=g; e2.b+=b; buckets.set(key, e2);
+        }
+        const top = [...buckets.values()].sort((a,b)=>b.n-a.n).slice(0,3)
+          .map(o => '#' + [o.r,o.g,o.b].map(v => Math.round(v/o.n).toString(16).padStart(2,'0')).join(''));
+        meta.colors = top; meta.dominant = top[0] || null;
       } catch (err) {
-        meta.transparentBackground = null;
+        meta.transparentBackground = meta.transparentBackground; 
       } finally {
         URL.revokeObjectURL(url);
         resolve(meta);
       }
     };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      resolve({ width: null, height: null, transparentBackground: null });
-    };
+    img.onerror = () => { URL.revokeObjectURL(url); resolve({ width: null, height: null, transparentBackground: null, dominant: null, colors: [] }); };
     img.src = url;
   });
 }
@@ -4077,6 +4108,11 @@ function buildPreparationReport(preparedFiles, duplicateFiles, originalFiles, as
   const guideline = assetsMeta.find(a => a.category === 'Brand Guidelines') || null;
   const typography = assetsMeta.find(a => a.category === 'Typography / Fonts') || null;
 
+  const palCount = new Map();
+  assetsMeta.filter(a => ['Logos','Icons','Wordmarks','Photography'].includes(a.category))
+    .forEach(a => (a.colors || []).forEach(hex => palCount.set(hex, (palCount.get(hex) || 0) + 1)));
+  const localPalette = [...palCount.entries()].sort((x, y) => y[1] - x[1]).slice(0, 6).map(([hex]) => hex);
+
   return {
     createdAt: new Date().toISOString(),
     originalFileCount: originalFiles.length,
@@ -4084,6 +4120,7 @@ function buildPreparationReport(preparedFiles, duplicateFiles, originalFiles, as
     duplicateCount: duplicateFiles.length,
     duplicateFiles: duplicateFiles.map(file => ({ name: file.name, size: file.size, lastModified: file.lastModified })),
     categoryCounts: counts,
+    localPalette,
     assets: assetsMeta,
     foundation: { mainLogo, mainIcon, mainWordmark, guideline, typography },
     hasEnoughForUnderstanding: preparedFiles.length > 0 && assetsMeta.some(a => ['Logos','Icons','Wordmarks','Brand Guidelines','Photography'].includes(a.category)),
@@ -4099,8 +4136,8 @@ async function prepareFilesLocally(files) {
   for (let index = 0; index < unique.length; index += 1) {
     const file = unique[index];
     const extension = ext(file.name);
-    const category = categorizeFile(file);
     const imageMeta = await getImageMetadata(file);
+    const category = categorizeFile(file, imageMeta);
     assetsMeta.push({
       id: `asset_${index + 1}`,
       uploadId: `asset_${index + 1}`,
@@ -4110,12 +4147,18 @@ async function prepareFilesLocally(files) {
       sizeLabel: fmt(file.size),
       lastModified: file.lastModified,
       type: file.type || extension,
+      folder: ((file.webkitRelativePath || '').split('/').slice(0, -1).join('/')) || null,
       category,
+      confidence: +categoryConfidence(file, imageMeta, category).toFixed(2),
       width: imageMeta.width,
       height: imageMeta.height,
+      aspect: (imageMeta.width && imageMeta.height) ? +(imageMeta.width / imageMeta.height).toFixed(2) : null,
       transparentBackground: imageMeta.transparentBackground,
+      dominant: imageMeta.dominant,
+      colors: imageMeta.colors || [],
+      duplicate: false,
       previewable: (file.type || '').startsWith('image/') || ['svg','png','jpg','jpeg','webp','gif'].includes(extension),
-      roleGuess: guessRole(file.name),
+      roleGuess: guessRole(file.name, imageMeta),
       file
     });
   }
@@ -4132,6 +4175,7 @@ function serializePreparationReport(report) {
     duplicateCount: report.duplicateCount,
     duplicateFiles: report.duplicateFiles,
     categoryCounts: report.categoryCounts,
+    localPalette: report.localPalette || [],
     hasEnoughForUnderstanding: report.hasEnoughForUnderstanding,
     assets: (report.assets || []).map(({ file, ...safe }) => safe),
     foundation: Object.fromEntries(Object.entries(report.foundation || {}).map(([key, asset]) => [key, asset ? { ...asset, file: undefined } : null]))
@@ -4461,7 +4505,7 @@ btnMovein.addEventListener('click', event => {
       WebsiteHeader:'04_Social_Assets',SocialAvatar:'04_Social_Assets',BusinessCard:'04_Social_Assets',
       PrintAsset:'04_Social_Assets',ExtraAsset:'06_Extra_Assets'}[r]||'06_Extra_Assets';
   }
-  function guessRole(name) {
+  function guessRole(name, meta) {
     const n=name.toLowerCase();
     if(n.includes('favicon'))return 'IconMark';
     if(n.includes('icon')||n.includes('mark')||n.includes('symbol'))return 'IconMark';
@@ -4469,6 +4513,9 @@ btnMovein.addEventListener('click', event => {
     if(n.includes('header')||n.includes('hero'))return 'WebsiteHeader';
     if(n.includes('social')||n.includes('avatar')||n.includes('profile'))return 'SocialAvatar';
     if(n.includes('card'))return 'BusinessCard';
+    if(meta && meta.transparentBackground===true && meta.width && meta.height){
+      const ar=meta.width/meta.height; if(ar>=0.8 && ar<=1.25) return 'IconMark';   // a transparent square reads as the icon
+    }
     return 'PrimaryLogo';
   }
   function resolveRole(slot) {
