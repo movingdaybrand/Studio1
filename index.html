@@ -456,7 +456,7 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .sig-copied{font-size:11px;color:var(--ink-faint);}
 .sig-hint{font-size:11px;color:var(--ink-faint);line-height:1.5;margin:0;}
 .ig-preview{width:160px;height:160px;border-radius:50%;display:grid;place-items:center;box-shadow:inset 0 0 0 1px var(--sage-line),0 10px 24px rgba(20,40,28,.16);overflow:hidden;}
-.ig-preview img{width:58%;height:58%;object-fit:contain;}
+.ig-preview img{width:82%;height:82%;object-fit:contain;}
 .ig-controls{display:flex;flex-direction:column;gap:12px;}
 .ig-bgs{display:flex;gap:8px;}
 .ig-bg{width:30px;height:30px;border-radius:50%;cursor:pointer;box-shadow:inset 0 0 0 1px var(--sage-line);transition:transform .12s,box-shadow .12s;}
@@ -1577,12 +1577,29 @@ function renderIgBgs(root){
   const prev=root.querySelector('[data-ig-preview]'); if(prev) prev.style.background=igBgChoice;
 }
 function setIgBg(hex){ igBgChoice=hex; renderIgBgs(roomBody); }
+function trimTransparentCanvas(img){           // crop to the opaque bounding box so padding doesn't shrink the mark
+  const w=img.naturalWidth||img.width||0, h=img.naturalHeight||img.height||0; if(!w||!h) return null;
+  const c=document.createElement('canvas'); c.width=w; c.height=h; const x=c.getContext('2d'); x.drawImage(img,0,0,w,h);
+  let d; try{ d=x.getImageData(0,0,w,h).data; }catch(e){ return c; }    // tainted (cross-origin) → use untrimmed
+  let minX=w,minY=h,maxX=-1,maxY=-1;
+  for(let y=0;y<h;y++) for(let xx=0;xx<w;xx++){ if(d[(y*w+xx)*4+3]>12){ if(xx<minX)minX=xx; if(xx>maxX)maxX=xx; if(y<minY)minY=y; if(y>maxY)maxY=y; } }
+  if(maxX<0) return c;
+  const tw=maxX-minX+1, th=maxY-minY+1, t=document.createElement('canvas'); t.width=tw; t.height=th;
+  t.getContext('2d').drawImage(c,minX,minY,tw,th,0,0,tw,th); return t;
+}
+async function trimmedLogoCanvas(url){ const img=await loadImg(url); if(!img||!img.width) return null; return trimTransparentCanvas(img); }
+async function renderIgPreview(root){          // show the trimmed mark so the preview matches the download
+  const prev=root.querySelector('[data-ig-preview]'); if(!prev) return;
+  const pm=pickMark('primaryLogo','wordmark','secondaryLogo'); if(!pm) return;
+  const c=await trimmedLogoCanvas(pm.url); const img=prev.querySelector('img');
+  if(img&&c){ img.src=c.toDataURL('image/png'); }
+}
 async function exportInstagramIcon(){
   const pm=pickMark('primaryLogo','wordmark','secondaryLogo'); if(!pm) return;
   const S=1080, c=document.createElement('canvas'); c.width=S; c.height=S; const x=c.getContext('2d');
   x.fillStyle=igBgChoice||'#14291f'; x.fillRect(0,0,S,S);
-  const img=await loadImg(pm.url);
-  if(img&&img.width){ const max=S*0.58, r=Math.min(max/img.width,max/img.height), w=img.width*r, h=img.height*r; x.drawImage(img,(S-w)/2,(S-h)/2,w,h); }
+  const lc=await trimmedLogoCanvas(pm.url);
+  if(lc&&lc.width){ const max=S*0.82, r=Math.min(max/lc.width,max/lc.height), w=lc.width*r, h=lc.height*r; x.drawImage(lc,(S-w)/2,(S-h)/2,w,h); }
   c.toBlob(b=>{ if(b){ dl(brandSlug()+'-instagram-icon.png',b,'image/png'); announceWorkspaceUpdate('Instagram icon downloaded.','deliverables'); } else announceWorkspaceUpdate('Could not render the icon.','deliverables'); },'image/png');
 }
 function renderApplications(root){
@@ -1622,6 +1639,7 @@ function renderApplications(root){
     </div>`;
   renderSigPreview(root);
   renderIgBgs(root);
+  renderIgPreview(root);
 }
 function applyHomeColor(){
   // The home keeps its own calm palette. The brand's colours live in the Guide (applyPaletteVars), not the shell.
