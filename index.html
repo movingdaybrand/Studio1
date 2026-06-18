@@ -2253,18 +2253,13 @@ async function placeLogos(root){
   root.querySelectorAll('.id-primary .wm').forEach(w=>{ const fr=w.closest('.id-primary'); if(fr&&fr.querySelector('img')) return;
     w.style.color=roomDark?'#f3efe6':''; const s=w.querySelector('small'); if(s) s.style.color=roomDark?'rgba(243,239,230,.62)':''; });
   if(!brand.logos.length) return;
-  const all=brand.logos, lum=l=>(l.lum==null?120:l.lum);
+  const all=brand.logos;
   const photoish=l=>(l.transparentRatio!=null&&l.transparentRatio<0.03)&&(l.variety!=null&&l.variety>120);
   const clean=all.filter(l=>!photoish(l)); const logos=clean.length?clean:all;      // never pick document/photo screenshots when a real mark exists
   const {primary}=logoSystemMarks();
   const primaryMark = primary || logos.find(l=>l.role==='primaryLogo') || logos[0];
-  const darkest=[...logos].sort((a,b)=>lum(a)-lum(b))[0];
-  const reversed = async m => { const isSvg=/svg/i.test(m.ext||''); return (brand.logos.find(l=>l.variant==='white')||{}).url || await recolorLogo(m.url,'white',isSvg) || m.url; };
-  for(const fr of frames){
-    const darkGround=fr.classList.contains('dark')||fr.classList.contains('brand')||roomDark;
-    const pick = darkGround ? primaryMark : (lum(primaryMark)<175 ? primaryMark : darkest);
-    if(pick){ const url=darkGround?await reversed(pick):pick.url; setFrameImage(fr,url,true,pick.id); }
-  }
+  if(!primaryMark) return;
+  for(const fr of frames){ setFrameImage(fr, primaryMark.url, true, primaryMark.id); }   // always the original, full-colour primary logo — no recolouring in placements
 }
 /* ── the brand's most-used marks: the exact uploaded marks; for a monochrome mark, a real Black + White pair ── */
 function markIsMonochrome(url){          // achromatic (black/white/grey line-art) → eligible for Black & White; coloured → exact only
@@ -2311,22 +2306,10 @@ async function renderIdMarks(root){
     const t=d.querySelector('.vframe-tag'); if(t) t.textContent=label; };
 
   wrap.innerHTML='';
-  // Row 1 — the exact marks, each on the ground that lets the real file read
+  // The exact uploaded marks, each as its original file on the ground that lets it read — no recoloured or invented variants.
   const row1=document.createElement('div'); row1.className='id-markrow';
   for(const it of items){ const dark=lum(it.mark)>150; const d=frame(dark); row1.appendChild(d); await fill(d, await full(it.mark), it.kind, it.mark.id); }
   wrap.appendChild(row1);
-
-  // Row 2 — ONLY for a monochrome mark: a real Black and a real White version (never invented colour treatments)
-  const mono = await markIsMonochrome(primaryMark.url);
-  if(mono){
-    const sub=document.createElement('div'); sub.className='mark-sublabel'; sub.textContent='Black & white'; wrap.appendChild(sub);
-    const row2=document.createElement('div'); row2.className='id-markrow';
-    const blackUrl=(brand.logos.find(l=>l.variant==='black')||{}).url || await recolorLogo(primaryMark.url,'black',isSvg(primaryMark)) || primaryMark.url;
-    const whiteUrl=(brand.logos.find(l=>l.variant==='white')||{}).url || await recolorLogo(primaryMark.url,'white',isSvg(primaryMark)) || primaryMark.url;
-    const bk=frame(false); row2.appendChild(bk); await fill(bk, blackUrl, 'Black', primaryMark.id);
-    const wt=frame(true);  row2.appendChild(wt); await fill(wt, whiteUrl, 'White', primaryMark.id);
-    wrap.appendChild(row2);
-  }
 }
 const LOGOVAR={};                          // markId|treatment -> generated data URL (for hover download)
 const DLICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v12"/><path d="M6.5 11l5.5 5.5 5.5-5.5"/><path d="M5 20.5h14"/></svg>';
