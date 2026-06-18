@@ -5592,10 +5592,23 @@ btnMovein.addEventListener('click', event => {
       category: ((report.assets||[]).find(x => x.uploadId === a.uploadId)||{}).category || a.folder || ''
     }));
 
+    // ── the brand name must never hand off empty: AI name → file-derived name → clean default ──
+    const looksGenericName = s => { if(!s) return true; const t=String(s).trim().toLowerCase();
+      return t.length<2 || /^(brand|the brand|this brand|a brand|client|the client|your brand|your company|company|business|logo|wordmark|untitled|unnamed|name|brand name|example|placeholder|n\/a|none|tbd|new brand)$/.test(t); };
+    const nameFromFiles = () => {
+      if(typeof guessClientNameFromFiles!=='function') return '';
+      const pri=[primaryAsset,wordmarkAsset,iconAsset].filter(Boolean).map(a=>({name:a.originalName||''})).filter(f=>f.name);
+      const all=(typeof orgAssets!=='undefined'?orgAssets:[]).map(a=>({name:a.originalName||a.label||''})).filter(f=>f.name);
+      return guessClientNameFromFiles(pri) || guessClientNameFromFiles(all) || '';
+    };
+    let resolvedBrandName='';
+    for(const c of [guide.clientName, brand.name, nameFromFiles()]){ const v=(c||'').trim(); if(v && !looksGenericName(v)){ resolvedBrandName=v; break; } }
+    if(!resolvedBrandName) resolvedBrandName = nameFromFiles() || 'Your Brand';   // last resort — Brand Home is never blank
+
     const dna = {
       version: 1,
       createdAt: new Date().toISOString(),
-      brandName: guide.clientName || brand.name || '',
+      brandName: resolvedBrandName,
       tagline: guide.description || (d.copySuggestions && d.copySuggestions.tagline) || brand.positioning || '',
       category: guide.category || brand.industry || '',
       primaryLogo: primaryLogo ? { name: primaryAsset.originalName,  dataUrl: primaryLogo } : null,
