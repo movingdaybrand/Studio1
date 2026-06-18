@@ -4969,14 +4969,25 @@ btnMovein.addEventListener('click', event => {
 
 
   function guessClientNameFromFiles(files) {
-    const first = Array.from(files || [])[0]?.name || 'Brand';
-    const base = first
+    const arr = Array.from(files || []);
+    // The brand name lives on the mark, not just any file — prefer a wordmark/logo file's name.
+    const pick = arr.find(f => /wordmark|logotype|logo/i.test(f.name || '')) || arr[0];
+    if (!pick) return '';
+    let base = (pick.name || '')
       .replace(/\.[^/.]+$/, '')
       .replace(/[_-]+/g, ' ')
-      .replace(/\b(logo|primary|secondary|final|brand|mark|icon|asset|transparent|white|black|png|jpg|jpeg|svg|webp|v\d+)\b/gi, ' ')
+      .replace(/\b(logo|logotype|wordmark|word\s*mark|brandmark|brand\s*mark|primary|secondary|final|draft|export|brand|favicon|transparent|reverse|hi-?res|rgb|cmyk|png|jpg|jpeg|svg|webp|version|v\d+)\b/gi, ' ')
+      .replace(/\(\d+\)|\bcopy\b/gi, ' ')
+      .replace(/\s+0?\d{1,4}\b/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
-    return base ? base.replace(/\b\w/g, c => c.toUpperCase()) : 'Brand';
+    // Only use a file-derived name if it actually reads like a brand — otherwise leave it blank.
+    if (!base || base.length < 2 || base.length > 40) return '';
+    if (/^[0-9\s]+$/.test(base)) return '';
+    if (/^[0-9a-f]{6,}$/i.test(base.replace(/\s/g, ''))) return '';
+    if (/\b(img|dsc|dscn|image|photo|pic|screenshot|screen\s*shot|untitled|unnamed|download|scan|new|render|output|artboard|frame|group|layer|comp|mockup|asset|file)\b/i.test(base)) return '';
+    if (!/[a-z]/i.test(base)) return '';
+    return base.replace(/\b\w/g, c => c.toUpperCase());
   }
 
   function rgbToHex(r, g, b) {
