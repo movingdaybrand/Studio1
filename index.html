@@ -30,14 +30,14 @@
 *{box-sizing:border-box;}
 html{scroll-behavior:smooth;}
 body{margin:0;min-height:100vh;font-family:var(--body);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden;
-  background:radial-gradient(1100px 640px at 80% -10%,var(--halo-a),transparent 60%),radial-gradient(820px 560px at 6% 110%,var(--halo-b),transparent 55%),linear-gradient(160deg,var(--bg-1),var(--bg-2) 46%,var(--bg-3));transition:background .6s ease;}
+  background:radial-gradient(150% 120% at 50% -10%,var(--environment-tint,transparent),transparent 72%),radial-gradient(1100px 640px at 80% -10%,var(--halo-a),transparent 60%),radial-gradient(820px 560px at 6% 110%,var(--halo-b),transparent 55%),linear-gradient(160deg,var(--bg-1),var(--bg-2) 46%,var(--bg-3));transition:background .6s ease;}
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
 :focus-visible{outline:2px solid var(--sage);outline-offset:3px;border-radius:6px;}
 
 .env{max-width:1040px;margin:0 auto;padding:clamp(14px,2.2vw,30px);}
 .glasspane{position:relative;border-radius:var(--r-lg);min-height:calc(100vh - 60px);
   background:linear-gradient(160deg,var(--ice-1),var(--ice-2));
-  backdrop-filter:blur(40px) saturate(170%);-webkit-backdrop-filter:blur(40px) saturate(170%);
+  backdrop-filter:blur(var(--glass-blur,40px)) saturate(var(--glass-sat,170%));-webkit-backdrop-filter:blur(var(--glass-blur,40px)) saturate(var(--glass-sat,170%));
   box-shadow:var(--shadow);padding:clamp(20px,3vw,40px);display:flex;flex-direction:column;transition:background .6s ease;}
 
 /* reusable clipping-mask container */
@@ -697,6 +697,7 @@ const ROOMS={
       <div class="frow"><div><b>Editor mode</b><i>Section editing &amp; placement tools</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>Brand immersion</b><i>Fill the home with the brand's colour</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>Deep mode</b><i>Inside the brand at night — dark, immersive</i></div><div class="toggle"></div></div>
+      <div class="frow"><div><b>Adaptive atmosphere</b><i>Light, glass &amp; motion adapt to the brand</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>AI Brand Concierge</b><i>Analyze uploads on intake</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>Local-only mode</b><i>Skip the AI route, organize on-device</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>Website lookup</b><i>Read a URL from the files &amp; check the live site</i></div><div class="toggle"></div></div>
@@ -715,6 +716,7 @@ function loadFounderState(){
   if(s['Website lookup']===undefined) s['Website lookup']=true;           // website enrichment on by default
   if(s['Editor mode']===undefined) s['Editor mode']=true;                 // edit live, straight away
   if(s['Brand immersion']===undefined) s['Brand immersion']=true;         // submerge the home in the brand by default
+  if(s['Adaptive atmosphere']===undefined) s['Adaptive atmosphere']=true; // light/glass/motion adapt to the brand by default
   return s;
 }
 function saveFounderState(){ try{ localStorage.setItem('mdFounderState', JSON.stringify(founderState)); }catch(e){} }
@@ -874,7 +876,7 @@ function applyFounder(root){
 roomBody.addEventListener('click',e=>{
   const tog=e.target.closest('.toggle');
   if(tog){ const on=tog.classList.toggle('on'); const row=tog.closest('.frow'), lab=row&&row.querySelector('b');
-    if(lab){ const name=lab.textContent.trim(); founderState[name]=on; saveFounderState(); if(name==='Editor mode') enableEditing(roomBody); if(name==='Brand immersion'||name==='Deep mode') applyBrandHome(); if(name==='Raw JSON') refreshFounderState(); } return; }
+    if(lab){ const name=lab.textContent.trim(); founderState[name]=on; saveFounderState(); if(name==='Editor mode') enableEditing(roomBody); if(name==='Brand immersion'||name==='Deep mode'||name==='Adaptive atmosphere') applyBrandHome(); if(name==='Raw JSON') refreshFounderState(); } return; }
   const deliv=e.target.closest('.vaultcard[data-deliv]'); if(deliv){ handleDeliverable(deliv.dataset.deliv); return; }
   const ex=e.target.closest('[data-export]'); if(ex){ exportApplication(ex.dataset.export, ex.dataset.fmt||'png'); return; }
   const ld=e.target.closest('[data-logodl]'); if(ld){ const u=LOGOVAR[ld.dataset.logodl]; if(u) dlDataURL(ld.dataset.fname||'logo.png',u); return; }
@@ -1668,8 +1670,9 @@ function renderApplications(root){
 function applyHomeColor(){
   // The home keeps its own calm palette. The brand's colours live in the Guide (applyPaletteVars), not the shell.
   const rs=document.documentElement.style;
-  ['--bg-1','--bg-2','--bg-3','--halo-a','--halo-b','--sage','--sage-line','--mark-ink','--shadow','--shadow-hover','--ice-1','--ice-2','--glass','--surface','--light','--fog','--stone','--reflection','--portal-glow','--environment-tint'].forEach(p=>rs.removeProperty(p));
+  ['--bg-1','--bg-2','--bg-3','--halo-a','--halo-b','--sage','--sage-line','--mark-ink','--shadow','--shadow-hover','--ice-1','--ice-2','--glass','--surface','--light','--fog','--stone','--reflection','--portal-glow','--environment-tint','--glass-blur','--glass-sat','--transition'].forEach(p=>rs.removeProperty(p));
   document.body.classList.remove('deep-immerse');
+  delete document.body.dataset.envMood; delete document.body.dataset.envMaterial;
 }
 function brandSignalColor(){            // the brand's most characteristic non-neutral colour
   const list=brand.colors||[], isN=h=>/^#?(000000|ffffff)$/i.test((h||'').replace('#',''));
@@ -1729,6 +1732,7 @@ function applyBrandImmersion(){
   rs.setProperty('--shadow-hover','0 0 0 1px '+rgba(dpr,.16)+',0 14px 34px '+rgba(dpr,.16));
 }
 function deepOn(){ return !!founderState['Deep mode']; }
+function atmosphereOn(){ return founderState['Adaptive atmosphere']!==false; }
 function applyBrandImmersionDeep(){
   // Inside the brand at night: a deep brand-coloured ground, brand light glowing, the UI flipped to light.
   const rs=document.documentElement.style, sig=brandSignalColor();
@@ -1748,6 +1752,50 @@ function applyBrandImmersionDeep(){
   rs.setProperty('--portal-glow',rgba(W(sg,.3),.58));
   rs.setProperty('--sage',rgb(W(sg,.45)));          // accent: a luminous brand tint that reads on dark
   document.body.classList.add('deep-immerse');
+}
+function colorStats(){                                 // average temperature / saturation / lightness of the brand colours
+  const list=(brand.colors||[]).filter(c=>c.hex && !/^#?(000000|ffffff)$/i.test((c.hex||'').replace('#','')));
+  if(!list.length) return null;
+  let sat=0, light=0, hx=0, hy=0, n=0;
+  list.forEach(c=>{ const [r,g,b]=hexToRgb(c.hex), mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn;
+    const l=(mx+mn)/510, s=mx?d/mx:0; let h=0;
+    if(d){ if(mx===r) h=((g-b)/d)%6; else if(mx===g) h=(b-r)/d+2; else h=(r-g)/d+4; h*=60; if(h<0)h+=360; }
+    hx+=Math.cos(h*Math.PI/180); hy+=Math.sin(h*Math.PI/180); sat+=s; light+=l; n++; });
+  let hue=Math.atan2(hy/n,hx/n)*180/Math.PI; if(hue<0)hue+=360;
+  return { hue, sat:sat/n, light:light/n };
+}
+function deriveEnvironmentProfile(){                   // brand understood as atmosphere — works offline
+  const st=colorStats(), strat=(typeof activeStrategy==='function'?activeStrategy():null), pers=(strat&&strat.personality)||'refined';
+  let lighting='natural', material='glass', mood='refined';
+  if(st){
+    const h=st.hue;
+    if(st.light>0.72 && st.sat<0.32) lighting='bright';        // airy / clinical
+    else if(h<70||h>=330) lighting='warm';                     // champagne
+    else if(h>=180&&h<300) lighting='cool';                    // clean / modern
+    else lighting='natural';                                   // greens / earth
+    mood = st.sat>0.5 ? (pers==='bold'?'energetic':'expressive')
+         : (lighting==='bright'?'clinical':(lighting==='warm'?'editorial':'modern'));
+    material = lighting==='warm'?'paper' : lighting==='cool'?'metal' : lighting==='bright'?'glass' : 'stone';
+  }
+  const motion = pers==='bold' ? 'responsive' : (pers==='classic'?'calm':'slow');
+  const intensity = pers==='bold' ? 0.85 : (pers==='classic'?0.55:0.45);
+  return { mood, lighting, material, motion, intensity, accent:brandSignalColor()||'' };
+}
+function buildEnvironmentProfile(){                    // Concierge override (brand.environmentProfile) wins over local derivation
+  const base=deriveEnvironmentProfile();
+  return (brand.environmentProfile && typeof brand.environmentProfile==='object') ? Object.assign(base, brand.environmentProfile) : base;
+}
+function applyEnvironmentProfile(p){                   // light temperature · glass treatment · motion feel — atmosphere only
+  if(!p) return; const rs=document.documentElement.style;
+  const I=Math.max(0,Math.min(1, p.intensity==null?0.5:p.intensity));
+  const tint={warm:[255,236,206],cool:[214,229,246],bright:[255,255,255],natural:[238,234,216]}[p.lighting]||[238,234,216];
+  rs.setProperty('--environment-tint',`rgba(${tint[0]},${tint[1]},${tint[2]},${(0.10+0.10*I).toFixed(3)})`);
+  const glass = (p.mood==='modern'||p.mood==='energetic') ? {b:30,s:188}          // sharper, cleaner
+              : (p.mood==='editorial'||p.lighting==='warm') ? {b:48,s:158}         // softer, museum
+              : {b:40,s:170};
+  rs.setProperty('--glass-blur',glass.b+'px'); rs.setProperty('--glass-sat',glass.s+'%');
+  rs.setProperty('--transition', {slow:'.82s cubic-bezier(.2,.8,.2,1)',responsive:'.42s cubic-bezier(.4,0,.2,1)',calm:'.9s cubic-bezier(.25,.9,.3,1)',drift:'.7s ease-in-out'}[p.motion] || '.6s cubic-bezier(.22,1,.36,1)');
+  document.body.dataset.envMood=p.mood||''; document.body.dataset.envMaterial=p.material||'';
 }
 const DEST_ENV={
   identity:{env:'Arrival',dflt:'Logo, name & palette',key:'identity'},
@@ -1793,6 +1841,7 @@ function applyBrandHome(){
   applyHomeColor();          // reset to the calm base first (also drops deep-immerse)
   if(immerseOn()){ if(deepOn()) applyBrandImmersionDeep(); else applyBrandImmersion(); }   // submerge: deep (dark) or light
   else applyAmbientBrandLight();           // …or just a whisper of brand in the light
+  if(brand.colors.length && atmosphereOn()) applyEnvironmentProfile(buildEnvironmentProfile());   // atmosphere: light temperature · glass · motion
   applyDestinations();       // plain room subtitles, no eyebrows
   renderPrepared();          // quiet "already prepared" line
   if(brand.colors.length) applyPaletteVars(brand.colors);   // brand colours only in the Guide doc
