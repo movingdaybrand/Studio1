@@ -1658,14 +1658,14 @@ function applyAmbientBrandLight(){
   if(!hex){ ['--halo-a','--halo-b','--portal-glow'].forEach(p=>rs.removeProperty(p)); return; }
   const [r,g,b]=hexToRgb(hex);
   const up=(c,t)=>Math.round(c+(255-c)*t);                 // lift toward white → coloured light, never a dark blob
-  const lr=up(r,.5), lg=up(g,.5), lb=up(b,.5);
+  const lr=up(r,.42), lg=up(g,.42), lb=up(b,.42);
   const sa=[180,205,185], sb=[196,214,198];                // the calm sage base the home ships with
   const mix=(a,c,t)=>Math.round(a*(1-t)+c*t);
-  const ha=[mix(sa[0],lr,.5),mix(sa[1],lg,.5),mix(sa[2],lb,.5)];
-  const hb=[mix(sb[0],lr,.42),mix(sb[1],lg,.42),mix(sb[2],lb,.42)];
-  rs.setProperty('--halo-a',`rgba(${ha[0]},${ha[1]},${ha[2]},.34)`);
-  rs.setProperty('--halo-b',`rgba(${hb[0]},${hb[1]},${hb[2]},.28)`);
-  rs.setProperty('--portal-glow',`rgba(${ha[0]},${ha[1]},${ha[2]},.36)`);
+  const ha=[mix(sa[0],lr,.66),mix(sa[1],lg,.66),mix(sa[2],lb,.66)];
+  const hb=[mix(sb[0],lr,.58),mix(sb[1],lg,.58),mix(sb[2],lb,.58)];
+  rs.setProperty('--halo-a',`rgba(${ha[0]},${ha[1]},${ha[2]},.44)`);
+  rs.setProperty('--halo-b',`rgba(${hb[0]},${hb[1]},${hb[2]},.36)`);
+  rs.setProperty('--portal-glow',`rgba(${ha[0]},${ha[1]},${ha[2]},.5)`);
 }
 const DEST_ENV={
   identity:{env:'Arrival',dflt:'Logo, name & palette',key:'identity'},
