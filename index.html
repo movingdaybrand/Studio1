@@ -675,6 +675,7 @@ const ROOMS={
   founder:{kicker:'Founder Tools',title:'Advanced controls.',html:`
     <div class="flist">
       <div class="frow"><div><b>Editor mode</b><i>Section editing &amp; placement tools</i></div><div class="toggle"></div></div>
+      <div class="frow"><div><b>Brand immersion</b><i>Fill the home with the brand's colour</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>AI Brand Concierge</b><i>Analyze uploads on intake</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>Local-only mode</b><i>Skip the AI route, organize on-device</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>Website lookup</b><i>Read a URL from the files &amp; check the live site</i></div><div class="toggle"></div></div>
@@ -692,6 +693,7 @@ function loadFounderState(){
   if(s['AI Brand Concierge']===undefined) s['AI Brand Concierge']=true;   // Concierge is on by default
   if(s['Website lookup']===undefined) s['Website lookup']=true;           // website enrichment on by default
   if(s['Editor mode']===undefined) s['Editor mode']=true;                 // edit live, straight away
+  if(s['Brand immersion']===undefined) s['Brand immersion']=true;         // submerge the home in the brand by default
   return s;
 }
 function saveFounderState(){ try{ localStorage.setItem('mdFounderState', JSON.stringify(founderState)); }catch(e){} }
@@ -851,7 +853,7 @@ function applyFounder(root){
 roomBody.addEventListener('click',e=>{
   const tog=e.target.closest('.toggle');
   if(tog){ const on=tog.classList.toggle('on'); const row=tog.closest('.frow'), lab=row&&row.querySelector('b');
-    if(lab){ const name=lab.textContent.trim(); founderState[name]=on; saveFounderState(); if(name==='Editor mode') enableEditing(roomBody); if(name==='Raw JSON') refreshFounderState(); } return; }
+    if(lab){ const name=lab.textContent.trim(); founderState[name]=on; saveFounderState(); if(name==='Editor mode') enableEditing(roomBody); if(name==='Brand immersion') applyBrandHome(); if(name==='Raw JSON') refreshFounderState(); } return; }
   const deliv=e.target.closest('.vaultcard[data-deliv]'); if(deliv){ handleDeliverable(deliv.dataset.deliv); return; }
   const ex=e.target.closest('[data-export]'); if(ex){ exportApplication(ex.dataset.export, ex.dataset.fmt||'png'); return; }
   const ld=e.target.closest('[data-logodl]'); if(ld){ const u=LOGOVAR[ld.dataset.logodl]; if(u) dlDataURL(ld.dataset.fname||'logo.png',u); return; }
@@ -1667,6 +1669,43 @@ function applyAmbientBrandLight(){
   rs.setProperty('--halo-b',`rgba(${hb[0]},${hb[1]},${hb[2]},.36)`);
   rs.setProperty('--portal-glow',`rgba(${ha[0]},${ha[1]},${ha[2]},.5)`);
 }
+function immerseOn(){ return founderState['Brand immersion']!==false; }
+function darkestBrandColor(){
+  const list=(brand.colors||[]).filter(c=>c.hex && !/^#?ffffff$/i.test((c.hex||'').replace('#','')));
+  if(!list.length) return '';
+  const lum=h=>{const x=hexToRgb(h);return .299*x[0]+.587*x[1]+.114*x[2];};
+  return list.slice().sort((a,b)=>lum(a.hex)-lum(b.hex))[0].hex;
+}
+function applyBrandImmersion(){
+  // Full submersion: the room's surfaces, glass, light, accents and shadows all draw from the brand —
+  // a light wash up top easing into a deep brand tone at the foot. Text stays dark so it never loses legibility.
+  const rs=document.documentElement.style, sig=brandSignalColor();
+  if(!sig){ applyAmbientBrandLight(); return; }
+  const sg=hexToRgb(sig);
+  let dpr=hexToRgb(darkestBrandColor()||sig);
+  if((.299*dpr[0]+.587*dpr[1]+.114*dpr[2])<26) dpr=[Math.round(sg[0]*.5),Math.round(sg[1]*.5),Math.round(sg[2]*.5)];  // pure-black → brand-deep, not a void
+  const W=(c,t)=>[Math.round(c[0]+(255-c[0])*t),Math.round(c[1]+(255-c[1])*t),Math.round(c[2]+(255-c[2])*t)];          // lift toward white
+  const rgb=a=>`rgb(${a[0]},${a[1]},${a[2]})`, rgba=(a,al)=>`rgba(${a[0]},${a[1]},${a[2]},${al})`;
+  rs.setProperty('--bg-1',rgb(W(sg,.80)));          // ground: light brand wash …
+  rs.setProperty('--bg-2',rgb(W(sg,.66)));
+  rs.setProperty('--bg-3',rgb(W(dpr,.40)));         // … easing into a deeper brand tone at the foot
+  const glowA=W(sg,.42), glowB=W(sg,.5);
+  rs.setProperty('--halo-a',rgba(glowA,.6));        // brand light, strong
+  rs.setProperty('--halo-b',rgba(glowB,.5));
+  rs.setProperty('--portal-glow',rgba(glowA,.62));
+  rs.setProperty('--ice-1',rgba(W(sg,.86),.6));     // glass takes a brand cast but stays light enough for dark text
+  rs.setProperty('--ice-2',rgba(W(sg,.86),.4));
+  rs.setProperty('--surface',rgba(W(sg,.92),.72));
+  rs.setProperty('--light',rgba(W(sg,.92),.9));
+  rs.setProperty('--fog',rgba(W(sg,.9),.62));
+  rs.setProperty('--reflection',rgba(W(sg,.95),.5));
+  rs.setProperty('--sage',rgb(sg));                 // accents + focus glow = the brand itself
+  rs.setProperty('--sage-line',rgba(sg,.14));
+  rs.setProperty('--stone',rgba(dpr,.12));
+  rs.setProperty('--mark-ink',rgba(dpr,.62));
+  rs.setProperty('--shadow','0 0 0 1px '+rgba(dpr,.08)+',0 6px 18px '+rgba(dpr,.10));
+  rs.setProperty('--shadow-hover','0 0 0 1px '+rgba(dpr,.16)+',0 14px 34px '+rgba(dpr,.16));
+}
 const DEST_ENV={
   identity:{env:'Arrival',dflt:'Logo, name & palette',key:'identity'},
   assets:{env:'Archive',dflt:"The brand's archive",key:'assets'},
@@ -1708,8 +1747,9 @@ function applyBrandHome(){
     if(sub) sub.textContent="Everything has a place. Choose where you'd like to continue.";
     const logo=document.getElementById('homeLogo'); if(logo) logo.style.display='none';
   }
-  applyHomeColor();          // home keeps its default calm palette
-  applyAmbientBrandLight();  // …with a whisper of the brand's colour in the light
+  applyHomeColor();          // reset to the calm base first
+  if(immerseOn()) applyBrandImmersion();   // …then submerge the room in the brand,
+  else applyAmbientBrandLight();           // …or just a whisper of it in the light
   applyDestinations();       // plain room subtitles, no eyebrows
   renderPrepared();          // quiet "already prepared" line
   if(brand.colors.length) applyPaletteVars(brand.colors);   // brand colours only in the Guide doc
