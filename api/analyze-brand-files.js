@@ -304,6 +304,7 @@ technical terms.
 Rules for these additional fields:
 - brandWorld is an environmental design system, not fantasy writing. Keep it premium, concrete, and design-directable. colorMapping hex values must come from the real palette; background/glass/glow stay LIGHT (the home is light-first), accent is the readable signature color, shadow is the deepest brand tone. Each destination keeps its fixed environmentName but gets a feeling and visualTreatment specific to THIS brand. If brand info is thin, derive a refined world from the available colors and files.
 - ALSO return a "designStrategy" object that tells the app how to design this brand's applications (business cards, social posts, banners) so the user never has to decide. Shape: "designStrategy": { "personality": "bold|refined|editorial|warm|classic|technical", "leadColor": "#rrggbb — the color that should lead dark/branded surfaces (usually the deepest or signature tone)", "accentColor": "#rrggbb — the pop/highlight color", "cardLayout": "centered|left|split", "postLayout": "badge|gradient|type", "corner": "round|sharp", "voice": "one short, confident, human sentence describing this brand's application style — no AI or technical language" }. Pick values that genuinely fit THIS brand's character and palette; if info is thin, derive a tasteful strategy from the colors.
+- ALSO return an "environmentProfile" object — the machine-readable atmosphere the app applies automatically to subtly adapt the Brand Home's light, glass, and motion to THIS brand (never a theme, never layout, never washing the UI). Use ONLY these enum values: "environmentProfile": { "mood": "editorial|modern|natural|energetic|clinical|scholarly|expressive", "lighting": "warm|cool|bright|natural", "material": "glass|stone|wood|metal|paper", "motion": "slow|responsive|calm|drift", "intensity": a number 0.25-0.95 for how strongly the atmosphere expresses (restrained brands low, energetic brands high) }. Choose from the brand's real industry, mood, and palette — e.g. luxury/fashion → editorial · warm · paper · slow; technology → modern · cool · metal · responsive; outdoor → natural · natural · wood · drift; healthcare → clinical · bright · glass · calm; education → scholarly · warm · paper · calm; sports → energetic · cool · metal · responsive (still premium, never aggressive). If unsure, choose the calmest fit.
 - colorSystem hex values must come from the real uploaded colors (reuse palette where possible). background defaults to a clean near-white and text to a legible dark, unless the brand clearly dictates otherwise. Never wash the whole guide in one color — the page stays light; brand color lives in accents, hero grounds, and swatches.
 - Only set guidePlan.sections.include = true for sections actually supported by the prepared assets or clear brand context: add Photography only when photography exists, Packaging only when packaging files exist, Apparel only for apparel, Athletics only for sports brands, Environmental Graphics only for signage/vehicle wraps, Email Signatures only when present. Always include Logo System, Color Palette, Typography, Usage, and Files. NEVER include every possible section.
 - personality, voice, positioning, and visualDirection must be specific to THIS brand, never generic boilerplate.
@@ -778,6 +779,52 @@ function normalizeDesignStrategy(parsed){
     voice: (typeof ds.voice==="string" && ds.voice.trim()) ? ds.voice.trim().slice(0,120) : fb.voice
   };
   return out;
+}
+
+/* ── environmentProfile: machine-readable atmosphere the app applies automatically (always present, derived if the model is thin) ── */
+const EP_MOOD=["editorial","modern","natural","energetic","clinical","scholarly","expressive","refined"];
+const EP_LIGHT=["warm","cool","bright","natural"];
+const EP_MAT=["glass","stone","wood","metal","paper"];
+const EP_MOTION=["slow","responsive","calm","drift"];
+function buildFallbackEnvironmentProfile(parsed){
+  const cols=((parsed && (parsed.colors||parsed.palette)) || []).map(c=>_normHex(c && c.hex)).filter(Boolean)
+    .filter(h=>!/^#(000000|ffffff)$/i.test(h));
+  const pers=((parsed && parsed.designStrategy && parsed.designStrategy.personality) || "refined");
+  let lighting="natural", material="stone", mood="refined";
+  if(cols.length){
+    let hx=0,hy=0,s=0,l=0,n=0;
+    for(const h of cols){ const c=_hexToRgb(h), mx=Math.max(...c), mn=Math.min(...c), d=mx-mn;
+      const li=(mx+mn)/510, sa=mx?d/mx:0; let hue=0;
+      if(d){ if(mx===c[0]) hue=((c[1]-c[2])/d)%6; else if(mx===c[1]) hue=(c[2]-c[0])/d+2; else hue=(c[0]-c[1])/d+4; hue*=60; if(hue<0)hue+=360; }
+      hx+=Math.cos(hue*Math.PI/180); hy+=Math.sin(hue*Math.PI/180); s+=sa; l+=li; n++;
+    }
+    const hue=((Math.atan2(hy/n,hx/n)*180/Math.PI)+360)%360, sat=s/n, light=l/n;
+    if(light>0.72 && sat<0.32) lighting="bright";
+    else if(hue<70||hue>=330) lighting="warm";
+    else if(hue>=180&&hue<300) lighting="cool";
+    else lighting="natural";
+    mood = sat>0.5 ? (pers==="bold"?"energetic":"expressive")
+         : (lighting==="bright"?"clinical":(lighting==="warm"?"editorial":"modern"));
+    material = lighting==="warm"?"paper" : lighting==="cool"?"metal" : lighting==="bright"?"glass" : "stone";
+  }
+  const motion = (pers==="bold"||pers==="technical") ? "responsive" : ((pers==="classic"||pers==="warm")?"calm":"slow");
+  const intensity = (pers==="bold"||pers==="technical") ? 0.8 : ((pers==="classic"||pers==="warm")?0.55:0.45);
+  return { mood, lighting, material, motion, intensity };
+}
+function normalizeEnvironmentProfile(parsed){
+  const fb=buildFallbackEnvironmentProfile(parsed);
+  const ep=(parsed && parsed.environmentProfile && typeof parsed.environmentProfile==="object") ? parsed.environmentProfile : {};
+  const pick=(v,allow,def)=> (typeof v==="string" && allow.includes(v.trim().toLowerCase())) ? v.trim().toLowerCase() : def;
+  let intensity=Number(ep.intensity); if(!isFinite(intensity)) intensity=fb.intensity;
+  intensity=Math.max(0.25,Math.min(0.95,intensity));
+  return {
+    mood: pick(ep.mood,EP_MOOD,fb.mood),
+    lighting: pick(ep.lighting,EP_LIGHT,fb.lighting),
+    material: pick(ep.material,EP_MAT,fb.material),
+    motion: pick(ep.motion,EP_MOTION,fb.motion),
+    intensity: Math.round(intensity*100)/100,
+    accent: _normHex(ep.accent) || (((parsed && (parsed.colors||parsed.palette)) || [])[0]||{}).hex || ""
+  };
 }
 
 export default async function handler(req, res) {
