@@ -469,6 +469,26 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .ig-bg{width:30px;height:30px;border-radius:50%;cursor:pointer;box-shadow:inset 0 0 0 1px var(--sage-line);transition:transform .12s,box-shadow .12s;}
 .ig-bg:hover{transform:scale(1.08);}
 .ig-bg.sel{box-shadow:inset 0 0 0 1px var(--sage-line),0 0 0 2px var(--ink);}
+/* ── Deep immersion: inside the brand at night — dark brand ground, light UI ── */
+body.deep-immerse{
+  --ink:rgba(246,248,244,.94);--ink-soft:rgba(246,248,244,.6);--ink-faint:rgba(246,248,244,.4);
+  --glass:rgba(255,255,255,.06);--ice-1:rgba(255,255,255,.08);--ice-2:rgba(255,255,255,.035);
+  --surface:rgba(255,255,255,.07);--light:rgba(255,255,255,.12);--fog:rgba(255,255,255,.05);
+  --sage-line:rgba(255,255,255,.14);--stone:rgba(255,255,255,.12);--reflection:rgba(255,255,255,.10);
+  --mark-ink:rgba(246,248,244,.72);
+  --shadow:0 0 0 1px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.34);
+  --shadow-hover:0 0 0 1px rgba(255,255,255,.16),0 16px 42px rgba(0,0,0,.46);
+}
+body.deep-immerse .vaultcard,body.deep-immerse .frow,body.deep-immerse .asset-card,
+body.deep-immerse .asset-thumb.doc,body.deep-immerse .lib-item,body.deep-immerse .apptool,
+body.deep-immerse .vframe,body.deep-immerse .primary-card,body.deep-immerse .sroom,
+body.deep-immerse .back,body.deep-immerse .movein-btn,body.deep-immerse .founder-pill,
+body.deep-immerse .lib-upload,body.deep-immerse .sig-fields input,body.deep-immerse .role-select,
+body.deep-immerse .asset-var{background:rgba(255,255,255,.07)!important;color:var(--ink);}
+body.deep-immerse .vframe-tag,body.deep-immerse .mk-tag,body.deep-immerse .asset-replace,
+body.deep-immerse .vframe::after,body.deep-immerse .swatch::after,body.deep-immerse .gd-sw::after,
+body.deep-immerse .asset-remove,body.deep-immerse .mk-dl button{background:rgba(16,20,26,.74)!important;color:rgba(246,248,244,.86)!important;}
+body.deep-immerse .sig-preview{box-shadow:0 14px 34px rgba(0,0,0,.45);}   /* the email card stays a real white card */
 </style>
 </head>
 <body>
@@ -676,6 +696,7 @@ const ROOMS={
     <div class="flist">
       <div class="frow"><div><b>Editor mode</b><i>Section editing &amp; placement tools</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>Brand immersion</b><i>Fill the home with the brand's colour</i></div><div class="toggle"></div></div>
+      <div class="frow"><div><b>Deep mode</b><i>Inside the brand at night — dark, immersive</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>AI Brand Concierge</b><i>Analyze uploads on intake</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>Local-only mode</b><i>Skip the AI route, organize on-device</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>Website lookup</b><i>Read a URL from the files &amp; check the live site</i></div><div class="toggle"></div></div>
@@ -853,7 +874,7 @@ function applyFounder(root){
 roomBody.addEventListener('click',e=>{
   const tog=e.target.closest('.toggle');
   if(tog){ const on=tog.classList.toggle('on'); const row=tog.closest('.frow'), lab=row&&row.querySelector('b');
-    if(lab){ const name=lab.textContent.trim(); founderState[name]=on; saveFounderState(); if(name==='Editor mode') enableEditing(roomBody); if(name==='Brand immersion') applyBrandHome(); if(name==='Raw JSON') refreshFounderState(); } return; }
+    if(lab){ const name=lab.textContent.trim(); founderState[name]=on; saveFounderState(); if(name==='Editor mode') enableEditing(roomBody); if(name==='Brand immersion'||name==='Deep mode') applyBrandHome(); if(name==='Raw JSON') refreshFounderState(); } return; }
   const deliv=e.target.closest('.vaultcard[data-deliv]'); if(deliv){ handleDeliverable(deliv.dataset.deliv); return; }
   const ex=e.target.closest('[data-export]'); if(ex){ exportApplication(ex.dataset.export, ex.dataset.fmt||'png'); return; }
   const ld=e.target.closest('[data-logodl]'); if(ld){ const u=LOGOVAR[ld.dataset.logodl]; if(u) dlDataURL(ld.dataset.fname||'logo.png',u); return; }
@@ -1648,6 +1669,7 @@ function applyHomeColor(){
   // The home keeps its own calm palette. The brand's colours live in the Guide (applyPaletteVars), not the shell.
   const rs=document.documentElement.style;
   ['--bg-1','--bg-2','--bg-3','--halo-a','--halo-b','--sage','--sage-line','--mark-ink','--shadow','--shadow-hover','--ice-1','--ice-2','--glass','--surface','--light','--fog','--stone','--reflection','--portal-glow','--environment-tint'].forEach(p=>rs.removeProperty(p));
+  document.body.classList.remove('deep-immerse');
 }
 function brandSignalColor(){            // the brand's most characteristic non-neutral colour
   const list=brand.colors||[], isN=h=>/^#?(000000|ffffff)$/i.test((h||'').replace('#',''));
@@ -1706,6 +1728,27 @@ function applyBrandImmersion(){
   rs.setProperty('--shadow','0 0 0 1px '+rgba(dpr,.08)+',0 6px 18px '+rgba(dpr,.10));
   rs.setProperty('--shadow-hover','0 0 0 1px '+rgba(dpr,.16)+',0 14px 34px '+rgba(dpr,.16));
 }
+function deepOn(){ return !!founderState['Deep mode']; }
+function applyBrandImmersionDeep(){
+  // Inside the brand at night: a deep brand-coloured ground, brand light glowing, the UI flipped to light.
+  const rs=document.documentElement.style, sig=brandSignalColor();
+  if(!sig){ applyAmbientBrandLight(); return; }
+  const sg=hexToRgb(sig);
+  let dpr=hexToRgb(darkestBrandColor()||sig);
+  const mixc=(a,b,t)=>[Math.round(a[0]*(1-t)+b[0]*t),Math.round(a[1]*(1-t)+b[1]*t),Math.round(a[2]*(1-t)+b[2]*t)];
+  if((.299*dpr[0]+.587*dpr[1]+.114*dpr[2])<22) dpr=mixc([0,0,0],sg,.22);     // near-black → brand-tinted dark, not a void
+  const D=(c,t)=>[Math.round(c[0]*t),Math.round(c[1]*t),Math.round(c[2]*t)];
+  const W=(c,t)=>[Math.round(c[0]+(255-c[0])*t),Math.round(c[1]+(255-c[1])*t),Math.round(c[2]+(255-c[2])*t)];
+  const rgb=a=>`rgb(${a[0]},${a[1]},${a[2]})`, rgba=(a,al)=>`rgba(${a[0]},${a[1]},${a[2]},${al})`;
+  rs.setProperty('--bg-1',rgb(mixc(dpr,sg,.22)));   // top: deep, faintly lit by the hue
+  rs.setProperty('--bg-2',rgb(D(dpr,.74)));
+  rs.setProperty('--bg-3',rgb(D(dpr,.46)));         // foot: the deepest point of the room
+  rs.setProperty('--halo-a',rgba(W(sg,.3),.4));     // brand light glowing in the dark
+  rs.setProperty('--halo-b',rgba(W(sg,.4),.32));
+  rs.setProperty('--portal-glow',rgba(W(sg,.3),.58));
+  rs.setProperty('--sage',rgb(W(sg,.45)));          // accent: a luminous brand tint that reads on dark
+  document.body.classList.add('deep-immerse');
+}
 const DEST_ENV={
   identity:{env:'Arrival',dflt:'Logo, name & palette',key:'identity'},
   assets:{env:'Archive',dflt:"The brand's archive",key:'assets'},
@@ -1747,9 +1790,9 @@ function applyBrandHome(){
     if(sub) sub.textContent="Everything has a place. Choose where you'd like to continue.";
     const logo=document.getElementById('homeLogo'); if(logo) logo.style.display='none';
   }
-  applyHomeColor();          // reset to the calm base first
-  if(immerseOn()) applyBrandImmersion();   // …then submerge the room in the brand,
-  else applyAmbientBrandLight();           // …or just a whisper of it in the light
+  applyHomeColor();          // reset to the calm base first (also drops deep-immerse)
+  if(immerseOn()){ if(deepOn()) applyBrandImmersionDeep(); else applyBrandImmersion(); }   // submerge: deep (dark) or light
+  else applyAmbientBrandLight();           // …or just a whisper of brand in the light
   applyDestinations();       // plain room subtitles, no eyebrows
   renderPrepared();          // quiet "already prepared" line
   if(brand.colors.length) applyPaletteVars(brand.colors);   // brand colours only in the Guide doc
