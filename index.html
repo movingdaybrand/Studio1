@@ -219,7 +219,7 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .gd-logos.two{grid-template-columns:1fr 1fr;}
 .gd-logocell{position:relative;min-height:clamp(150px,18vw,200px);display:grid;place-items:center;border-radius:var(--r-sm);padding:30px 22px 40px;}
 .gd-logocell.paper{background:#ebe5d6;}.gd-logocell.dark{background:linear-gradient(160deg,var(--gd-glass),var(--gd-panel));box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 0 0 1px var(--gd-line);}.gd-logocell.brand{background:var(--b4);}
-.gd-logocell img{max-width:74%;max-height:clamp(64px,9vw,104px);object-fit:contain;}
+.gd-logocell img{max-width:82%;max-height:clamp(96px,13vw,150px);object-fit:contain;}
 .gd-logo-label{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(28,43,34,.5);padding:0 10px;}
 .gd-logo-label.on-dark{color:var(--gd-mute);}
 .gd-logo-dl{position:absolute;top:10px;right:10px;width:27px;height:27px;border-radius:8px;border:none;display:grid;place-items:center;cursor:pointer;opacity:0;transition:opacity .15s,background .15s;background:rgba(0,0,0,.08);color:#1c2b22;}
@@ -230,7 +230,7 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .wm-doc{font-family:var(--display);font-size:clamp(17px,2vw,25px);color:#1c2b22;text-align:center;}
 .wm-doc small{display:block;font-size:.32em;letter-spacing:.3em;text-transform:uppercase;color:rgba(28,43,34,.55);margin-top:.9em;}
 .gd-palette{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
-.gd-sw{position:relative;border-radius:var(--r-sm);min-height:clamp(120px,15vw,168px);display:flex;flex-direction:column;justify-content:space-between;padding:16px 18px;}
+.gd-sw{position:relative;border-radius:var(--r-sm);min-height:clamp(120px,15vw,168px);display:flex;flex-direction:column;justify-content:space-between;padding:16px 18px;box-shadow:inset 0 0 0 1px rgba(235,229,214,.16);}
 .gd-sw span{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;}.gd-sw i{font-style:normal;font-size:11px;font-family:ui-monospace,monospace;opacity:.78;letter-spacing:.04em;}
 .gd-type{display:grid;grid-template-columns:1fr;gap:12px;}
 .gd-type>div{background:linear-gradient(160deg,var(--gd-glass),var(--gd-panel));border-radius:var(--r-sm);padding:clamp(20px,3vw,30px);box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 0 0 1px var(--gd-line);}
@@ -765,23 +765,23 @@ function recolorLogo(url, mode, isSvg){          // recolor opaque pixels, keep 
         if(mode==='grey'){
           for(let i=0;i<p.length;i+=4){ if(p[i+3]===0) continue; const g=Math.round(0.299*p[i]+0.587*p[i+1]+0.114*p[i+2]); p[i]=p[i+1]=p[i+2]=g; }
         } else {
-          // Histogram of the opaque pixels' luminance, plus tonal range.
-          const hist=new Array(256).fill(0); let lo=255, hi=0, total=0;
-          for(let i=0;i<p.length;i+=4){ if(p[i+3]<16) continue; const L=Math.round(0.299*p[i]+0.587*p[i+1]+0.114*p[i+2]); hist[L]++; total++; if(L<lo)lo=L; if(L>hi)hi=L; }
+          // Measure the mark's tonal range across its opaque pixels.
+          let lo=255, hi=0;
+          for(let i=0;i<p.length;i+=4){ if(p[i+3]<16) continue; const L=0.299*p[i]+0.587*p[i+1]+0.114*p[i+2]; if(L<lo)lo=L; if(L>hi)hi=L; }
           const range=hi-lo;
-          // Otsu: the threshold that best separates the mark's two tone groups (body vs highlight),
-          // so the split follows the artwork instead of a fixed brightness — the larger/darker mass becomes the main colour.
-          let sum=0; for(let i=0;i<256;i++) sum+=i*hist[i];
-          let sumB=0, wB=0, maxVar=-1, thr=Math.round((lo+hi)/2);
-          for(let i=0;i<256;i++){ wB+=hist[i]; if(!wB) continue; const wF=total-wB; if(wF<=0) break; sumB+=i*hist[i]; const mB=sumB/wB, mF=(sum-sumB)/wF, between=wB*wF*(mB-mF)*(mB-mF); if(between>maxVar){ maxVar=between; thr=i; } }
+          // Asymmetric split so each version is predominantly its own colour:
+          //  · BLACK ("black with white"): everything black, only the brightest highlights knock out to white.
+          //  · WHITE ("white with black"): everything white, only the darkest detail drops to black.
+          const tHi = lo + range*0.66;     // black mode: above this → white
+          const tLo = lo + range*0.34;     // white mode: below this → black
           for(let i=0;i<p.length;i+=4){
             if(p[i+3]===0) continue;
             if(range<24){                                   // single colour → solid fill
               const v = mode==='black' ? 0 : 255; p[i]=p[i+1]=p[i+2]=v;
-            } else {                                         // two-tone: darker group is the body, lighter group knocks out
+            } else {
               const L=0.299*p[i]+0.587*p[i+1]+0.114*p[i+2];
-              const darker = L < thr;
-              const v = (mode==='black') ? (darker?0:255) : (darker?255:0);   // black → body black / highlight white · white → the inverse
+              const v = (mode==='black') ? (L>=tHi ? 255 : 0)    // mostly black + white highlights
+                                         : (L<=tLo ? 0 : 255);   // mostly white + black shadows
               p[i]=p[i+1]=p[i+2]=v;
             }
           }
@@ -1222,16 +1222,22 @@ function applyGuideSections(root){
 }
 function paintSwatches(root){
   if(!brand.colors.length) return;
-  root.querySelectorAll('.swatch').forEach((el,i)=>{ const c=brand.colors[i]; if(!c) return;
+  // Clean the palette for display: drop exact-duplicate hexes, then disambiguate repeated names by tone.
+  const seen=new Set(), list=[];
+  brand.colors.forEach(c=>{ const hex=(c.hex||'').toUpperCase(); if(!hex||seen.has(hex)) return; seen.add(hex); list.push({hex,name:c.name||'Color'}); });
+  const lum=h=>{const x=hexToRgb(h);return .299*x[0]+.587*x[1]+.114*x[2];};
+  const groups={}; list.forEach((c,i)=>{ (groups[c.name]=groups[c.name]||[]).push(i); });
+  Object.values(groups).forEach(idxs=>{ if(idxs.length<2) return;
+    const s=[...idxs].sort((a,b)=>lum(list[b].hex)-lum(list[a].hex));
+    s.forEach((idx,k)=>{ const base=list[idx].name; list[idx].name = k===0 ? 'Light '+base : (k===s.length-1 ? 'Deep '+base : base); });
+  });
+  root.querySelectorAll('.swatch').forEach((el,i)=>{ const c=list[i]; if(!c){ el.style.display='none'; return; } el.style.display='';
     el.style.background=c.hex; el.style.color=readOn(c.hex);
-    const h=el.querySelector('.hex'); if(h) h.textContent=c.hex.toUpperCase();
+    const h=el.querySelector('.hex'); if(h) h.textContent=c.hex;
     const nm=el.querySelector('span:not(.hex)'); if(nm) nm.textContent=c.name; });
-  // Rebuild the guide palette so every real colour shows — including black & white — each named.
+  // Rebuild the guide palette so every real colour shows — including black & white — each named and visibly bordered.
   root.querySelectorAll('.gd-palette').forEach(pal=>{
-    pal.innerHTML = brand.colors.map(c=>{
-      const hex=(c.hex||'').toUpperCase();
-      return `<div class="gd-sw" style="background:${c.hex};color:${readOn(c.hex)}"><span>${esc(c.name||'Color')}</span><i>${esc(hex)}</i></div>`;
-    }).join('');
+    pal.innerHTML = list.map(c=>`<div class="gd-sw" style="background:${c.hex};color:${readOn(c.hex)}"><span>${esc(c.name)}</span><i>${esc(c.hex)}</i></div>`).join('');
   });
 }
 function ensureFont(name){
