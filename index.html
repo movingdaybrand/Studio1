@@ -660,6 +660,7 @@ function loadFounderState(){
   try{ const raw=localStorage.getItem('mdFounderState'); if(raw) s=JSON.parse(raw)||{}; }catch(e){}
   if(s['AI Brand Concierge']===undefined) s['AI Brand Concierge']=true;   // Concierge is on by default
   if(s['Website lookup']===undefined) s['Website lookup']=true;           // website enrichment on by default
+  if(s['Editor mode']===undefined) s['Editor mode']=true;                 // edit live, straight away
   return s;
 }
 function saveFounderState(){ try{ localStorage.setItem('mdFounderState', JSON.stringify(founderState)); }catch(e){} }
@@ -862,17 +863,20 @@ fileInput.addEventListener('change',()=>{
   const f=fileInput.files&&fileInput.files[0]; if(!f||(!editTarget&&!editAssetId)){fileInput.value='';return;}
   const ext=((f.name||'').split('.').pop()||'png').toLowerCase();
   const rd=new FileReader();
-  rd.onload=()=>{
+  rd.onload=async ()=>{
     if(editAssetId){                                       // replace a specific asset from the Assets room
-      const a=findAsset(editAssetId); if(a){ a.url=rd.result; a.name=f.name; a.ext=ext; }
+      const a=findAsset(editAssetId); const isMark=!!(a && /primaryLogo|wordmark|logo/i.test(a.role||''));
+      if(a){ a.url=rd.result; a.name=f.name; a.ext=ext; }
       editAssetId=null; fileInput.value='';
-      updateWorkspaceState({},{source:'assets',announce:'Asset replaced. Brand Guide and Deliverables refreshed.'});
+      if(isMark && conciergeOn()){ setStatus('Reading your logo…'); await analyzeMarkUpload(rd.result); }
+      updateWorkspaceState({},{source:'assets',announce: isMark&&conciergeOn() ? 'Logo read — colours and name updated from your mark.' : 'Asset replaced. Brand Guide and Deliverables refreshed.'});
       return;
     }
-    const tgt=editTarget;
+    const tgt=editTarget; const wasLogo=isLogoFrame(tgt);
     fillFrameWithAsset(tgt,{url:rd.result,name:f.name,ext});
     editTarget=null; fileInput.value='';
-    updateWorkspaceState({},{source:'identity',announce:isLogoFrame(tgt)?'Logo added. Brand Guide and Deliverables refreshed.':'Photo added. Brand Guide refreshed.'});
+    if(wasLogo && conciergeOn()){ setStatus('Reading your logo…'); await analyzeMarkUpload(rd.result); }
+    updateWorkspaceState({},{source:'identity',announce: wasLogo ? (conciergeOn()?'Logo read — colours and name updated from your mark.':'Logo added. Brand Guide and Deliverables refreshed.') : 'Photo added. Brand Guide refreshed.'});
   };
   rd.readAsDataURL(f);
 });
@@ -1684,8 +1688,41 @@ async function extractPalette(urls){            // EXACT hex codes pulled from t
   }
   const sorted=[...counts.entries()].sort((a,b)=>b[1]-a[1])
     .map(([k])=>({hex:'#'+[(k>>16)&255,(k>>8)&255,k&255].map(n=>n.toString(16).padStart(2,'0')).join('')}));
-  const names=['Primary','Secondary','Accent','Tint','Deep'];
-  return dedupeColors(sorted).slice(0,5).map((c,i)=>({hex:c.hex,name:names[i]||('Color '+(i+1))}));
+  const core=dedupeColors(sorted).slice(0,5).map(c=>({hex:c.hex.toUpperCase(), name:homeColorName(c.hex), role:'brand'}));
+  return core.concat([                                  // black & white always part of the system
+    {hex:'#000000', name:'Black', role:'neutral'},
+    {hex:'#FFFFFF', name:'White', role:'neutral'}
+  ]);
+}
+function homeColorName(hex){                            // name a colour from its actual hue/tone — same rules as intake
+  const [r,g,b]=hexToRgb(hex);
+  const mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2/255,d=(mx-mn)/255;
+  if(mx<=26) return 'Black'; if(mn>=234) return 'White';
+  if(d<0.10) return l<0.3?'Charcoal':(l<0.6?'Grey':'Light Grey');
+  const R=r/255,G=g/255,B=b/255; let h;
+  if(mx/255===R) h=((G-B)/d)%6; else if(mx/255===G) h=(B-R)/d+2; else h=(R-G)/d+4;
+  h=Math.round(h*60); if(h<0) h+=360;
+  if(h>=35&&h<65&&l>0.8) return 'Cream';
+  let f; if(h<15||h>=345)f='Red';else if(h<40)f='Orange';else if(h<65)f='Gold';else if(h<90)f='Lime';else if(h<160)f='Green';else if(h<195)f='Teal';else if(h<255)f='Blue';else if(h<290)f='Violet';else if(h<330)f='Magenta';else f='Pink';
+  if(f==='Green'){ if(l<0.32)f='Forest'; else if(l>0.7&&d<0.5)f='Sage'; }
+  if(f==='Blue'&&l<0.3)f='Navy';
+  const tone=(l<0.32&&!['Forest','Navy'].includes(f))?'Deep ':(l>0.74&&!['Sage','Cream'].includes(f)?'Light ':'');
+  return (tone+f).trim();
+}
+// When a primary logo / wordmark is dropped in (Concierge on), treat it like intake:
+// colours straight from the mark (named + black/white), and the brand name read from the logo — never the file name.
+async function analyzeMarkUpload(newUrl){
+  try{
+    const urls=[newUrl].concat((brand.logos||[]).map(l=>l.url)).filter(Boolean);
+    const pal=await extractPalette(urls); if(pal.length) brand.colors=pal;
+  }catch(e){}
+  if(conciergeOn()){
+    try{
+      const ai=await requestReview([{id:'mark', name:'logo', type:'image/png', category:'logo', dataUrl:newUrl}]);
+      const nm=safeBrandName((ai&&ai.guide&&ai.guide.clientName)||(ai&&ai.brand&&ai.brand.name)||'');
+      if(nm) brand.name=nm;
+    }catch(e){ /* the reader runs on your live site; offline we keep the current name */ }
+  }
 }
 /* ── read the actual pixels so the intake can reason about each logo ── */
 async function analyzeAsset(url){
