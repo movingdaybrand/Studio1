@@ -1297,6 +1297,14 @@ function safeBrandName(n){           // a name we'll actually show: tidied, and 
   const c=cleanBrandName(n);
   return (c && !looksLikeFileName(c)) ? c : '';
 }
+function ensureBrandName(){          // the Brand Home must never render nameless — derive from a logo, else a clean default
+  const cur=String(brand.name||'').trim();
+  if(cur && !looksLikeFileName(cur)) return cur;            // a real name → leave it exactly as set
+  const pick=(brand.logos||[]).find(l=>l&&(l.role==='primaryLogo'||l.role==='wordmark')) || (brand.logos||[])[0];
+  const fromLogo=pick?safeBrandName(pick.name):'';
+  brand.name = fromLogo || 'Your Brand';
+  return brand.name;
+}
 function looksGenericTag(t){         // suppress Moving-Day/AI filler so the client guide stays theirs
   if(!t) return false;
   return /prepared brand package|organized from the files|files provided|brand package organized/i.test(String(t));
@@ -2498,6 +2506,7 @@ function restoreBrand(snap){
   brand.environmentProfile=snap.environmentProfile||null; brand.signature=snap.signature||null;
   assignRoles(); projectWorkspaceState();
   if(brand.name||brand.logos.length||brand.photos.length||brand.colors.length){
+    ensureBrandName();       // a saved session with a blank name still shows something real
     setStatus('Welcome back'+(brand.name?', '+brand.name:'')+' — your guide is saved.');
     applyBrandHome();
     if(currentRoom && room.classList.contains('show')) openRoom(currentRoom);
@@ -2598,6 +2607,7 @@ async function importFromExperience(){
   if(!(brand.name||brand.logos.length||brand.photos.length||brand.colors.length)) return false;
   try{ await analyzeAssets(brand.logos.concat(brand.photos)); }catch(e){ console.warn('[brand-home] analyzeAssets skipped:',e); }
   try{ assignRoles(); brand.logos.sort((x,y)=>((y.role==='primaryLogo')-(x.role==='primaryLogo'))); }catch(e){}
+  ensureBrandName();         // never move in nameless, even from an old or hand-built handoff
   try{ projectWorkspaceState(); }catch(e){ console.warn('[brand-home] project skipped:',e); }
   try{ applyBrandHome(); }catch(e){ console.warn('[brand-home] applyBrandHome skipped:',e); }
   saveBrand();               // the brand persists no matter what rendering did
