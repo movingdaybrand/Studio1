@@ -1839,9 +1839,11 @@ function applyBrandHome(){
     const logo=document.getElementById('homeLogo'); if(logo) logo.style.display='none';
   }
   applyHomeColor();          // reset to the calm base first (also drops deep-immerse)
-  if(immerseOn()){ if(deepOn()) applyBrandImmersionDeep(); else applyBrandImmersion(); }   // submerge: deep (dark) or light
-  else applyAmbientBrandLight();           // …or just a whisper of brand in the light
-  if(brand.colors.length && atmosphereOn()) applyEnvironmentProfile(buildEnvironmentProfile());   // atmosphere: light temperature · glass · motion
+  try{
+    if(immerseOn()){ if(deepOn()) applyBrandImmersionDeep(); else applyBrandImmersion(); }   // submerge: deep (dark) or light
+    else applyAmbientBrandLight();           // …or just a whisper of brand in the light
+    if(brand.colors.length && atmosphereOn()) applyEnvironmentProfile(buildEnvironmentProfile());   // atmosphere: light · glass · motion
+  }catch(e){ console.warn('[brand-home] environment skipped:', e); }   // atmosphere must never block the brand loading
   applyDestinations();       // plain room subtitles, no eyebrows
   renderPrepared();          // quiet "already prepared" line
   if(brand.colors.length) applyPaletteVars(brand.colors);   // brand colours only in the Guide doc
@@ -2301,7 +2303,7 @@ const SAVE_DB='mdBrandHomeSave', SAVE_STORE='brand', SAVE_KEY='current';
 function _db(){return new Promise((res,rej)=>{ if(typeof indexedDB==='undefined') return rej(new Error('no idb')); const r=indexedDB.open(SAVE_DB,1); r.onupgradeneeded=()=>{ try{r.result.createObjectStore(SAVE_STORE);}catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });}
 function saveBrand(){
   const snap={name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type,
-    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null,designStrategy:brand.designStrategy||null};
+    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null,designStrategy:brand.designStrategy||null,environmentProfile:brand.environmentProfile||null,signature:brand.signature||null};
   if(!snap.name && !snap.logos.length && !snap.photos.length && !(snap.colors&&snap.colors.length)) return;
   _db().then(db=>{ try{ db.transaction(SAVE_STORE,'readwrite').objectStore(SAVE_STORE).put(snap,SAVE_KEY); }catch(e){} })
        .catch(()=>{ try{ localStorage.setItem('mdBrandHomeSaveLight', JSON.stringify({name:snap.name,tagline:snap.tagline,category:snap.category,colors:snap.colors,type:snap.type,colorSystem:snap.colorSystem,typeSystem:snap.typeSystem,logos:snap.logos.slice(0,3),photos:[],docs:snap.docs})); }catch(e){} });
@@ -2318,6 +2320,7 @@ function restoreBrand(snap){
   brand.colorSystem=snap.colorSystem||null; brand.typeSystem=snap.typeSystem||null;
   brand.personality=snap.personality||null; brand.guidePlan=snap.guidePlan||null; brand.brandHomeImprovements=snap.brandHomeImprovements||null;
   brand.brandWorld=snap.brandWorld||null; brand.designStrategy=snap.designStrategy||null;
+  brand.environmentProfile=snap.environmentProfile||null; brand.signature=snap.signature||null;
   assignRoles(); projectWorkspaceState();
   if(brand.name||brand.logos.length||brand.photos.length||brand.colors.length){
     setStatus('Welcome back'+(brand.name?', '+brand.name:'')+' — your guide is saved.');
@@ -2398,6 +2401,7 @@ async function importFromExperience(){
     if(dna.guidePlan) brand.guidePlan=dna.guidePlan;
     if(dna.brandWorld) brand.brandWorld=dna.brandWorld;
     if(dna.designStrategy) brand.designStrategy=dna.designStrategy;
+    if(dna.environmentProfile) brand.environmentProfile=dna.environmentProfile;   // Concierge's atmosphere, if present
     if(Array.isArray(dna.brandHomeImprovements)) brand.brandHomeImprovements=dna.brandHomeImprovements;
     if(dna.personality) brand.personality=dna.personality;
     if(dna.visualDirection) brand.visualDirection=dna.visualDirection;
@@ -2415,12 +2419,11 @@ async function importFromExperience(){
     });
   }
   if(!(brand.name||brand.logos.length||brand.photos.length||brand.colors.length)) return false;
-  await analyzeAssets(brand.logos.concat(brand.photos));
-  assignRoles();
-  brand.logos.sort((x,y)=>((y.role==='primaryLogo')-(x.role==='primaryLogo')));
-  projectWorkspaceState();
-  applyBrandHome();
-  saveBrand();
+  try{ await analyzeAssets(brand.logos.concat(brand.photos)); }catch(e){ console.warn('[brand-home] analyzeAssets skipped:',e); }
+  try{ assignRoles(); brand.logos.sort((x,y)=>((y.role==='primaryLogo')-(x.role==='primaryLogo'))); }catch(e){}
+  try{ projectWorkspaceState(); }catch(e){ console.warn('[brand-home] project skipped:',e); }
+  try{ applyBrandHome(); }catch(e){ console.warn('[brand-home] applyBrandHome skipped:',e); }
+  saveBrand();               // the brand persists no matter what rendering did
   await bridgeClear(); try{ localStorage.removeItem(BRAND_DNA_KEY); }catch(e){}
   const n=brand.logos.length+brand.photos.length+brand.docs.length;
   setStatus((brand.name?brand.name+' moved in from your intake':'Your brand moved in from intake')+(n?` — ${n} file${n===1?'':'s'} placed.`:'.'));
