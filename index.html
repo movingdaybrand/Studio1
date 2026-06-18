@@ -102,20 +102,20 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .home-veil .hv-mark svg{width:100%;height:auto;display:block;}
 .home-veil .hv-mark svg path{fill:#ece6d8;}
 .home-veil.lift{opacity:0;transform:scale(1.06);pointer-events:none;}
-body.entering .env{opacity:0;transform:scale(.986);}
-body.entering.reveal .env{opacity:1;transform:none;transition:opacity 1s cubic-bezier(.22,1,.36,1),transform 1.2s cubic-bezier(.22,1,.36,1);}
-body.entering .home-head{opacity:0;transform:translateY(10px);}
-body.entering.reveal .home-head{opacity:1;transform:none;transition:opacity .85s ease .25s,transform .95s cubic-bezier(.22,1,.36,1) .25s;}
-body.entering #homePrepared{opacity:0;}
-body.entering.reveal #homePrepared{opacity:1;transition:opacity .8s ease .55s;}
-body.entering .room-card{opacity:0;transform:translateY(13px);}
-body.entering.reveal .room-card{opacity:1;transform:none;transition:opacity .72s ease,transform .82s cubic-bezier(.22,1,.36,1);}
-body.entering.reveal .room-card:nth-child(1){transition-delay:.55s;}
-body.entering.reveal .room-card:nth-child(2){transition-delay:.63s;}
-body.entering.reveal .room-card:nth-child(3){transition-delay:.71s;}
-body.entering.reveal .room-card:nth-child(4){transition-delay:.79s;}
-body.entering.reveal .room-card:nth-child(5){transition-delay:.87s;}
-body.entering.reveal .room-card:nth-child(6){transition-delay:.95s;}
+body.md-arrive .env{opacity:0;transform:scale(.986);}
+body.md-arrive.md-arrive-go .env{opacity:1;transform:none;transition:opacity 1s cubic-bezier(.22,1,.36,1),transform 1.2s cubic-bezier(.22,1,.36,1);}
+body.md-arrive .home-head{opacity:0;transform:translateY(10px);}
+body.md-arrive.md-arrive-go .home-head{opacity:1;transform:none;transition:opacity .85s ease .25s,transform .95s cubic-bezier(.22,1,.36,1) .25s;}
+body.md-arrive #homePrepared{opacity:0;}
+body.md-arrive.md-arrive-go #homePrepared{opacity:1;transition:opacity .8s ease .55s;}
+body.md-arrive .room-card{opacity:0;transform:translateY(13px);}
+body.md-arrive.md-arrive-go .room-card{opacity:1;transform:none;transition:opacity .72s ease,transform .82s cubic-bezier(.22,1,.36,1);}
+body.md-arrive.md-arrive-go .room-card:nth-child(1){transition-delay:.55s;}
+body.md-arrive.md-arrive-go .room-card:nth-child(2){transition-delay:.63s;}
+body.md-arrive.md-arrive-go .room-card:nth-child(3){transition-delay:.71s;}
+body.md-arrive.md-arrive-go .room-card:nth-child(4){transition-delay:.79s;}
+body.md-arrive.md-arrive-go .room-card:nth-child(5){transition-delay:.87s;}
+body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .prep-item{display:flex;flex-direction:column;align-items:center;gap:3px;}
 .prep-k{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-faint);}
 .prep-v{font-size:.86rem;color:var(--ink-soft);font-weight:300;letter-spacing:.01em;}
@@ -454,7 +454,7 @@ body.entering.reveal .room-card:nth-child(6){transition-delay:.95s;}
     if (!arriving) return;                                  // not an intake → ordinary load
     if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     var b = document.body;
-    b.classList.add('entering');
+    b.classList.add('md-arrive');
     var v = document.createElement('div');
     v.className = 'home-veil';
     v.innerHTML = '<div class="hv-mark"><svg viewBox="596 85 178 122" xmlns="http://www.w3.org/2000/svg">' +
@@ -463,10 +463,10 @@ body.entering.reveal .room-card:nth-child(6){transition-delay:.95s;}
       '</svg></div>';
     b.appendChild(v);
     var done = false;
-    function cleanup(){ if (v && v.parentNode) v.parentNode.removeChild(v); b.classList.remove('entering','reveal'); }
+    function cleanup(){ if (v && v.parentNode) v.parentNode.removeChild(v); b.classList.remove('md-arrive','md-arrive-go'); }
     function reveal(){
       if (done) return; done = true;
-      b.classList.add('reveal');
+      b.classList.add('md-arrive-go');
       v.classList.add('lift');
       setTimeout(cleanup, 2400);
       window.removeEventListener('pointerdown', skip, true);
@@ -477,7 +477,7 @@ body.entering.reveal .room-card:nth-child(6){transition-delay:.95s;}
     else document.addEventListener('DOMContentLoaded', start);
     window.addEventListener('pointerdown', skip, true);
     setTimeout(reveal, 4200);                                 // hard safety: never strand the veil
-  } catch (e) { try { document.body.classList.remove('entering'); var lv=document.querySelector('.home-veil'); if(lv) lv.remove(); } catch(_){} }
+  } catch (e) { try { document.body.classList.remove('md-arrive','md-arrive-go'); var lv=document.querySelector('.home-veil'); if(lv) lv.remove(); } catch(_){} }
 })();
 </script>
 <div class="env"><div class="glasspane">
@@ -678,10 +678,11 @@ function renderActiveRoom(){
   const key=currentRoom, r=ROOMS[key]; if(!r) return;
   roomBody.innerHTML=r.html; roomTitle.innerHTML=r.title; roomKicker.textContent=r.kicker;
   if(roomDesc) roomDesc.textContent=(ROOM_META[key]&&ROOM_META[key].desc)||'';
-  if(key==='assets') renderAssetsRoom();
-  if(key==='deliverables') renderApplications(roomBody);
-  enableEditing(roomBody); applyUploads(roomBody); applyFounder(roomBody);
-  if(key==='founder') refreshFounderState();
+  const g=(label,fn)=>{ try{ fn(); }catch(e){ console.warn('[brand-home] room render ('+label+') failed:', e); } };
+  if(key==='assets') g('assets',renderAssetsRoom);
+  if(key==='deliverables') g('deliverables',()=>renderApplications(roomBody));
+  g('edit',()=>enableEditing(roomBody)); g('uploads',()=>applyUploads(roomBody)); g('founder',()=>applyFounder(roomBody));
+  if(key==='founder') g('founderState',refreshFounderState);
 }
 function openRoom(key){
   if(!ROOMS[key]) return;
@@ -1275,22 +1276,25 @@ async function fillHeroLogo(root){
 }
 function applyUploads(root){
   if(!(brand.logos.length||brand.photos.length||brand.name||brand.colors.length)) return;   // nothing moved in yet
-  if(brand.name) root.querySelectorAll('.id-name,.gd-title').forEach(e=>e.textContent=brand.name);
-  applyNameMarks(root);
-  const tag = looksGenericTag(brand.tagline) ? '' : brand.tagline;
-  root.querySelectorAll('.id-tag,.gd-tag').forEach(e=>{ if(tag) e.textContent=tag; else if(brand.name){ e.textContent=''; e.style.display='none'; } });
+  const step=(fn)=>{ try{ fn(); }catch(e){ console.warn('[brand-home] live-update step failed:', e); } };
+  if(brand.name) step(()=>root.querySelectorAll('.id-name,.gd-title').forEach(e=>e.textContent=brand.name));
+  step(()=>applyNameMarks(root));
+  step(()=>{
+    const tag = looksGenericTag(brand.tagline) ? '' : brand.tagline;
+    root.querySelectorAll('.id-tag,.gd-tag').forEach(e=>{ if(tag) e.textContent=tag; else if(brand.name){ e.textContent=''; e.style.display='none'; } });
+  });
   if(brand.category){ const m=root.querySelector('[data-k="category"] span'); if(m) m.textContent=brand.category; }
-  if(brand.colors.length){ applyPaletteVars(brand.colors); paintSwatches(root); }
+  if(brand.colors.length){ step(()=>applyPaletteVars(brand.colors)); step(()=>paintSwatches(root)); }   // colours first, never blocked by later steps
   { const n=(brand.logos.length||0)+(brand.photos.length||0)+(brand.docs.length||0);
     const a=root.querySelector('[data-k="assets"] span'); if(a) a.textContent=n?(n+(n===1?' file':' files')):'\u2014';
     const p=root.querySelector('[data-k="prepared"] span'); if(p){ try{ p.textContent=new Date().toLocaleDateString(undefined,{month:'long',year:'numeric'}); }catch(e){} } }
-  applyType(root); applyTypeProse(root); applyDeliverables(root);
-  placeLogos(root); renderLogoSystem(root); fillHeroLogo(root);
-  renderMockups(root);
-  let pi=0;
-  root.querySelectorAll('.gframe:not(.glogo),.gd-mock').forEach(fr=>{ const P=brand.photos[pi]; if(P){ setFrameImage(fr,P.url,false,P.id); pi++; } });
-  if(brand.colors.length){ legibilityFix(root); applyMockups(root); }
-  applyGuideSections(root);
+  step(()=>applyType(root)); step(()=>applyTypeProse(root)); step(()=>applyDeliverables(root));
+  step(()=>placeLogos(root)); step(()=>renderLogoSystem(root)); step(()=>fillHeroLogo(root));
+  step(()=>renderMockups(root));
+  step(()=>{ let pi=0;
+    root.querySelectorAll('.gframe:not(.glogo),.gd-mock').forEach(fr=>{ const P=brand.photos[pi]; if(P){ setFrameImage(fr,P.url,false,P.id); pi++; } }); });
+  if(brand.colors.length){ step(()=>legibilityFix(root)); step(()=>applyMockups(root)); }
+  step(()=>applyGuideSections(root));
 }
 function pickMark(...roles){
   for(const r of roles){ const m=brand.logos.find(l=>l.role===r); if(m) return m; }
