@@ -1363,8 +1363,9 @@ function logoForGround(dark){          // use the user's B/W variations when the
 }
 function renderMockups(root){
   const box=root.querySelector('[data-inuse]'); if(!box) return;
-  const dl=logoForGround(false); if(!dl) return;            // no logo yet → keep the default tiles
-  const wl=logoForGround(true)||dl;
+  const pm=pickMark('primaryLogo','wordmark','secondaryLogo');
+  const dl=pm?pm.url:''; if(!dl) return;            // always the full-colour primary — no B/W swap
+  const wl=dl;
   const nm=esc(brand.name||'Brand');
   const tag=esc((looksGenericTag(brand.tagline)?'':brand.tagline)||'');
   const cfg=[
@@ -1431,7 +1432,9 @@ async function exportApplication(kind, fmt){
   const s=APP_SPECS[kind]; if(!s) return;
   const dark=cssVar('--b1','#1c2b22'), deep=cssVar('--b5',dark), accent=cssVar('--b3','#888'), mid=cssVar('--b4',dark);
   const nm=brand.name||'Brand', tg=(looksGenericTag(brand.tagline)?'':brand.tagline)||'', email='hello@'+brandSlug()+'.com';
-  const colorLogoUrl=await exportLogoFor('color'), plainLogoUrl=await exportLogoFor('plain');
+  const pm0=pickMark('primaryLogo','wordmark','secondaryLogo');
+  const fullColorUrl=pm0?pm0.url:'';
+  const colorLogoUrl=fullColorUrl, plainLogoUrl=fullColorUrl;   // always the full-colour primary on every application
   if(fmt==='svg'){
     const pm=pickMark('primaryLogo','wordmark','secondaryLogo')||{};
     const dlData=await imgToDataURL(plainLogoUrl,/svg/i.test(pm.ext||''));
