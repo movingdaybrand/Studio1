@@ -773,10 +773,11 @@ function recolorLogo(url, mode, isSvg){          // recolor opaque pixels, keep 
             if(p[i+3]===0) continue;
             if(range<24){                                   // single colour → solid fill, as before
               const v = mode==='black' ? 0 : 255; p[i]=p[i+1]=p[i+2]=v;
-            } else {                                         // tonal mark → keep relative luminance so highlights read
+            } else {                                         // tonal mark → two-tone: shadows one colour, highlights the opposite
               const L=0.299*p[i]+0.587*p[i+1]+0.114*p[i+2];
               const t=(L-lo)/range;                          // 0 = darkest part, 1 = brightest highlight
-              const v = mode==='black' ? Math.round(t*110) : Math.round(150 + t*105);
+              const hi = t>=0.5;                             // upper half = highlight, lower half = shadow
+              const v = (mode==='black') ? (hi?255:0) : (hi?0:255);   // black → shadows black / highlights white · white → the inverse
               p[i]=p[i+1]=p[i+2]=v;
             }
           }
@@ -794,11 +795,11 @@ async function makeLogoVariations(id){
   const base=(a.name||'logo').replace(/\.[a-z0-9]+$/i,'');
   const isSvg=/svg/i.test(a.ext||'') || /^data:image\/svg/i.test(a.url);
   let made=0;
-  for(const [mode,label] of [['black','Black'],['white','White'],['grey','Greyscale']]){
+  for(const [mode,label] of [['black','Black'],['white','White']]){
     const url=await recolorLogo(a.url, mode, isSvg);
     if(url){ brand.logos.push({id:newId(),name:base+' — '+label+'.png',url,ext:'png',role:'',variant:mode}); made++; }
   }
-  updateWorkspaceState({},{source:'assets',announce: made ? 'Black, white, and greyscale variations added.' : 'Couldn’t read that image for variations.'});
+  updateWorkspaceState({},{source:'assets',announce: made ? 'Black and white variations added.' : 'Couldn’t read that image for variations.'});
 }
 function isLogoFrame(f){return f.classList.contains('contain')||!!f.querySelector('.wm,.wm-doc,.wordmark-mini,.mono');}
 function editorActive(){ return !!founderState['Editor mode']; }
