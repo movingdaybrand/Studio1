@@ -9,11 +9,15 @@ The app may also provide a local preparation report before brand understanding.
 Use that local preparation report as trusted context for:
 - file counts
 - duplicate removal
-- file categories
+- file categories and per-asset confidence
 - extensions
-- image dimensions
+- image dimensions and aspect ratios
 - transparent background detection
-- prepared asset set
+- the local color reading (each asset's dominant colours, and report.localPalette)
+- the cleaned-up display names the app assigned to messy files
+- the prepared asset set
+
+The report includes a "foundation" object (mainLogo, mainIcon, mainWordmark, guideline, typography) — the app's best local picks. Treat these as the default choices and confirm them unless the visual evidence clearly points elsewhere. Weight the report's per-asset "confidence" when deciding which guesses to trust. Use report.localPalette as the starting point for the colour system, refining it rather than inventing unrelated colours. When you refer to a file in any customer-facing text, use its cleaned display name, never the messy original filename.
 
 Your role is brand understanding, not file intake.
 
@@ -299,6 +303,7 @@ technical terms.
 
 Rules for these additional fields:
 - brandWorld is an environmental design system, not fantasy writing. Keep it premium, concrete, and design-directable. colorMapping hex values must come from the real palette; background/glass/glow stay LIGHT (the home is light-first), accent is the readable signature color, shadow is the deepest brand tone. Each destination keeps its fixed environmentName but gets a feeling and visualTreatment specific to THIS brand. If brand info is thin, derive a refined world from the available colors and files.
+- ALSO return a "designStrategy" object that tells the app how to design this brand's applications (business cards, social posts, banners) so the user never has to decide. Shape: "designStrategy": { "personality": "bold|refined|editorial|warm|classic|technical", "leadColor": "#rrggbb — the color that should lead dark/branded surfaces (usually the deepest or signature tone)", "accentColor": "#rrggbb — the pop/highlight color", "cardLayout": "centered|left|split", "postLayout": "badge|gradient|type", "corner": "round|sharp", "voice": "one short, confident, human sentence describing this brand's application style — no AI or technical language" }. Pick values that genuinely fit THIS brand's character and palette; if info is thin, derive a tasteful strategy from the colors.
 - colorSystem hex values must come from the real uploaded colors (reuse palette where possible). background defaults to a clean near-white and text to a legible dark, unless the brand clearly dictates otherwise. Never wash the whole guide in one color — the page stays light; brand color lives in accents, hero grounds, and swatches.
 - Only set guidePlan.sections.include = true for sections actually supported by the prepared assets or clear brand context: add Photography only when photography exists, Packaging only when packaging files exist, Apparel only for apparel, Athletics only for sports brands, Environmental Graphics only for signage/vehicle wraps, Email Signatures only when present. Always include Logo System, Color Palette, Typography, Usage, and Files. NEVER include every possible section.
 - personality, voice, positioning, and visualDirection must be specific to THIS brand, never generic boilerplate.
@@ -733,6 +738,48 @@ function normalizeBrandWorld(parsed){
   return out;
 }
 
+/* ── designStrategy: how to design this brand's applications (always present, derived if the model is thin) ── */
+const DS_PERSONALITY=["bold","refined","editorial","warm","classic","technical"];
+const DS_CARD=["centered","left","split"], DS_POST=["badge","gradient","type"], DS_CORNER=["round","sharp"];
+const DS_VOICE={
+  bold:"Bold and high-contrast — built to be seen.",
+  refined:"Quiet, refined, and confident — nothing shouts.",
+  editorial:"Editorial and considered — type-led and calm.",
+  warm:"Warm and approachable — friendly without trying too hard.",
+  classic:"Clean and timeless — the kind of look that lasts.",
+  technical:"Precise and modern — structured and sharp."
+};
+function buildFallbackDesignStrategy(parsed){
+  const cols=((parsed && (parsed.colors||parsed.palette)) || []).map(c=>_normHex(c && c.hex)).filter(Boolean);
+  if(!cols.length) return { personality:"refined", leadColor:"#14291f", accentColor:"#2c5a3c", cardLayout:"centered", postLayout:"gradient", corner:"round", voice:DS_VOICE.refined };
+  const bySat=[...cols].sort((a,b)=>_sat(b)-_sat(a)), byLum=[...cols].sort((a,b)=>_lum(a)-_lum(b));
+  const sig=bySat[0], deepest=byLum[0];
+  const sat=_sat(sig), contrast=_lum(byLum[byLum.length-1])-_lum(byLum[0]);
+  let personality = (sat>0.55 && contrast>120) ? "bold" : (sat<0.25 ? "refined" : "classic");
+  const leadColor = _lum(deepest)<92 ? deepest : _darken(sig,0.6);
+  let accent=bySat.find(c=>c!==leadColor && _sat(c)>0.25) || sig;
+  if(_lum(accent)>200) accent=_darken(accent,0.3);
+  const cardLayout = personality==="bold" ? "left" : "centered";
+  const postLayout = personality==="bold" ? "badge" : "gradient";
+  const corner = personality==="bold" ? "sharp" : "round";
+  return { personality, leadColor, accentColor:accent, cardLayout, postLayout, corner, voice:DS_VOICE[personality] };
+}
+function normalizeDesignStrategy(parsed){
+  const fb=buildFallbackDesignStrategy(parsed);
+  const ds=(parsed && parsed.designStrategy && typeof parsed.designStrategy==="object") ? parsed.designStrategy : {};
+  const pick=(v,allow,def)=> (typeof v==="string" && allow.includes(v.trim().toLowerCase())) ? v.trim().toLowerCase() : def;
+  const out={
+    personality: pick(ds.personality,DS_PERSONALITY,fb.personality),
+    leadColor: _normHex(ds.leadColor) || fb.leadColor,
+    accentColor: _normHex(ds.accentColor) || fb.accentColor,
+    cardLayout: pick(ds.cardLayout,DS_CARD,fb.cardLayout),
+    postLayout: pick(ds.postLayout,DS_POST,fb.postLayout),
+    corner: pick(ds.corner,DS_CORNER,fb.corner),
+    voice: (typeof ds.voice==="string" && ds.voice.trim()) ? ds.voice.trim().slice(0,120) : fb.voice
+  };
+  return out;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -1002,6 +1049,8 @@ export default async function handler(req, res) {
 
   // brandWorld is always present and complete — derived from the palette if the model was thin.
   parsed.brandWorld = normalizeBrandWorld(parsed);
+  // designStrategy tells the app how to design this brand's applications — always present.
+  parsed.designStrategy = normalizeDesignStrategy(parsed);
 
   return res.status(200).json(parsed);
 }
