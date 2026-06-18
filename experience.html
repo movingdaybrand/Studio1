@@ -4216,6 +4216,40 @@ function getImageMetadata(file) {
   });
 }
 
+// ── Colour system is EXTRACTED, never inferred: real hex from the brand's marks, plus black & white, each named.
+function hexToRgb(h){ h=String(h||'').replace('#',''); if(h.length===3) h=h.split('').map(c=>c+c).join(''); const n=parseInt(h||'0',16)||0; return [(n>>16)&255,(n>>8)&255,n&255]; }
+function colDist(a,b){ const x=hexToRgb(a),y=hexToRgb(b); return Math.abs(x[0]-y[0])+Math.abs(x[1]-y[1])+Math.abs(x[2]-y[2]); }
+function nameColor(hex){
+  const [r,g,b]=hexToRgb(hex);
+  const mx=Math.max(r,g,b), mn=Math.min(r,g,b), l=(mx+mn)/2/255, d=(mx-mn)/255, s=mx===0?0:d/(mx/255);
+  if(mx<=26) return 'Black'; if(mn>=234) return 'White';
+  if(d<0.10) return l<0.3?'Charcoal':(l<0.6?'Grey':'Light Grey');
+  const R=r/255,G=g/255,B=b/255; let h;
+  if(mx/255===R) h=((G-B)/d)%6; else if(mx/255===G) h=(B-R)/d+2; else h=(R-G)/d+4;
+  h=Math.round(h*60); if(h<0) h+=360;
+  if(h>=35&&h<65&&l>0.8) return 'Cream';
+  let fam;
+  if(h<15||h>=345) fam='Red'; else if(h<40) fam='Orange'; else if(h<65) fam='Gold';
+  else if(h<90) fam='Lime'; else if(h<160) fam='Green'; else if(h<195) fam='Teal';
+  else if(h<255) fam='Blue'; else if(h<290) fam='Violet'; else if(h<330) fam='Magenta'; else fam='Pink';
+  if(fam==='Green'){ if(l<0.32) fam='Forest'; else if(l>0.7&&s<0.5) fam='Sage'; }
+  if(fam==='Blue'&&l<0.3) fam='Navy';
+  const tone = (l<0.32 && !['Forest','Navy'].includes(fam)) ? 'Deep ' : (l>0.74 && !['Sage','Cream'].includes(fam) ? 'Light ' : '');
+  return (tone+fam).trim();
+}
+function buildColorSystem(assetsMeta){
+  const marks = (assetsMeta||[]).filter(a => ['Logos','Icons','Wordmarks'].includes(a.category));
+  const count = new Map();
+  marks.forEach(a => (a.colors||[]).forEach(hex => { const k=String(hex||'').toLowerCase(); if(/^#?[0-9a-f]{3,6}$/.test(k)) count.set(k,(count.get(k)||0)+1); }));
+  const ranked = [...count.entries()].sort((x,y)=>y[1]-x[1]).map(e=>e[0]);
+  const picked=[];
+  ranked.forEach(hex=>{ if(!picked.some(p=>colDist(p,hex)<28)) picked.push(hex); });   // drop near-duplicate shades
+  const core = picked.slice(0,5).map(hex=>({ hex:(hex[0]==='#'?hex:'#'+hex).toUpperCase(), name:nameColor(hex), role:'brand' }));
+  return core.concat([                                   // black & white always included as standard variations
+    { hex:'#000000', name:'Black', role:'neutral' },
+    { hex:'#FFFFFF', name:'White', role:'neutral' }
+  ]);
+}
 function buildPreparationReport(preparedFiles, duplicateFiles, originalFiles, assetsMeta) {
   const counts = Object.fromEntries(categoryOrder().map(c => [c, 0]));
   assetsMeta.forEach(asset => { counts[asset.category] = (counts[asset.category] || 0) + 1; });
@@ -4227,9 +4261,10 @@ function buildPreparationReport(preparedFiles, duplicateFiles, originalFiles, as
   const typography = assetsMeta.find(a => a.category === 'Typography / Fonts') || null;
 
   const palCount = new Map();
-  assetsMeta.filter(a => ['Logos','Icons','Wordmarks','Photography'].includes(a.category))
+  assetsMeta.filter(a => ['Logos','Icons','Wordmarks'].includes(a.category))   // marks only — never photography
     .forEach(a => (a.colors || []).forEach(hex => palCount.set(hex, (palCount.get(hex) || 0) + 1)));
   const localPalette = [...palCount.entries()].sort((x, y) => y[1] - x[1]).slice(0, 6).map(([hex]) => hex);
+  const colorSystem = buildColorSystem(assetsMeta);   // real hex + black/white, named — not inferred
 
   return {
     createdAt: new Date().toISOString(),
@@ -4239,6 +4274,7 @@ function buildPreparationReport(preparedFiles, duplicateFiles, originalFiles, as
     duplicateFiles: duplicateFiles.map(file => ({ name: file.name, size: file.size, lastModified: file.lastModified })),
     categoryCounts: counts,
     localPalette,
+    colorSystem,
     renamedCount: assetsMeta.filter(a => a.renamed).length,
     assets: assetsMeta,
     foundation: { mainLogo, mainIcon, mainWordmark, guideline, typography },
@@ -5339,13 +5375,15 @@ btnMovein.addEventListener('click', event => {
       else logo = { state: 'mockup', asset: a };          // fell back to a photo/mockup
     }
 
-    // COLOURS
-    const palArr = (aiData?.palette || aiData?.colors || []).slice(0, 5);
-    const localArr = (report.localPalette || []).slice(0, 5).map(h => ({ hex: h }));
-    const swatches = palArr.length ? palArr : localArr;
-    let colors = { state: 'none' };
-    if (swatches.length >= 4) colors = { state: 'strong', swatches };
-    else if (swatches.length >= 1) colors = { state: 'tentative', swatches };
+    // COLOURS — taken straight from the marks (never inferred). Black & white always included.
+    const system = (report.colorSystem && report.colorSystem.length)
+      ? report.colorSystem
+      : buildColorSystem((report.assets) || []);
+    const brandCols = system.filter(s => s.role === 'brand');
+    let colors;
+    if (brandCols.length >= 3) colors = { state: 'strong', swatches: system };
+    else if (brandCols.length >= 1) colors = { state: 'tentative', swatches: system };
+    else colors = { state: 'mono', swatches: system };   // a black-and-white mark is itself the system
 
     // TYPOGRAPHY
     let typography = { state: 'none' };
@@ -5406,11 +5444,15 @@ btnMovein.addEventListener('click', event => {
     else
       cards.push({ key:'logo', title:'Primary Logo', preview:emptyPreview('No logo yet'), copy:"I haven't found a clear primary logo yet.", actions:[['add','Add logo']] });
 
-    // COLOURS — only when there's something real to show
+    // COLOURS — pulled straight from the marks, never inferred; black & white always included
+    const leadNames = (a.colors.swatches || []).filter(s => s.role === 'brand').slice(0, 3).map(s => s.name);
+    const nameList = leadNames.length ? leadNames.join(', ') : '';
     if (a.colors.state === 'strong')
-      cards.push({ key:'colors', title:'Color System', preview:dotsPreview(a.colors.swatches), copy:'These are the colours your brand uses most consistently.', actions:[['confirm','Confirm'],['adjust','Adjust']] });
+      cards.push({ key:'colors', title:'Color System', preview:dotsPreview(a.colors.swatches), copy:`Taken straight from your logo${nameList ? ' — ' + nameList : ''} — with black and white added.`, actions:[['confirm','Confirm'],['adjust','Adjust']] });
     else if (a.colors.state === 'tentative')
-      cards.push({ key:'colors', title:'Color System', preview:dotsPreview(a.colors.swatches), copy:'These are the colours I can see so far — we can refine them together.', actions:[['confirm','Confirm'],['adjust','Adjust']] });
+      cards.push({ key:'colors', title:'Color System', preview:dotsPreview(a.colors.swatches), copy:`The colour I read from your mark${nameList ? ' (' + nameList + ')' : ''}, with black and white. Add more art and I'll pull the rest.`, actions:[['confirm','Confirm'],['adjust','Adjust']] });
+    else
+      cards.push({ key:'colors', title:'Color System', preview:dotsPreview(a.colors.swatches), copy:'Your mark is black and white — so that is your colour system, exactly as drawn.', status:'Straight from your mark' });
 
     // TYPOGRAPHY — four honest states, no fake confirm
     if (a.typography.state === 'found')
@@ -5513,10 +5555,14 @@ btnMovein.addEventListener('click', event => {
   async function saveBrandDNA(){
     const d = (typeof aiData!=='undefined' && aiData) ? aiData : {};
     const guide = d.guide || {}; const brand = d.brand || {};
-    const rawPalette = d.palette || d.colors || [];
-    const colors = rawPalette.slice(0,5).map(c => ({
-      hex: (typeof normalizeHex==='function' ? normalizeHex(c.hex||c.value||c) : (c.hex||c.value||c)) || '#15140F',
-      name: c.name || 'Color'
+    const prep = (typeof preparationReport!=='undefined' && preparationReport) ? preparationReport : {};
+    const realSystem = (prep.colorSystem && prep.colorSystem.length)
+      ? prep.colorSystem
+      : (typeof buildColorSystem==='function' ? buildColorSystem(prep.assets||[]) : []);
+    const colors = realSystem.map(c => ({
+      hex: (typeof normalizeHex==='function' ? normalizeHex(c.hex) : c.hex) || c.hex,
+      name: c.name || 'Color',
+      role: c.role || 'brand'
     }));
     const typo = d.typography || {};
     const report = (typeof preparationReport!=='undefined' && preparationReport) ? preparationReport : {};
@@ -5550,7 +5596,7 @@ btnMovein.addEventListener('click', event => {
         body:    { name: typo.bodyFont    || (typo.body&&typo.body.name)    || '', usage: (typo.body&&typo.body.usage)    || '' }
       },
       assets: assetsSummary,
-      colorSystem: d.colorSystem || null,
+      colorSystem: realSystem.length ? realSystem : (d.colorSystem || null),
       typographySystem: d.typographySystem || null,
       guidePlan: d.guidePlan || null,
       brandHomeImprovements: Array.isArray(d.brandHomeImprovements) ? d.brandHomeImprovements : [],
