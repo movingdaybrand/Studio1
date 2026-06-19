@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     return;
   }
   try {
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    if (!process.env.BLOB_READ_WRITE_TOKEN && !process.env.BLOB_STORE_ID) {
       res.status(501).json({ error: 'Blob storage is not configured for this project yet.' });
       return;
     }
