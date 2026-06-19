@@ -1,13 +1,9 @@
-// api/publish.js — uploads a built Brand Guide HTML page to Vercel Blob and returns a public, shareable URL.
+// api/publish.js — stores a built Brand Guide HTML in Vercel Blob and returns a *viewer* link.
 //
-// Setup (one time):
-//   1) npm install @vercel/blob
-//   2) In the Vercel dashboard → Storage → create a Blob store (this auto-adds the
-//      BLOB_READ_WRITE_TOKEN environment variable to the project).
-//   3) Redeploy.
+// Vercel Blob force-downloads HTML (content-disposition: attachment), so we never share the raw
+// blob URL. Instead we return a link to /api/guide, which re-serves the page inline so it renders.
 //
-// The client posts { html, slug, id }. We write to a stable path (guides/<slug>-<id>.html)
-// with allowOverwrite, so re-publishing the same brand updates the SAME link.
+// Setup (one time): npm install @vercel/blob, create a PUBLIC Blob store in Vercel and connect it.
 
 import { put } from '@vercel/blob';
 
@@ -16,7 +12,6 @@ export default async function handler(req, res) {
     res.status(405).json({ error: 'Method not allowed' });
     return;
   }
-
   try {
     let body = req.body;
     if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
@@ -27,7 +22,6 @@ export default async function handler(req, res) {
       return;
     }
     if (!process.env.BLOB_READ_WRITE_TOKEN && !process.env.BLOB_STORE_ID) {
-      // No Blob store connected yet — tell the client so it can fall back to a download.
       res.status(501).json({ error: 'Blob storage is not configured for this project yet.' });
       return;
     }
@@ -36,14 +30,19 @@ export default async function handler(req, res) {
       .replace(/[^a-z0-9-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'brand';
     const safeId = String(id || Math.random().toString(36).slice(2, 10))
       .replace(/[^a-z0-9]+/gi, '').slice(0, 16) || 'guide';
-    const pathname = `guides/${safeSlug}-${safeId}.html`;
+    const guideId = `${safeSlug}-${safeId}`;
 
-    const { url } = await put(pathname, html, {
+    await put(`guides/${guideId}.html`, html, {
       access: 'public',
       contentType: 'text/html; charset=utf-8',
       addRandomSuffix: false,   // stable path → the shared link stays the same on re-publish
-      allowOverwrite: true,     // re-publishing updates the existing page
+      allowOverwrite: true,
     });
+
+    // Hand back a viewer link on this deployment's own domain (renders inline; doesn't download).
+    const proto = String(req.headers['x-forwarded-proto'] || 'https').split(',')[0];
+    const host = req.headers.host;
+    const url = `${proto}://${host}/api/guide?g=${guideId}`;
 
     res.status(200).json({ url });
   } catch (err) {
@@ -51,5 +50,4 @@ export default async function handler(req, res) {
   }
 }
 
-// The guide page inlines the logo as a data URL, so allow a larger body (still under Vercel's ~4.5MB request cap).
 export const config = { api: { bodyParser: { sizeLimit: '4mb' } } };
