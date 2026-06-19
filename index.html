@@ -553,14 +553,6 @@ body.deep-immerse{
   --shadow-hover:0 0 0 1px rgba(255,255,255,.16),0 16px 42px rgba(0,0,0,.46);
 }
 body.deep-immerse .vaultcard,body.deep-immerse .frow,body.deep-immerse .asset-card,
-/* ── Hosted (published customer) Brand Home: read-only, no founder/publish controls ── */
-body.hosted-mode .movein,
-body.hosted-mode .room-card[data-open="founder"],
-body.hosted-mode .founder-pill,
-body.hosted-mode [data-deliv="html"],
-body.hosted-mode [data-deliv="save"],
-body.hosted-mode [data-deliv="versions"],
-body.hosted-mode [data-deliv="guides"]{display:none!important;}
 body.deep-immerse .asset-thumb.doc,body.deep-immerse .lib-item,body.deep-immerse .apptool,
 body.deep-immerse .vframe,body.deep-immerse .primary-card,body.deep-immerse .sroom,
 body.deep-immerse .back,body.deep-immerse .movein-btn,body.deep-immerse .founder-pill,
@@ -677,8 +669,8 @@ body.deep-immerse .id-primary .wm small{color:rgba(243,239,230,.62)!important;}
 
 <div class="pub-overlay" id="publishModal" hidden>
   <div class="pub-panel">
-    <div class="pub-head"><span>Your Brand Home is live</span><button class="pub-x" id="pubClose" aria-label="Close">&times;</button></div>
-    <p class="pub-sub">Anyone with this link gets the full Brand Home — logos, colours, type and assets, ready to use. Re-publish anytime to update it in place.</p>
+    <div class="pub-head"><span>Your guide is live</span><button class="pub-x" id="pubClose" aria-label="Close">&times;</button></div>
+    <p class="pub-sub">Anyone with this link can view your brand guide. Re-publish anytime to update it in place.</p>
     <div class="pub-linkrow"><input class="pub-link" id="pubLink" readonly spellcheck="false"><button class="pub-copy" id="pubCopy">Copy</button></div>
     <a class="pub-open" id="pubOpen" target="_blank" rel="noopener">Open in new tab →</a>
   </div>
@@ -686,7 +678,7 @@ body.deep-immerse .id-primary .wm small{color:rgba(243,239,230,.62)!important;}
 
 <div class="pub-overlay" id="guidesModal" hidden>
   <div class="pub-panel guides-panel">
-    <div class="pub-head"><span>Published links</span><button class="pub-x" id="guidesClose" aria-label="Close">&times;</button></div>
+    <div class="pub-head"><span>Saved guides</span><button class="pub-x" id="guidesClose" aria-label="Close">&times;</button></div>
     <div class="guides-list" id="guidesList"></div>
   </div>
 </div>
@@ -797,10 +789,10 @@ const ROOMS={
   deliverables:{kicker:'Deliverables',title:'Prepare the handoff.',html:`
     <div class="vault vault-2">
       <button class="vaultcard primary" data-deliv="zip"><span class="vic">Brand package</span><b>Download Package</b><i>Guide, logos, colours &amp; type — everything, zipped</i></button>
-      <button class="vaultcard" data-deliv="html"><span class="vic">Web</span><b>Publish Brand Home</b><i>A live, shareable link</i></button>
+      <button class="vaultcard" data-deliv="html"><span class="vic">Web</span><b>Publish Guide</b><i>A live, shareable link</i></button>
     </div>
     <div class="deliv-more">
-      <button class="deliv-link" data-deliv="guides">Published links</button>
+      <button class="deliv-link" data-deliv="guides">Saved guides</button>
       <button class="deliv-link" data-deliv="pdf">Download PDF</button>
       <button class="deliv-link" data-deliv="palette">Colour styles</button>
       <button class="deliv-link" data-deliv="save">Save working file</button>
@@ -981,7 +973,7 @@ async function makeLogoVariations(id){
   updateWorkspaceState({},{source:'assets',announce: made ? 'Black and white variations added.' : 'Couldn’t read that image for variations.'});
 }
 function isLogoFrame(f){return f.classList.contains('contain')||!!f.querySelector('.wm,.wm-doc,.wordmark-mini,.mono');}
-function editorActive(){ return !window.__HOSTED_MODE__ && !!founderState['Editor mode']; }
+function editorActive(){ return !!founderState['Editor mode']; }
 function enableEditing(root){
   const on=editorActive();
   root.classList.toggle('editing', on);
@@ -1310,26 +1302,6 @@ async function buildGuideHTML(){
     +'<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">'
     +'<style>'+css+'\nbody{padding:24px}:root{'+vars+'}</style></head><body>'+inner+'</body></html>';
 }
-/* Build a self-contained, hosted Brand Home: the live app + the brand baked in, booting read-only.
-   We fetch this page's *pristine* source (not the mutated DOM) and inject the snapshot into <head>
-   so the published file boots straight into the customer's environment. Returns {html, dropped}. */
-async function buildBrandHomeHTML(){
-  let src='';
-  try{ const r=await fetch(window.location.href,{cache:'no-store'}); src=await r.text(); }catch(e){}
-  if(!src || !/__BRAND_HOME_APP__|<\/head>/i.test(src)){ try{ src=document.documentElement.outerHTML; }catch(_){ src=''; } }
-  if(!src) throw new Error('no source');
-  const inject = snap => {
-    const json = JSON.stringify(snap).replace(/<\/script/gi,'<\\/script').replace(/<!--/g,'<\\!--');
-    const tag = '<script>window.__BRAND_SNAPSHOT__='+json+';window.__HOSTED_MODE__=true;<\/script>';
-    return /<head[^>]*>/i.test(src) ? src.replace(/(<head[^>]*>)/i,'$1'+tag) : (tag+src);
-  };
-  const full = brandSnapshot();
-  let snap = full, html = inject(snap), dropped = false;
-  const CAP = 4.2*1024*1024;                                   // stay under the ~4.5MB function-body limit
-  if(html.length>CAP && snap.photos && snap.photos.length){ snap={...snap,photos:[]}; html=inject(snap); dropped=true; }
-  if(html.length>CAP && snap.docs && snap.docs.length){ snap={...snap,docs:[]}; html=inject(snap); }
-  return { html, dropped };
-}
 async function downloadPackage(){
   if(typeof JSZip==='undefined'){ announceWorkspaceUpdate('Packaging needs the live site.','deliverables'); return; }
   announceWorkspaceUpdate('Preparing your package…','deliverables');
@@ -1363,25 +1335,18 @@ function ensurePublishId(){            // a stable id per brand so re-publishing
   return map[slug];
 }
 async function publishWebGuide(){
-  announceWorkspaceUpdate('Publishing your Brand Home…','deliverables');
-  let built;
-  try{ built=await buildBrandHomeHTML(); }catch(e){ announceWorkspaceUpdate('Couldn’t build the Brand Home page.','deliverables'); return; }
-  const html=built.html;
+  announceWorkspaceUpdate('Publishing your guide…','deliverables');
+  let html='';
+  try{ html=await buildGuideHTML(); }catch(e){ announceWorkspaceUpdate('Couldn’t build the guide page.','deliverables'); return; }
   try{
     const res=await fetch('/api/publish',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ html, slug:brandSlug(), id:ensurePublishId() })});
     const data=await res.json().catch(()=>({}));
-    if(res.ok && data && data.url){
-      recordPublishedGuide(data.url); showPublishedLink(data.url);
-      announceWorkspaceUpdate(built.dropped
-        ? 'Your Brand Home is live — photos were too large to host inline, but everything else is in.'
-        : 'Your Brand Home is live — link ready to share.','deliverables');
-      return;
-    }
+    if(res.ok && data && data.url){ recordPublishedGuide(data.url); showPublishedLink(data.url); announceWorkspaceUpdate('Your guide is live — link ready to share.','deliverables'); return; }
     throw new Error((data&&data.error)||'publish failed');
   }catch(e){
-    try{ dl(brandSlug()+'-brand-home.html', html, 'text/html'); }catch(_){}    // graceful fallback so the user still gets the page
-    announceWorkspaceUpdate('Publishing isn’t set up yet — downloaded the Brand Home instead.','deliverables');
+    try{ dl(brandSlug()+'-guide.html', html, 'text/html'); }catch(_){}      // graceful fallback so the user still gets the page
+    announceWorkspaceUpdate('Publishing isn’t set up yet — downloaded the page instead.','deliverables');
   }
 }
 function showPublishedLink(url){
@@ -1424,7 +1389,7 @@ async function openSavedGuides(){
     if(res.ok && data && Array.isArray(data.guides)) guides=data.guides;
     else throw new Error((data&&data.error)||'list failed');
   }catch(e){ guides=localPublishedGuides(); }                       // fall back to locally-recorded links
-  if(!guides.length){ listEl.innerHTML='<p class="guides-empty">No published Brand Homes yet. Publish one and it’ll appear here.</p>'; return; }
+  if(!guides.length){ listEl.innerHTML='<p class="guides-empty">No published guides yet. Publish a guide and it’ll appear here.</p>'; return; }
   listEl.innerHTML=guides.map(g=>{
     const d=g.uploadedAt?new Date(g.uploadedAt):null;
     const date=d?d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):'';
@@ -2661,7 +2626,6 @@ async function finishIntake(imgs,folderName){
     setStatus(total? `${total} file${total===1?'':'s'} moved in.` : 'Nothing readable found — try images, a PDF, a folder, or a .zip.');
   }
   assignRoles();
-  if(total) ensureBrandName();   // a direct upload with no AI name still shows a real name on the Home (parity with the intake handoff)
   if(currentRoom && room.classList.contains('show')) openRoom(currentRoom);
   applyBrandHome();
   projectWorkspaceState();
@@ -2697,13 +2661,9 @@ pane.addEventListener('drop',e=>{
 //    (This is local only — it is NOT login or sharing. See note below the build.) ──
 const SAVE_DB='mdBrandHomeSave', SAVE_STORE='brand', SAVE_KEY='current';
 function _db(){return new Promise((res,rej)=>{ if(typeof indexedDB==='undefined') return rej(new Error('no idb')); const r=indexedDB.open(SAVE_DB,1); r.onupgradeneeded=()=>{ try{r.result.createObjectStore(SAVE_STORE);}catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });}
-function brandSnapshot(){
-  return {name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type,
-    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null,designStrategy:brand.designStrategy||null,environmentProfile:brand.environmentProfile||null,signature:brand.signature||null};
-}
 function saveBrand(){
-  if(window.__HOSTED_MODE__) return;                       // a published Brand Home is read-only; never overwrite the customer's storage
-  const snap=brandSnapshot();
+  const snap={name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type,
+    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null,designStrategy:brand.designStrategy||null,environmentProfile:brand.environmentProfile||null,signature:brand.signature||null};
   if(!snap.name && !snap.logos.length && !snap.photos.length && !(snap.colors&&snap.colors.length)) return;
   _db().then(db=>{ try{ db.transaction(SAVE_STORE,'readwrite').objectStore(SAVE_STORE).put(snap,SAVE_KEY); }catch(e){} })
        .catch(()=>{ try{ localStorage.setItem('mdBrandHomeSaveLight', JSON.stringify({name:snap.name,tagline:snap.tagline,category:snap.category,colors:snap.colors,type:snap.type,colorSystem:snap.colorSystem,typeSystem:snap.typeSystem,logos:snap.logos.slice(0,3),photos:[],docs:snap.docs})); }catch(e){} });
@@ -2724,9 +2684,7 @@ function restoreBrand(snap){
   assignRoles(); projectWorkspaceState();
   if(brand.name||brand.logos.length||brand.photos.length||brand.colors.length){
     ensureBrandName();       // a saved session with a blank name still shows something real
-    setStatus(window.__HOSTED_MODE__
-      ? (brand.name?'Welcome to the '+brand.name+' Brand Home.':'Welcome to your Brand Home.')
-      : 'Welcome back'+(brand.name?', '+brand.name:'')+' — your guide is saved.');
+    setStatus('Welcome back'+(brand.name?', '+brand.name:'')+' — your guide is saved.');
     applyBrandHome();
     if(currentRoom && room.classList.contains('show')) openRoom(currentRoom);
   }
@@ -2741,27 +2699,13 @@ function storageProbe(){
     }catch(e){ res(false); }
   })).catch(()=>false);
 }
-// A published Brand Home boots straight from its embedded snapshot, in read-only customer mode.
-function enterHostedMode(){
-  try{
-    document.body.classList.add('hosted-mode');
-    founderState['Editor mode']=false;
-    const hide=sel=>document.querySelectorAll(sel).forEach(n=>{ n.style.display='none'; });
-    hide('.movein'); hide('.room-card[data-open="founder"]'); hide('.founder-pill');
-  }catch(e){}
-}
-if(window.__BRAND_SNAPSHOT__){
-  try{ enterHostedMode(); restoreBrand(window.__BRAND_SNAPSHOT__); }
-  catch(e){ console.warn('[hosted] boot failed',e); }
-} else {
-  storageProbe().then(ok=>{
-    importFromExperience().then(imported=>{
-      if(imported){ if(currentRoom && room.classList.contains('show')) openRoom(currentRoom); refreshFounderState(); return; }
-      if(!ok){ setStatus("Saving is off in this view — it works once this page is on your live site."); return; }
-      loadBrand().then(restoreBrand);
-    }).catch(()=>{ if(ok) loadBrand().then(restoreBrand); });
-  });
-}
+storageProbe().then(ok=>{
+  importFromExperience().then(imported=>{
+    if(imported){ if(currentRoom && room.classList.contains('show')) openRoom(currentRoom); refreshFounderState(); return; }
+    if(!ok){ setStatus("Saving is off in this view — it works once this page is on your live site."); return; }
+    loadBrand().then(restoreBrand);
+  }).catch(()=>{ if(ok) loadBrand().then(restoreBrand); });
+});
 
 /* ════════════════ INTAKE BRIDGE: receive what experience.html prepared ════════════════
    experience.html writes the analysis to localStorage('movingDay_brandDNA_v1') and the real
