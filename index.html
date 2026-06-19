@@ -2661,6 +2661,7 @@ async function finishIntake(imgs,folderName){
     setStatus(total? `${total} file${total===1?'':'s'} moved in.` : 'Nothing readable found — try images, a PDF, a folder, or a .zip.');
   }
   assignRoles();
+  if(total) ensureBrandName();   // a direct upload with no AI name still shows a real name on the Home (parity with the intake handoff)
   if(currentRoom && room.classList.contains('show')) openRoom(currentRoom);
   applyBrandHome();
   projectWorkspaceState();
