@@ -215,6 +215,13 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 
 /* deliverables vault */
 .vault{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(9px,1.1vw,13px);}
+.vault.vault-2{grid-template-columns:1fr 1fr;gap:clamp(12px,1.4vw,18px);}
+@media(max-width:720px){.vault{grid-template-columns:1fr 1fr;}.vault.vault-2{grid-template-columns:1fr;}}
+.vaultcard.primary{min-height:128px;box-shadow:var(--shadow),inset 0 0 0 1.5px rgba(44,90,60,.26);}
+.vaultcard.primary b{font-size:1.45rem;}
+.deliv-more{display:flex;flex-wrap:wrap;justify-content:center;gap:4px 20px;margin-top:clamp(13px,1.8vh,18px);}
+.deliv-link{background:none;border:none;cursor:pointer;font:inherit;font-size:12.5px;color:var(--ink-soft);padding:5px 4px;border-radius:6px;transition:color .2s ease;}
+.deliv-link:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px;}
 @media(max-width:720px){.vault{grid-template-columns:1fr 1fr;}}
 .vaultcard{padding:clamp(16px,1.8vw,22px);border-radius:var(--r-md);min-height:108px;display:flex;flex-direction:column;background:linear-gradient(160deg,rgba(255,255,255,.58),rgba(255,255,255,.38));backdrop-filter:blur(26px) saturate(170%);box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease;cursor:pointer;}
 .vaultcard:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);}
@@ -732,13 +739,15 @@ const ROOMS={
       <div class="pairline"><span><b>Display</b> Fraunces · 300–500</span><span><b>Body</b> Inter · 300–400</span></div>
     </div>`},
   deliverables:{kicker:'Deliverables',title:'Prepare the handoff.',html:`
-    <div class="vault">
-      <button class="vaultcard" data-deliv="pdf"><span class="vic">Document</span><b>Download PDF</b><i>Printable guide</i></button>
-      <button class="vaultcard" data-deliv="html"><span class="vic">Web</span><b>Publish Guide</b><i>Standalone page</i></button>
-      <button class="vaultcard" data-deliv="zip"><span class="vic">Bundle</span><b>Download Package</b><i>All assets &amp; palette</i></button>
-      <button class="vaultcard" data-deliv="save"><span class="vic">Workspace</span><b>Save Brand Home</b><i>Your working file</i></button>
-      <button class="vaultcard" data-deliv="palette"><span class="vic">Color</span><b>Color styles</b><i>HEX values</i></button>
-      <button class="vaultcard" data-deliv="versions"><span class="vic">History</span><b>Versions</b><i>Every save, kept</i></button>
+    <div class="vault vault-2">
+      <button class="vaultcard primary" data-deliv="zip"><span class="vic">Brand package</span><b>Download Package</b><i>Guide, logos, colours &amp; type — everything, zipped</i></button>
+      <button class="vaultcard" data-deliv="html"><span class="vic">Web</span><b>Publish Guide</b><i>A shareable link to your brand</i></button>
+    </div>
+    <div class="deliv-more">
+      <button class="deliv-link" data-deliv="pdf">Download PDF</button>
+      <button class="deliv-link" data-deliv="palette">Colour styles</button>
+      <button class="deliv-link" data-deliv="save">Save working file</button>
+      <button class="deliv-link" data-deliv="versions">Version history</button>
     </div>
     <p class="deliv-note">Deliverables always use the <b>latest version</b> of your Brand Home — current logo, colors, type, and assets.</p>
     <div class="apps-wrap">
@@ -930,7 +939,7 @@ roomBody.addEventListener('click',e=>{
   const tog=e.target.closest('.toggle');
   if(tog){ const on=tog.classList.toggle('on'); const row=tog.closest('.frow'), lab=row&&row.querySelector('b');
     if(lab){ const name=lab.textContent.trim(); founderState[name]=on; saveFounderState(); if(name==='Editor mode') enableEditing(roomBody); if(name==='Brand immersion'||name==='Deep mode'||name==='Adaptive atmosphere'){ applyBrandHome(); try{ placeLogos(roomBody); renderIdMarks(roomBody); }catch(e){} } if(name==='Raw JSON') refreshFounderState(); } return; }
-  const deliv=e.target.closest('.vaultcard[data-deliv]'); if(deliv){ handleDeliverable(deliv.dataset.deliv); return; }
+  const deliv=e.target.closest('[data-deliv]'); if(deliv){ handleDeliverable(deliv.dataset.deliv); return; }
   const ex=e.target.closest('[data-export]'); if(ex){ exportApplication(ex.dataset.export, ex.dataset.fmt||'png'); return; }
   const ld=e.target.closest('[data-logodl]'); if(ld){ const u=LOGOVAR[ld.dataset.logodl]; if(u) dlDataURL(ld.dataset.fname||'logo.png',u); return; }
   const sc=e.target.closest('[data-sig-copy]'); if(sc){ copySignature(); return; }
@@ -1320,6 +1329,14 @@ function rgb2hex(r,g,b){ return '#'+[r,g,b].map(x=>Math.max(0,Math.min(255,Math.
 function mixHex(a,b,t){ const A=hexToRgb(a),B=hexToRgb(b); return rgb2hex(A[0]+(B[0]-A[0])*t,A[1]+(B[1]-A[1])*t,A[2]+(B[2]-A[2])*t); }
 function darkenHex(h,t){ return mixHex(h,'#0b0b0c',t); }
 function lightenHex(h,t){ return mixHex(h,'#ffffff',t); }
+function brandGround(which){          // a light / dark ground pulled from the brand palette (hue kept, nudged to stay legible)
+  const cols=(brand.colors||[]).map(c=>(c.hex||'')).filter(Boolean);
+  const lum=h=>{ const r=hexToRgb(h); return 0.299*r[0]+0.587*r[1]+0.114*r[2]; };
+  if(!cols.length) return which==='dark' ? '#161d1a' : '#ebe5d6';
+  const sorted=[...cols].sort((a,b)=>lum(a)-lum(b));
+  if(which==='dark'){ const d=sorted[0];                 return lum(d)<=70  ? d : darkenHex(d,0.62); }   // brand's darkest, deepened only if needed
+  const l=sorted[sorted.length-1];                       return lum(l)>=212 ? l : lightenHex(l,0.78);    // brand's lightest, lifted only if needed
+}
 function applyPaletteVars(cols){
   const rs=document.documentElement.style;
   const cs=brand.colorSystem;
@@ -2259,7 +2276,7 @@ async function placeLogos(root){
   const {primary}=logoSystemMarks();
   const primaryMark = primary || logos.find(l=>l.role==='primaryLogo') || logos[0];
   if(!primaryMark) return;
-  for(const fr of frames){ setFrameImage(fr, primaryMark.url, true, primaryMark.id); }   // always the original, full-colour primary logo — no recolouring in placements
+  for(const fr of frames){ setFrameImage(fr, primaryMark.url, true, primaryMark.id); }   // always the original primary logo — no black/white variations, ever
 }
 /* ── the brand's most-used marks: the exact uploaded marks; for a monochrome mark, a real Black + White pair ── */
 function markIsMonochrome(url){          // achromatic (black/white/grey line-art) → eligible for Black & White; coloured → exact only
@@ -2297,7 +2314,7 @@ async function renderIdMarks(root){
   add(icon&&icon.id!==primaryMark.id?icon:null,'Icon');
   add(logos.find(l=>l.role==='secondaryLogo'),'Secondary');
 
-  const PAPER='#ECEAE3', INK='#161d1a';
+  const PAPER=brandGround('light'), INK=brandGround('dark');
   const frame=dark=>{ const d=document.createElement('div'); d.className='vframe markframe '+(dark?'dark':'paper');
     d.style.setProperty('background', dark?INK:PAPER, 'important');     // a real reference card, independent of room atmosphere
     d.innerHTML='<span class="vframe-tag'+(dark?' on-dark':'')+'"></span>'; return d; };
@@ -2345,7 +2362,9 @@ async function logoCell(mark,kind,treatment,ground,label){   // ground: 'paper' 
   else url=await imgToDataURL(mark.url,isSvg)||mark.url;
   const key=mark.id+'|'+kind+'|'+treatment+'|'+ground; LOGOVAR[key]=url;
   const onD=ground==='dark'; const fname=brandSlug()+'-'+kind+'-'+treatment+'.png';
-  return '<div class="gd-logocell '+(onD?'dark':'paper')+'"><img alt="" src="'+url+'">'
+  const bg=brandGround(onD?'dark':'light');
+  return '<div class="gd-logocell '+(onD?'dark':'paper')+'" style="background:'+bg+'!important">'
+    +'<img alt="" src="'+url+'">'
     +'<button class="gd-logo-dl'+(onD?' on-dark':'')+'" data-logodl="'+key+'" data-fname="'+fname+'" title="Download" aria-label="Download">'+DLICON+'</button>'
     +'<span class="gd-logo-label'+(onD?' on-dark':'')+'">'+esc(label)+'</span></div>';
 }
