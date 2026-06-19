@@ -1351,18 +1351,62 @@ async function publishWebGuide(){
     announceWorkspaceUpdate('Publishing isn’t set up yet — downloaded the page instead.','deliverables');
   }
 }
-/* ── Publish HOME: snapshot the live, brand-applied home into a standalone page and share it through the same Blob pipeline ── */
+/* ── Publish HOME: snapshot the live, brand-applied home — with FUNCTIONING rooms — into a standalone page ──
+   Each public room is fully rendered here (in the studio, where every renderer + the live brand state exist),
+   embedded as a <template>, and re-shown by a tiny nav-only script. No studio runtime or re-serialized state
+   ships to the published page; the rooms are the real, edited DOM, captured once at publish time. */
+const PUBLISH_ROOMS=['identity','assets','guide','typography'];   // the public rooms (founder/deliverables stay private)
+async function renderRoomForPublish(key){
+  const tmp=document.createElement('div');
+  tmp.style.cssText='position:absolute;left:-9999px;top:0;width:980px;';
+  tmp.innerHTML=(ROOMS[key]&&ROOMS[key].html)||'';
+  document.body.appendChild(tmp);
+  try{
+    if(key==='assets'){                                // renderAssetsRoom() targets a global #assetRoot → render into THIS node instead
+      const ar=tmp.querySelector('#assetRoot');
+      if(ar){
+        if(brand.logos.length||brand.photos.length||brand.docs.length){
+          let h='';
+          if(brand.logos.length){ h+='<div class="sect-label">Logos &amp; marks</div><div class="asset-grid">'+brand.logos.map(a=>assetCardHTML(a,true)).join('')+'</div>'; }
+          if(brand.photos.length){ h+='<div class="sect-label">Photography</div><div class="asset-grid">'+brand.photos.map(a=>assetCardHTML(a,false)).join('')+'</div>'; }
+          if(brand.docs.length){ h+='<div class="sect-label">Documents</div><div class="asset-grid">'+brand.docs.map(a=>assetCardHTML(a,false)).join('')+'</div>'; }
+          ar.innerHTML=h;
+        } else { ar.innerHTML='<div class="asset-empty">No assets yet.</div>'; }
+      }
+    }
+    applyUploads(tmp);                                 // full brand paint: name · tagline · colours · type · counts
+    await placeLogos(tmp); await renderIdMarks(tmp); await renderLogoSystem(tmp); await fillHeroLogo(tmp);   // settle async logo renders before snapshot
+  }catch(e){ console.warn('[publish] room render failed:',key,e); }
+  // strip editor-only chrome → clean read-only capture
+  tmp.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
+  tmp.querySelectorAll('[data-action],.asset-replace,.edit-hint,.mk-dl,.gd-logo-dl,.ig-dl,.lib-upload,.id-edit,.edit-dot').forEach(n=>n.remove());
+  const html=tmp.innerHTML; tmp.remove();
+  return html;
+}
 async function buildHomeHTML(){
-  applyBrandHome();                                    // make sure hero/logo/atmosphere reflect the current brand
-  const src=document.querySelector('#home');
-  if(!src) throw new Error('home view not found');
-  const clone=src.cloneNode(true);
-  clone.classList.add('show');                         // force-visible in the static page (no view runtime to toggle it)
+  applyBrandHome();                                    // hero/logo/atmosphere reflect the current brand
+  const pane=document.querySelector('.glasspane');
+  if(!pane) throw new Error('home shell not found');
+  const clone=pane.cloneNode(true);
+  clone.className='glasspane md-room-home';            // start on the home view, drop any live md-room-* state
 
-  // strip editor-only chrome from the public artifact
+  // HOME view: keep the four public room cards working, strip editor-only chrome
+  const homeView=clone.querySelector('#home'); if(homeView){ homeView.className='view show'; }
   clone.querySelectorAll('.movein, #homePrepared, [data-open="founder"], [data-open="deliverables"]').forEach(n=>n.remove());
-  // room cards can't open rooms in a static snapshot → drop the button semantics + the hover arrow, keep the look
-  clone.querySelectorAll('.room-card').forEach(c=>{ c.removeAttribute('data-open'); c.setAttribute('tabindex','-1'); const go=c.querySelector('.go'); if(go) go.remove(); });
+  // ROOM view: keep the shell (back button + title), empty the body — the nav script fills it on demand
+  const roomView=clone.querySelector('#room'); if(roomView){ roomView.className='view'; }
+  const rb=clone.querySelector('#roomBody'); if(rb) rb.innerHTML='';
+
+  // pre-render every public room and embed each as an inert <template>
+  let templates='', meta={};
+  for(const key of PUBLISH_ROOMS){
+    if(!ROOMS[key]) continue;
+    const body=await renderRoomForPublish(key);
+    templates+='<template data-room="'+key+'">'+body+'</template>';
+    meta[key]={ kicker:(ROOMS[key].kicker||''), title:(ROOMS[key].title||'') };
+  }
+  applyBrandHome();                                    // restore the live home after the off-screen room renders
+
   const inner=clone.outerHTML;
 
   // capture every environment var the brand layer may set on :root (atmosphere/immersion), plus the palette
@@ -1378,11 +1422,26 @@ async function buildHomeHTML(){
   // bring along every stylesheet link (Fraunces/Inter + any brand display font ensureFont injected)
   const links=[...document.querySelectorAll('link[rel="stylesheet"]')].map(l=>'<link rel="stylesheet" href="'+esc(l.href)+'">').join('');
   const css=document.querySelector('style').textContent;
+  const metaJSON=JSON.stringify(meta).replace(/<\//g,'<\\/');
+
+  // tiny nav-only runtime: open/close rooms with the same transitions, no studio runtime needed
+  const nav='<script>(function(){'
+    +'var rooms={};document.querySelectorAll("template[data-room]").forEach(function(t){rooms[t.getAttribute("data-room")]=t.innerHTML;});'
+    +'var meta='+metaJSON+';'
+    +'var home=document.getElementById("home"),room=document.getElementById("room"),pane=document.querySelector(".glasspane");'
+    +'var body=document.getElementById("roomBody"),kick=document.getElementById("roomKicker"),title=document.getElementById("roomTitle");'
+    +'function setShell(k){pane.className=pane.className.replace(/\\bmd-room-\\S+/g,"").replace(/\\s+/g," ").trim();pane.classList.add("md-room-"+k);}'
+    +'function open(k){if(!rooms[k])return;body.innerHTML=rooms[k];if(meta[k]){if(kick)kick.textContent=meta[k].kicker;if(title)title.innerHTML=meta[k].title;}setShell(k);'
+    +'home.classList.add("entering");setTimeout(function(){home.classList.remove("show","entering");room.classList.remove("leaving");room.classList.add("show");window.scrollTo(0,0);},300);}'
+    +'function close(){setShell("home");room.classList.remove("show");home.classList.remove("entering");home.classList.add("show");window.scrollTo(0,0);}'
+    +'document.querySelectorAll("#home [data-open]").forEach(function(b){b.addEventListener("click",function(){open(b.getAttribute("data-open"));});});'
+    +'var back=document.getElementById("backBtn");if(back)back.addEventListener("click",close);'
+    +'})();<\/script>';
 
   return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(brand.name||'Brand Home')+'</title>'
     +links
     +'<style>'+css+'\n:root{'+vars+'}\nbody{margin:0}</style></head>'
-    +'<body class="'+bodyCls+'"'+mood+material+'><div class="env"><div class="glasspane">'+inner+'</div></div></body></html>';
+    +'<body class="'+bodyCls+'"'+mood+material+'><div class="env">'+inner+'</div>'+templates+nav+'</body></html>';
 }
 async function publishBrandHome(){
   announceWorkspaceUpdate('Publishing your home…','deliverables');
