@@ -787,8 +787,9 @@ const ROOMS={
       <div class="pairline"><span><b>Display</b> Fraunces · 300–500</span><span><b>Body</b> Inter · 300–400</span></div>
     </div>`},
   deliverables:{kicker:'Deliverables',title:'Prepare the handoff.',html:`
-    <div class="vault vault-2">
+    <div class="vault">
       <button class="vaultcard primary" data-deliv="zip"><span class="vic">Brand package</span><b>Download Package</b><i>Guide, logos, colours &amp; type — everything, zipped</i></button>
+      <button class="vaultcard" data-deliv="home"><span class="vic">Web</span><b>Publish Home</b><i>The branded home as a live, shareable link</i></button>
       <button class="vaultcard" data-deliv="html"><span class="vic">Web</span><b>Publish Guide</b><i>A live, shareable link</i></button>
     </div>
     <div class="deliv-more">
@@ -1320,6 +1321,7 @@ function handleDeliverable(kind){
   refreshDeliverablesState();
   if(kind==='save'){ dl(brandSlug()+'-brand-home.json', JSON.stringify(MDWorkspaceState,(k,v)=>k==='url'?undefined:v,2), 'application/json'); announceWorkspaceUpdate('Brand Home saved to a file.','deliverables'); }
   else if(kind==='html'){ publishWebGuide(); }
+  else if(kind==='home'){ publishBrandHome(); }
   else if(kind==='zip'){ downloadPackage(); }
   else if(kind==='palette'){ const css=':root{\n'+(brand.colors.map((c,i)=>'  --brand-'+(i+1)+': '+c.hex+'; /* '+(c.name||'Color')+' */').join('\n')||'  /* no colours yet */')+'\n}'; dl(brandSlug()+'-colors.css', css, 'text/css'); announceWorkspaceUpdate('Color styles downloaded.','deliverables'); }
   else if(kind==='pdf'){ announceWorkspaceUpdate('Opening print — choose “Save as PDF”.','deliverables'); if(currentRoom!=='guide') openRoom('guide'); setTimeout(()=>window.print(),650); }
@@ -1349,8 +1351,64 @@ async function publishWebGuide(){
     announceWorkspaceUpdate('Publishing isn’t set up yet — downloaded the page instead.','deliverables');
   }
 }
-function showPublishedLink(url){
+/* ── Publish HOME: snapshot the live, brand-applied home into a standalone page and share it through the same Blob pipeline ── */
+async function buildHomeHTML(){
+  applyBrandHome();                                    // make sure hero/logo/atmosphere reflect the current brand
+  const src=document.querySelector('#home');
+  if(!src) throw new Error('home view not found');
+  const clone=src.cloneNode(true);
+  clone.classList.add('show');                         // force-visible in the static page (no view runtime to toggle it)
+
+  // strip editor-only chrome from the public artifact
+  clone.querySelectorAll('.movein, #homePrepared, [data-open="founder"], [data-open="deliverables"]').forEach(n=>n.remove());
+  // room cards can't open rooms in a static snapshot → drop the button semantics + the hover arrow, keep the look
+  clone.querySelectorAll('.room-card').forEach(c=>{ c.removeAttribute('data-open'); c.setAttribute('tabindex','-1'); const go=c.querySelector('.go'); if(go) go.remove(); });
+  const inner=clone.outerHTML;
+
+  // capture every environment var the brand layer may set on :root (atmosphere/immersion), plus the palette
+  const rs=getComputedStyle(document.documentElement);
+  const VARS=['--b1','--b2','--b3','--b4','--b5','--bg-1','--bg-2','--bg-3','--halo-a','--halo-b','--sage','--sage-line','--mark-ink','--shadow','--shadow-hover','--ice-1','--ice-2','--glass','--surface','--light','--fog','--stone','--reflection','--portal-glow','--environment-tint','--glass-blur','--glass-sat','--transition'];
+  const vars=VARS.map(v=>{ const val=rs.getPropertyValue(v).trim(); return val?(v+':'+val):''; }).filter(Boolean).join(';');
+
+  // carry the body's environment state (deep-immerse + mood/material data-attrs)
+  const bodyCls=document.body.classList.contains('deep-immerse')?'deep-immerse':'';
+  const mood=document.body.dataset.envMood?(' data-env-mood="'+esc(document.body.dataset.envMood)+'"'):'';
+  const material=document.body.dataset.envMaterial?(' data-env-material="'+esc(document.body.dataset.envMaterial)+'"'):'';
+
+  // bring along every stylesheet link (Fraunces/Inter + any brand display font ensureFont injected)
+  const links=[...document.querySelectorAll('link[rel="stylesheet"]')].map(l=>'<link rel="stylesheet" href="'+esc(l.href)+'">').join('');
+  const css=document.querySelector('style').textContent;
+
+  return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(brand.name||'Brand Home')+'</title>'
+    +links
+    +'<style>'+css+'\n:root{'+vars+'}\nbody{margin:0}</style></head>'
+    +'<body class="'+bodyCls+'"'+mood+material+'><div class="env"><div class="glasspane">'+inner+'</div></div></body></html>';
+}
+async function publishBrandHome(){
+  announceWorkspaceUpdate('Publishing your home…','deliverables');
+  let html='';
+  try{ html=await buildHomeHTML(); }catch(e){ announceWorkspaceUpdate('Couldn’t build the home page.','deliverables'); return; }
+  try{
+    const res=await fetch('/api/publish',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ html, slug:brandSlug()+'-home', id:ensurePublishId() })});   // -home namespace → never clobbers the guide
+    const data=await res.json().catch(()=>({}));
+    if(res.ok && data && data.url){ recordPublishedGuide(data.url,(brand.name||'Brand')+' — Home'); showPublishedLink(data.url,'home'); announceWorkspaceUpdate('Your home is live — link ready to share.','deliverables'); return; }
+    throw new Error((data&&data.error)||'publish failed');
+  }catch(e){
+    try{ dl(brandSlug()+'-home.html', html, 'text/html'); }catch(_){}      // graceful fallback so the user still gets the page
+    announceWorkspaceUpdate('Publishing isn’t set up yet — downloaded the home instead.','deliverables');
+  }
+}
+function showPublishedLink(url,kind){
   const ov=document.getElementById('publishModal'); if(!ov){ return; }
+  const head=ov.querySelector('.pub-head span'), sub=ov.querySelector('.pub-sub');
+  if(kind==='home'){
+    if(head) head.textContent='Your home is live';
+    if(sub) sub.textContent='Anyone with this link can view your brand home. Re-publish anytime to update it in place.';
+  } else {
+    if(head) head.textContent='Your guide is live';
+    if(sub) sub.textContent='Anyone with this link can view your brand guide. Re-publish anytime to update it in place.';
+  }
   const link=document.getElementById('pubLink'), open=document.getElementById('pubOpen');
   if(link) link.value=url; if(open) open.href=url;
   ov.hidden=false;
@@ -1372,10 +1430,10 @@ function showPublishedLink(url){
 function localPublishedGuides(){
   try{ const a=JSON.parse(localStorage.getItem('movingDay_publishedGuides_v1')||'[]'); return Array.isArray(a)?a:[]; }catch(e){ return []; }
 }
-function recordPublishedGuide(url){
+function recordPublishedGuide(url,name){
   try{
     const list=localPublishedGuides().filter(g=>g.url!==url);
-    list.unshift({ url, name:(brand.name||'Brand'), uploadedAt:new Date().toISOString() });
+    list.unshift({ url, name:(name||brand.name||'Brand'), uploadedAt:new Date().toISOString() });
     localStorage.setItem('movingDay_publishedGuides_v1', JSON.stringify(list.slice(0,60)));
   }catch(e){}
 }
