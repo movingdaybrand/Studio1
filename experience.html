@@ -4779,6 +4779,20 @@ btnMovein.addEventListener('click', event => {
     setTimeout(() => { pSub.textContent = text; pSub.style.opacity = ''; }, 240);
   }
 
+  // During the long AI step, rotate calm, truthful lines (what the concierge is actually reading)
+  // so the wait reads as considered craft rather than a frozen spinner.
+  let _prepCycle = null;
+  function startPreparingCycle(lines, intervalMs) {
+    stopPreparingCycle();
+    if (!lines || !lines.length) return;
+    let i = 0;
+    setPreparingLine(lines[0]);
+    _prepCycle = setInterval(() => { i = (i + 1) % lines.length; setPreparingLine(lines[i]); }, intervalMs || 2600);
+  }
+  function stopPreparingCycle() {
+    if (_prepCycle) { clearInterval(_prepCycle); _prepCycle = null; }
+  }
+
   function revealResults() {
     renderCustomerReview();
     goToState('review');
@@ -5215,12 +5229,26 @@ btnMovein.addEventListener('click', event => {
       const dataUrls = await Promise.all(analyzable.map(item => fileToDataUrl(item.file)));
       stepDone(1);
 
-      setPreparingLine(ANALYSIS_MODE === 'local' ? 'Organizing your foundation' : 'Understanding your visual system');
       stepActive(2);
+      if (ANALYSIS_MODE === 'local') {
+        setPreparingLine('Organizing your foundation');
+      } else {
+        const _n = analyzable.length;
+        startPreparingCycle([
+          'Looking closely at your ' + _n + (_n === 1 ? ' file' : ' files'),
+          'Reading your marks',
+          'Drawing out your colour',
+          'Reading your typography',
+          "Sensing your brand's character",
+          'Seeing how it fits together'
+        ], 2600);
+      }
       try {
         if (ANALYSIS_MODE === 'local') throw new Error('Local organization requested.');
         aiData = await requestBrandConciergeReview(analyzable, dataUrls, report);
+        stopPreparingCycle();
       } catch (apiErr) {
+        stopPreparingCycle();
         if (ANALYSIS_MODE === 'ai') throw apiErr;
         console.warn('Brand Concierge route unavailable; using local organization:', apiErr);
         setPreparingLine('Organizing your foundation');
@@ -5266,6 +5294,7 @@ btnMovein.addEventListener('click', event => {
       setPreparingLine('A little more is needed');
       setTimeout(revealResults, 700);
     } finally {
+      stopPreparingCycle();
       btnMovein.disabled = !staged.length;
       btnMovein.style.opacity = '';
       btnMovein.removeAttribute('aria-busy');
