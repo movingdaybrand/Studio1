@@ -26,8 +26,8 @@ export default async function handler(req, res) {
       res.status(400).json({ error: 'Missing guide HTML.' });
       return;
     }
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      // Blob store not connected yet — tell the client so it can fall back to a download.
+    if (!process.env.BLOB_READ_WRITE_TOKEN && !process.env.BLOB_STORE_ID) {
+      // No Blob store connected yet — tell the client so it can fall back to a download.
       res.status(501).json({ error: 'Blob storage is not configured for this project yet.' });
       return;
     }
