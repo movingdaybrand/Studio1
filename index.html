@@ -741,7 +741,7 @@ const ROOMS={
   deliverables:{kicker:'Deliverables',title:'Prepare the handoff.',html:`
     <div class="vault vault-2">
       <button class="vaultcard primary" data-deliv="zip"><span class="vic">Brand package</span><b>Download Package</b><i>Guide, logos, colours &amp; type — everything, zipped</i></button>
-      <button class="vaultcard" data-deliv="html"><span class="vic">Web</span><b>Publish Guide</b><i>A shareable link to your brand</i></button>
+      <button class="vaultcard" data-deliv="html"><span class="vic">Web</span><b>Web Guide</b><i>A standalone page — downloads to host yourself</i></button>
     </div>
     <div class="deliv-more">
       <button class="deliv-link" data-deliv="pdf">Download PDF</button>
@@ -1270,7 +1270,7 @@ async function downloadPackage(){
 function handleDeliverable(kind){
   refreshDeliverablesState();
   if(kind==='save'){ dl(brandSlug()+'-brand-home.json', JSON.stringify(MDWorkspaceState,(k,v)=>k==='url'?undefined:v,2), 'application/json'); announceWorkspaceUpdate('Brand Home saved to a file.','deliverables'); }
-  else if(kind==='html'){ buildGuideHTML().then(h=>{ dl(brandSlug()+'-guide.html', h, 'text/html'); announceWorkspaceUpdate('Guide published — current logo, colors, and type included.','deliverables'); }); }
+  else if(kind==='html'){ buildGuideHTML().then(h=>{ dl(brandSlug()+'-guide.html', h, 'text/html'); announceWorkspaceUpdate('Web guide downloaded — a standalone page with your current logo, colors, and type.','deliverables'); }); }
   else if(kind==='zip'){ downloadPackage(); }
   else if(kind==='palette'){ const css=':root{\n'+(brand.colors.map((c,i)=>'  --brand-'+(i+1)+': '+c.hex+'; /* '+(c.name||'Color')+' */').join('\n')||'  /* no colours yet */')+'\n}'; dl(brandSlug()+'-colors.css', css, 'text/css'); announceWorkspaceUpdate('Color styles downloaded.','deliverables'); }
   else if(kind==='pdf'){ announceWorkspaceUpdate('Opening print — choose “Save as PDF”.','deliverables'); if(currentRoom!=='guide') openRoom('guide'); setTimeout(()=>window.print(),650); }
