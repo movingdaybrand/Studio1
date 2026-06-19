@@ -787,10 +787,9 @@ const ROOMS={
       <div class="pairline"><span><b>Display</b> Fraunces · 300–500</span><span><b>Body</b> Inter · 300–400</span></div>
     </div>`},
   deliverables:{kicker:'Deliverables',title:'Prepare the handoff.',html:`
-    <div class="vault">
+    <div class="vault vault-2">
       <button class="vaultcard primary" data-deliv="zip"><span class="vic">Brand package</span><b>Download Package</b><i>Guide, logos, colours &amp; type — everything, zipped</i></button>
       <button class="vaultcard" data-deliv="home"><span class="vic">Web</span><b>Publish Home</b><i>The branded home as a live, shareable link</i></button>
-      <button class="vaultcard" data-deliv="html"><span class="vic">Web</span><b>Publish Guide</b><i>A live, shareable link</i></button>
     </div>
     <div class="deliv-more">
       <button class="deliv-link" data-deliv="guides">Saved guides</button>
@@ -814,6 +813,9 @@ const ROOMS={
       <div class="frow"><div><b>Local-only mode</b><i>Skip the AI route, organize on-device</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>Website lookup</b><i>Read a URL from the files &amp; check the live site</i></div><div class="toggle"></div></div>
       <div class="frow"><div><b>Raw JSON</b><i>Inspect the live workspace state</i></div><div class="toggle"></div></div>
+    </div>
+    <div class="flist" style="margin-top:14px">
+      <div class="frow"><div><b>Render brand guide</b><i>Founder-only — a standalone guide with linked, downloadable files</i></div><button class="deliv-link" data-deliv="guide-render" style="white-space:nowrap">Render &rarr;</button></div>
     </div>
     <div class="founder-state" id="founderState"><div class="fs-bar"><span>Live workspace state</span><span id="fsUpdated"></span></div><pre id="fsJson"></pre></div>`}
 };
@@ -1289,13 +1291,28 @@ function dl(filename,content,mime){
   document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); },1500);
 }
 function brandSlug(){ return (brand.name||'brand-home').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')||'brand-home'; }
-async function buildGuideHTML(){
+async function buildGuideHTML(opts){
+  const linkFiles=!!(opts&&opts.linkFiles);
   const tmp=document.createElement('div'); tmp.style.cssText='position:absolute;left:-9999px;top:0;width:900px;';
   tmp.innerHTML=ROOMS.guide.html; document.body.appendChild(tmp);
   try{ applyUploads(tmp); }catch(e){}
   try{ await renderLogoSystem(tmp); }catch(e){}        // recolored logo cells must be in place before the snapshot
   try{ await fillHeroLogo(tmp); }catch(e){}
-  const node=tmp.querySelector('.guidedoc'); if(node) node.querySelectorAll('.mk-dl,.gd-logo-dl').forEach(n=>n.remove()); const inner=node?node.outerHTML:''; tmp.remove();
+  const node=tmp.querySelector('.guidedoc');
+  if(node){
+    if(linkFiles){
+      // founder render → turn the JS download buttons into real standalone <a download> links pointing at the rendered data-URL image
+      node.querySelectorAll('.gd-logocell').forEach(cell=>{
+        const img=cell.querySelector('img'), btn=cell.querySelector('.gd-logo-dl');
+        if(img&&img.src&&btn){ const a=document.createElement('a'); a.className=btn.className; a.href=img.src; a.download=(btn.getAttribute('data-fname')||'logo'); a.title='Download'; a.setAttribute('aria-label','Download'); a.style.textDecoration='none'; a.innerHTML=btn.innerHTML; btn.replaceWith(a); }
+        else if(btn){ btn.remove(); }
+      });
+      node.querySelectorAll('.mk-dl').forEach(n=>n.remove());   // these are runtime-only buttons → no standalone equivalent
+    } else {
+      node.querySelectorAll('.mk-dl,.gd-logo-dl').forEach(n=>n.remove());
+    }
+  }
+  const inner=node?node.outerHTML:''; tmp.remove();
   const rs=getComputedStyle(document.documentElement);
   const vars=['--b1','--b2','--b3','--b4','--b5'].map(v=>v+':'+(rs.getPropertyValue(v).trim()||'')).join(';');
   const css=document.querySelector('style').textContent;
@@ -1322,6 +1339,7 @@ function handleDeliverable(kind){
   if(kind==='save'){ dl(brandSlug()+'-brand-home.json', JSON.stringify(MDWorkspaceState,(k,v)=>k==='url'?undefined:v,2), 'application/json'); announceWorkspaceUpdate('Brand Home saved to a file.','deliverables'); }
   else if(kind==='html'){ publishWebGuide(); }
   else if(kind==='home'){ publishBrandHome(); }
+  else if(kind==='guide-render'){ renderFounderGuide(); }
   else if(kind==='zip'){ downloadPackage(); }
   else if(kind==='palette'){ const css=':root{\n'+(brand.colors.map((c,i)=>'  --brand-'+(i+1)+': '+c.hex+'; /* '+(c.name||'Color')+' */').join('\n')||'  /* no colours yet */')+'\n}'; dl(brandSlug()+'-colors.css', css, 'text/css'); announceWorkspaceUpdate('Color styles downloaded.','deliverables'); }
   else if(kind==='pdf'){ announceWorkspaceUpdate('Opening print — choose “Save as PDF”.','deliverables'); if(currentRoom!=='guide') openRoom('guide'); setTimeout(()=>window.print(),650); }
@@ -1438,24 +1456,67 @@ async function buildHomeHTML(){
     +'var back=document.getElementById("backBtn");if(back)back.addEventListener("click",close);'
     +'})();<\/script>';
 
+  // cinematic arrival: play the veil reveal into the home on ?arrive=1 (publish) or the first view in a session
+  const arrive="<script>(function(){try{"
+    +"var P=new URLSearchParams(location.search),go=P.get('arrive')==='1';"
+    +"try{if(!go&&!sessionStorage.getItem('mdHomeArrived'))go=true;sessionStorage.setItem('mdHomeArrived','1');}catch(e){}"
+    +"if(!go)return;"
+    +"if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;"
+    +"var b=document.body;b.classList.add('md-arrive');"
+    +"var v=document.createElement('div');v.className='home-veil';"
+    +"var mk=document.createElement('div');mk.className='hv-mark';mk.style.width='96px';"
+    +"var hl=document.querySelector('#homeLogo img');"
+    +"if(hl){var im=new Image();im.src=hl.src;im.style.cssText='width:100%;height:auto;display:block;border-radius:16px';mk.appendChild(im);}"
+    +"v.appendChild(mk);b.appendChild(v);var done=false;"
+    +"function cleanup(){if(v&&v.parentNode)v.parentNode.removeChild(v);b.classList.remove('md-arrive','md-arrive-go');}"
+    +"function reveal(){if(done)return;done=true;b.classList.add('md-arrive-go');v.classList.add('lift');setTimeout(cleanup,2400);}"
+    +"function start(){setTimeout(reveal,700);}"
+    +"if(document.readyState==='interactive'||document.readyState==='complete')start();else document.addEventListener('DOMContentLoaded',start);"
+    +"setTimeout(reveal,4200);"
+    +"}catch(e){try{document.body.classList.remove('md-arrive','md-arrive-go');}catch(_){}}"
+    +"})();<\/script>";
+
   return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(brand.name||'Brand Home')+'</title>'
     +links
     +'<style>'+css+'\n:root{'+vars+'}\nbody{margin:0}</style></head>'
-    +'<body class="'+bodyCls+'"'+mood+material+'><div class="env">'+inner+'</div>'+templates+nav+'</body></html>';
+    +'<body class="'+bodyCls+'"'+mood+material+'><div class="env">'+inner+'</div>'+templates+nav+arrive+'</body></html>';
 }
 async function publishBrandHome(){
+  const tab=window.open('','_blank');                  // claim the tab inside the click gesture so the popup isn't blocked after the await
   announceWorkspaceUpdate('Publishing your home…','deliverables');
   let html='';
-  try{ html=await buildHomeHTML(); }catch(e){ announceWorkspaceUpdate('Couldn’t build the home page.','deliverables'); return; }
+  try{ html=await buildHomeHTML(); }catch(e){ if(tab) tab.close(); announceWorkspaceUpdate('Couldn’t build the home page.','deliverables'); return; }
   try{
     const res=await fetch('/api/publish',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ html, slug:brandSlug()+'-home', id:ensurePublishId() })});   // -home namespace → never clobbers the guide
     const data=await res.json().catch(()=>({}));
-    if(res.ok && data && data.url){ recordPublishedGuide(data.url,(brand.name||'Brand')+' — Home'); showPublishedLink(data.url,'home'); announceWorkspaceUpdate('Your home is live — link ready to share.','deliverables'); return; }
+    if(res.ok && data && data.url){
+      recordPublishedGuide(data.url,(brand.name||'Brand')+' — Home');                    // still retrievable from Saved guides
+      const arriveUrl=data.url+(data.url.indexOf('?')>=0?'&':'?')+'arrive=1';             // → the published page plays the cinematic arrival
+      if(tab){ tab.location.href=arriveUrl; } else { window.open(arriveUrl,'_blank'); }
+      announceWorkspaceUpdate('Your home is live — opening it now.','deliverables');
+      return;
+    }
     throw new Error((data&&data.error)||'publish failed');
   }catch(e){
+    if(tab) tab.close();
     try{ dl(brandSlug()+'-home.html', html, 'text/html'); }catch(_){}      // graceful fallback so the user still gets the page
     announceWorkspaceUpdate('Publishing isn’t set up yet — downloaded the home instead.','deliverables');
+  }
+}
+async function renderFounderGuide(){
+  announceWorkspaceUpdate('Rendering the brand guide…','founder');
+  let html='';
+  try{ html=await buildGuideHTML({linkFiles:true}); }catch(e){ announceWorkspaceUpdate('Couldn’t build the guide.','founder'); return; }
+  try{
+    const res=await fetch('/api/publish',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ html, slug:brandSlug()+'-guide', id:ensurePublishId() })});
+    const data=await res.json().catch(()=>({}));
+    if(res.ok && data && data.url){ recordPublishedGuide(data.url,(brand.name||'Brand')+' — Guide'); showPublishedLink(data.url); announceWorkspaceUpdate('Guide rendered — link ready.','founder'); return; }
+    throw new Error((data&&data.error)||'publish failed');
+  }catch(e){
+    try{ dl(brandSlug()+'-guide.html', html, 'text/html'); }catch(_){}
+    announceWorkspaceUpdate('Publishing isn’t set up yet — downloaded the guide instead.','founder');
   }
 }
 function showPublishedLink(url,kind){
