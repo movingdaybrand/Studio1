@@ -193,6 +193,21 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .cp-done{margin-top:4px;padding:11px;border:none;border-radius:10px;cursor:pointer;font:inherit;font-size:12px;letter-spacing:.04em;font-weight:600;color:var(--paper,#fbf8f0);background:var(--b1,#1c2b22);box-shadow:var(--shadow);}
 .cp-done:hover{filter:brightness(1.08);}
 
+/* published-link modal */
+.pub-overlay{position:fixed;inset:0;z-index:120;display:grid;place-items:center;background:rgba(12,20,15,.42);backdrop-filter:blur(8px);animation:cpFade .2s ease;}
+.pub-overlay[hidden]{display:none;}
+.pub-panel{width:min(420px,92vw);padding:22px;border-radius:var(--r-md);display:flex;flex-direction:column;gap:12px;background:linear-gradient(155deg,rgba(255,255,255,.93),rgba(255,255,255,.84));backdrop-filter:blur(30px) saturate(180%);box-shadow:0 30px 70px rgba(12,20,15,.32),inset 0 0 0 1px rgba(255,255,255,.55);}
+.pub-head{display:flex;justify-content:space-between;align-items:center;}
+.pub-head span{font-family:var(--display);font-weight:400;font-size:1.3rem;color:var(--ink);}
+.pub-x{border:none;background:none;font-size:22px;line-height:1;color:var(--ink-soft);cursor:pointer;padding:0 2px;}
+.pub-sub{font-size:12.5px;line-height:1.5;color:var(--ink-soft);margin:0;}
+.pub-linkrow{display:flex;gap:8px;margin-top:2px;}
+.pub-link{flex:1;min-width:0;font-family:ui-monospace,monospace;font-size:12.5px;padding:11px 12px;border-radius:10px;border:none;outline:none;color:var(--ink);background:rgba(255,255,255,.72);box-shadow:inset 0 0 0 1px rgba(44,90,60,.18);}
+.pub-copy{flex:none;padding:11px 16px;border:none;border-radius:10px;cursor:pointer;font:inherit;font-size:12px;font-weight:600;letter-spacing:.03em;color:var(--paper,#fbf8f0);background:var(--b1,#1c2b22);box-shadow:var(--shadow);}
+.pub-copy:hover{filter:brightness(1.08);}
+.pub-open{font-size:12.5px;color:var(--b3,#4e6b5a);text-decoration:none;font-weight:500;align-self:flex-start;margin-top:2px;}
+.pub-open:hover{text-decoration:underline;text-underline-offset:3px;}
+
 /* assets gallery */
 .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(9px,1.1vw,13px);}
 @media(max-width:820px){.gallery{grid-template-columns:1fr 1fr;}}
@@ -635,6 +650,15 @@ body.deep-immerse .id-primary .wm small{color:rgba(243,239,230,.62)!important;}
   </div>
 </div>
 
+<div class="pub-overlay" id="publishModal" hidden>
+  <div class="pub-panel">
+    <div class="pub-head"><span>Your guide is live</span><button class="pub-x" id="pubClose" aria-label="Close">&times;</button></div>
+    <p class="pub-sub">Anyone with this link can view your brand guide. Re-publish anytime to update it in place.</p>
+    <div class="pub-linkrow"><input class="pub-link" id="pubLink" readonly spellcheck="false"><button class="pub-copy" id="pubCopy">Copy</button></div>
+    <a class="pub-open" id="pubOpen" target="_blank" rel="noopener">Open in new tab →</a>
+  </div>
+</div>
+
 <input type="file" id="editFile" accept="image/*" hidden>
 <input type="color" id="editColor" hidden>
 <input type="file" id="zipInput" accept=".zip,.pdf,.svg,.png,.jpg,.jpeg,.webp,.gif,image/*,application/pdf,application/zip" multiple hidden>
@@ -741,7 +765,7 @@ const ROOMS={
   deliverables:{kicker:'Deliverables',title:'Prepare the handoff.',html:`
     <div class="vault vault-2">
       <button class="vaultcard primary" data-deliv="zip"><span class="vic">Brand package</span><b>Download Package</b><i>Guide, logos, colours &amp; type — everything, zipped</i></button>
-      <button class="vaultcard" data-deliv="html"><span class="vic">Web</span><b>Web Guide</b><i>A standalone page — downloads to host yourself</i></button>
+      <button class="vaultcard" data-deliv="html"><span class="vic">Web</span><b>Publish Guide</b><i>A live, shareable link</i></button>
     </div>
     <div class="deliv-more">
       <button class="deliv-link" data-deliv="pdf">Download PDF</button>
@@ -1270,12 +1294,54 @@ async function downloadPackage(){
 function handleDeliverable(kind){
   refreshDeliverablesState();
   if(kind==='save'){ dl(brandSlug()+'-brand-home.json', JSON.stringify(MDWorkspaceState,(k,v)=>k==='url'?undefined:v,2), 'application/json'); announceWorkspaceUpdate('Brand Home saved to a file.','deliverables'); }
-  else if(kind==='html'){ buildGuideHTML().then(h=>{ dl(brandSlug()+'-guide.html', h, 'text/html'); announceWorkspaceUpdate('Web guide downloaded — a standalone page with your current logo, colors, and type.','deliverables'); }); }
+  else if(kind==='html'){ publishWebGuide(); }
   else if(kind==='zip'){ downloadPackage(); }
   else if(kind==='palette'){ const css=':root{\n'+(brand.colors.map((c,i)=>'  --brand-'+(i+1)+': '+c.hex+'; /* '+(c.name||'Color')+' */').join('\n')||'  /* no colours yet */')+'\n}'; dl(brandSlug()+'-colors.css', css, 'text/css'); announceWorkspaceUpdate('Color styles downloaded.','deliverables'); }
   else if(kind==='pdf'){ announceWorkspaceUpdate('Opening print — choose “Save as PDF”.','deliverables'); if(currentRoom!=='guide') openRoom('guide'); setTimeout(()=>window.print(),650); }
   else if(kind==='versions'){ announceWorkspaceUpdate('Every save is kept in this browser.','deliverables'); }
 }
+/* ── Publish: upload the built guide to Vercel Blob and surface a live, shareable link (falls back to a download) ── */
+function ensurePublishId(){            // a stable id per brand so re-publishing updates the SAME link
+  const key='movingDay_pubid_v1'; let map={};
+  try{ map=JSON.parse(localStorage.getItem(key)||'{}'); }catch(e){}
+  const slug=brandSlug();
+  if(!map[slug]){ map[slug]=Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4); try{ localStorage.setItem(key,JSON.stringify(map)); }catch(e){} }
+  return map[slug];
+}
+async function publishWebGuide(){
+  announceWorkspaceUpdate('Publishing your guide…','deliverables');
+  let html='';
+  try{ html=await buildGuideHTML(); }catch(e){ announceWorkspaceUpdate('Couldn’t build the guide page.','deliverables'); return; }
+  try{
+    const res=await fetch('/api/publish',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ html, slug:brandSlug(), id:ensurePublishId() })});
+    const data=await res.json().catch(()=>({}));
+    if(res.ok && data && data.url){ showPublishedLink(data.url); announceWorkspaceUpdate('Your guide is live — link ready to share.','deliverables'); return; }
+    throw new Error((data&&data.error)||'publish failed');
+  }catch(e){
+    try{ dl(brandSlug()+'-guide.html', html, 'text/html'); }catch(_){}      // graceful fallback so the user still gets the page
+    announceWorkspaceUpdate('Publishing isn’t set up yet — downloaded the page instead.','deliverables');
+  }
+}
+function showPublishedLink(url){
+  const ov=document.getElementById('publishModal'); if(!ov){ return; }
+  const link=document.getElementById('pubLink'), open=document.getElementById('pubOpen');
+  if(link) link.value=url; if(open) open.href=url;
+  ov.hidden=false;
+}
+(function wirePublishModal(){
+  const ov=document.getElementById('publishModal'); if(!ov) return;
+  const x=document.getElementById('pubClose'), copy=document.getElementById('pubCopy');
+  const close=()=>{ ov.hidden=true; };
+  if(x) x.addEventListener('click',close);
+  ov.addEventListener('pointerdown',e=>{ if(e.target===ov) close(); });
+  if(copy) copy.addEventListener('click',async()=>{
+    const v=(document.getElementById('pubLink')||{}).value||'';
+    try{ await navigator.clipboard.writeText(v); }
+    catch(e){ try{ const i=document.getElementById('pubLink'); i.select(); document.execCommand('copy'); }catch(_){} }
+    copy.textContent='Copied'; setTimeout(()=>{ copy.textContent='Copy'; },1400);
+  });
+})();
 function prettify(s){return s.replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()).trim();}
 function setStatus(t){const el=document.getElementById('moveinStatus'); if(el) el.textContent=t||'';}
 
