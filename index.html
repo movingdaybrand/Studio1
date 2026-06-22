@@ -872,6 +872,22 @@ const ROOM_META={
   deliverables:{desc:'Prepare the handoff.'},
   founder:{desc:'Advanced controls.'}
 };
+/* Room registry: one definition per room (id, label, purpose, emptyState, render). Render fns delegate to the EXISTING renderers — structure only, behaviour unchanged. */
+const roomRegistry = {
+  foyer:        { id:'foyer',        label:'Foyer',        purpose:'The arrival — name, tagline, and the doors into every room.',  emptyState:'Move your brand in to begin.',                render:()=>{ try{ applyBrandHome(); }catch(e){} } },
+  identity:     { id:'identity',     label:'Identity',     purpose:'The lead mark, name and tagline — who the brand is.',          emptyState:'Add a logo to anchor the identity.',          render:(root)=>{ renderIdentityBrain(root); } },
+  color:        { id:'color',        label:'Color',        purpose:'The palette and where each colour belongs.',                  emptyState:'Colours appear once a logo is read.',         render:(root)=>{ renderColorBrain(root); } },
+  typography:   { id:'typography',   label:'Typography',   purpose:'Display and body type — the voice in letterform.',            emptyState:'Type is detected or set by hand.',            render:(root)=>{ renderTypographyBrain(root); } },
+  voice:        { id:'voice',        label:'Voice',        purpose:'Tone, positioning and the words the brand uses.',             emptyState:"Voice is drawn from the brand's strategy.",    render:()=>{} },
+  assets:       { id:'assets',       label:'Assets',       purpose:'Every logo, photo and document, organized by role.',          emptyState:'Add files, or move a brand in.',              render:(root)=>{ renderAssetsRoom(); renderAssetsBrain(root); } },
+  applications: { id:'applications', label:'Applications', purpose:'The brand in use — signature, social and ready pieces.',       emptyState:'Applications build from the identity.',       render:(root)=>{ renderApplications(root); renderApplicationsBrain(root); } },
+  rules:        { id:'rules',        label:'Rules',        purpose:'Usage guidance — how to keep the brand consistent.',          emptyState:'Guidance assembles from the system.',         render:()=>{} },
+  delivery:     { id:'delivery',     label:'Delivery',     purpose:'The handoff — guide, ZIP, PDF and the published link.',       emptyState:'Prepare deliverables once the brand is set.', render:()=>{} }
+};
+const LEGACY_ROOM = {     // existing room key → registry room(s) it currently surfaces (mapping is documented; behaviour preserved exactly)
+  home:['foyer'], identity:['identity','color'], assets:['assets'], typography:['typography'],
+  guide:['rules','delivery'], deliverables:['applications'], founder:[]
+};
 function setShellRoom(key){ SHELL.className=SHELL.className.replace(/\bmd-room-\S+/g,'').replace(/\s+/g,' ').trim(); SHELL.classList.add('md-room-'+key); }
 function renderActiveRoom(){
   const key=currentRoom, r=ROOMS[key]; if(!r) return;
@@ -879,14 +895,12 @@ function renderActiveRoom(){
   if(roomDesc) roomDesc.textContent=(ROOM_META[key]&&ROOM_META[key].desc)||'';
   try{ if(window.MD&&MD.brain){ MD.brain.refresh(); const st=MD.brain.roomStatus()[key]; if(st!=null) roomBody.dataset.brainStatus=st; } }catch(e){}   // room reads the Brain
   const g=(label,fn)=>{ try{ fn(); }catch(e){ console.warn('[brand-home] room render ('+label+') failed:', e); } };
-  if(key==='assets') g('assets',renderAssetsRoom);
-  if(key==='assets') g('assetsBrain',()=>renderAssetsBrain(roomBody));
-  if(key==='deliverables') g('deliverables',()=>renderApplications(roomBody));
-  if(key==='deliverables') g('appsBrain',()=>renderApplicationsBrain(roomBody));
+  syncBrandState();                                                    // keep the shared read-model current for whatever this room reads
+  if(key==='assets')       g('room:assets',()=>roomRegistry.assets.render(roomBody));
+  if(key==='deliverables') g('room:applications',()=>roomRegistry.applications.render(roomBody));
   g('edit',()=>enableEditing(roomBody)); g('uploads',()=>applyUploads(roomBody)); g('founder',()=>applyFounder(roomBody));
-  if(key==='identity') g('identityBrain',()=>renderIdentityBrain(roomBody));
-  if(key==='identity') g('colorBrain',()=>renderColorBrain(roomBody));
-  if(key==='typography') g('typeBrain',()=>renderTypographyBrain(roomBody));
+  if(key==='identity'){ g('room:identity',()=>roomRegistry.identity.render(roomBody)); g('room:color',()=>roomRegistry.color.render(roomBody)); }
+  if(key==='typography')   g('room:typography',()=>roomRegistry.typography.render(roomBody));
   if(key==='founder') g('founderState',refreshFounderState);
 }
 function renderActiveRoomBrains(){            // re-run the editor-only specialist reads for the open room
@@ -913,6 +927,31 @@ document.querySelectorAll('[data-action="edit"]').forEach(b=>b.addEventListener(
   announceWorkspaceUpdate('Editing your Brand Home. Changes save as you go.','edit');
 }));
 document.getElementById('backBtn').addEventListener('click',closeRoom);
+/* Cmd/Ctrl-Z undo · Cmd/Ctrl-Shift-Z or Ctrl-Y redo — left native undo alone inside a text field */
+document.addEventListener('keydown',e=>{
+  if(!(e.metaKey||e.ctrlKey)) return;
+  const k=(e.key||'').toLowerCase(); if(k!=='z'&&k!=='y') return;
+  const ae=document.activeElement;
+  if(ae && (ae.isContentEditable || ae.tagName==='INPUT' || ae.tagName==='TEXTAREA')) return;
+  e.preventDefault();
+  if(k==='y' || (k==='z'&&e.shiftKey)) doRedo(); else doUndo();
+});
+/* A clear leftward swipe (outside the colour picker / inputs) returns to the Brand Home */
+(function(){
+  let x0=null,y0=null,t0=0,guard=false;
+  document.addEventListener('touchstart',e=>{
+    if(e.touches.length!==1){ x0=null; return; }
+    const t=e.touches[0]; x0=t.clientX; y0=t.clientY; t0=Date.now();
+    guard = !!(e.target && e.target.closest && e.target.closest('#mdColorPicker, input, textarea, [contenteditable], canvas, [data-noswipe]'));
+  },{passive:true});
+  document.addEventListener('touchend',e=>{
+    if(x0==null||guard){ x0=null; return; }
+    const t=e.changedTouches[0], dx=t.clientX-x0, dy=t.clientY-y0, dt=Date.now()-t0; x0=null;
+    if(dx < -70 && Math.abs(dx) > Math.abs(dy)*1.8 && dt < 700){
+      try{ if(typeof room!=='undefined' && room && room.classList.contains('show')) closeRoom(); }catch(err){}
+    }
+  },{passive:true});
+})();
 // founder toggles + any future toggle: flip on click
 // ── make every container editable: replace images, pick colors, edit text ──
 const fileInput=document.getElementById('editFile'), colorInput=document.getElementById('editColor'), addFilesInput=document.getElementById('addFiles');
@@ -1173,6 +1212,54 @@ function cpClose(){
 
 // ── upload & set: a dropped .zip unzips and populates the rooms ──
 const brand={name:'',tagline:'',category:'',logos:[],photos:[],docs:[],colors:[],type:null,colorSystem:null,typeSystem:null,personality:null,visualDirection:'',guidePlan:null,brandHomeImprovements:null,brandWorld:null,designStrategy:null,presentation:null};
+const brandState = {                 // one shared, structured read-model. `brand` stays the write target for now; syncBrandState() keeps this in step so every room reads one source of truth.
+  overview:{}, identity:{}, colors:[], typography:{}, voice:{}, assets:[], applications:{}, rules:{}, delivery:{}
+};
+function syncBrandState(){            // project the existing `brand` into brandState — non-destructive, never replaces brand
+  try{
+    const b=brand||{}, byRole=r=>(b.logos||[]).find(l=>l&&l.role===r)||null, P=b.presentation||{};
+    brandState.overview   = { name:b.name||'', tagline:b.tagline||'', category:b.category||'', headline:P.headline||'', summary:P.overview||'' };
+    brandState.identity   = { name:b.name||'', primary:byRole('primaryLogo'), wordmark:byRole('wordmark'), icon:byRole('iconMark'), secondary:byRole('secondaryLogo'), markCount:(b.logos||[]).length };
+    brandState.colors     = (b.colors||[]).slice();
+    brandState.typography = { display:(b.type&&(b.type.display||b.type.displayFont))||(b.typeSystem&&b.typeSystem.display)||null, body:(b.type&&(b.type.body||b.type.bodyFont))||(b.typeSystem&&b.typeSystem.body)||null, system:b.typeSystem||null };
+    brandState.voice      = { tone:(b.brandWorld&&b.brandWorld.tone)||(b.designStrategy&&b.designStrategy.voice)||'', keywords:(b.brandWorld&&b.brandWorld.keywords)||[], positioning:(b.designStrategy&&b.designStrategy.positioning)||'' };
+    brandState.assets     = [].concat(b.logos||[], b.photos||[], b.docs||[]);
+    brandState.applications = { ready:(b.logos||[]).length>0, fromAI:!!b.presentation };
+    brandState.rules      = { plan:b.guidePlan||null, world:b.brandWorld||null };
+    brandState.delivery   = { name:b.name||'', assetCount:(b.logos||[]).length+(b.photos||[]).length+(b.docs||[]).length, hasGuide:!!b.name };
+  }catch(e){ console.warn('[brandState] sync skipped:', e); }
+  return brandState;
+}
+/* Undo / redo: snapshot `brand` on every committed change; Cmd/Ctrl-Z steps back through restoreBrand(). */
+let undoStack=[], redoStack=[], _undoLast=null, _undoing=false;
+function _brandSnap(){
+  try{ return JSON.parse(JSON.stringify({
+    name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type,
+    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null,designStrategy:brand.designStrategy||null,environmentProfile:brand.environmentProfile||null,signature:brand.signature||null
+  })); }catch(e){ return null; }
+}
+function pushUndoSnapshot(){            // store the prior committed state so we can step back to it
+  if(_undoing) return;
+  const cur=_brandSnap(); if(!cur) return;
+  const curStr=JSON.stringify(cur);
+  if(_undoLast===curStr) return;       // nothing actually changed
+  if(_undoLast!=null){ undoStack.push(_undoLast); if(undoStack.length>50) undoStack.shift(); redoStack.length=0; }
+  _undoLast=curStr;
+}
+function doUndo(){
+  if(!undoStack.length){ try{ setStatus('Nothing to undo'); }catch(e){} return; }
+  const cur=_brandSnap(); if(cur) redoStack.push(JSON.stringify(cur));
+  const prev=undoStack.pop(); _undoLast=prev;
+  _undoing=true; try{ restoreBrand(JSON.parse(prev)); }catch(e){} _undoing=false;
+  try{ setStatus('Undid last change'); }catch(e){}
+}
+function doRedo(){
+  if(!redoStack.length){ try{ setStatus('Nothing to redo'); }catch(e){} return; }
+  const cur=_brandSnap(); if(cur) undoStack.push(JSON.stringify(cur));
+  const nxt=redoStack.pop(); _undoLast=nxt;
+  _undoing=true; try{ restoreBrand(JSON.parse(nxt)); }catch(e){} _undoing=false;
+  try{ setStatus('Redid change'); }catch(e){}
+}
 
 /* ════════════════ SHARED BRAND HOME STATE (single source of truth) ════════════════
    `brand` is the working store; MDWorkspaceState is its canonical, serializable view.
@@ -3286,9 +3373,11 @@ pane.addEventListener('drop',e=>{
 const SAVE_DB='mdBrandHomeSave', SAVE_STORE='brand', SAVE_KEY='current';
 function _db(){return new Promise((res,rej)=>{ if(typeof indexedDB==='undefined') return rej(new Error('no idb')); const r=indexedDB.open(SAVE_DB,1); r.onupgradeneeded=()=>{ try{r.result.createObjectStore(SAVE_STORE);}catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });}
 function saveBrand(){
+  try{ syncBrandState(); }catch(e){}
   const snap={name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type,
     colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null,designStrategy:brand.designStrategy||null,environmentProfile:brand.environmentProfile||null,signature:brand.signature||null};
   if(!snap.name && !snap.logos.length && !snap.photos.length && !(snap.colors&&snap.colors.length)) return;
+  try{ pushUndoSnapshot(); }catch(e){}
   _db().then(db=>{ try{ db.transaction(SAVE_STORE,'readwrite').objectStore(SAVE_STORE).put(snap,SAVE_KEY); }catch(e){} })
        .catch(()=>{ try{ localStorage.setItem('mdBrandHomeSaveLight', JSON.stringify({name:snap.name,tagline:snap.tagline,category:snap.category,colors:snap.colors,type:snap.type,colorSystem:snap.colorSystem,typeSystem:snap.typeSystem,logos:snap.logos.slice(0,3),photos:[],docs:snap.docs})); }catch(e){} });
 }
@@ -3311,6 +3400,7 @@ function restoreBrand(snap){
     setStatus('Welcome back'+(brand.name?', '+brand.name:'')+' — your guide is saved.');
     applyBrandHome();
     if(currentRoom && room.classList.contains('show')) openRoom(currentRoom);
+    try{ pushUndoSnapshot(); }catch(e){}
   }
 }
 window.addEventListener('beforeunload', saveBrand);
