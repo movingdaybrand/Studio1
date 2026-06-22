@@ -168,6 +168,11 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .id-read-line{font-family:var(--display);font-style:italic;font-weight:300;font-size:clamp(14px,1.4vw,16px);color:var(--ink-soft);margin:0;line-height:1.4;}
 .id-read-note{font-size:11.5px;line-height:1.5;color:var(--ink-faint);margin:0;padding-left:14px;position:relative;}
 .id-read-note::before{content:"";position:absolute;left:0;top:.52em;width:5px;height:5px;border-radius:50%;background:var(--ink-faint);opacity:.55;}
+.rec-uploads{display:flex;flex-wrap:wrap;gap:8px;margin:7px 0 3px;padding-left:14px;}
+.rec-upload{font-family:inherit;font-size:11.5px;letter-spacing:.01em;color:var(--ink-soft);background:rgba(127,127,127,.05);border:1.5px dashed var(--ink-faint);border-radius:10px;padding:9px 13px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:border-color .2s,background .2s,color .2s,transform .2s;}
+.rec-upload:hover{color:var(--ink);border-color:var(--sage);transform:translateY(-1px);}
+.rec-upload.drag{border-style:solid;border-color:var(--sage);background:var(--glass);}
+.rec-upload svg{width:13px;height:13px;opacity:.7;}
 .editing .swatch span:not(.hex){cursor:text;}
 .id-marks{display:flex;flex-direction:column;gap:clamp(12px,1.6vw,18px);}
 .id-markrow{display:flex;flex-wrap:wrap;gap:clamp(10px,1.2vw,15px);}
@@ -911,6 +916,7 @@ document.getElementById('backBtn').addEventListener('click',closeRoom);
 // founder toggles + any future toggle: flip on click
 // ── make every container editable: replace images, pick colors, edit text ──
 const fileInput=document.getElementById('editFile'), colorInput=document.getElementById('editColor'), addFilesInput=document.getElementById('addFiles');
+let _addRole='';   // a recommendation's upload box can target the role of the file it's asking for
 let editTarget=null, editAssetId=null;
 function findAsset(id){ return [...brand.logos,...brand.photos,...brand.docs].find(a=>a.id===id)||null; }
 /* ── replace from the uploaded asset library (no re-upload needed) ── */
@@ -959,7 +965,8 @@ function removeAsset(id){
 async function addBrandFiles(fileList){            // additive: bring new files in WITHOUT touching colours, type, name, or copy
   const files=Array.from(fileList||[]).filter(Boolean); if(!files.length) return;
   announceWorkspaceUpdate('Adding '+files.length+' file'+(files.length===1?'':'s')+'\u2026','assets');
-  let added=0;
+  const wantRole=_addRole; _addRole='';            // a rec box can ask for a specific role (iconMark / secondaryLogo / primaryLogo)
+  let added=0, rolePlaced=false;
   for(const f of files){
     const name=(f.name||'file').split('/').pop();
     const ext=((name.split('.').pop())||'').toLowerCase();
@@ -969,7 +976,7 @@ async function addBrandFiles(fileList){            // additive: bring new files 
       const a={id:newId(),name,url:dataUrl,ext,role:''};
       try{ const m=await analyzeAsset(dataUrl); if(m){ a.lum=m.lum; a.aspect=m.aspect; a.variety=m.variety; a.transparentRatio=m.transparentRatio; a.softRatio=m.softRatio; a._an=true; } }catch(e){}
       if(categoryForAsset(a)==='Photography'){ a.role='photography'; brand.photos.push(a); }
-      else brand.logos.push(a);
+      else { if(wantRole && !rolePlaced){ a.role=wantRole; rolePlaced=true; } brand.logos.push(a); }
       added++;
     } else if(DOC_EXT.includes(ext)){
       brand.docs.push({id:newId(),name,ext,url:dataUrl||''}); added++;
@@ -1004,7 +1011,7 @@ roomBody.addEventListener('click',e=>{
   const idl=e.target.closest('[data-ig-download]'); if(idl){ exportInstagramIcon(); return; }
   if(!editorActive()) return;                                  // edits only live in Editor mode
   const rm=e.target.closest('.asset-remove'); if(rm){ removeAsset(rm.dataset.remove); return; }
-  const af=e.target.closest('[data-addfiles]'); if(af){ addFilesInput.click(); return; }
+  const af=e.target.closest('[data-addfiles]'); if(af){ _addRole=af.getAttribute('data-addrole')||''; addFilesInput.click(); return; }
   if(e.target.isContentEditable) return;                       // editing text, not replacing
   const at=e.target.closest('.asset-thumb[data-asset]');
   if(at){ editAssetId=at.dataset.asset; editTarget=null; openReplacePicker(); return; }
@@ -2563,11 +2570,26 @@ function renderIdentityBrain(root){
     const line = id.count + ' mark' + (id.count>1?'s':'') + ', organized'
                + (roles.length ? ' — ' + roles.join(', ') + ' set' : '') + '.';
     const notes = (id.recommendations || []).slice(0,2);
+    const recAction = n=>{
+      if(/square icon|favicon|avatar/i.test(n)) return {label:'Add a square icon', role:'iconMark'};
+      if(/reversed|light\)? version|dark grounds/i.test(n)) return {label:'Add a reversed logo', role:'secondaryLogo'};
+      if(/primary logo/i.test(n)) return {label:'Add your primary logo', role:'primaryLogo'};
+      return null;
+    };
+    const plus='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>';
     const block = document.createElement('div');
     block.className = 'id-read';
     block.innerHTML = '<p class="id-read-line">'+esc(line)+'</p>'
-      + notes.map(n=>'<p class="id-read-note">'+esc(n)+'</p>').join('');
+      + notes.map(n=>{ const a=recAction(n);
+          return '<p class="id-read-note">'+esc(n)+'</p>'
+            + (a ? '<div class="rec-uploads"><button type="button" class="rec-upload" data-addfiles data-addrole="'+a.role+'">'+plus+esc(a.label)+'</button></div>' : '');
+        }).join('');
     marks.insertAdjacentElement('afterend', block);
+    block.querySelectorAll('.rec-upload[data-addrole]').forEach(btn=>{        // click to pick, or drop a file straight onto the box
+      btn.addEventListener('dragover', e=>{ e.preventDefault(); btn.classList.add('drag'); });
+      btn.addEventListener('dragleave', ()=>btn.classList.remove('drag'));
+      btn.addEventListener('drop', e=>{ e.preventDefault(); btn.classList.remove('drag'); const f=e.dataTransfer&&e.dataTransfer.files; if(f&&f.length){ _addRole=btn.getAttribute('data-addrole')||''; addBrandFiles(f); } });
+    });
   }catch(e){ console.warn('[identity-room] specialist read skipped:', e); }
 }
 
