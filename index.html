@@ -2854,10 +2854,18 @@ async function walkEntry(en,out,depth){
   if(en.isFile){ const f=await entryFile(en); if(f) out.push(f); }
   else if(en.isDirectory){ const rd=en.createReader(); let batch; do{ batch=await readDir(rd); for(const e of batch) await walkEntry(e,out,depth+1); }while(batch.length); }
 }
+function arriveHome(){                                   // reveal a freshly moved-in brand as one composed motion, never a pop
+  const b=document.body;
+  b.classList.remove('md-arrive-go'); b.classList.add('md-arrive');     // settle to the pre-arrival state for a frame
+  requestAnimationFrame(()=>requestAnimationFrame(()=>b.classList.add('md-arrive-go')));   // then ease environment, header and rooms in together
+  setTimeout(()=>b.classList.remove('md-arrive','md-arrive-go'), 1800); // hand styling back once the choreography has played
+}
 async function moveInFiles(fileList){
   if(typeof JSZip==='undefined'){ setStatus('Still loading — try again in a second.'); return; }
   const files=Array.from(fileList||[]).filter(Boolean);
   if(!files.length) return;
+  const coldArrival = !brand.name && !(brand.logos||[]).length && activeRoom==='home'
+    && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);   // a first arrival on the home — not an additive add-files
   setStatus('Moving in '+files.length+' item'+(files.length===1?'':'s')+'…');
   const imgs=[]; brand.docs=[]; let folderName='';
   for(const f of files){
@@ -2870,6 +2878,7 @@ async function moveInFiles(fileList){
     else if(DOC_EXT.includes(ext)){ brand.docs.push({name:name.split('/').pop(),ext}); }
   }
   await finishIntake(imgs,folderName);
+  if(coldArrival && activeRoom==='home' && (brand.logos.length||brand.colors.length||brand.name)) arriveHome();   // the brand arrives as one motion, not a pop
 }
 function loadImg(url){ return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=url; }); }
 function dedupeColors(list){            // drop identical + near-identical so no duplicates slip through
