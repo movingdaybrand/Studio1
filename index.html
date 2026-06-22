@@ -72,11 +72,26 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .home-logo{display:flex;justify-content:center;margin:0 0 clamp(14px,2.4vh,24px);}
 .home-logo img{height:clamp(62px,8vw,96px);max-width:clamp(220px,36vw,400px);object-fit:contain;mix-blend-mode:normal;}
 body.deep-immerse .home-logo img{mix-blend-mode:normal;}   /* multiply darkens a mark on the dark immersive ground — keep it true on dark */
-#mdWelcome{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;pointer-events:none;background:radial-gradient(130% 100% at 50% 32%,#1b2730,#0c1218 72%);opacity:0;transition:opacity .7s ease;}
+#mdWelcome{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;pointer-events:none;background:#0b1116;opacity:0;transition:opacity .9s ease;overflow:hidden;}
 #mdWelcome.on{opacity:1;}
-#mdWelcome .ww{font-family:var(--display);font-weight:300;font-size:clamp(30px,4.2vw,48px);letter-spacing:-.02em;color:#f3efe6;opacity:0;transform:translateY(10px);transition:opacity .8s ease,transform .8s ease;}
-#mdWelcome.show-text .ww{opacity:1;transform:none;}
-#mdWelcome .ww .soft{color:rgba(243,239,230,.42);}
+#mdWelcome .md-env{position:absolute;inset:-12%;opacity:0;transition:opacity 1.5s ease;filter:blur(10px) saturate(1.06);transform:scale(1.04);}
+#mdWelcome.s-env .md-env{opacity:1;}
+#mdWelcome .md-vig{position:absolute;inset:0;background:radial-gradient(120% 92% at 50% 44%,transparent 38%,rgba(6,10,14,.58) 100%);}
+#mdWelcome .md-greet{position:absolute;font-family:var(--display);font-weight:300;font-size:clamp(30px,4.6vw,52px);letter-spacing:-.02em;color:#f5f1e8;opacity:0;transform:translateY(8px);transition:opacity .9s ease,transform .9s ease;text-shadow:0 2px 22px rgba(0,0,0,.42);}
+#mdWelcome.s-greet .md-greet{opacity:1;transform:none;}
+#mdWelcome .md-greet .soft{color:rgba(245,241,232,.45);}
+#mdWelcome .md-stage{position:relative;display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;padding:24px;}
+#mdWelcome .md-logo{position:relative;opacity:0;transform:scale(.92) translateY(8px);transition:opacity 1.05s ease,transform 1.25s cubic-bezier(.2,.7,.2,1);}
+#mdWelcome.s-logo .md-logo{opacity:1;transform:none;}
+#mdWelcome .md-logo::after{content:"";position:absolute;inset:-45% -45%;background:radial-gradient(closest-side,rgba(255,255,255,.15),transparent 70%);z-index:-1;}
+#mdWelcome .md-logo img{height:clamp(96px,16vh,168px);max-width:min(60vw,360px);object-fit:contain;filter:drop-shadow(0 18px 44px rgba(0,0,0,.5));}
+#mdWelcome .md-name{font-family:var(--display);font-weight:300;font-size:clamp(30px,5vw,56px);letter-spacing:-.02em;color:#f5f1e8;opacity:0;transform:translateY(12px);transition:opacity .95s ease,transform .95s ease;text-shadow:0 2px 22px rgba(0,0,0,.45);}
+#mdWelcome.s-name .md-name{opacity:1;transform:none;}
+#mdWelcome .md-tag{font-weight:300;font-size:clamp(14px,1.8vw,18px);color:rgba(245,241,232,.7);max-width:min(80vw,560px);opacity:0;transform:translateY(8px);transition:opacity .95s ease,transform .95s ease;text-shadow:0 1px 16px rgba(0,0,0,.4);}
+#mdWelcome.s-tag .md-tag{opacity:1;transform:none;}
+#mdWelcome .md-pal{display:flex;gap:10px;margin-top:8px;}
+#mdWelcome .md-pal i{width:clamp(26px,3.4vw,40px);height:clamp(26px,3.4vw,40px);border-radius:999px;box-shadow:0 6px 18px rgba(0,0,0,.38),inset 0 0 0 1px rgba(255,255,255,.16);opacity:0;transform:translateY(12px) scale(.6);transition:opacity .6s ease,transform .75s cubic-bezier(.2,.85,.2,1);}
+#mdWelcome.s-pal .md-pal i{opacity:1;transform:none;}
 @media (prefers-reduced-motion:reduce){#mdWelcome{display:none;}}
 .movein{display:flex;flex-direction:column;align-items:center;gap:9px;margin-top:16px;}
 .movein-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--sage);background:rgba(255,255,255,.62);box-shadow:var(--shadow);padding:9px 17px;border-radius:99px;transition:transform .2s,box-shadow .2s;}
@@ -2990,16 +3005,60 @@ function arriveHome(){                                   // reveal a freshly mov
   requestAnimationFrame(()=>requestAnimationFrame(()=>b.classList.add('md-arrive-go')));   // then ease environment, header and rooms in together
   setTimeout(()=>b.classList.remove('md-arrive','md-arrive-go'), 1800); // hand styling back once the choreography has played
 }
-function welcomeHomeArrival(){                            // on a cold move-in: greet, then reveal the logo + environment as the veil lifts
+function _wHexA(hex,a){                                   // #rrggbb → rgba(), for the arrival's atmospheric ground
+  try{ const h=String(hex||'').replace('#',''); if(h.length<6) return 'rgba(22,30,36,'+a+')';
+    const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
+    return 'rgba('+r+','+g+','+b+','+a+')';
+  }catch(e){ return 'rgba(22,30,36,'+a+')'; }
+}
+function _wEnvGrad(cols){                                 // a soft, brand-coloured atmosphere built from the palette
+  const c=(i,d)=>(cols[i]&&cols[i].hex)||d;
+  const a=c(0,'#26323b'), b=c(1,a), c3=c(2,b);
+  return 'radial-gradient(70% 60% at 27% 22%,'+_wHexA(a,.85)+',transparent 70%),'
+       + 'radial-gradient(62% 55% at 82% 78%,'+_wHexA(c3,.72)+',transparent 72%),'
+       + 'linear-gradient(135deg,'+_wHexA(b,.92)+','+_wHexA(a,.96)+')';
+}
+function welcomeHomeArrival(){                            // cinematic cold-arrival: greeting → primary logo → name → feel → colours → environment → dissolve
   try{
     if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches){ arriveHome(); return; }
-    let ov=document.getElementById('mdWelcome');
-    if(!ov){ ov=document.createElement('div'); ov.id='mdWelcome';
-      ov.innerHTML='<div class="ww">Welcome <span class="soft">home.</span></div>'; document.body.appendChild(ov); }
-    ov.classList.remove('on','show-text');
-    requestAnimationFrame(()=>{ ov.classList.add('on'); requestAnimationFrame(()=>ov.classList.add('show-text')); });  // ground calms · greeting rises
-    setTimeout(()=>ov.classList.remove('show-text'), 1200);                                  // greeting eases away
-    setTimeout(()=>{ try{ arriveHome(); }catch(e){} ov.classList.remove('on'); }, 1500);     // veil lifts → logo & environment ease in beneath
+    const mark = (typeof heroMark==='function' && heroMark()) || (typeof pickMark==='function' && pickMark('primaryLogo','wordmark','secondaryLogo')) || null;
+    const cols = (brand.colors||[]).slice(0,5);
+    const name = brand.name||'';
+    const tag  = brand.tagline||'';
+    const t=brand.type||{}, ts=brand.typeSystem||{};
+    const df = t.display || (ts.display&&ts.display.name) || (ts.heading&&ts.heading.name) || '';
+    if(df){ try{ ensureFont(df); }catch(e){} }
+
+    let ov=document.getElementById('mdWelcome'); if(ov) ov.remove();
+    ov=document.createElement('div'); ov.id='mdWelcome';
+    const pal = cols.map((c,i)=>'<i style="background:'+(c.hex||'#888')+';transition-delay:'+(i*85)+'ms"></i>').join('');
+    ov.innerHTML =
+        '<div class="md-env" style="background:'+_wEnvGrad(cols)+'"></div><div class="md-vig"></div>'
+      + '<div class="md-greet">Welcome <span class="soft">home.</span></div>'
+      + '<div class="md-stage">'
+      +   '<div class="md-logo"><img alt=""></div>'
+      +   (name ? '<div class="md-name">'+esc(name)+'</div>' : '')
+      +   (tag  ? '<div class="md-tag">'+esc(tag)+'</div>'   : '')
+      +   (pal  ? '<div class="md-pal">'+pal+'</div>'        : '')
+      + '</div>';
+    document.body.appendChild(ov);
+
+    const nm=ov.querySelector('.md-name'); if(nm && df){ try{ nm.style.fontFamily='"'+df+'", var(--display)'; }catch(e){} }
+    const img=ov.querySelector('.md-logo img');
+    if(mark && mark.url && img){ img.src=mark.url;
+      try{ cleanMark(mark.url, /svg/i.test(mark.ext||mark.url||'')).then(u=>{ if(u) img.src=u; }).catch(()=>{}); }catch(e){}
+    } else { const l=ov.querySelector('.md-logo'); if(l) l.style.display='none'; }
+
+    const at=(ms,fn)=>setTimeout(fn,ms);
+    requestAnimationFrame(()=>{ ov.classList.add('on'); requestAnimationFrame(()=>ov.classList.add('s-greet')); });  // ground rises · greeting
+    at(1400, ()=>ov.classList.remove('s-greet'));        // greeting eases away
+    at(1750, ()=>ov.classList.add('s-logo'));            // the primary logo, spotlit
+    at(2400, ()=>ov.classList.add('s-name'));            // the name, in the brand's own type
+    at(2950, ()=>ov.classList.add('s-tag'));             // the tagline — the feel
+    at(3500, ()=>ov.classList.add('s-pal'));             // the colours bloom in
+    at(4150, ()=>ov.classList.add('s-env'));             // the environment washes in
+    at(5350, ()=>{ try{ arriveHome(); }catch(e){} ov.classList.remove('on'); });   // dissolve → the real home eases in beneath
+    at(6350, ()=>{ if(ov&&ov.parentNode) ov.remove(); });
   }catch(e){ try{ arriveHome(); }catch(_){} }
 }
 async function moveInFiles(fileList){
