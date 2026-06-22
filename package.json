@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "build": "mkdir -p dist && cp index.html dist/index.html && cp guide.html dist/guide.html && cp ai-test.html dist/ai-test.html && cp client-guide.html dist/client-guide.html && cp -R clients dist/clients 2>/dev/null || true && cp -R shared dist/shared 2>/dev/null || true"
+    "build": "mkdir -p dist && for f in index.html experience.html guide.html client-guide.html; do [ -f \"$f\" ] && cp \"$f\" dist/; done; for d in clients shared; do [ -d \"$d\" ] && cp -R \"$d\" dist/; done; true"
   },
   "dependencies": {
     "@vercel/blob": "^2.3.0"
