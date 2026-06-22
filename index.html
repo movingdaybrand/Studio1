@@ -104,6 +104,18 @@ body.deep-immerse .home-logo img{mix-blend-mode:normal;}   /* multiply darkens a
 .fontname{font-size:12.5px;color:var(--ink-soft);letter-spacing:.01em;}
 .fontrole{font-size:13px;padding:5px 11px;border-radius:9px;border:1px solid var(--ink-faint);background:transparent;color:var(--ink);cursor:pointer;}
 .fontup-empty{font-size:13px;color:var(--ink-soft);border:1px dashed var(--ink-faint);border-radius:13px;padding:20px;text-align:center;}
+.gread{margin-top:22px;border-top:1px solid var(--ink-faint);padding-top:18px;}
+.gread-head{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+.gread-busy{font-size:11px;letter-spacing:.04em;text-transform:none;color:var(--ink-faint);}
+.gread-sec{margin-bottom:16px;}
+.gread-lbl{font-size:12px;color:var(--ink-soft);margin-bottom:8px;}
+.gread-cols,.gread-chips{display:flex;flex-wrap:wrap;gap:8px;}
+.gread-col{display:flex;align-items:center;gap:7px;padding:5px 11px 5px 6px;border:1px solid var(--ink-faint);border-radius:999px;background:transparent;color:var(--ink);font-size:12.5px;cursor:pointer;transition:border-color .2s;}
+.gread-col:hover{border-color:var(--ink-soft);}
+.gread-col i{width:16px;height:16px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);}
+.gread-chip{font-size:12.5px;color:var(--ink);border:1px solid var(--ink-faint);border-radius:8px;padding:4px 10px;}
+.gread-rules{margin:0;padding-left:18px;color:var(--ink-soft);font-size:13px;line-height:1.5;}
+.gread-rules li{margin-bottom:5px;}
 .movein{display:flex;flex-direction:column;align-items:center;gap:9px;margin-top:16px;}
 .movein-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--sage);background:rgba(255,255,255,.62);box-shadow:var(--shadow);padding:9px 17px;border-radius:99px;transition:transform .2s,box-shadow .2s;}
 .movein-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover);}
@@ -911,7 +923,7 @@ const roomRegistry = {
   color:        { id:'color',        label:'Color',        purpose:'The palette and where each colour belongs.',                  emptyState:'Colours appear once a logo is read.',         render:(root)=>{ renderColorBrain(root); } },
   typography:   { id:'typography',   label:'Typography',   purpose:'Display and body type — the voice in letterform.',            emptyState:'Type is detected or set by hand.',            render:(root)=>{ renderTypographyBrain(root); renderFontUploads(root); } },
   voice:        { id:'voice',        label:'Voice',        purpose:'Tone, positioning and the words the brand uses.',             emptyState:"Voice is drawn from the brand's strategy.",    render:()=>{} },
-  assets:       { id:'assets',       label:'Assets',       purpose:'Every logo, photo and document, organized by role.',          emptyState:'Add files, or move a brand in.',              render:(root)=>{ renderAssetsRoom(); renderAssetsBrain(root); } },
+  assets:       { id:'assets',       label:'Assets',       purpose:'Every logo, photo and document, organized by role.',          emptyState:'Add files, or move a brand in.',              render:(root)=>{ renderAssetsRoom(); renderAssetsBrain(root); renderGuidelineReader(root); } },
   applications: { id:'applications', label:'Applications', purpose:'The brand in use — signature, social and ready pieces.',       emptyState:'Applications build from the identity.',       render:(root)=>{ renderApplications(root); renderApplicationsBrain(root); } },
   rules:        { id:'rules',        label:'Rules',        purpose:'Usage guidance — how to keep the brand consistent.',          emptyState:'Guidance assembles from the system.',         render:()=>{} },
   delivery:     { id:'delivery',     label:'Delivery',     purpose:'The handoff — guide, ZIP, PDF and the published link.',       emptyState:'Prepare deliverables once the brand is set.', render:()=>{} }
@@ -1998,6 +2010,101 @@ function renderFontUploads(root){
     panel.querySelectorAll('.fontrole').forEach(sel=> sel.addEventListener('change',e=> assignFontRole(e.target.getAttribute('data-fam'), e.target.value)) );
   }catch(e){ console.warn('[fonts] panel render skipped', e); }
 }
+
+/* ── Guideline reader: pull text from uploaded PDFs, surface colours / type / usage rules ── */
+let _pdfjsReady=null;
+function loadPdfJs(){
+  if(window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+  if(_pdfjsReady) return _pdfjsReady;
+  _pdfjsReady=new Promise((res,rej)=>{
+    const s=document.createElement('script'); s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+    s.onload=()=>{ try{ if(window.pdfjsLib) window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'; }catch(e){} res(window.pdfjsLib); };
+    s.onerror=()=>rej(new Error('pdf.js load failed')); document.head.appendChild(s);
+  });
+  return _pdfjsReady;
+}
+function _dataUrlToBytes(durl){
+  try{ const i=String(durl).indexOf(','); const b64=String(durl).slice(i+1); const bin=atob(b64); const u=new Uint8Array(bin.length); for(let k=0;k<bin.length;k++) u[k]=bin.charCodeAt(k); return u; }catch(e){ return null; }
+}
+async function extractPdfText(dataURL){
+  const lib=await loadPdfJs(); if(!lib) return '';
+  const bytes=_dataUrlToBytes(dataURL); if(!bytes) return '';
+  const pdf=await lib.getDocument({data:bytes}).promise;
+  let out=''; const max=Math.min(pdf.numPages||1, 40);
+  for(let i=1;i<=max;i++){ try{ const pg=await pdf.getPage(i); const tc=await pg.getTextContent(); out += tc.items.map(it=>it.str).join(' ')+'\n'; }catch(e){} }
+  return out;
+}
+function parseGuidelines(text){
+  const t=String(text||''); const res={colors:[],fonts:[],rules:[],voice:[]};
+  const hexes=(t.match(/#[0-9a-fA-F]{6}\b/g)||[]).map(h=>'#'+h.slice(1).toUpperCase());
+  res.colors=[...new Set(hexes)].slice(0,12);
+  const fre=/(?:typeface|type family|primary type|secondary type|set in|font family|font)\s*[:\-]?\s*([A-Z][A-Za-z0-9][A-Za-z0-9 \-]{1,26})/g;
+  const fs=new Set(); let m;
+  while((m=fre.exec(t))){ let nm=m[1].trim().replace(/\s+(is|are|the|for|family|font|typeface|in)$/i,'').trim(); if(nm.length>2 && /[A-Za-z]/.test(nm) && !/^(the|and|for|with|your|our)$/i.test(nm)) fs.add(nm); }
+  res.fonts=[...fs].slice(0,6);
+  const lines=t.split(/[\n.;•]/).map(s=>s.replace(/\s+/g,' ').trim()).filter(s=>s.length>14 && s.length<180);
+  const ruleRe=/(clear ?space|exclusion zone|minimum size|min\.? size|do not|don'?t|never|always|must not|safe area|placement|logo.{0,20}(size|space|colou?r))/i;
+  const seen=new Set();
+  for(const l of lines){ if(ruleRe.test(l)){ const k=l.toLowerCase().slice(0,40); if(!seen.has(k)){ seen.add(k); res.rules.push(l); } } if(res.rules.length>=6) break; }
+  const vre=/(tone of voice|brand voice|our voice|we are|we're|we believe|personality)/i;
+  for(const l of lines){ if(vre.test(l) && res.voice.length<3 && res.voice.indexOf(l)<0) res.voice.push(l); }
+  return res;
+}
+function mergeGuidelines(){
+  const G={colors:[],fonts:[],rules:[],voice:[],sources:[]};
+  (brand.docs||[]).forEach(d=>{ const e=d.extracted; if(e&&!e.pending&&!e.error){ if(e.colors)G.colors.push(...e.colors); if(e.fonts)G.fonts.push(...e.fonts); if(e.rules)G.rules.push(...e.rules); if(e.voice)G.voice.push(...e.voice); if((d.ext||'')==='pdf'&&d.name)G.sources.push(d.name); } });
+  G.colors=[...new Set(G.colors)]; G.fonts=[...new Set(G.fonts)]; G.rules=[...new Set(G.rules)]; G.voice=[...new Set(G.voice)];
+  brand.guidelines=G; return G;
+}
+async function readGuidelinePdf(doc){
+  try{
+    if(!doc || !doc.url || doc.extracted || String(doc.ext||'').toLowerCase()!=='pdf') return;
+    doc.extracted={pending:true};
+    if(currentRoom==='assets'){ try{ renderGuidelineReader(roomBody); }catch(e){} }
+    setStatus('Reading '+(doc.name||'your guidelines')+'\u2026');
+    const text=await extractPdfText(doc.url);
+    const g=parseGuidelines(text);
+    doc.extracted={ chars:text.length, colors:g.colors, fonts:g.fonts, rules:g.rules, voice:g.voice };
+    mergeGuidelines();
+    try{ saveBrand(); }catch(e){}
+    if(currentRoom==='assets'){ try{ renderGuidelineReader(roomBody); }catch(e){} }
+    const bits=[]; if(g.colors.length)bits.push(g.colors.length+' colour'+(g.colors.length>1?'s':'')); if(g.fonts.length)bits.push(g.fonts.length+' font'+(g.fonts.length>1?'s':'')); if(g.rules.length)bits.push(g.rules.length+' note'+(g.rules.length>1?'s':''));
+    setStatus(bits.length? ('Read '+bits.join(', ')+' from '+(doc.name||'your guidelines')+'.') : ('No readable text in '+(doc.name||'that PDF')+' \u2014 it may be image-only.'));
+  }catch(e){ console.warn('[pdf] read failed', e); if(doc) doc.extracted={error:true}; if(currentRoom==='assets'){ try{ renderGuidelineReader(roomBody); }catch(_){} } }
+}
+function approveGuidelineColor(hex){
+  if(!hex) return; brand.colors=brand.colors||[]; const h=String(hex).toLowerCase();
+  if(brand.colors.some(c=>String(c.hex||'').toLowerCase()===h)){ setStatus(hex+' is already in your palette.'); return; }
+  brand.colors.push({hex:h, name:(typeof homeColorName==='function'?homeColorName(h):'Color')});
+  try{ if(typeof applyPaletteVars==='function') applyPaletteVars(brand.colors); }catch(e){}
+  try{ saveBrand(); }catch(e){}
+  try{ applyBrandHome(); }catch(e){}
+  setStatus(hex+' added to your palette.');
+}
+function renderGuidelineReader(root){
+  try{
+    if(!root) return; root.querySelectorAll('.gread').forEach(e=>e.remove());
+    if(typeof editorActive==='function' && !editorActive()) return;
+    const pdfs=(brand.docs||[]).filter(d=>String(d.ext||'').toLowerCase()==='pdf');
+    if(!pdfs.length) return;
+    pdfs.forEach(d=>{ if(d.url && !d.extracted) readGuidelinePdf(d); });   // lazy-read on view
+    const host=root.querySelector('#assetRoot')||root;
+    const G=brand.guidelines||{};
+    const pending=pdfs.some(d=>!d.extracted || (d.extracted&&d.extracted.pending));
+    const anyData=(G.colors&&G.colors.length)||(G.fonts&&G.fonts.length)||(G.rules&&G.rules.length);
+    if(!pending && !anyData) return;
+    let inner='<div class="gread-head">From your guidelines'+(pending?' <span class="gread-busy">reading\u2026</span>':'')+'</div>';
+    if(G.colors&&G.colors.length){
+      inner+='<div class="gread-sec"><div class="gread-lbl">Colours found</div><div class="gread-cols">'
+        + G.colors.map(h=>'<button class="gread-col" data-hex="'+h+'" title="Add '+h+' to palette"><i style="background:'+h+'"></i><span>'+h+'</span></button>').join('')
+        + '</div></div>';
+    }
+    if(G.fonts&&G.fonts.length){ inner+='<div class="gread-sec"><div class="gread-lbl">Type mentioned</div><div class="gread-chips">'+G.fonts.map(f=>'<span class="gread-chip">'+esc(f)+'</span>').join('')+'</div></div>'; }
+    if(G.rules&&G.rules.length){ inner+='<div class="gread-sec"><div class="gread-lbl">Usage notes</div><ul class="gread-rules">'+G.rules.slice(0,6).map(r=>'<li>'+esc(r)+'</li>').join('')+'</ul></div>'; }
+    const panel=document.createElement('div'); panel.className='gread'; panel.innerHTML=inner; host.appendChild(panel);
+    panel.querySelectorAll('.gread-col').forEach(b=> b.addEventListener('click',()=>approveGuidelineColor(b.getAttribute('data-hex'))));
+  }catch(e){ console.warn('[pdf] reader render skipped', e); }
+}
 function applyType(root){
   if(!brand.type) return; const t=brand.type, ts=brand.typeSystem;
   ensureFont(t.display); ensureFont(t.body);
@@ -3062,7 +3169,7 @@ async function collectFromZip(file){
     } else if(FONT_EXT.includes(ext)){
       const b64=await f.async('base64'); const mime=ext==='woff2'?'font/woff2':ext==='woff'?'font/woff':ext==='ttf'?'font/ttf':'font/otf';
       fonts.push({name:base,family:safeFamily(base),url:'data:'+mime+';base64,'+b64,ext,role:''});
-    } else if(DOC_EXT.includes(ext)){ docs.push({name:base,ext}); }
+    } else if(DOC_EXT.includes(ext)){ let durl=''; if(ext==='pdf'){ try{ const b64=await f.async('base64'); durl='data:application/pdf;base64,'+b64; }catch(e){} } docs.push({name:base,ext,url:durl}); }
   }
   const tops=[...new Set(entries.map(f=>f.name.includes('/')?f.name.split('/')[0]:null).filter(Boolean))];
   return {imgs,docs,fonts,top:tops.length===1?prettify(tops[0]):''};
@@ -3158,7 +3265,7 @@ async function moveInFiles(fileList){
       catch(e){ console.warn('zip failed',name,e); }
     } else if(IMG_EXT.includes(ext)){ const im=await fileToImg(f); if(im) imgs.push(im); }
     else if(FONT_EXT.includes(ext)){ const ft=await fileToFont(f); if(ft){ brand.fonts=brand.fonts||[]; if(!brand.fonts.some(x=>x.family===ft.family)){ brand.fonts.push(ft); registerUploadedFont(ft); } } }
-    else if(DOC_EXT.includes(ext)){ brand.docs.push({name:name.split('/').pop(),ext}); }
+    else if(DOC_EXT.includes(ext)){ let durl=''; if(ext==='pdf'){ try{ durl=await new Promise(r=>{ const rd=new FileReader(); rd.onload=()=>r(rd.result); rd.onerror=()=>r(''); rd.readAsDataURL(f); }); }catch(e){} } brand.docs.push({id:newId(),name:name.split('/').pop(),ext,url:durl}); }
   }
   await finishIntake(imgs,folderName);
   if(coldArrival && activeRoom==='home' && (brand.logos.length||brand.colors.length||brand.name)) welcomeHomeArrival();   // welcome home → logo → environment, as one arrival
@@ -3539,7 +3646,7 @@ function saveBrand(){
   if(!snap.name && !snap.logos.length && !snap.photos.length && !(snap.colors&&snap.colors.length)) return;
   try{ pushUndoSnapshot(); }catch(e){}
   _db().then(db=>{ try{ db.transaction(SAVE_STORE,'readwrite').objectStore(SAVE_STORE).put(snap,SAVE_KEY); }catch(e){} })
-       .catch(()=>{ try{ localStorage.setItem('mdBrandHomeSaveLight', JSON.stringify({name:snap.name,tagline:snap.tagline,category:snap.category,colors:snap.colors,type:snap.type,colorSystem:snap.colorSystem,typeSystem:snap.typeSystem,logos:snap.logos.slice(0,3),photos:[],docs:snap.docs})); }catch(e){} });
+       .catch(()=>{ try{ localStorage.setItem('mdBrandHomeSaveLight', JSON.stringify({name:snap.name,tagline:snap.tagline,category:snap.category,colors:snap.colors,type:snap.type,colorSystem:snap.colorSystem,typeSystem:snap.typeSystem,logos:snap.logos.slice(0,3),photos:[],docs:(snap.docs||[]).map(d=>({id:d.id,name:d.name,ext:d.ext,role:d.role,extracted:d.extracted}))})); }catch(e){} });
 }
 function loadBrand(){
   return _db().then(db=>new Promise(res=>{ let rq; try{ rq=db.transaction(SAVE_STORE,'readonly').objectStore(SAVE_STORE).get(SAVE_KEY); }catch(e){ return res(null); } rq.onsuccess=()=>res(rq.result||null); rq.onerror=()=>res(null); }))
@@ -3550,6 +3657,7 @@ function restoreBrand(snap){
   brand.name=snap.name||''; brand.tagline=snap.tagline||''; brand.category=snap.category||'';
   brand.logos=snap.logos||[]; brand.photos=snap.photos||[]; brand.docs=snap.docs||[];
   brand.fonts=snap.fonts||[]; try{ (brand.fonts||[]).forEach(registerUploadedFont); }catch(e){}
+  try{ mergeGuidelines(); }catch(e){}
   brand.colors=snap.colors||[]; brand.type=snap.type||null;
   brand.colorSystem=snap.colorSystem||null; brand.typeSystem=snap.typeSystem||null;
   brand.personality=snap.personality||null; brand.guidePlan=snap.guidePlan||null; brand.brandHomeImprovements=snap.brandHomeImprovements||null;
