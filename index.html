@@ -153,6 +153,11 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .id-tag:focus{box-shadow:0 0 0 2px rgba(44,90,60,.22);}
 .edit-hint{font-size:10px;color:var(--ink-faint);margin-top:14px;display:none;}
 .editing .edit-hint{display:block;}
+/* Identity specialist read — what the room understands, kept quiet and human */
+.id-read,.color-read,.type-read,.assets-read,.apps-read{margin:clamp(10px,1.4vh,16px) 2px 2px;display:grid;gap:7px;}
+.id-read-line{font-family:var(--display);font-style:italic;font-weight:300;font-size:clamp(14px,1.4vw,16px);color:var(--ink-soft);margin:0;line-height:1.4;}
+.id-read-note{font-size:11.5px;line-height:1.5;color:var(--ink-faint);margin:0;padding-left:14px;position:relative;}
+.id-read-note::before{content:"";position:absolute;left:0;top:.52em;width:5px;height:5px;border-radius:50%;background:var(--ink-faint);opacity:.55;}
 .editing .swatch span:not(.hex){cursor:text;}
 .id-marks{display:flex;flex-direction:column;gap:clamp(12px,1.6vw,18px);}
 .id-markrow{display:flex;flex-wrap:wrap;gap:clamp(10px,1.2vw,15px);}
@@ -450,11 +455,11 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 /* assets: real asset cards with role assignment */
 .asset-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(9px,1.1vw,13px);}
 @media(max-width:820px){.asset-grid{grid-template-columns:1fr 1fr;}}
-.asset-card{border-radius:var(--r-md);background:rgba(255,255,255,.5);box-shadow:var(--shadow);overflow:hidden;display:flex;flex-direction:column;transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s ease;}
-.asset-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover);}
-.asset-thumb{position:relative;aspect-ratio:4/3;background:var(--b2);display:grid;place-items:center;overflow:hidden;}
-.asset-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;padding:clamp(10px,8%,22px);}
-.asset-thumb.cover img{object-fit:cover;padding:0;}
+.asset-card{position:relative;display:flex;flex-direction:column;background:transparent;border:none;box-shadow:none;transition:transform .4s cubic-bezier(.22,1,.36,1);}
+.asset-card:hover{transform:translateY(-3px);}
+.asset-thumb{position:relative;aspect-ratio:4/3;background:transparent;display:grid;place-items:center;}
+.asset-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;object-position:center;padding:clamp(8px,6%,18px);filter:drop-shadow(0 7px 18px rgba(0,0,0,.18));}
+.asset-thumb.cover img{object-fit:cover;padding:0;border-radius:12px;}
 .asset-thumb.doc{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;background:rgba(255,255,255,.6);}
 .asset-meta{padding:9px 11px 11px;display:flex;flex-direction:column;gap:7px;}
 .asset-name{font-size:11px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -465,11 +470,14 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .editing .asset-remove{display:grid;}
 .editing .asset-thumb{cursor:pointer;}
 .editing .asset-thumb:hover .asset-replace{opacity:1;}
+.asset-addrow{display:none;margin:0 0 15px;}
+.editing .asset-addrow{display:block;}
+.asset-add{font-family:inherit;font-size:12px;letter-spacing:.02em;color:var(--ink);background:rgba(255,255,255,.72);box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:10px;padding:9px 14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:box-shadow .2s,background .2s;}
+.asset-add:hover{box-shadow:inset 0 0 0 1px rgba(44,90,60,.4);background:var(--light);}
+.asset-add svg{width:14px;height:14px;}
+body.deep-immerse .asset-add{background:rgba(255,255,255,.08)!important;color:var(--ink);}
 .editing .asset-name{white-space:normal;overflow:visible;text-overflow:clip;cursor:text;}
 .asset-thumb.on-dark{background:#1c2b22;}
-.asset-var{display:none;margin-top:7px;width:100%;font-family:inherit;font-size:10px;letter-spacing:.04em;color:var(--ink-soft);background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:8px;padding:6px 8px;cursor:pointer;transition:color .2s,box-shadow .2s;}
-.asset-var:hover{color:var(--ink);box-shadow:inset 0 0 0 1px rgba(44,90,60,.28);}
-.editing .asset-var{display:block;}
 .lib-overlay{position:fixed;inset:0;z-index:60;display:grid;place-items:center;background:rgba(20,40,28,.28);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);padding:24px;}
 .lib-overlay[hidden]{display:none;}
 .lib-panel{width:min(720px,94vw);max-height:84vh;display:flex;flex-direction:column;border-radius:var(--r-lg);padding:clamp(18px,2.4vw,28px);background:linear-gradient(160deg,rgba(255,255,255,.88),rgba(255,255,255,.72));backdrop-filter:blur(40px) saturate(180%);-webkit-backdrop-filter:blur(40px) saturate(180%);box-shadow:0 24px 70px rgba(20,50,34,.22);}
@@ -486,8 +494,9 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .lib-name{font-size:10px;color:var(--ink-soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .lib-upload{margin-top:14px;align-self:center;font-size:12px;color:var(--sage);background:rgba(255,255,255,.7);box-shadow:var(--shadow);padding:9px 18px;border-radius:99px;transition:transform .2s;}
 .lib-upload:hover{transform:translateY(-1px);}
-.role-select{font-family:inherit;font-size:11px;color:var(--ink);background:rgba(255,255,255,.7);border:none;box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:8px;padding:6px 8px;cursor:pointer;outline:none;}
-.role-select:focus{box-shadow:inset 0 0 0 2px rgba(44,90,60,.3);}
+.role-select{font-family:inherit;font-size:11px;color:var(--ink-soft);background:transparent;border:none;box-shadow:none;border-radius:8px;padding:5px 2px;cursor:pointer;outline:none;transition:color .2s,background .2s,box-shadow .2s,padding .2s;}
+.role-select:hover{color:var(--ink);}
+.role-select:focus{color:var(--ink);background:rgba(255,255,255,.7);box-shadow:inset 0 0 0 2px rgba(44,90,60,.3);padding:5px 8px;}
 .asset-empty{grid-column:1/-1;text-align:center;color:var(--ink-faint);font-size:13px;padding:clamp(20px,5vh,48px) 0;}
 
 /* founder: quiet live state */
@@ -553,15 +562,16 @@ body.deep-immerse{
   --shadow:0 0 0 1px rgba(255,255,255,.06),0 10px 30px rgba(0,0,0,.34);
   --shadow-hover:0 0 0 1px rgba(255,255,255,.16),0 16px 42px rgba(0,0,0,.46);
 }
-body.deep-immerse .vaultcard,body.deep-immerse .frow,body.deep-immerse .asset-card,
+body.deep-immerse .vaultcard,body.deep-immerse .frow,
 body.deep-immerse .asset-thumb.doc,body.deep-immerse .lib-item,body.deep-immerse .apptool,
 body.deep-immerse .vframe,body.deep-immerse .primary-card,body.deep-immerse .sroom,
 body.deep-immerse .back,body.deep-immerse .movein-btn,body.deep-immerse .founder-pill,
-body.deep-immerse .lib-upload,body.deep-immerse .sig-fields input,body.deep-immerse .role-select,
-body.deep-immerse .asset-var{background:rgba(255,255,255,.07)!important;color:var(--ink);}
+body.deep-immerse .lib-upload,body.deep-immerse .sig-fields input,
 body.deep-immerse .vframe-tag,body.deep-immerse .mk-tag,body.deep-immerse .asset-replace,
 body.deep-immerse .vframe::after,body.deep-immerse .swatch::after,body.deep-immerse .gd-sw::after,
 body.deep-immerse .asset-remove,body.deep-immerse .mk-dl button{background:rgba(16,20,26,.74)!important;color:rgba(246,248,244,.86)!important;}
+body.deep-immerse .asset-name,body.deep-immerse .role-select{color:rgba(246,248,244,.82)!important;}
+body.deep-immerse .role-select:focus{background:rgba(16,20,26,.74)!important;}
 body.deep-immerse .sig-preview{box-shadow:0 14px 34px rgba(0,0,0,.45);}   /* the email card stays a real white card */
 body.deep-immerse .id-hero .id-primary{background:transparent!important;}                 /* the primary logo keeps floating — no frame box */
 body.deep-immerse .id-primary .wm{color:#f3efe6!important;}                                 /* text-fallback wordmark reads on the dark room */
@@ -687,6 +697,7 @@ body.deep-immerse .id-primary .wm small{color:rgba(243,239,230,.62)!important;}
 <input type="file" id="editFile" accept="image/*" hidden>
 <input type="color" id="editColor" hidden>
 <input type="file" id="zipInput" accept=".zip,.pdf,.svg,.png,.jpg,.jpeg,.webp,.gif,image/*,application/pdf,application/zip" multiple hidden>
+<input type="file" id="addFiles" accept="image/*,.svg,.pdf,.doc,.docx,.ppt,.pptx,.key,.txt" multiple hidden>
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
@@ -736,7 +747,7 @@ const ROOMS={
           <div data-k="by"><b>Designed with</b><span>Moving Day</span></div>
         </div>
       </div>
-      <div class="gd-section"><div class="gd-num">01 — Logo</div><h3 class="gd-head"><span class="cap">Your logo,</span> <em>every version.</em></h3>
+      <div class="gd-section"><div class="gd-num">01 — Logo</div><h3 class="gd-head"><span class="cap">Your logo,</span> <em>ready to use.</em></h3>
         <div data-logosys>
           <div class="gd-logos">
             <div class="gd-logocell paper"><div class="wm-doc">Marlowe &amp; Finch<small>Private Advisory</small></div></div>
@@ -851,11 +862,24 @@ function renderActiveRoom(){
   const key=currentRoom, r=ROOMS[key]; if(!r) return;
   roomBody.innerHTML=r.html; roomTitle.innerHTML=r.title; roomKicker.textContent=r.kicker;
   if(roomDesc) roomDesc.textContent=(ROOM_META[key]&&ROOM_META[key].desc)||'';
+  try{ if(window.MD&&MD.brain){ MD.brain.refresh(); const st=MD.brain.roomStatus()[key]; if(st!=null) roomBody.dataset.brainStatus=st; } }catch(e){}   // room reads the Brain
   const g=(label,fn)=>{ try{ fn(); }catch(e){ console.warn('[brand-home] room render ('+label+') failed:', e); } };
   if(key==='assets') g('assets',renderAssetsRoom);
+  if(key==='assets') g('assetsBrain',()=>renderAssetsBrain(roomBody));
   if(key==='deliverables') g('deliverables',()=>renderApplications(roomBody));
+  if(key==='deliverables') g('appsBrain',()=>renderApplicationsBrain(roomBody));
   g('edit',()=>enableEditing(roomBody)); g('uploads',()=>applyUploads(roomBody)); g('founder',()=>applyFounder(roomBody));
+  if(key==='identity') g('identityBrain',()=>renderIdentityBrain(roomBody));
+  if(key==='identity') g('colorBrain',()=>renderColorBrain(roomBody));
+  if(key==='typography') g('typeBrain',()=>renderTypographyBrain(roomBody));
   if(key==='founder') g('founderState',refreshFounderState);
+}
+function renderActiveRoomBrains(){            // re-run the editor-only specialist reads for the open room
+  const k=currentRoom, g=(fn)=>{ try{ fn(); }catch(e){} };
+  if(k==='identity'){ g(()=>renderIdentityBrain(roomBody)); g(()=>renderColorBrain(roomBody)); }
+  else if(k==='typography') g(()=>renderTypographyBrain(roomBody));
+  else if(k==='assets') g(()=>renderAssetsBrain(roomBody));
+  else if(k==='deliverables') g(()=>renderApplicationsBrain(roomBody));
 }
 function openRoom(key){
   if(!ROOMS[key]) return;
@@ -876,7 +900,7 @@ document.querySelectorAll('[data-action="edit"]').forEach(b=>b.addEventListener(
 document.getElementById('backBtn').addEventListener('click',closeRoom);
 // founder toggles + any future toggle: flip on click
 // ── make every container editable: replace images, pick colors, edit text ──
-const fileInput=document.getElementById('editFile'), colorInput=document.getElementById('editColor');
+const fileInput=document.getElementById('editFile'), colorInput=document.getElementById('editColor'), addFilesInput=document.getElementById('addFiles');
 let editTarget=null, editAssetId=null;
 function findAsset(id){ return [...brand.logos,...brand.photos,...brand.docs].find(a=>a.id===id)||null; }
 /* ── replace from the uploaded asset library (no re-upload needed) ── */
@@ -905,9 +929,12 @@ function applyReplacement(src){
 }
 function fillFrameWithAsset(fr,src){          // an untagged/empty frame → bind a fresh asset of the right kind
   const isLogo=isLogoFrame(fr), id=newId();
-  if(isLogo) brand.logos.push({id,name:src.name||'logo',url:src.url,ext:src.ext||'png',role:brand.logos.length?'':'primaryLogo'});
-  else brand.photos.push({id,name:src.name||'photo',url:src.url,ext:src.ext||'png',role:'photography'});
+  const a = isLogo
+    ? {id,name:src.name||'logo',url:src.url,ext:src.ext||'png',role:brand.logos.length?'':'primaryLogo'}
+    : {id,name:src.name||'photo',url:src.url,ext:src.ext||'png',role:'photography'};
+  (isLogo?brand.logos:brand.photos).push(a);
   setFrameImage(fr,src.url,isLogo,id);
+  try{ analyzeAssets([a]); }catch(e){}            // measure for placement; never re-derives colours or name
   return isLogo;
 }
 libGrid.addEventListener('click',e=>{ const b=e.target.closest('[data-pick]'); if(!b) return; const a=findAsset(b.dataset.pick); closeLib(); applyReplacement(a); });
@@ -919,62 +946,29 @@ function removeAsset(id){
   ['logos','photos','docs'].forEach(k=>{ const i=brand[k].findIndex(a=>a.id===id); if(i>-1) brand[k].splice(i,1); });
   updateWorkspaceState({},{source:'assets',announce:'Asset removed. Brand Guide and Deliverables refreshed.'});
 }
-function recolorLogo(url, mode, isSvg){          // recolor opaque pixels, keep the transparency intact
-  return new Promise(res=>{
-    const img=new Image();
-    img.onload=()=>{
-      try{
-        let w=img.naturalWidth||img.width||0, h=img.naturalHeight||img.height||0;
-        if(isSvg){                                 // vector source → render up for a crisp export
-          const TARGET=1024;
-          if(!w||!h){ w=h=TARGET; }
-          else { const s=TARGET/Math.max(w,h); if(s>1){ w=Math.round(w*s); h=Math.round(h*s); } }
-        } else if(!w||!h){ w=h=512; }
-        const c=document.createElement('canvas'); c.width=w; c.height=h;
-        const x=c.getContext('2d'); x.drawImage(img,0,0,w,h);
-        const d=x.getImageData(0,0,w,h), p=d.data;
-        if(mode==='grey'){
-          for(let i=0;i<p.length;i+=4){ if(p[i+3]===0) continue; const g=Math.round(0.299*p[i]+0.587*p[i+1]+0.114*p[i+2]); p[i]=p[i+1]=p[i+2]=g; }
-        } else {
-          // Measure the mark's tonal range across its opaque pixels.
-          let lo=255, hi=0;
-          for(let i=0;i<p.length;i+=4){ if(p[i+3]<16) continue; const L=0.299*p[i]+0.587*p[i+1]+0.114*p[i+2]; if(L<lo)lo=L; if(L>hi)hi=L; }
-          const range=hi-lo;
-          // Asymmetric split so each version is predominantly its own colour:
-          //  · BLACK ("black with white"): everything black, only the brightest highlights knock out to white.
-          //  · WHITE ("white with black"): everything white, only the darkest detail drops to black.
-          const tHi = lo + range*0.66;     // black mode: above this → white
-          const tLo = lo + range*0.34;     // white mode: below this → black
-          for(let i=0;i<p.length;i+=4){
-            if(p[i+3]===0) continue;
-            if(range<24){                                   // single colour → solid fill
-              const v = mode==='black' ? 0 : 255; p[i]=p[i+1]=p[i+2]=v;
-            } else {
-              const L=0.299*p[i]+0.587*p[i+1]+0.114*p[i+2];
-              const v = (mode==='black') ? (L>=tHi ? 255 : 0)    // mostly black + white highlights
-                                         : (L<=tLo ? 0 : 255);   // mostly white + black shadows
-              p[i]=p[i+1]=p[i+2]=v;
-            }
-          }
-        }
-        x.putImageData(d,0,0); res(c.toDataURL('image/png'));
-      }catch(e){ res(null); }
-    };
-    img.onerror=()=>res(null);
-    img.crossOrigin='anonymous'; img.src=url;
-  });
-}
-async function makeLogoVariations(id){
-  const a=findAsset(id); if(!a||!a.url) return;
-  announceWorkspaceUpdate('Creating logo variations…','assets');
-  const base=(a.name||'logo').replace(/\.[a-z0-9]+$/i,'');
-  const isSvg=/svg/i.test(a.ext||'') || /^data:image\/svg/i.test(a.url);
-  let made=0;
-  for(const [mode,label] of [['black','Black'],['white','White']]){
-    const url=await recolorLogo(a.url, mode, isSvg);
-    if(url){ brand.logos.push({id:newId(),name:base+' — '+label+'.png',url,ext:'png',role:'',variant:mode}); made++; }
+async function addBrandFiles(fileList){            // additive: bring new files in WITHOUT touching colours, type, name, or copy
+  const files=Array.from(fileList||[]).filter(Boolean); if(!files.length) return;
+  announceWorkspaceUpdate('Adding '+files.length+' file'+(files.length===1?'':'s')+'\u2026','assets');
+  let added=0;
+  for(const f of files){
+    const name=(f.name||'file').split('/').pop();
+    const ext=((name.split('.').pop())||'').toLowerCase();
+    const dataUrl=await new Promise(r=>{ const rd=new FileReader(); rd.onload=()=>r(rd.result); rd.onerror=()=>r(''); rd.readAsDataURL(f); });
+    if(IMG_EXT.includes(ext)){
+      if(!dataUrl) continue;
+      const a={id:newId(),name,url:dataUrl,ext,role:''};
+      try{ const m=await analyzeAsset(dataUrl); if(m){ a.lum=m.lum; a.aspect=m.aspect; a.variety=m.variety; a.transparentRatio=m.transparentRatio; a.softRatio=m.softRatio; a._an=true; } }catch(e){}
+      if(categoryForAsset(a)==='Photography'){ a.role='photography'; brand.photos.push(a); }
+      else brand.logos.push(a);
+      added++;
+    } else if(DOC_EXT.includes(ext)){
+      brand.docs.push({id:newId(),name,ext,url:dataUrl||''}); added++;
+    }
   }
-  updateWorkspaceState({},{source:'assets',announce: made ? 'Black and white variations added.' : 'Couldn’t read that image for variations.'});
+  if(!added){ announceWorkspaceUpdate('Nothing to add from those files.','assets'); return; }
+  try{ renderAssetsRoom(); }catch(e){}
+  try{ applyUploads(roomBody); }catch(e){}
+  updateWorkspaceState({},{source:'assets',announce: added+(added===1?' file added':' files added')+' \u2014 colours, type, and copy untouched.'});
 }
 function isLogoFrame(f){return f.classList.contains('contain')||!!f.querySelector('.wm,.wm-doc,.wordmark-mini,.mono');}
 function editorActive(){ return !!founderState['Editor mode']; }
@@ -991,7 +985,7 @@ function applyFounder(root){
 roomBody.addEventListener('click',e=>{
   const tog=e.target.closest('.toggle');
   if(tog){ const on=tog.classList.toggle('on'); const row=tog.closest('.frow'), lab=row&&row.querySelector('b');
-    if(lab){ const name=lab.textContent.trim(); founderState[name]=on; saveFounderState(); if(name==='Editor mode') enableEditing(roomBody); if(name==='Brand immersion'||name==='Deep mode'||name==='Adaptive atmosphere'){ applyBrandHome(); try{ placeLogos(roomBody); renderIdMarks(roomBody); }catch(e){} } if(name==='Raw JSON') refreshFounderState(); } return; }
+    if(lab){ const name=lab.textContent.trim(); founderState[name]=on; saveFounderState(); if(name==='Editor mode'){ enableEditing(roomBody); renderActiveRoomBrains(); } if(name==='Brand immersion'||name==='Deep mode'||name==='Adaptive atmosphere'){ applyBrandHome(); try{ placeLogos(roomBody); renderIdMarks(roomBody); }catch(e){} } if(name==='Raw JSON') refreshFounderState(); } return; }
   const deliv=e.target.closest('[data-deliv]'); if(deliv){ handleDeliverable(deliv.dataset.deliv); return; }
   const ex=e.target.closest('[data-export]'); if(ex){ exportApplication(ex.dataset.export, ex.dataset.fmt||'png'); return; }
   const ld=e.target.closest('[data-logodl]'); if(ld){ const u=LOGOVAR[ld.dataset.logodl]; if(u) dlDataURL(ld.dataset.fname||'logo.png',u); return; }
@@ -1000,7 +994,7 @@ roomBody.addEventListener('click',e=>{
   const idl=e.target.closest('[data-ig-download]'); if(idl){ exportInstagramIcon(); return; }
   if(!editorActive()) return;                                  // edits only live in Editor mode
   const rm=e.target.closest('.asset-remove'); if(rm){ removeAsset(rm.dataset.remove); return; }
-  const vb=e.target.closest('.asset-var'); if(vb){ makeLogoVariations(vb.dataset.var); return; }
+  const af=e.target.closest('[data-addfiles]'); if(af){ addFilesInput.click(); return; }
   if(e.target.isContentEditable) return;                       // editing text, not replacing
   const at=e.target.closest('.asset-thumb[data-asset]');
   if(at){ editAssetId=at.dataset.asset; editTarget=null; openReplacePicker(); return; }
@@ -1068,22 +1062,21 @@ fileInput.addEventListener('change',()=>{
   const ext=((f.name||'').split('.').pop()||'png').toLowerCase();
   const rd=new FileReader();
   rd.onload=async ()=>{
-    if(editAssetId){                                       // replace a specific asset from the Assets room
-      const a=findAsset(editAssetId); const isMark=!!(a && /primaryLogo|wordmark|logo/i.test(a.role||''));
-      if(a){ a.url=rd.result; a.name=f.name; a.ext=ext; }
+    if(editAssetId){                                       // replace a specific asset — a clean swap, nothing else changes
+      const a=findAsset(editAssetId);
+      if(a){ a.url=rd.result; a.name=f.name; a.ext=ext; a._an=false; try{ await analyzeAssets([a]); }catch(e){} }
       editAssetId=null; fileInput.value='';
-      if(isMark && conciergeOn()){ setStatus('Reading your logo…'); await analyzeMarkUpload(rd.result); }
-      updateWorkspaceState({},{source:'assets',announce: isMark&&conciergeOn() ? 'Logo read — colours and name updated from your mark.' : 'Asset replaced. Brand Guide and Deliverables refreshed.'});
+      updateWorkspaceState({},{source:'assets',announce:'File replaced \u2014 colours, type, and copy untouched.'});
       return;
     }
     const tgt=editTarget; const wasLogo=isLogoFrame(tgt);
     fillFrameWithAsset(tgt,{url:rd.result,name:f.name,ext});
     editTarget=null; fileInput.value='';
-    if(wasLogo && conciergeOn()){ setStatus('Reading your logo…'); await analyzeMarkUpload(rd.result); }
-    updateWorkspaceState({},{source:'identity',announce: wasLogo ? (conciergeOn()?'Logo read — colours and name updated from your mark.':'Logo added. Brand Guide and Deliverables refreshed.') : 'Photo added. Brand Guide refreshed.'});
+    updateWorkspaceState({},{source:wasLogo?'identity':'guide',announce: (wasLogo?'Logo':'Photo')+' added \u2014 colours, type, and copy untouched.'});
   };
   rd.readAsDataURL(f);
 });
+addFilesInput.addEventListener('change',()=>{ if(addFilesInput.files&&addFilesInput.files.length) addBrandFiles(addFilesInput.files); addFilesInput.value=''; });
 colorInput.addEventListener('input',()=>{
   if(!editTarget) return;
   const hex=colorInput.value.toUpperCase();
@@ -1162,7 +1155,7 @@ function cpClose(){
 }
 
 // ── upload & set: a dropped .zip unzips and populates the rooms ──
-const brand={name:'',tagline:'',category:'',logos:[],photos:[],docs:[],colors:[],type:null,colorSystem:null,typeSystem:null,personality:null,visualDirection:'',guidePlan:null,brandHomeImprovements:null,brandWorld:null,designStrategy:null};
+const brand={name:'',tagline:'',category:'',logos:[],photos:[],docs:[],colors:[],type:null,colorSystem:null,typeSystem:null,personality:null,visualDirection:'',guidePlan:null,brandHomeImprovements:null,brandWorld:null,designStrategy:null,presentation:null};
 
 /* ════════════════ SHARED BRAND HOME STATE (single source of truth) ════════════════
    `brand` is the working store; MDWorkspaceState is its canonical, serializable view.
@@ -1264,25 +1257,33 @@ function assetCardHTML(a,isLogoGroup){
   const thumb = a.url
     ? '<div class="asset-thumb '+(isLogoGroup||a.ext==='svg'?'':'cover')+onDark+'" data-asset="'+a.id+'"><img alt="" src="'+a.url+'"><span class="asset-replace">Replace</span></div>'
     : '<div class="asset-thumb doc" data-asset="'+a.id+'">'+((a.ext||'file').toUpperCase())+'<span class="asset-replace">Replace</span></div>';
-  const canVary = isLogoGroup && a.url && /^(png|webp|svg)$/i.test(a.ext||'') && !a.variant;
-  const varBtn = canVary ? '<button class="asset-var" data-var="'+a.id+'">Make B / W variations</button>' : '';
   const opts=ROLE_OPTS.map(o=>'<option value="'+o[0]+'"'+(a.role===o[0]?' selected':'')+'>'+o[1]+'</option>').join('');
   return '<div class="asset-card">'
     +'<button class="asset-remove" data-remove="'+a.id+'" title="Remove asset" aria-label="Remove asset">\u00d7</button>'
     +thumb
     +'<div class="asset-meta"><div class="asset-name" data-name="'+a.id+'" spellcheck="false">'+esc(a.name||'asset')+'</div>'
-    +'<select class="role-select" data-asset="'+a.id+'">'+opts+'</select>'+varBtn+'</div></div>';
+    +'<select class="role-select" data-asset="'+a.id+'">'+opts+'</select></div></div>';
 }
 function renderAssetsRoom(){
   const root=document.getElementById('assetRoot'); if(!root) return;
+  const addRow='<div class="asset-addrow"><button class="asset-add" data-addfiles type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add files</button></div>';
   if(!(brand.logos.length||brand.photos.length||brand.docs.length)){
-    root.innerHTML='<div class="asset-empty">No assets yet — move your brand in from Home, and everything will find its place here.</div>'; return;
+    root.innerHTML=addRow+'<div class="asset-empty">No assets yet — add files here, or move your brand in from Home.</div>'; return;
   }
-  let html='';
+  let html=addRow;
   if(brand.logos.length){ html+='<div class="sect-label">Logos &amp; marks</div><div class="asset-grid">'+brand.logos.map(a=>assetCardHTML(a,true)).join('')+'</div>'; }
   if(brand.photos.length){ html+='<div class="sect-label">Photography</div><div class="asset-grid">'+brand.photos.map(a=>assetCardHTML(a,false)).join('')+'</div>'; }
   if(brand.docs.length){ html+='<div class="sect-label">Documents</div><div class="asset-grid">'+brand.docs.map(a=>assetCardHTML(a,false)).join('')+'</div>'; }
   root.innerHTML=html;
+  enhanceAssetThumbs(root);                                  // float the marks: transparent, trimmed, on the brand ground
+}
+async function enhanceAssetThumbs(root){                     // swap logo thumbnails for their knocked-out, trimmed version so they float instead of sitting on a white tile
+  for(const thumb of root.querySelectorAll('.asset-thumb[data-asset]')){
+    if(thumb.classList.contains('cover')||thumb.classList.contains('doc')) continue;   // photos & docs keep their own treatment
+    const a=findAsset(thumb.dataset.asset); if(!a||!a.url) continue;
+    const img=thumb.querySelector('img'); if(!img) continue;
+    try{ const u=await cleanMark(a.url, /svg/i.test(a.ext||'')); if(u && u!==img.getAttribute('src')) img.src=u; }catch(e){}
+  }
 }
 
 /* ── Deliverables: real exports, always from the latest state ── */
@@ -1294,6 +1295,7 @@ function dl(filename,content,mime){
 function brandSlug(){ return (brand.name||'brand-home').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')||'brand-home'; }
 async function buildGuideHTML(opts){
   const linkFiles=!!(opts&&opts.linkFiles);
+  try{ if(window.MD&&MD.brain){ MD.brain.refresh(true); MD.brain.applyToGuide(); } }catch(e){}   // guide reflects the Brain
   const tmp=document.createElement('div'); tmp.style.cssText='position:absolute;left:-9999px;top:0;width:900px;';
   tmp.innerHTML=ROOMS.guide.html; document.body.appendChild(tmp);
   try{ applyUploads(tmp); }catch(e){}
@@ -1398,7 +1400,7 @@ async function renderRoomForPublish(key){
   }catch(e){ console.warn('[publish] room render failed:',key,e); }
   // strip editor-only chrome → clean read-only capture
   tmp.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
-  tmp.querySelectorAll('[data-action],.asset-replace,.edit-hint,.mk-dl,.gd-logo-dl,.ig-dl,.lib-upload,.id-edit,.edit-dot').forEach(n=>n.remove());
+  tmp.querySelectorAll('[data-action],.asset-replace,.edit-hint,.mk-dl,.gd-logo-dl,.ig-dl,.lib-upload,.id-edit,.edit-dot,.id-read,.color-read,.type-read,.assets-read,.apps-read').forEach(n=>n.remove());
   const html=tmp.innerHTML; tmp.remove();
   return html;
 }
@@ -1608,8 +1610,17 @@ function looksLikeFileName(s){      // true when this is clearly a file/export n
   if(/^[0-9\s.]+$/.test(t)) return true;                         // digits/punctuation only
   if(/^[0-9a-f]{6,}$/i.test(t.replace(/\s/g,''))) return true;   // hash / uuid-like
   if(!/[a-z]/i.test(t)) return true;                             // no letters
-  if(/\b(img|dsc|dscn|image|photo|pic|screenshot|screen\s*shot|untitled|unnamed|download|scan|asset|file|new|render|output|artboard|frame|group|layer|comp|mockup|export|copy)\b/i.test(t)) return true;
+  if(/\b(img|dsc|dscn|image|photo|pic|screenshot|screen\s*shot|untitled|unnamed|download|scan|asset|file|new|render|output|artboard|frame|group|layer|comp|mockup|export|copy|avatar|social|banner|profile|cover|thumbnail|favicon|wallpaper|wordmark|brandmark)\b/i.test(t)) return true;
+  if(/\bbrand\s*home\b/i.test(t)) return true;                   // Moving Day's own export prefix is never the client's brand name
   return false;
+}
+function tidyName(s){                 // remove brackets a descriptor strip emptied, e.g. "Name (logo)" -> "Name ( )" -> "Name"
+  return String(s||'')
+    .replace(/[([{]\s*[)\]}]/g,' ')         // empty ( ) [ ] { } pairs
+    .replace(/\s*[([{]\s*$/,'')             // a dangling open bracket at the end
+    .replace(/^\s*[)\]}]\s*/,'')           // a dangling close bracket at the start
+    .replace(/\s+([)\]}])/g,'$1').replace(/([([{])\s+/g,'$1')   // tighten " )" and "( "
+    .replace(/\s{2,}/g,' ').trim();
 }
 function cleanBrandName(n){          // tidy a candidate; strip logo descriptors; '' if nothing brand-like remains
   if(!n) return '';
@@ -1617,16 +1628,15 @@ function cleanBrandName(n){          // tidy a candidate; strip logo descriptors
   s=s.replace(/\s*\((?:\d+|copy)\)\s*$/ig,'').replace(/\s+copy\s*$/i,'');
   s=s.replace(/\b(logo|logotype|wordmark|word\s*mark|brandmark|brand\s*mark|favicon|primary|secondary|reverse|transparent|hi-?res|rgb|cmyk|final|draft|export|version|v\d+)\b/ig,' ');  // descriptors, not the name
   s=s.replace(/[-–—]+/g,' ').replace(/\s+0?\d{1,3}\b\s*$/,'');   // separators + trailing counters (keeps "Studio 54")
-  s=s.replace(/\s{2,}/g,' ').trim();
-  return s;
+  return tidyName(s);
 }
 function safeBrandName(n){           // a name we'll actually show: tidied, and only if it reads like a brand
   const c=cleanBrandName(n);
   return (c && !looksLikeFileName(c)) ? c : '';
 }
 function ensureBrandName(){          // the Brand Home must never render nameless — derive from a logo, else a clean default
-  const cur=String(brand.name||'').trim();
-  if(cur && !looksLikeFileName(cur)) return cur;            // a real name → leave it exactly as set
+  const cur=tidyName(String(brand.name||''));
+  if(cur && !looksLikeFileName(cur)){ brand.name=cur; return cur; }   // a real name → keep it, just tidied of empty brackets
   const pick=(brand.logos||[]).find(l=>l&&(l.role==='primaryLogo'||l.role==='wordmark')) || (brand.logos||[])[0];
   const fromLogo=pick?safeBrandName(pick.name):'';
   brand.name = fromLogo || 'Your Brand';
@@ -1756,8 +1766,16 @@ function paintSwatches(root){
   const lum=h=>{const x=hexToRgb(h);return .299*x[0]+.587*x[1]+.114*x[2];};
   const groups={}; list.forEach((c,i)=>{ if(c.named) return; (groups[c.name]=groups[c.name]||[]).push(i); });  // never re-prefix a name the founder typed by hand
   Object.values(groups).forEach(idxs=>{ if(idxs.length<2) return;
-    const s=[...idxs].sort((a,b)=>lum(list[b].hex)-lum(list[a].hex));
-    s.forEach((idx,k)=>{ const base=list[idx].name; list[idx].name = k===0 ? 'Light '+base : (k===s.length-1 ? 'Deep '+base : base); });
+    const POOL={ black:['Black','Ink','Onyx','Graphite'], charcoal:['Charcoal','Graphite','Slate'], grey:['Grey','Slate','Stone','Ash'], 'light grey':['Light Grey','Silver','Mist','Cloud'], white:['White','Off-White','Paper','Bone'], cream:['Cream','Ivory','Bone','Sand'] };
+    const base0=list[idxs[0]].name, pool=POOL[base0.toLowerCase()];
+    if(pool){                                       // neutrals get distinct real names, never a contradiction like "Light Black"
+      const lightBase=/white|cream|light grey/i.test(base0);
+      const ordered=[...idxs].sort((a,b)=> lightBase ? lum(list[b].hex)-lum(list[a].hex) : lum(list[a].hex)-lum(list[b].hex));
+      ordered.forEach((idx,k)=>{ list[idx].name = pool[Math.min(k,pool.length-1)]; });
+    } else {                                        // chromatic: Light/Deep by tone reads naturally
+      const s=[...idxs].sort((a,b)=>lum(list[b].hex)-lum(list[a].hex));
+      s.forEach((idx,k)=>{ const base=list[idx].name; list[idx].name = k===0 ? 'Light '+base : (k===s.length-1 ? 'Deep '+base : base); });
+    }
   });
   root.querySelectorAll('.swatch').forEach((el,i)=>{ const c=list[i]; if(!c){ el.style.display='none'; el.removeAttribute('data-hex'); return; } el.style.display='';
     el.style.background=c.hex; el.style.color=readOn(c.hex); el.dataset.hex=c.hex;
@@ -1884,11 +1902,6 @@ function heroMark(){            // the most logo-like mark for the home hero —
     if(photoish(l)) s-=200; return s; };
   return [...L].sort((a,b)=>score(b)-score(a))[0]||L[0];
 }
-function logoForGround(dark){          // use the user's B/W variations when they exist
-  if(dark){ const w=brand.logos.find(l=>l.variant==='white'); if(w) return w.url; }
-  else { const b=brand.logos.find(l=>l.variant==='black'); if(b) return b.url; }
-  const p=pickMark('primaryLogo','wordmark','secondaryLogo'); return p?p.url:'';
-}
 async function renderMockups(root){
   const box=root.querySelector('[data-inuse]'); if(!box) return;
   const pm=pickMark('primaryLogo','wordmark','secondaryLogo'); if(!pm) return;   // no logo yet → keep default tiles
@@ -1897,7 +1910,7 @@ async function renderMockups(root){
   const sigHTML=buildSignatureHTML(sigLogo);
   const igc=await trimmedLogoCanvas(pm.url);
   const igSrc=igc?igc.toDataURL('image/png'):pm.url;
-  const igBg=igBgChoice || cssVar('--b1','#14291f') || '#14291f';
+  const igBg=igBgChoice || (bestGround(pm)==='dark' ? (cssVar('--b1','#14291f')||'#14291f') : (brandGround('light')||'#F4F1E8'));
   box.className='inuse-two';
   box.innerHTML=
     '<div class="inuse-card"><div class="inuse-sig">'+sigHTML+'</div><span class="inuse-tag">Email signature</span></div>'
@@ -1934,21 +1947,14 @@ function activeStrategy(){
   const personality=(sigSat>0.55&&contrast>120)?'bold':(sigSat<0.25?'refined':'classic');
   return {personality, cardLayout:personality==='bold'?'left':'centered', postLayout:personality==='bold'?'badge':'gradient', corner:personality==='bold'?'sharp':'round', voice:DS_VOICE[personality]};
 }
-async function exportLogoFor(ground){   // 'color' → best logo for DARK grounds; 'plain' → best for light & transparent grounds
+async function exportLogoFor(ground){   // always the real, original mark — no recoloured variants
   const m=(logoSystemMarks().primary) || pickMark('primaryLogo','wordmark','secondaryLogo'); if(!m) return '';
   const isSvg=/svg/i.test(m.ext||'');
-  if(ground==='color'){           // dark background: reverse only when it stays crisp, otherwise keep the real mark
-    const t=chooseTreatment(m,'dark');
-    if(t==='white'){ const w=brand.logos.find(l=>l.variant==='white'); return w?w.url:(await recolorLogo(m.url,'white',isSvg)||m.url); }
-    return m.url;
-  }
-  const t=chooseTreatment(m,'light');
-  if(t==='black'){ const b=brand.logos.find(l=>l.variant==='black'); return b?b.url:(await recolorLogo(m.url,'black',isSvg)||m.url); }
-  return m.url;
+  return (await cleanMark(m.url,isSvg))||m.url;
 }
 function imgToDataURL(url,isSvg){        // portable copy for embedding inside downloadable SVG (keeps real colours)
   return new Promise(res=>{ if(!url) return res(''); if(/^data:/.test(url)) return res(url);
-    const img=new Image(); img.crossOrigin='anonymous';
+    const img=new Image(); try{ if(/^https?:/i.test(url) && new URL(url,location.href).origin!==location.origin) img.crossOrigin='anonymous'; }catch(e){}
     img.onload=()=>{ try{ let w=img.naturalWidth||img.width||512,h=img.naturalHeight||img.height||512; if(isSvg){ const s=1024/Math.max(w,h); if(s>1){w=Math.round(w*s);h=Math.round(h*s);} } const c=document.createElement('canvas'); c.width=w;c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); res(c.toDataURL('image/png')); }catch(e){ res(url); } };
     img.onerror=()=>res(url); img.src=url; });
 }
@@ -1959,20 +1965,22 @@ async function exportApplication(kind, fmt){
   const pm0=pickMark('primaryLogo','wordmark','secondaryLogo');
   const fullColorUrl=pm0?pm0.url:'';
   const colorLogoUrl=fullColorUrl, plainLogoUrl=fullColorUrl;   // always the full-colour primary on every application
+  const _onDark=markProfile(pm0||{}).worksOnDark!==false;        // does the real mark read on a dark ground?
+  const groundA=_onDark?dark:(cssVar('--b2','#F4F1E8')||'#F4F1E8'), groundB=_onDark?deep:groundA, onText=_onDark?'rgba(255,255,255,.9)':'rgba(20,20,20,.88)';
   if(fmt==='svg'){
     const pm=pickMark('primaryLogo','wordmark','secondaryLogo')||{};
     const dlData=await imgToDataURL(plainLogoUrl,/svg/i.test(pm.ext||''));
-    const svg=buildAppSVG(kind,s,{dark,deep,accent,nm,tg,dl:dlData,wl:colorLogoUrl||dlData});
+    const svg=buildAppSVG(kind,s,{dark,deep,accent,nm,tg,dl:dlData,wl:colorLogoUrl||dlData,badgeBg:groundA,postA:groundA,postB:groundB,onText});
     if(svg){ dl(brandSlug()+'-'+kind+'.svg', svg, 'image/svg+xml'); announceWorkspaceUpdate(s.label+' downloaded.','deliverables'); }
     return;
   }
   const c=document.createElement('canvas'); c.width=s.w; c.height=s.h; const x=c.getContext('2d');
   const fit=(img,cx,cy,mw,mh)=>{ if(!img||!img.width) return; const r=Math.min(mw/img.width,mh/img.height), w=img.width*r,h=img.height*r; x.drawImage(img,cx-w/2,cy-h/2,w,h); };
   const lightLogo=await loadImg(colorLogoUrl), darkLogo=await loadImg(plainLogoUrl), ratio=s.w/s.h;
-  if(s.mode==='badge'){ x.fillStyle=dark; x.fillRect(0,0,s.w,s.h); fit(lightLogo,s.w/2,s.h/2,s.w*0.6,s.h*0.6); }
-  else if(s.mode==='post'){ const g=x.createLinearGradient(0,0,s.w,s.h); g.addColorStop(0,dark); g.addColorStop(1,deep); x.fillStyle=g; x.fillRect(0,0,s.w,s.h);
+  if(s.mode==='badge'){ x.fillStyle=groundA; x.fillRect(0,0,s.w,s.h); fit(lightLogo,s.w/2,s.h/2,s.w*0.6,s.h*0.6); }
+  else if(s.mode==='post'){ const g=x.createLinearGradient(0,0,s.w,s.h); g.addColorStop(0,groundA); g.addColorStop(1,groundB); x.fillStyle=g; x.fillRect(0,0,s.w,s.h);
     if(ratio>1.7){ fit(lightLogo,s.w/2,s.h/2,s.w*0.4,s.h*0.66); }
-    else if(tg){ fit(lightLogo,s.w/2,s.h*0.42,s.w*0.62,s.h*0.4); x.fillStyle='rgba(255,255,255,.9)'; x.textAlign='center'; x.font='500 '+Math.round(Math.min(s.w,s.h)*0.04)+'px Inter,sans-serif'; x.fillText(tg.slice(0,42),s.w/2,s.h*0.76); }
+    else if(tg){ fit(lightLogo,s.w/2,s.h*0.42,s.w*0.62,s.h*0.4); x.fillStyle=onText; x.textAlign='center'; x.font='500 '+Math.round(Math.min(s.w,s.h)*0.04)+'px Inter,sans-serif'; x.fillText(tg.slice(0,42),s.w/2,s.h*0.76); }
     else { fit(lightLogo,s.w/2,s.h/2,s.w*0.6,s.h*0.5); } }
   else if(s.mode==='transparent'){ fit(darkLogo,s.w/2,s.h/2,s.w*0.86,s.h*0.86); }
   else if(s.mode==='card'){ x.fillStyle='#fff'; x.fillRect(0,0,s.w,s.h); fit(darkLogo,s.w/2,s.h*0.37,s.w*0.5,s.h*0.4); x.strokeStyle=accent; x.lineWidth=3; x.beginPath(); x.moveTo(s.w*0.43,s.h*0.62); x.lineTo(s.w*0.57,s.h*0.62); x.stroke(); x.fillStyle=dark; x.textAlign='center'; x.font='400 '+Math.round(s.w*0.034)+'px Fraunces,Georgia,serif'; x.fillText(nm,s.w/2,s.h*0.75); }
@@ -1997,10 +2005,10 @@ async function exportApplication(kind, fmt){
 function buildAppSVG(kind,s,o){
   const img=(x,y,w,h,href)=>'<image href="'+href+'" x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" preserveAspectRatio="xMidYMid meet"/>';
   const head='<svg xmlns="http://www.w3.org/2000/svg" width="'+s.w+'" height="'+s.h+'" viewBox="0 0 '+s.w+' '+s.h+'">', ratio=s.w/s.h;
-  if(s.mode==='badge'){ const bw=s.w*0.5,bh=s.h*0.55; return head+'<rect width="'+s.w+'" height="'+s.h+'" fill="'+o.dark+'"/>'+img((s.w-bw)/2,(s.h-bh)/2,bw,bh,o.wl)+'</svg>'; }
-  if(s.mode==='post'){ const grad='<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+o.dark+'"/><stop offset="1" stop-color="'+o.deep+'"/></linearGradient></defs><rect width="'+s.w+'" height="'+s.h+'" fill="url(#g)"/>';
+  if(s.mode==='badge'){ const bw=s.w*0.5,bh=s.h*0.55; return head+'<rect width="'+s.w+'" height="'+s.h+'" fill="'+(o.badgeBg||o.dark)+'"/>'+img((s.w-bw)/2,(s.h-bh)/2,bw,bh,o.wl)+'</svg>'; }
+  if(s.mode==='post'){ const grad='<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+(o.postA||o.dark)+'"/><stop offset="1" stop-color="'+(o.postB||o.deep)+'"/></linearGradient></defs><rect width="'+s.w+'" height="'+s.h+'" fill="url(#g)"/>';
     if(ratio>1.7){ const bw=s.w*0.34,bh=s.h*0.62; return head+grad+img((s.w-bw)/2,(s.h-bh)/2,bw,bh,o.wl)+'</svg>'; }
-    const bw=s.w*0.54,bh=s.h*0.32; return head+grad+img((s.w-bw)/2,s.h*0.26,bw,bh,o.wl)+(o.tg?'<text x="'+(s.w/2)+'" y="'+(s.h*0.73)+'" text-anchor="middle" fill="#ffffff" font-family="Inter,sans-serif" font-size="'+Math.round(Math.min(s.w,s.h)*0.04)+'" font-weight="500">'+esc(o.tg.slice(0,42))+'</text>':'')+'</svg>'; }
+    const bw=s.w*0.54,bh=s.h*0.32; return head+grad+img((s.w-bw)/2,s.h*0.26,bw,bh,o.wl)+(o.tg?'<text x="'+(s.w/2)+'" y="'+(s.h*0.73)+'" text-anchor="middle" fill="'+(o.onText||'#ffffff')+'" font-family="Inter,sans-serif" font-size="'+Math.round(Math.min(s.w,s.h)*0.04)+'" font-weight="500">'+esc(o.tg.slice(0,42))+'</text>':'')+'</svg>'; }
   if(s.mode==='transparent'){ const p=s.w*0.09; return head+img(p,p,s.w-2*p,s.h-2*p,o.dl)+'</svg>'; }
   if(s.mode==='card'){ const bw=s.w*0.42,bh=s.h*0.34; return head+'<rect width="'+s.w+'" height="'+s.h+'" fill="#ffffff"/>'+img((s.w-bw)/2,s.h*0.23,bw,bh,o.dl)+'<line x1="'+(s.w*0.43)+'" y1="'+(s.h*0.61)+'" x2="'+(s.w*0.57)+'" y2="'+(s.h*0.61)+'" stroke="'+o.accent+'" stroke-width="3"/><text x="'+(s.w/2)+'" y="'+(s.h*0.75)+'" text-anchor="middle" fill="'+o.dark+'" font-family="Fraunces,Georgia,serif" font-size="'+Math.round(s.w*0.032)+'">'+esc(o.nm)+'</text></svg>'; }
   return null;
@@ -2065,7 +2073,10 @@ function igBgOptions(){
 }
 function renderIgBgs(root){
   const wrap=root.querySelector('[data-ig-bgs]'); if(!wrap) return;
-  const opts=igBgOptions(); if(!igBgChoice) igBgChoice=opts[0].hex;
+  const opts=igBgOptions();
+  if(!igBgChoice){ const pm=pickMark('primaryLogo','wordmark','secondaryLogo');
+    const pick=(pm && bestGround(pm)==='paper') ? (opts.find(o=>/light/i.test(o.name))||opts[0]) : opts[0];
+    igBgChoice=pick.hex; }
   wrap.innerHTML=opts.map(o=>`<span class="ig-bg${o.hex.toUpperCase()===igBgChoice.toUpperCase()?' sel':''}" data-ig-bg="${o.hex}" title="${o.name}" style="background:${o.hex}"></span>`).join('');
   const prev=root.querySelector('[data-ig-preview]'); if(prev) prev.style.background=igBgChoice;
 }
@@ -2081,6 +2092,75 @@ function trimTransparentCanvas(img){           // crop to the opaque bounding bo
   t.getContext('2d').drawImage(c,minX,minY,tw,th,0,0,tw,th); return t;
 }
 async function trimmedLogoCanvas(url){ const img=await loadImg(url); if(!img||!img.width) return null; return trimTransparentCanvas(img); }
+/* ── background knockout: a mark exported on a solid (white/colour) rectangle gets that
+   background flood-filled to transparent, so it sits clean on any ground. Conservative:
+   only fires when the image has no real transparency AND its border is one flat colour,
+   and it never fires if it would eat the mark itself. ── */
+function knockoutUniformBg(x,w,h){
+  let d; try{ d=x.getImageData(0,0,w,h); }catch(e){ return false; }   // tainted → leave it
+  const p=d.data, N=w*h;
+  let clear=0; for(let i=0;i<N;i++){ if(p[i*4+3]<16) clear++; }
+  if(clear > N*0.04) return false;                                    // already a cutout
+  // sample the border for a flat background colour
+  const samp=[]; const step=Math.max(1,Math.floor(Math.min(w,h)/18));
+  const at=(xx,yy)=>{ const i=(yy*w+xx)*4; samp.push([p[i],p[i+1],p[i+2]]); };
+  for(let xx=0;xx<w;xx+=step){ at(xx,0); at(xx,h-1); }
+  for(let yy=0;yy<h;yy+=step){ at(0,yy); at(w-1,yy); }
+  let ar=0,ag=0,ab=0; samp.forEach(s=>{ar+=s[0];ag+=s[1];ab+=s[2];}); const n=samp.length||1; ar/=n; ag/=n; ab/=n;
+  let spread=0; samp.forEach(s=>{ spread+=Math.abs(s[0]-ar)+Math.abs(s[1]-ag)+Math.abs(s[2]-ab); }); spread/=n;
+  if(spread>26) return false;                                         // border isn't a flat colour → don't touch
+  const br=ar,bg=ag,bb=ab, tol=42*3, soft=82*3;
+  const dist=i=>Math.abs(p[i]-br)+Math.abs(p[i+1]-bg)+Math.abs(p[i+2]-bb);
+  const visited=new Uint8Array(N), stack=[];
+  const seed=idx=>{ if(visited[idx]) return; const i=idx*4; if(p[i+3]<8){ visited[idx]=1; return; } if(dist(i)<=soft) stack.push(idx); };
+  for(let xx=0;xx<w;xx++){ seed(xx); seed((h-1)*w+xx); }
+  for(let yy=0;yy<h;yy++){ seed(yy*w); seed(yy*w+(w-1)); }
+  let removed=0;
+  while(stack.length){ const idx=stack.pop(); if(visited[idx]) continue; visited[idx]=1;
+    const i=idx*4, dd=dist(i);
+    if(dd<=tol){ p[i+3]=0; removed++; }
+    else if(dd<=soft){ const a=Math.round(255*((dd-tol)/(soft-tol))); if(a<p[i+3]){ p[i+3]=a; } removed++; }
+    else continue;                                                   // hit the mark → stop spreading here
+    const xx=idx%w, yy=(idx/w)|0;
+    if(xx>0) seed(idx-1); if(xx<w-1) seed(idx+1); if(yy>0) seed(idx-w); if(yy<h-1) seed(idx+w);
+  }
+  if(removed < N*0.02) return false;                                  // nothing really removed
+  let kept=0; for(let i=0;i<N;i++){ if(p[i*4+3]>16) kept++; }
+  if(kept < N*0.008) return false;                                    // it would have eaten the mark → abort
+  x.putImageData(d,0,0); return true;
+}
+const _markClean=new Map(), _markInk=new Map();      // _markInk: {ink:avgLuminance, colorful:bool} — the mark's real ink, for choosing a ground
+async function cleanMark(url,isSvg){                                   // transparent-bg, trimmed copy of a mark; measures its ink so it never lands on a ground it vanishes into
+  if(!url) return '';
+  if(_markClean.has(url)) return _markClean.get(url);
+  const img=await loadImg(url);
+  if(!img||!img.width){ _markClean.set(url,url); return url; }
+  let w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+  if(isSvg){ const s=1024/Math.max(w,h); if(s>1){ w=Math.round(w*s); h=Math.round(h*s); } }
+  const cap=1400; { const s=cap/Math.max(w,h); if(s<1){ w=Math.round(w*s); h=Math.round(h*s); } }
+  const c=document.createElement('canvas'); c.width=w; c.height=h;
+  const x=c.getContext('2d',{willReadFrequently:true}); x.drawImage(img,0,0,w,h);
+  let knocked=false; try{ knocked=knockoutUniformBg(x,w,h); }catch(e){}
+  let out=url, d=null; try{ d=x.getImageData(0,0,w,h); }catch(e){ d=null; }   // tainted (cross-origin) → leave the original
+  if(d){
+    const p=d.data; let n=0,lumSum=0,colour=0, minX=w,minY=h,maxX=-1,maxY=-1;
+    for(let y=0;y<h;y++){ for(let xx=0;xx<w;xx++){ const i=(y*w+xx)*4; if(p[i+3]<40) continue;
+      const r=p[i],g=p[i+1],b=p[i+2]; n++; lumSum+=0.299*r+0.587*g+0.114*b;
+      const mx=Math.max(r,g,b),mn=Math.min(r,g,b); if(mx&&(mx-mn)/mx>0.22) colour++;
+      if(xx<minX)minX=xx; if(xx>maxX)maxX=xx; if(y<minY)minY=y; if(y>maxY)maxY=y; } }
+    if(n) _markInk.set(url,{ ink:lumSum/n, colorful: colour/n>0.10 });        // average ink luminance + whether it carries real colour
+    const needTrim = maxX>=0 && (minX>0||minY>0||maxX<w-1||maxY<h-1);
+    if(knocked || needTrim){                                                  // crop to the mark so it fills its frame instead of floating tiny
+      const pad=Math.round(Math.max(w,h)*0.02);
+      const x0=Math.max(0,minX-pad), y0=Math.max(0,minY-pad), x1=Math.min(w-1,maxX+pad), y1=Math.min(h-1,maxY+pad);
+      const tw=Math.max(1,x1-x0+1), th=Math.max(1,y1-y0+1);
+      const t=document.createElement('canvas'); t.width=tw; t.height=th;
+      t.getContext('2d').drawImage(c,x0,y0,tw,th,0,0,tw,th);
+      out=t.toDataURL('image/png');
+    }
+  }
+  _markClean.set(url,out); return out;
+}
 async function renderIgPreview(root){          // show the trimmed mark so the preview matches the download
   const prev=root.querySelector('[data-ig-preview]'); if(!prev) return;
   const pm=pickMark('primaryLogo','wordmark','secondaryLogo'); if(!pm) return;
@@ -2273,13 +2353,342 @@ const DEST_ENV={
   founder:{env:'Control Room',dflt:'Advanced controls',key:'founderTools'}
 };
 function applyDestinations(){
+  let status={}; try{ if(window.MD&&MD.brain){ MD.brain.refresh(); status=MD.brain.roomStatus()||{}; } }catch(e){}
   document.querySelectorAll('.room-card').forEach(card=>{
     const meta=DEST_ENV[card.dataset.open]; if(!meta) return;
     const env=card.querySelector('.room-env'); if(env) env.remove();   // no environment eyebrows
-    const i=card.querySelector('i'); if(i) i.textContent=meta.dflt;     // plain, calm subtitles
+    const i=card.querySelector('i'); if(i){ const s=status[card.dataset.open]; i.textContent = s || meta.dflt; }  // each destination reads its specialist, else the calm default
   });
 }
+/* ════════════════════════════ THE BRAND BRAIN ════════════════════════════
+   A single structured source of truth for everything Moving Day understands about
+   a brand. It does NOT replace `brand` (the working store) or MDWorkspaceState
+   (its serializable view) — it sits on top as the derived-intelligence layer the
+   rooms (specialists) and the guide read from. Each domain has a lightweight agent
+   that reads the current brand + AI signals and writes structured knowledge. The
+   Concierge (refresh) runs the agents and listens to md:workspace-update, so the
+   Brain always reflects the latest upload, edit, or move-in. Purely additive. */
+window.MD = window.MD || {};
+(function(){
+  function contrastRatio(h1,h2){
+    try{ const Lin=c=>{ const r=hexToRgb(c).map(v=>{ v/=255; return v<=0.03928? v/12.92 : Math.pow((v+0.055)/1.055,2.4); });
+      return 0.2126*r[0]+0.7152*r[1]+0.0722*r[2]; };
+      const a=Lin(h1), b=Lin(h2), hi=Math.max(a,b), lo=Math.min(a,b); return (hi+0.05)/(lo+0.05);
+    }catch(e){ return null; }
+  }
+
+  // ── SPECIALIST AGENTS — each reads the brand and returns structured knowledge ──
+  const agents = {
+    identity(b){
+      const logos=(b.logos||[]); const byRole=r=>logos.find(l=>l.role===r)||null;
+      const quality=logos.map(l=>{ const issues=[];
+        if(l.lum!=null && l.lum>235) issues.push('very light — likely needs a dark version');
+        if(l.aspect!=null && (l.aspect>4||l.aspect<0.25)) issues.push('extreme proportions');
+        if(/mockup|product|shirt|sign|board|render/i.test(l.name||'')) issues.push('looks like a mockup, not the mark itself');
+        if(l.ext && !/svg/i.test(l.ext)) issues.push('raster — an SVG would scale cleanly');
+        return { id:l.id, name:l.name, role:l.role||'', issues, clean:issues.length===0 }; });
+      return { count:logos.length, direction:b.visualDirection||'',
+        logos: logos.map(l=>({id:l.id,name:l.name,role:l.role||'',ext:l.ext||'',url:l.url})),
+        primary:byRole('primaryLogo'), icon:byRole('iconMark'), wordmark:byRole('wordmark'), secondary:byRole('secondaryLogo'),
+        favicon: logos.find(l=>/favicon/i.test(l.name||'')) || byRole('iconMark') || null,
+        quality,
+        recommendations:[
+          !byRole('primaryLogo') && logos.length && 'Set a primary logo so the rest of the system can anchor to it.',
+          !byRole('iconMark') && logos.length && 'No square icon yet — needed for favicons and social avatars.',
+          !byRole('secondaryLogo') && logos.length>1 && 'A reversed (light) version would help on dark grounds.'
+        ].filter(Boolean) };
+    },
+    color(b){
+      const palette=(b.colors||[]).map(c=>({hex:c.hex,name:c.name||'Color',role:c.role||'brand'})).filter(c=>c.hex);
+      const L=palette.map(c=>lumOf(c.hex));
+      const chromaOf=hx=>{const x=hexToRgb(hx);return (Math.max(x[0],x[1],x[2])-Math.min(x[0],x[1],x[2]))/255;};
+      const dominant=[...palette].filter(c=>!/neutral/.test(c.role||'')&&chromaOf(c.hex)>0.12).sort((a,b)=>chromaOf(b.hex)-chromaOf(a.hex))[0]
+                    || palette.find(c=>/brand|primary/.test(c.role)) || palette[0] || null;   // the brand is led by its most chromatic colour
+      const hasDark=L.some(x=>x<70), hasLight=L.some(x=>x>200);
+      const accessibility=palette.map(c=>{ const w=contrastRatio(c.hex,'#ffffff'), k=contrastRatio(c.hex,'#15140f');
+        return { hex:c.hex, name:c.name, role:c.role, onWhite:w&&+w.toFixed(2), onInk:k&&+k.toFixed(2), aaOnWhite:w>=4.5, aaOnInk:k>=4.5 }; });
+      const cs=b.colorSystem||{}, N=v=>(v&&v.hex!==undefined)?v.hex:v;
+      const roleMap=[['primary',N(cs.primary)],['secondary',N(cs.secondary)],['accent',N(cs.accent)],['dark',N(cs.dark)],['background',N(cs.background)]].filter(r=>r[1]);
+      const system=roleMap.length? roleMap.reduce((o,r)=>{o[r[0]]=r[1];return o;},{}) : null;
+      return { count:palette.length, palette, dominant, system, primaryRole:(system&&system.primary)||null, hasDark, hasLight, accessibility,
+        recommendations:[
+          palette.length && !hasDark && 'Add a deep neutral (near-black) for text and contrast.',
+          palette.length && !hasLight && 'Add a light/paper tone for backgrounds.',
+          accessibility.some(c=>!/neutral/.test(c.role||'') && !c.aaOnWhite && !c.aaOnInk) && 'A brand colour reads low-contrast on both white and black — pair it carefully for text.'
+        ].filter(Boolean) };
+    },
+    typography(b){
+      const t=b.type||{}, ts=b.typeSystem||{};
+      const display=t.display||(ts.display&&ts.display.name)||'';
+      const body=t.body||(ts.body&&ts.body.name)||'';
+      return {
+        display: display?{name:display, usage:t.displayUsage||(ts.display&&ts.display.usage)||'Headlines and display'}:null,
+        body:    body?{name:body, usage:t.bodyUsage||(ts.body&&ts.body.usage)||'Body copy and interface'}:null,
+        pairing: (display&&body)? display+' + '+body : '',
+        hierarchy: (display||body)? ['Display — '+(display||'TBD'),'Body — '+(body||'TBD')] : [],
+        recommendations:[
+          !display && 'No display face set — I can recommend one that fits the brand’s character.',
+          display && !body && 'Pair the display face with a quiet, readable body face.'
+        ].filter(Boolean) };
+    },
+    assets(b){
+      const all=[].concat(
+        (b.logos||[]).map(l=>({id:l.id,name:l.name,ext:l.ext,role:l.role||'',category:'logo'})),
+        (b.photos||[]).map(p=>({id:p.id,name:p.name,ext:p.ext,role:p.role||'photography',category:'photo'})),
+        (b.docs||[]).map(d=>({id:d.id,name:d.name,ext:d.ext,role:d.role||'document',category:'document'})) );
+      const folders={}; all.forEach(a=>{ (folders[a.category]=folders[a.category]||[]).push(a); });
+      const seen={}, duplicates=[]; all.forEach(a=>{ const k=String(a.name||'').toLowerCase().replace(/\.[a-z0-9]+$/,''); if(seen[k]) duplicates.push(a.name); else seen[k]=1; });
+      const formats=[...new Set(all.map(a=>String(a.ext||'').toLowerCase()).filter(Boolean))];
+      const hasIcon=(b.logos||[]).some(l=>l.role==='iconMark'), hasRev=(b.logos||[]).some(l=>l.role==='secondaryLogo');
+      const missing=[
+        all.length && !formats.includes('svg') && 'a vector (SVG) logo',
+        all.length && !hasIcon && 'a square icon',
+        all.length && !hasRev && 'a reversed logo',
+        all.length && !(b.docs||[]).length && 'written guidelines'
+      ].filter(Boolean);
+      return { files:all.length, folders, duplicates, formats, missing };
+    },
+    voice(b){
+      const p=b.presentation||{}; const overview=(p.sections||[]).find(s=>s.id==='overview');
+      const bw=b.brandWorld||{}, ds=b.designStrategy||{};
+      return {
+        summary:(overview&&overview.intro)||b.tagline||'',
+        tagline:b.tagline||'', headline:p.headline||'',
+        tone:b.personality||bw.tone||ds.personality||null,
+        character: ds.voice||bw.voice||'',
+        direction: b.visualDirection||bw.visualDirection||'',
+        keywords: Array.isArray(bw.keywords)? bw.keywords.slice(0,6) : [],
+        language:(p.sections||[]).map(s=>s.intro).filter(Boolean).slice(0,3),
+        recommendations:[
+          !b.tagline && 'No tagline yet — I can draft one from the brand’s character.',
+          !b.personality && 'Define a tone of voice so copy stays consistent across the brand.'
+        ].filter(Boolean) };
+    },
+    applications(b){
+      const has=r=>(b.logos||[]).some(l=>l.role===r);
+      const colours=(b.colors||[]).length>0, type=!!(b.type&&(b.type.display||b.type.body));
+      const item=(name,ready,needs)=>({name,ready,needs:needs.filter(Boolean)});
+      return { items:[
+        item('Social avatar', has('iconMark')||has('primaryLogo'), [!has('iconMark')&&'a square icon']),
+        item('Website hero', has('primaryLogo')&&colours, [!has('primaryLogo')&&'a primary logo', !colours&&'a colour palette']),
+        item('Business card', has('primaryLogo')&&colours&&type, [!type&&'a type pairing']),
+        item('Deck / template', has('primaryLogo')&&colours&&type, [!type&&'a type pairing']),
+        item('Email signature', has('primaryLogo'), [!has('primaryLogo')&&'a logo'])
+      ] };
+    }
+  };
+
+  let _busy=false, _sig='';
+  const sigOf=b=>{ try{ return [b.name,(b.colors||[]).length,(b.logos||[]).length,(b.photos||[]).length,(b.docs||[]).length,(b.type&&b.type.display)||'',!!b.presentation].join('|'); }catch(e){ return String(Math.random()); } };
+
+  const brain = MD.brain = {
+    meta:{}, identity:{}, color:{}, typography:{}, assets:{}, voice:{}, applications:{}, sources:{}, updatedAt:'', agents,
+    refresh(force){
+      if(_busy) return brain;
+      try{
+        const sig=sigOf(brand); if(!force && sig===_sig) return brain;
+        _busy=true; _sig=sig;
+        brain.meta={ name:brand.name||'', category:brand.category||'', industry:brand.category||'', tagline:brand.tagline||'',
+          summary:(brand.presentation&&brand.presentation.overview)||brand.tagline||'', hasAI:!!brand.presentation };
+        brain.identity=agents.identity(brand);
+        brain.color=agents.color(brand);
+        brain.typography=agents.typography(brand);
+        brain.assets=agents.assets(brand);
+        brain.voice=agents.voice(brand);
+        brain.applications=agents.applications(brand);
+        brain.sources={ files:brain.assets.files, ai:!!brand.presentation };
+        brain.updatedAt=new Date().toISOString();
+        try{ window.dispatchEvent(new CustomEvent('md:brain-update',{detail:{brain}})); }catch(e){}
+      }catch(e){ console.warn('[brand-brain] refresh skipped:', e); }
+      finally{ _busy=false; }
+      return brain;
+    },
+    get(domain){ return domain ? brain[domain] : brain; },
+    // what each specialist currently knows — for rooms to read without re-deriving
+    roomStatus(){ try{
+      const apps=(brain.applications&&brain.applications.items)||[]; const ready=apps.filter(a=>a.ready).length;
+      return {
+      identity: brain.identity.count? (brain.identity.count+' mark'+(brain.identity.count>1?'s':'')+(brain.identity.primary?' · primary set':'')) : '',
+      color:    brain.color.count? (brain.color.count+' colour'+(brain.color.count>1?'s':'')) : '',
+      typography: brain.typography.pairing || (brain.typography.display&&brain.typography.display.name) || '',
+      assets:   brain.assets.files? (brain.assets.files+' file'+(brain.assets.files>1?'s':'')+(brain.assets.missing.length?' · '+brain.assets.missing.length+' to prepare':'')) : '',
+      deliverables: apps.length? (ready+' of '+apps.length+' ready to use') : '',
+      guide:    brain.meta.hasAI? 'Written from your brand' : (brain.voice.tagline||'')
+    }; }catch(e){ return {}; } },
+    // fill blank brand fields from what the Brain knows, so the guide reflects it
+    applyToGuide(){ try{
+      if(!brand.tagline && brain.voice.summary) brand.tagline=brain.voice.summary;
+      if(!brand.category && brain.meta.category) brand.category=brain.meta.category;
+      if(!brand.personality && brain.voice.tone) brand.personality=brain.voice.tone;
+    }catch(e){} return brain; }
+  };
+
+  // The Concierge keeps the Brain current — listens to the existing state event,
+  // so every upload, edit, and move-in refreshes the specialists. Never throws.
+  try{ window.addEventListener('md:workspace-update', function(){ brain.refresh(); }); }catch(e){}
+  try{ if(document.readyState==='loading') window.addEventListener('DOMContentLoaded', function(){ brain.refresh(true); }); else setTimeout(function(){ brain.refresh(true); },0); }catch(e){}
+})();
+
+/* The Identity room, reading its specialist. Surfaces what MD.brain.identity knows —
+   marks organized, roles set, and the one or two things still worth preparing — in
+   the room's own calm voice. Purely additive: if anything is missing, it shows nothing. */
+function renderIdentityBrain(root){
+  try{
+    if(!root || !(window.MD && MD.brain)) return;
+    if(!editorActive()){ root.querySelectorAll('.id-read').forEach(e=>e.remove()); return; }   // workspace-only insight; clients see a clean guide
+    MD.brain.refresh();
+    const id = MD.brain.identity || {};
+    const marks = root.querySelector('.id-marks'); if(!marks) return;
+    root.querySelectorAll('.id-read').forEach(e=>e.remove());   // never stack
+    if(!id.count) return;                                       // nothing real to say yet
+    const roles=[];
+    if(id.primary) roles.push('primary');
+    if(id.icon) roles.push('icon');
+    if(id.wordmark) roles.push('wordmark');
+    if(id.secondary) roles.push('reversed');
+    const line = id.count + ' mark' + (id.count>1?'s':'') + ', organized'
+               + (roles.length ? ' — ' + roles.join(', ') + ' set' : '') + '.';
+    const notes = (id.recommendations || []).slice(0,2);
+    const block = document.createElement('div');
+    block.className = 'id-read';
+    block.innerHTML = '<p class="id-read-line">'+esc(line)+'</p>'
+      + notes.map(n=>'<p class="id-read-note">'+esc(n)+'</p>').join('');
+    marks.insertAdjacentElement('afterend', block);
+  }catch(e){ console.warn('[identity-room] specialist read skipped:', e); }
+}
+
+/* The Color specialist, reading into the Primary colors section. Surfaces the palette
+   and — the part that proves it understands — where a brand colour is hard to read,
+   with a real pairing suggestion. Drawn from MD.brain.color (WCAG contrast). Additive. */
+function renderColorBrain(root){
+  try{
+    if(!root || !(window.MD && MD.brain)) return;
+    if(!editorActive()){ root.querySelectorAll('.color-read').forEach(e=>e.remove()); return; }   // workspace-only insight; clients see a clean guide
+    MD.brain.refresh();
+    const col = MD.brain.color || {};
+    const host = root.querySelector('.id-colors'); if(!host) return;
+    root.querySelectorAll('.color-read').forEach(e=>e.remove());   // never stack
+    if(!col.count) return;                                         // nothing real to say yet
+
+    const line = col.count + ' colour' + (col.count>1?'s':'')
+               + (col.dominant && col.dominant.name ? ', led by ' + col.dominant.name : '') + '.';
+
+    const notes = [];
+    const checks = col.accessibility || [];
+    // a vivid brand colour that struggles as text on white — the legible-pairing insight
+    const weak = checks.find(c => !/neutral|paper|white/i.test((c.role||'')+' '+(c.name||'')) && c.aaOnWhite === false);
+    if(weak){
+      const darkName = ((col.palette||[]).slice().sort((a,b)=>lumOf(a.hex)-lumOf(b.hex))[0]||{});
+      const partner = (darkName.hex && lumOf(darkName.hex) < 90) ? darkName.name : '';
+      notes.push(weak.aaOnInk
+        ? weak.name + ' is vivid, but reads low-contrast on white — keep it for accents and set text in ' + (partner || 'a deep neutral') + '.'
+        : weak.name + ' reads low-contrast on white and black alike — best as an accent, not for text.');
+    }
+    (col.recommendations || []).forEach(r => { if(notes.length < 2 && !/low-contrast/.test(r)) notes.push(r); });
+
+    const block = document.createElement('div');
+    block.className = 'color-read';
+    block.innerHTML = '<p class="id-read-line">'+esc(line)+'</p>'
+      + notes.slice(0,2).map(n=>'<p class="id-read-note">'+esc(n)+'</p>').join('');
+    host.insertAdjacentElement('afterend', block);
+  }catch(e){ console.warn('[color-room] specialist read skipped:', e); }
+}
+
+/* small list join: a · a and b · a, b, and c */
+function _mdJoin(a){ a=(a||[]).filter(Boolean); if(a.length<=1) return a[0]||''; if(a.length===2) return a[0]+' and '+a[1]; return a.slice(0,-1).join(', ')+', and '+a[a.length-1]; }
+function _lc(s){ return s? s.charAt(0).toLowerCase()+s.slice(1) : s; }
+
+/* Typography specialist — reads the pairing and says what each face is doing. */
+function renderTypographyBrain(root){
+  try{
+    if(!root || !(window.MD && MD.brain)) return;
+    if(!editorActive()){ root.querySelectorAll('.type-read').forEach(e=>e.remove()); return; }   // workspace-only insight; clients see a clean guide
+    MD.brain.refresh();
+    const ty = MD.brain.typography || {};
+    const spec = root.querySelector('.spec'); if(!spec) return;
+    root.querySelectorAll('.type-read').forEach(e=>e.remove());
+    const d = ty.display && ty.display.name, b = ty.body && ty.body.name;
+    if(!d && !b) return;
+    const line = (d && b)
+      ? d + ' and ' + b + ' — the display carries the character, ' + b + ' keeps long copy quiet.'
+      : (d ? d + ', set for display.' : b + ', set for body.');
+    const notes = (ty.recommendations || []).slice(0,2);
+    const block = document.createElement('div');
+    block.className = 'type-read';
+    block.innerHTML = '<p class="id-read-line">'+esc(line)+'</p>'
+      + notes.map(n=>'<p class="id-read-note">'+esc(n)+'</p>').join('');
+    spec.appendChild(block);
+  }catch(e){ console.warn('[type-room] specialist read skipped:', e); }
+}
+
+/* Assets specialist — what's organized, what's duplicated, what's still worth preparing. */
+function renderAssetsBrain(root){
+  try{
+    if(!root || !(window.MD && MD.brain)) return;
+    if(!editorActive()){ root.querySelectorAll('.assets-read').forEach(e=>e.remove()); return; }   // workspace-only insight; clients see a clean guide
+    MD.brain.refresh();
+    const as = MD.brain.assets || {};
+    const host = root.querySelector('#assetRoot'); if(!host) return;
+    root.querySelectorAll('.assets-read').forEach(e=>e.remove());
+    if(!as.files) return;
+    const label = { logo:'logos', photo:'photography', document:'documents' };
+    const folders = Object.keys(as.folders || {}).map(f=>label[f]||f);
+    const line = as.files + ' file' + (as.files>1?'s':'') + ', organized'
+               + (folders.length ? ' into ' + _mdJoin(folders) : '') + '.';
+    const notes = [];
+    if(as.duplicates && as.duplicates.length)
+      notes.push(as.duplicates.length + ' possible duplicate' + (as.duplicates.length>1?'s':'') + ' — I can keep the cleanest.');
+    if(as.missing && as.missing.length){
+      const head = as.missing.slice(0,2).map(_lc);
+      notes.push('Still worth preparing: ' + _mdJoin(head) + (as.missing.length>2 ? ' (+'+(as.missing.length-2)+' more)' : '') + '.');
+    }
+    const block = document.createElement('div');
+    block.className = 'assets-read';
+    block.innerHTML = '<p class="id-read-line">'+esc(line)+'</p>'
+      + notes.slice(0,2).map(n=>'<p class="id-read-note">'+esc(n)+'</p>').join('');
+    host.insertAdjacentElement('afterbegin', block);
+  }catch(e){ console.warn('[assets-room] specialist read skipped:', e); }
+}
+
+/* Applications specialist — which real-world uses are ready, and what the rest still need. */
+function renderApplicationsBrain(root){
+  try{
+    if(!root || !(window.MD && MD.brain)) return;
+    if(!editorActive()){ root.querySelectorAll('.apps-read').forEach(e=>e.remove()); return; }   // workspace-only insight; clients see a clean guide
+    MD.brain.refresh();
+    const items = (MD.brain.applications && MD.brain.applications.items) || [];
+    const wrap = root.querySelector('.apps-wrap'); if(!wrap || !items.length) return;
+    root.querySelectorAll('.apps-read').forEach(e=>e.remove());
+    const ready = items.filter(i=>i.ready), pending = items.filter(i=>!i.ready);
+    let line;
+    if(ready.length && pending.length) line = ready.length + ' ready, ' + pending.length + ' waiting on a detail.';
+    else if(ready.length)              line = 'Every application is ready to use.';
+    else                               line = 'Applications fill in as the foundation does.';
+    // group what's still needed by the missing detail
+    const needs = {};
+    pending.forEach(i => (i.needs||[]).forEach(n => { (needs[n] = needs[n] || []).push(i.name); }));
+    const notes = Object.keys(needs).slice(0,2).map(n => _mdJoin(needs[n]) + ' need' + (needs[n].length>1?'':'s') + ' ' + n + '.');
+    const head = wrap.querySelector('.apps-head');
+    const block = document.createElement('div');
+    block.className = 'apps-read';
+    block.innerHTML = '<p class="id-read-line">'+esc(line)+'</p>'
+      + notes.map(n=>'<p class="id-read-note">'+esc(n)+'</p>').join('');
+    if(head) head.insertAdjacentElement('afterend', block); else wrap.insertAdjacentElement('afterbegin', block);
+  }catch(e){ console.warn('[applications-room] specialist read skipped:', e); }
+}
+
+function applyPresentation(){
+  // Route studio-written section intros into each room's subtitle, so the home
+  // reads as prepared for this specific brand. Falls back silently if absent.
+  const p=brand.presentation; if(!p||!Array.isArray(p.sections)) return;
+  const byId={}; p.sections.forEach(s=>{ if(s&&s.id) byId[String(s.id).toLowerCase()]=s; });
+  const set=(room,secId)=>{ const s=byId[secId]; if(s&&s.intro&&ROOM_META[room]) ROOM_META[room].desc=s.intro; };
+  set('identity','identity');   // studio copy lives on Logo/identity + the overview only — Color, Type, Files stay clean, matching the printed guide
+  // if the current room is open, refresh its visible subtitle in place
+  try{ if(currentRoom&&roomDesc&&ROOM_META[currentRoom]) roomDesc.textContent=ROOM_META[currentRoom].desc||''; }catch(e){}
+}
 function applyBrandHome(){
+  applyPresentation();
   const head=document.querySelector('.home-head');
   if(head && brand.name){
     const k=head.querySelector('.kicker'), w=head.querySelector('.welcome'), sub=head.querySelector('.welcome-sub');
@@ -2315,6 +2724,7 @@ function applyBrandHome(){
   renderPrepared();          // quiet "already prepared" line
   if(brand.colors.length) applyPaletteVars(brand.colors);   // brand colours only in the Guide doc
   showReset();
+  try{ if(window.MD&&MD.brain) MD.brain.refresh(); }catch(e){}   // keep the Brand Brain current with every render
 }
 function renderPrepared(){
   const box=document.getElementById('homePrepared'); if(!box) return;
@@ -2387,6 +2797,7 @@ function mapAiToBrand(d, picked){     // map the AI's response into the brand �
                                  body:tbody||'',bodyUsage:(ts.body&&ts.body.usage)||(ty.body&&ty.body.usage)||''};
   }
   if(d.brand && typeof d.brand==='object'){ if(d.brand.personality) brand.personality=d.brand.personality; if(d.brand.visualDirection) brand.visualDirection=d.brand.visualDirection; }
+  if(d.presentation && typeof d.presentation==='object') brand.presentation=d.presentation;
   if(d.guidePlan) brand.guidePlan=d.guidePlan;
   if(d.brandWorld && typeof d.brandWorld==='object') brand.brandWorld=d.brandWorld;
   if(d.designStrategy && typeof d.designStrategy==='object') brand.designStrategy=d.designStrategy;
@@ -2474,7 +2885,8 @@ function dedupeColors(list){            // drop identical + near-identical so no
 async function extractPalette(urls){            // EXACT hex codes pulled from the uploaded pixels — nothing averaged or invented
   const counts=new Map();
   for(const url of urls.slice(0,6)){
-    let img; try{ img=await loadImg(url); }catch(e){ continue; }
+    let src=url; try{ const cu=await cleanMark(url, /svg/i.test(url)); if(cu) src=cu; }catch(e){}   // knock out the logo's flat background first
+    let img; try{ img=await loadImg(src); }catch(e){ continue; }
     const S=64, c=document.createElement('canvas'); c.width=S; c.height=S; const x=c.getContext('2d');
     try{ x.drawImage(img,0,0,S,S); }catch(e){ continue; }
     let d; try{ d=x.getImageData(0,0,S,S).data; }catch(e){ continue; }
@@ -2591,24 +3003,8 @@ async function placeLogos(root){
   const {primary}=logoSystemMarks();
   const primaryMark = primary || logos.find(l=>l.role==='primaryLogo') || logos[0];
   if(!primaryMark) return;
-  for(const fr of frames){ setFrameImage(fr, primaryMark.url, true, primaryMark.id); }   // always the original primary logo — no black/white variations, ever
-}
-/* ── the brand's most-used marks: the exact uploaded marks; for a monochrome mark, a real Black + White pair ── */
-function markIsMonochrome(url){          // achromatic (black/white/grey line-art) → eligible for Black & White; coloured → exact only
-  return new Promise(res=>{
-    const img=new Image();
-    img.onload=()=>{ try{
-      const S=40,c=document.createElement('canvas');c.width=S;c.height=S;
-      const x=c.getContext('2d',{willReadFrequently:true}); x.clearRect(0,0,S,S); x.drawImage(img,0,0,S,S);
-      const d=x.getImageData(0,0,S,S).data; let op=0,col=0;
-      for(let i=0;i<d.length;i+=4){ const a=d[i+3]; if(a<40) continue; op++;
-        const r=d[i],g=d[i+1],b=d[i+2],mx=Math.max(r,g,b),mn=Math.min(r,g,b);
-        const sat=mx?(mx-mn)/mx:0; if(sat>0.22 && mx>40 && mn<235) col++; }       // a genuinely coloured pixel
-      res(op ? (col/op)<0.04 : false);
-    }catch(e){ res(false); } };          // unreadable (CORS taint) → assume coloured → show exact only
-    img.onerror=()=>res(false);
-    img.src=url;
-  });
+  const cleaned=await cleanMark(primaryMark.url, /svg/i.test(primaryMark.ext||''));
+  for(const fr of frames){ setFrameImage(fr, cleaned||primaryMark.url, true, primaryMark.id); }   // original primary logo, background knocked out, on any ground
 }
 async function renderIdMarks(root){
   const wrap=root.querySelector('.id-marks'); if(!wrap) return;
@@ -2619,7 +3015,7 @@ async function renderIdMarks(root){
   const {primary,icon}=logoSystemMarks();
   const primaryMark = primary || logos.find(l=>l.role==='primaryLogo') || logos[0];
   const isSvg=m=>/svg/i.test(m.ext||'');
-  const full=async m=> await imgToDataURL(m.url,isSvg(m)) || m.url;     // the EXACT file, never recoloured
+  const full=async m=> await cleanMark(m.url,isSvg(m)) || m.url;     // the exact mark, background knocked out
 
   // distinct REAL items — each labelled for what it actually is, no fabricated variants
   const items=[], seen=new Set();
@@ -2640,7 +3036,7 @@ async function renderIdMarks(root){
   wrap.innerHTML='';
   // The exact uploaded marks, each as its original file on the ground that lets it read — no recoloured or invented variants.
   const row1=document.createElement('div'); row1.className='id-markrow';
-  for(const it of items){ const dark=lum(it.mark)>150; const d=frame(dark); row1.appendChild(d); await fill(d, await full(it.mark), it.kind, it.mark.id); }
+  for(const it of items){ const dark=bestGround(it.mark)==='dark'; const d=frame(dark); row1.appendChild(d); await fill(d, await full(it.mark), it.kind, it.mark.id); }
   wrap.appendChild(row1);
 }
 const LOGOVAR={};                          // markId|treatment -> generated data URL (for hover download)
@@ -2656,7 +3052,7 @@ function logoSystemMarks(){
   const icon=pool.find(l=>l.role==='iconMark'&&l!==primary) || pool.find(l=>l!==primary&&asp(l)>0.7&&asp(l)<1.4&&!/wordmark/i.test(l.name||''));
   return {primary, icon};
 }
-/* ── the concierge's logo design decisions: when to reverse, recolor, or keep the real mark ── */
+/* ── how the real mark is placed: which grounds it reads on ── */
 function markProfile(m){
   const tr=m.transparentRatio==null?0.1:m.transparentRatio, vy=m.variety==null?40:m.variety, lum=m.lum==null?128:m.lum;
   const cleanReverse = tr>0.45 && vy<26;     // open line-art with few colors → a flat recolor stays crisp (won't blob)
@@ -2664,19 +3060,18 @@ function markProfile(m){
   const worksOnLight = lum<236;              // not a near-white-only mark
   return {cleanReverse, worksOnDark, worksOnLight};
 }
-function chooseTreatment(m,slot){            // slot: 'light' | 'dark'
-  const p=markProfile(m);
-  if(slot==='dark'){ if(p.cleanReverse) return 'white'; if(p.worksOnDark) return 'color'; return 'white'; }
-  if(p.worksOnLight) return 'color'; return 'black';
+function bestGround(m){            // the single ground a real mark reads on best — one rule, used in every room
+  if(!m) return 'paper';
+  const p=markProfile(m); const lum=m.lum==null?128:m.lum;
+  if(p.worksOnLight && p.worksOnDark) return lum>168 ? 'dark' : 'paper';   // light-leaning marks pop on dark; everything else sits on paper
+  if(p.worksOnDark && !p.worksOnLight) return 'dark';                      // near-white marks need a dark ground
+  return 'paper';
 }
-const TREAT_WORD={color:'full color',white:'reversed',black:'one-color'};
-async function logoCell(mark,kind,treatment,ground,label){   // ground: 'paper' | 'dark'
-  const isSvg=/svg/i.test(mark.ext||''); let url;
-  if(treatment==='white') url=(brand.logos.find(l=>l.variant==='white')||{}).url || await recolorLogo(mark.url,'white',isSvg) || mark.url;
-  else if(treatment==='black') url=(brand.logos.find(l=>l.variant==='black')||{}).url || await recolorLogo(mark.url,'black',isSvg) || mark.url;
-  else url=await imgToDataURL(mark.url,isSvg)||mark.url;
-  const key=mark.id+'|'+kind+'|'+treatment+'|'+ground; LOGOVAR[key]=url;
-  const onD=ground==='dark'; const fname=brandSlug()+'-'+kind+'-'+treatment+'.png';
+async function logoCell(mark,kind,ground,label){   // ground: 'paper' | 'dark' — always the original file
+  const isSvg=/svg/i.test(mark.ext||'');
+  const url=(await cleanMark(mark.url,isSvg))||mark.url;
+  const key=mark.id+'|'+kind+'|'+ground; LOGOVAR[key]=url;
+  const onD=ground==='dark'; const fname=brandSlug()+'-'+kind+(onD?'-on-dark':'')+'.png';
   const bg=brandGround(onD?'dark':'light');
   return '<div class="gd-logocell '+(onD?'dark':'paper')+'" style="background:'+bg+'!important">'
     +'<img alt="" src="'+url+'">'
@@ -2684,21 +3079,25 @@ async function logoCell(mark,kind,treatment,ground,label){   // ground: 'paper' 
     +'<span class="gd-logo-label'+(onD?' on-dark':'')+'">'+esc(label)+'</span></div>';
 }
 async function markRow(mark,kind,role){
-  const p=markProfile(mark);
-  const lightTreat=chooseTreatment(mark,'light'), darkTreat=chooseTreatment(mark,'dark');
-  const cells=[
-    await logoCell(mark,kind,lightTreat,'paper',role+' — '+TREAT_WORD[lightTreat]+' · on light'),
-    await logoCell(mark,kind,darkTreat,'dark',role+' — '+TREAT_WORD[darkTreat]+' · on dark')
-  ];
-  if(p.cleanReverse) cells.push(await logoCell(mark,kind,'black','paper',role+' — one-color · single ink'));
+  const isSvg=/svg/i.test(mark.ext||'');
+  await cleanMark(mark.url,isSvg);                              // process once → trims + measures the mark's real ink
+  const ink=_markInk.get(mark.url)||{};
+  const L = ink.ink!=null ? ink.ink : (mark.lum==null?128:mark.lum);
+  const colorful = !!ink.colorful;
+  const onLight = colorful || L < 175;                         // dark or mid ink reads on the light card
+  const onDark  = colorful || L > 150;                         // light or mid ink reads on the dark card — a white mark only here, never on white
+  const cells=[];
+  if(onLight) cells.push(await logoCell(mark,kind,'paper',role+' — on light'));
+  if(onDark)  cells.push(await logoCell(mark,kind,'dark', role+' — on dark'));
+  if(!cells.length) cells.push(await logoCell(mark,kind,'paper',role));   // always show it somewhere
   return '<div class="gd-logos'+(cells.length<3?' two':'')+'">'+cells.join('')+'</div>';
 }
 async function renderLogoSystem(root){
   const wrap=root.querySelector('[data-logosys]'); if(!wrap) return;
   const {primary,icon}=logoSystemMarks(); if(!primary) return;        // keep template placeholder until a real mark exists
   const intro = (icon&&icon.id!==primary.id)
-    ? "Your logo, prepared for every background, plus a compact mark for tight spaces. Use the full logo wherever there's room; let the compact mark stand alone for avatars, favicons, and small placements. Each version is chosen to look right on its background — hover any mark to download it."
-    : "Your logo, prepared for every background. Use the version shown for light and for dark grounds — each is chosen to keep the mark sharp and legible. Every file is optimized and ready; hover any mark to download it.";
+    ? "Your logo and a compact mark for tight spaces, each shown on the backgrounds it sits on best. Use the full logo wherever there's room; let the compact mark stand alone for avatars and small placements. Hover any mark to download the original file."
+    : "Your logo, shown on the backgrounds it sits on best. Hover any mark to download the original file.";
   wrap.innerHTML='<p class="gd-sub">'+esc(intro)+'</p>'
     + await markRow(primary,'logo','Primary')
     + ((icon&&icon.id!==primary.id) ? await markRow(icon,'icon','Compact mark') : '');
@@ -2947,6 +3346,7 @@ async function importFromExperience(){
     if(Array.isArray(dna.brandHomeImprovements)) brand.brandHomeImprovements=dna.brandHomeImprovements;
     if(dna.personality) brand.personality=dna.personality;
     if(dna.visualDirection) brand.visualDirection=dna.visualDirection;
+    if(dna.presentation && typeof dna.presentation==='object') brand.presentation=dna.presentation;
   }
   brand.logos=[]; brand.photos=[]; brand.docs=[];
   for(const rec of (recs||[])){
