@@ -837,6 +837,7 @@ body.founder-mode .developer-files { display: block; }
 .concierge-actions { margin-top: auto; display: flex; gap: 6px; }
 .concierge-status { margin-top: auto; padding: 7px 2px 3px; font-size: 10px; letter-spacing: .08em;
   text-transform: uppercase; color: rgba(14,42,24,.34); }
+.concierge-card.is-done .concierge-status { color: #2c5a3c; font-weight: 600; }
 .concierge-placeholder.is-empty { color: rgba(14,42,24,.32); }
 .concierge-placeholder.is-type { font-size: 1.15rem; letter-spacing: -.01em; color: rgba(14,42,24,.62); text-transform: none; }
 .concierge-actions button {
@@ -1309,6 +1310,13 @@ body.md-state-preparing .p-sub {
   letter-spacing: .14em;
   text-transform: uppercase;
   color: rgba(22,74,42,.52);
+}
+.review-reco-card .reco-check {
+  display: grid; place-items: center;
+  width: 26px; height: 26px; margin-bottom: .85rem;
+  border-radius: 50%; font-size: 13px; letter-spacing: 0;
+  color: #2c5a3c; background: rgba(44,90,60,.10);
+  box-shadow: inset 0 0 0 1px rgba(44,90,60,.18);
 }
 .review-reco-card h3 {
   margin: 0 0 .55rem;
@@ -3842,9 +3850,9 @@ body.md-state-concierge .concierge-missing {
     <!-- CUSTOMER REVIEW: recommendations first. Technical output is Founder Mode only. -->
     <section class="customer-review" id="customerReview" aria-label="Moving Day recommendations">
       <p class="customer-review-kicker">Brand Concierge</p>
-      <h2 class="customer-review-title">I have three recommendations.</h2>
+      <h2 class="customer-review-title">Your Brand Home is ready.</h2>
       <p class="customer-review-copy">
-        Before I prepare your Brand Home, I recommend confirming the foundation, color system, and asset plan.
+        I reviewed the uploaded assets, selected the strongest identity pieces, built a starter visual system, and prepared a client-ready foundation.
       </p>
       <div class="review-reco-grid" id="reviewRecoGrid"></div>
       <div class="customer-review-footer">
@@ -4803,20 +4811,19 @@ btnMovein.addEventListener('click', event => {
     const grid = document.getElementById('reviewRecoGrid');
     if (!grid) return;
 
-    const aiRecommendations = Array.isArray(aiData?.recommendations)
-      ? aiData.recommendations
-      : [];
+    const decisions = (Array.isArray(aiData?.decisions) && aiData.decisions.length)
+      ? aiData.decisions
+      : ['Primary identity selected', 'Supporting badge organized', 'Color system established', 'Typography direction prepared', 'Brand Home content written'];
 
-    if (aiRecommendations.length) {
-      grid.innerHTML = aiRecommendations.slice(0, 3).map((item, index) => `
-        <article class="review-reco-card">
-          <span>${esc(String(index + 1).padStart(2, '0'))}</span>
-          <h3>${esc(item.title || 'Review this recommendation')}</h3>
-          <p>${esc(item.summary || item.reason || item.nextAction || '')}</p>
-        </article>
-      `).join('');
-      return;
-    }
+    grid.innerHTML = decisions.slice(0, 4).map(item => {
+      const text = typeof item === 'string' ? item : (item.title || item.summary || '');
+      return `
+        <article class="review-reco-card is-done">
+          <span class="reco-check" aria-hidden="true">✓</span>
+          <h3>${esc(text)}</h3>
+        </article>`;
+    }).join('');
+    return;
 
     const guide = aiData?.guide || {};
     const brand = aiData?.brand || {};
@@ -4984,24 +4991,43 @@ btnMovein.addEventListener('click', event => {
 
   function guessClientNameFromFiles(files) {
     const arr = Array.from(files || []);
-    // The brand name lives on the mark, not just any file — prefer a wordmark/logo file's name.
-    const pick = arr.find(f => /wordmark|logotype|logo/i.test(f.name || '')) || arr[0];
-    if (!pick) return '';
-    let base = (pick.name || '')
-      .replace(/\.[^/.]+$/, '')
-      .replace(/[_-]+/g, ' ')
-      .replace(/\b(logo|logotype|wordmark|word\s*mark|brandmark|brand\s*mark|primary|secondary|final|draft|export|brand|favicon|transparent|reverse|hi-?res|rgb|cmyk|png|jpg|jpeg|svg|webp|version|v\d+)\b/gi, ' ')
-      .replace(/\(\d+\)|\bcopy\b/gi, ' ')
-      .replace(/\s+0?\d{1,4}\b/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-    // Only use a file-derived name if it actually reads like a brand — otherwise leave it blank.
-    if (!base || base.length < 2 || base.length > 40) return '';
-    if (/^[0-9\s]+$/.test(base)) return '';
-    if (/^[0-9a-f]{6,}$/i.test(base.replace(/\s/g, ''))) return '';
-    if (/\b(img|dsc|dscn|image|photo|pic|screenshot|screen\s*shot|untitled|unnamed|download|scan|new|render|output|artboard|frame|group|layer|comp|mockup|asset|file)\b/i.test(base)) return '';
-    if (!/[a-z]/i.test(base)) return '';
-    return base.replace(/\b\w/g, c => c.toUpperCase());
+    if (!arr.length) return '';
+    // Asset/export words that are never a brand name — kept in step with index.html's looksLikeFileName.
+    const JUNK = /\b(img|dsc|dscn|image|photo|pic|screenshot|screen\s*shot|untitled|unnamed|download|scan|new|render|output|artboard|frame|group|layer|comp|mockup|asset|file|export|copy|avatar|social|banner|profile|cover|thumbnail|favicon|wallpaper|wordmark|brandmark)\b/i;
+    const clean = raw => {
+      let base = String(raw || '')
+        .replace(/\.[^/.]+$/, '')
+        .replace(/([a-z0-9])([A-Z])/g, '$1 $2')           // split camelCase exports: BodyByMaddie -> Body By Maddie
+        .replace(/[_-]+/g, ' ')
+        .replace(/\b(logo|logotype|wordmark|word\s*mark|brandmark|brand\s*mark|primary|secondary|final|draft|export|favicon|transparent|reverse|hi-?res|rgb|cmyk|png|jpg|jpeg|svg|webp|version|v\d+)\b/gi, ' ')
+        .replace(/\(\d+\)|\bcopy\b/gi, ' ')
+        .replace(/[([{]\s*[)\]}]/g, ' ')                   // drop brackets the descriptor strip emptied: "Name (logo)" -> "Name"
+        .replace(/\s*[([{]\s*$|^\s*[)\]}]\s*/g, ' ')       // and a dangling bracket left at an edge
+        .replace(/\s+0?\d{1,4}\b/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+      if (!base || base.length < 2 || base.length > 40) return '';
+      if (/^[0-9\s]+$/.test(base)) return '';
+      if (/^[0-9a-f]{6,}$/i.test(base.replace(/\s/g, ''))) return '';
+      if (!/[a-z]/i.test(base)) return '';
+      if (/\bbrand\s*home\b/i.test(base)) return '';        // Moving Day's own export prefix is never the client's brand
+      if (JUNK.test(base)) return '';
+      return base;
+    };
+    // Clean every filename — a wordmark/logo file is the strongest signal, but weigh them all.
+    const cands = [];
+    arr.forEach(f => { const c = clean(f.name); if (c) cands.push({ name: c, logo: /wordmark|logotype|logo/i.test(f.name || '') }); });
+    if (!cands.length) return '';                            // nothing brand-like → leave blank; the concierge reads the real name from the mark
+    // A stem repeated across several assets is almost certainly the brand itself.
+    const norm = s => s.toLowerCase(), tally = {};
+    cands.forEach(c => { tally[norm(c.name)] = (tally[norm(c.name)] || 0) + 1; });
+    let best = cands[0], bestScore = -Infinity;
+    cands.forEach(c => {
+      const words = c.name.split(/\s+/).length;
+      const score = tally[norm(c.name)] * 10 + (c.logo ? 3 : 0) - words - c.name.length * 0.02;   // repeated > on a logo file > short & clean
+      if (score > bestScore) { bestScore = score; best = c; }
+    });
+    return best.name.replace(/\b\w/g, ch => ch.toUpperCase());
   }
 
   function rgbToHex(r, g, b) {
@@ -5076,9 +5102,115 @@ btnMovein.addEventListener('click', event => {
     }));
   }
 
+  // Guarantee the Brand Home contract on the client too — covers the local
+  // fallback (API unreachable / logos-only) and any thin response. Mirrors the
+  // server's normalizeBrandUnderstanding without re-deriving everything.
+  function ensureUnderstanding(d) {
+    if (!d || typeof d !== 'object') return d;
+    const S = (v, f = '') => (typeof v === 'string' && v.trim()) ? v.trim() : f;
+    const A = v => Array.isArray(v) ? v.filter(Boolean) : [];
+    const g = d.guide || (d.guide = {});
+    const b = d.brand || {};
+    const pal = A(d.palette).length ? d.palette : A(d.colors);
+    d.clientName = S(d.clientName, S(g.clientName, S(b.name)));
+    d.industry = S(d.industry, S(g.category, S(b.industry)));
+    d.location = S(d.location);
+    d.establishedYear = S(d.establishedYear);
+    d.brandSummary = S(d.brandSummary, S(g.description, S(b.positioning)));
+    if (typeof d.confidence !== 'number') d.confidence = 0.7;
+    const id = d.identity || {};
+    d.identity = {
+      primaryLogo: S(id.primaryLogo, S(d.selectedAssets?.primaryLogo, S(d.selectedAssets?.heroLogo))),
+      secondaryLogo: S(id.secondaryLogo), iconMark: S(id.iconMark, S(d.selectedAssets?.iconMark)),
+      wordmark: S(id.wordmark), badge: S(id.badge)
+    };
+    const ROLES = ['Primary', 'Secondary', 'Accent', 'Neutral', 'Background', 'Text'];
+    d.palette = A(pal).slice(0, 6).map((c, i) => ({
+      name: S(c && c.name, 'Colour ' + (i + 1)),
+      hex: normalizeHex((c && (c.hex || c.value)) || '#15140f'),
+      role: S(c && (c.role || c.name), ROLES[i] || 'Accent'),
+      usage: S(c && c.usage)
+    }));
+    const tIn = d.typography || {};
+    const rec = A(tIn.recommended).length ? tIn.recommended
+      : [{ name: S(tIn.display?.name, 'Fraunces'), role: 'Display' }, { name: S(tIn.body?.name, 'Inter'), role: 'Body' }];
+    d.typography = Object.assign({}, tIn, { detected: A(tIn.detected), recommended: rec });
+    d.personality = A(d.personality).length ? d.personality : A(b.personality);
+    d.visualThemes = A(d.visualThemes);
+    const bh = d.brandHomeSections || {};
+    const nm = d.clientName || 'this brand';
+    d.brandHomeSections = {
+      identity: S(bh.identity, 'The lead identity for ' + nm + ', ready to use.'),
+      colors: S(bh.colors, 'A colour system drawn from the marks.'),
+      typography: S(bh.typography, 'A typographic direction set for clarity and character.'),
+      voice: S(bh.voice, S(b.voice, 'A calm, confident brand voice.')),
+      usage: S(bh.usage, 'Clear rules so the marks always read well.'),
+      downloads: S(bh.downloads, 'Your logos, colours, and type — ready to download.')
+    };
+    d.decisions = A(d.decisions);
+    if (!d.decisions.length) {
+      const dd = ['Primary identity selected'];
+      if (d.identity.secondaryLogo || d.identity.badge || d.identity.iconMark) dd.push('Supporting badge organized');
+      if (d.palette.length) dd.push('Color system established');
+      dd.push('Typography direction prepared');
+      dd.push('Brand Home content written');
+      d.decisions = dd;
+    }
+    d.missing = A(d.missing);
+    d.nextActions = A(d.nextActions).length ? d.nextActions : ['Confirm the foundation', 'Open your Brand Home'];
+    ensurePresentation(d);
+    return d;
+  }
+
+  // Compact client mirror of the server presentation guarantee — keeps the local
+  // fallback (and any thin response) studio-quality and brand-specific.
+  function ensurePresentation(d) {
+    const S = (v, f = '') => (typeof v === 'string' && v.trim()) ? v.trim() : f;
+    const A = v => Array.isArray(v) ? v.filter(Boolean) : [];
+    const nm = d.clientName || 'this brand';
+    const indLc = (d.industry || '').toLowerCase() || 'its field';
+    const bh = d.brandHomeSections || {};
+    const palText = A(d.palette).map(c => c.name).filter(Boolean).slice(0, 4).join(', ') || 'a focused set of brand tones';
+    const rec = A(d.typography && d.typography.recommended);
+    const disp = S((rec.find(r => /display|head/i.test(r.role || '')) || {}).name, 'a confident display face');
+    const body = S((rec.find(r => /body|text/i.test(r.role || '')) || {}).name, 'a clean, readable body face');
+    const traits = A(d.personality).slice(0, 3).join(', ') || 'considered and grounded';
+    const DEF = {
+      overview:   { title:'Brand Overview',       intro:S(d.brandSummary, nm + ' is a ' + indLc + ' brand with a clear, ownable identity.'), rationale:'Drawn from the marks ' + nm + ' already uses, so the system reads as one voice.', usage:'Lead with this when introducing the brand to a client or teammate.' },
+      identity:   { title:'Identity System',      intro:S(bh.identity, nm + "'s primary mark leads the brand and should front most customer-facing materials."), rationale:'The primary lockup carries the most recognition, so it anchors the system.', usage:'Use it on signage, web headers, invoices, and social profiles.' },
+      color:      { title:'Color System',         intro:S(bh.colors, 'The palette is built from ' + palText + ' — drawn straight from the marks.'), rationale:"These colours come from " + nm + "'s own artwork, so the system stays authentic.", usage:'Let the primary colour lead, support with secondary tones, keep neutrals for type.' },
+      typography: { title:'Typography Direction', intro:S(bh.typography, 'A pairing of ' + disp + ' for display and ' + body + ' for body.'), rationale:'Display carries character; the body face keeps everything legible.', usage:'Display for headlines, the body face for running copy and UI.' },
+      visual:     { title:'Visual Language',      intro:'A look that feels ' + traits + '.', rationale:'The personality of ' + nm + ' guides texture, spacing, and imagery.', usage:'Apply it to photography, layouts, and social for a consistent feel.' },
+      usage:      { title:'Usage Guidance',       intro:S(bh.usage, "Simple rules keep " + nm + "'s identity strong wherever it appears."), rationale:'Consistency is what makes a brand feel established.', usage:'Give the marks room, keep contrast strong, never stretch or recolour them.' },
+      assets:     { title:'Asset Library',        intro:'Every uploaded asset is organised, named, and sorted into a clean library.', rationale:'A tidy library means the right file is always one click away.', usage:'Pull from here whenever you need a logo, colour, or asset.' },
+      downloads:  { title:'Download Package',     intro:S(bh.downloads, 'Your logos, colours, and type are packaged and ready to hand off.'), rationale:'Exported in the formats a printer, developer, or partner will ask for.', usage:'Download to share the brand, or publish the Brand Home as a living link.' }
+    };
+    const ORDER = ['overview','identity','color','typography','visual','usage','assets','downloads'];
+    const p = d.presentation || {};
+    const inModel = {}; A(p.sections).forEach(s => { if (s && s.id) inModel[String(s.id).toLowerCase()] = s; });
+    const sections = ORDER.map(id => {
+      const m = inModel[id] || {}, def = DEF[id];
+      let conf = Number(m.confidence); if (!isFinite(conf)) conf = (typeof d.confidence === 'number' ? d.confidence : 0.85);
+      return {
+        id, title: S(m.title, def.title), intro: S(m.intro, def.intro),
+        rationale: S(m.rationale, def.rationale), usage: S(m.usage, def.usage),
+        confidence: Math.max(0, Math.min(1, conf)),
+        inferred: S(m.inferred, 'Read from the assets ' + nm + ' uploaded.'),
+        refine: S(m.refine, 'Add more brand material anytime and this section sharpens automatically.')
+      };
+    });
+    d.presentation = {
+      headline: S(p.headline, nm + ', brought together.'),
+      subheadline: S(p.subheadline, 'A starter brand system, prepared from your assets.'),
+      overview: S(p.overview, S(d.brandSummary, nm + "'s identity, colour, and type — organised into one calm, client-ready system.")),
+      sections
+    };
+    return d;
+  }
+
   function buildLocalReviewData(allFiles, analyzable, dataUrls, palette, report = preparationReport) {
     const clientName = guessClientNameFromFiles(allFiles);
-    return {
+    const _ld = {
       reviewMode: 'local',
       guide: {
         clientName,
@@ -5109,6 +5241,7 @@ btnMovein.addEventListener('click', event => {
         positioning: 'A cleaner, organized brand home prepared from the provided assets.'
       }
     };
+    return ensureUnderstanding(_ld);
   }
 
   // Bound the wait so the "Understanding your visual system" step can never hang forever.
@@ -5146,7 +5279,7 @@ btnMovein.addEventListener('click', event => {
     if (!res.ok) throw new Error(await res.text());
     const json = await res.json();
     json.reviewMode = 'concierge';
-    return json;
+    return ensureUnderstanding(json);
   }
 
   function organizeOriginalAssets(allFiles, reviewData) {
@@ -5313,22 +5446,36 @@ btnMovein.addEventListener('click', event => {
     const fields={...(existing.fields||{})};
     const g=aiData.guide||{};
     const b=aiData.brand||{};
-    if(g.clientName)fields.clientName=g.clientName;
+    // clientName → hero/title; industry/location/year → brand metadata
+    if(aiData.clientName)fields.clientName=aiData.clientName;
+    else if(g.clientName)fields.clientName=g.clientName;
     else if(b.name)fields.clientName=b.name;
-    if(g.category)fields.category=g.category;
+    if(aiData.industry)fields.category=aiData.industry;
+    else if(g.category)fields.category=g.category;
     else if(b.industry)fields.category=b.industry;
-    if(g.description)fields.tagline=g.description;
+    if(aiData.location)fields.location=aiData.location;
+    if(aiData.establishedYear)fields.establishedYear=aiData.establishedYear;
+    // brandSummary → overview copy (tagline slot the builder already renders)
+    if(aiData.brandSummary)fields.tagline=aiData.brandSummary;
+    else if(g.description)fields.tagline=g.description;
+    // identity filenames carried for the logo slots
+    if(aiData.identity)fields.identity=aiData.identity;
     const t=aiData.typography||{};
+    // prefer fonts detected in files; else fall back to the recommended pair
+    const recDisplay=(t.recommended||[]).find(x=>/display|head/i.test(x.role||''));
+    const recBody=(t.recommended||[]).find(x=>/body|text/i.test(x.role||''));
     if(t.displayFont)fields.displayFont=t.displayFont;
     else if(t.display?.name)fields.displayFont=t.display.name;
+    else if(recDisplay?.name)fields.displayFont=recDisplay.name;
     if(t.bodyFont)fields.bodyFont=t.bodyFont;
     else if(t.body?.name)fields.bodyFont=t.body.name;
+    else if(recBody?.name)fields.bodyFont=recBody.name;
     if(t.display?.usage)fields.displayFontNote=t.display.usage;
     if(t.body?.usage)fields.bodyFontNote=t.body.usage;
     const palette=aiData.palette||aiData.colors||[];
     const colors=palette.slice(0,5).map(c=>normalizeHex(c.hex||c.value||c));
     while(colors.length<5)colors.push('#15140F');
-    fields.colorNames=palette.slice(0,5).map(c=>c.name||'Color').join(', ');
+    fields.colorNames=palette.slice(0,5).map(c=>c.name||c.role||'Color').join(', ');
     const copy=aiData.copySuggestions||{};
     if(copy.tagline&&!fields.tagline)fields.tagline=copy.tagline;
     try{localStorage.setItem(BUILDER_KEY,JSON.stringify({...existing,fields,colors}));}
@@ -5450,14 +5597,14 @@ btnMovein.addEventListener('click', event => {
   }
 
   const CONCIERGE_VOICE = {
-    high:     { title: 'I think I have everything I need.',
-                note: "Here's the foundation I've prepared. Confirm what looks right, and adjust anything you'd like." },
-    medium:   { title: "I'm beginning to understand your identity.",
-                note: "I'd like to confirm a few details before we settle into your Brand Home." },
-    low:      { title: "I haven't found a clear primary logo yet.",
-                note: "I can still prepare your Brand Home — adding your logo will make it considerably stronger." },
-    very_low: { title: 'This looks more like reference material than a complete brand package.',
-                note: "I can organise what's here, but a logo and your core brand files would let me build a proper foundation." }
+    high:     { title: 'Your foundation is ready.',
+                note: "Here's everything I've prepared. It's set — you can refine anything later inside your Brand Home." },
+    medium:   { title: 'Your foundation is taking shape.',
+                note: "Here's what I've prepared. It's ready to move in — the rest you can refine inside your Brand Home." },
+    low:      { title: 'Your starting point is prepared.',
+                note: "I've organised what's here. Adding your logo will make the Brand Home considerably stronger." },
+    very_low: { title: "I've organised what you shared.",
+                note: "This reads more like reference material — a logo and your core brand files would let me build a fuller foundation." }
   };
 
   function renderConciergeMode(report = preparationReport) {
@@ -5510,8 +5657,16 @@ btnMovein.addEventListener('click', event => {
     else if (a.wordmark.state === 'found')
       cards.push({ key:'wordmark', title:'Wordmark', preview:assetPreviewHTML(a.wordmark.asset), copy:'This is your wordmark or lockup.', actions:[['confirm','Confirm'],['change','Change']] });
 
+    // Present settled items as completed decisions — no confirm/change asks.
+    // Genuine gaps (add logo / isolate / add fonts) keep their gentle prompt.
+    cards.forEach(c => {
+      if (c.actions && c.actions.every(([act]) => ['confirm','change','adjust','use'].includes(act))) {
+        delete c.actions; c.status = '✓ Prepared'; c.done = true;
+      }
+    });
+
     conciergeGrid.innerHTML = cards.slice(0, 4).map(card => `
-      <article class="concierge-card" data-key="${esc(card.key)}">
+      <article class="concierge-card${card.done ? ' is-done' : ''}" data-key="${esc(card.key)}">
         <div class="concierge-preview">${card.preview}</div>
         <h3>${esc(card.title)}</h3>
         <p>${esc(card.copy)}</p>
@@ -5631,7 +5786,8 @@ btnMovein.addEventListener('click', event => {
       return guessClientNameFromFiles(pri) || guessClientNameFromFiles(all) || '';
     };
     let resolvedBrandName='';
-    for(const c of [guide.clientName, brand.name, nameFromFiles()]){ const v=(c||'').trim(); if(v && !looksGenericName(v)){ resolvedBrandName=v; break; } }
+    // d.clientName is where the Brand Concierge puts the inferred name — it must lead the chain
+    for(const c of [d.clientName, guide.clientName, brand.name, (d.identity&&d.identity.name), nameFromFiles()]){ const v=(c||'').trim(); if(v && !looksGenericName(v)){ resolvedBrandName=v; break; } }
     if(!resolvedBrandName) resolvedBrandName = nameFromFiles() || 'Your Brand';   // last resort — Brand Home is never blank
 
     const dna = {
@@ -5659,6 +5815,11 @@ btnMovein.addEventListener('click', event => {
       personality: (d.brand && d.brand.personality) || null,
       visualDirection: (d.brand && d.brand.visualDirection) || '',
       recommendations: Array.isArray(d.recommendations) ? d.recommendations : [],
+      presentation: (d.presentation && typeof d.presentation === 'object') ? d.presentation : null,
+      decisions: Array.isArray(d.decisions) ? d.decisions : [],
+      brandSummary: d.brandSummary || '',
+      location: d.location || '',
+      establishedYear: d.establishedYear || '',
       sourceFiles: {
         count: report.preparedFileCount || report.preparedCount || assetsSummary.length || 0,
         names: assetsSummary.map(a => a.name).slice(0,60),
