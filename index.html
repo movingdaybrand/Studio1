@@ -70,8 +70,14 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 .welcome .soft{color:var(--ink-faint);}
 .welcome-sub{color:var(--ink-soft);font-weight:300;font-size:14px;}
 .home-logo{display:flex;justify-content:center;margin:0 0 clamp(14px,2.4vh,24px);}
-.home-logo img{height:clamp(62px,8vw,96px);max-width:clamp(220px,36vw,400px);object-fit:contain;mix-blend-mode:multiply;}
+.home-logo img{height:clamp(62px,8vw,96px);max-width:clamp(220px,36vw,400px);object-fit:contain;mix-blend-mode:normal;}
 body.deep-immerse .home-logo img{mix-blend-mode:normal;}   /* multiply darkens a mark on the dark immersive ground — keep it true on dark */
+#mdWelcome{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;pointer-events:none;background:radial-gradient(130% 100% at 50% 32%,#1b2730,#0c1218 72%);opacity:0;transition:opacity .7s ease;}
+#mdWelcome.on{opacity:1;}
+#mdWelcome .ww{font-family:var(--display);font-weight:300;font-size:clamp(30px,4.2vw,48px);letter-spacing:-.02em;color:#f3efe6;opacity:0;transform:translateY(10px);transition:opacity .8s ease,transform .8s ease;}
+#mdWelcome.show-text .ww{opacity:1;transform:none;}
+#mdWelcome .ww .soft{color:rgba(243,239,230,.42);}
+@media (prefers-reduced-motion:reduce){#mdWelcome{display:none;}}
 .movein{display:flex;flex-direction:column;align-items:center;gap:9px;margin-top:16px;}
 .movein-btn{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:var(--sage);background:rgba(255,255,255,.62);box-shadow:var(--shadow);padding:9px 17px;border-radius:99px;transition:transform .2s,box-shadow .2s;}
 .movein-btn:hover{transform:translateY(-2px);box-shadow:var(--shadow-hover);}
@@ -2828,7 +2834,8 @@ function applyBrandHome(){
     let logo=document.getElementById('homeLogo');
     if(mark){
       if(!logo){ logo=document.createElement('div'); logo.id='homeLogo'; logo.className='home-logo'; head.insertBefore(logo,head.firstChild); }
-      logo.innerHTML='<img alt="">'; logo.querySelector('img').src=mark.url; logo.style.display='';
+      logo.innerHTML='<img alt="">'; const _li=logo.querySelector('img'); _li.src=mark.url; logo.style.display='';
+      try{ cleanMark(mark.url, /svg/i.test(mark.ext||mark.url||'')).then(u=>{ if(u) _li.src=u; }).catch(()=>{}); }catch(e){}   // knock the flat background out so the mark floats free
     } else if(logo){ logo.style.display='none'; }
   } else if(head){                                   // no brand → restore the default greeting
     const k=head.querySelector('.kicker'), w=head.querySelector('.welcome'), sub=head.querySelector('.welcome-sub');
@@ -2983,6 +2990,18 @@ function arriveHome(){                                   // reveal a freshly mov
   requestAnimationFrame(()=>requestAnimationFrame(()=>b.classList.add('md-arrive-go')));   // then ease environment, header and rooms in together
   setTimeout(()=>b.classList.remove('md-arrive','md-arrive-go'), 1800); // hand styling back once the choreography has played
 }
+function welcomeHomeArrival(){                            // on a cold move-in: greet, then reveal the logo + environment as the veil lifts
+  try{
+    if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches){ arriveHome(); return; }
+    let ov=document.getElementById('mdWelcome');
+    if(!ov){ ov=document.createElement('div'); ov.id='mdWelcome';
+      ov.innerHTML='<div class="ww">Welcome <span class="soft">home.</span></div>'; document.body.appendChild(ov); }
+    ov.classList.remove('on','show-text');
+    requestAnimationFrame(()=>{ ov.classList.add('on'); requestAnimationFrame(()=>ov.classList.add('show-text')); });  // ground calms · greeting rises
+    setTimeout(()=>ov.classList.remove('show-text'), 1200);                                  // greeting eases away
+    setTimeout(()=>{ try{ arriveHome(); }catch(e){} ov.classList.remove('on'); }, 1500);     // veil lifts → logo & environment ease in beneath
+  }catch(e){ try{ arriveHome(); }catch(_){} }
+}
 async function moveInFiles(fileList){
   if(typeof JSZip==='undefined'){ setStatus('Still loading — try again in a second.'); return; }
   const files=Array.from(fileList||[]).filter(Boolean);
@@ -3001,7 +3020,7 @@ async function moveInFiles(fileList){
     else if(DOC_EXT.includes(ext)){ brand.docs.push({name:name.split('/').pop(),ext}); }
   }
   await finishIntake(imgs,folderName);
-  if(coldArrival && activeRoom==='home' && (brand.logos.length||brand.colors.length||brand.name)) arriveHome();   // the brand arrives as one motion, not a pop
+  if(coldArrival && activeRoom==='home' && (brand.logos.length||brand.colors.length||brand.name)) welcomeHomeArrival();   // welcome home → logo → environment, as one arrival
 }
 function loadImg(url){ return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=url; }); }
 function dedupeColors(list){            // drop identical + near-identical so no duplicates slip through
