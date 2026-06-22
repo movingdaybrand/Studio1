@@ -3204,6 +3204,7 @@ async function finishIntake(imgs,folderName){
     setStatus(total? `${total} file${total===1?'':'s'} moved in.` : 'Nothing readable found — try images, a PDF, a folder, or a .zip.');
   }
   assignRoles();
+  ensureBrandName();                                         // read a name from the mark/filename when the AI didn't set one — never leave the demo name showing
   if(currentRoom && room.classList.contains('show')) openRoom(currentRoom);
   applyBrandHome();
   projectWorkspaceState();
