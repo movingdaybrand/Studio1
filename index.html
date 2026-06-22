@@ -3065,7 +3065,7 @@ async function renderIdMarks(root){
   // distinct REAL items — each labelled for what it actually is, no fabricated variants
   const items=[], seen=new Set();
   const add=(m,kind)=>{ if(!m||seen.has(m.id)) return; seen.add(m.id); items.push({mark:m,kind:kind||markKind(m)}); };
-  add(primaryMark);
+  add(primaryMark,'Primary');
   add(logos.find(l=>l.role==='wordmark') || logos.find(l=>l!==primaryMark&&markKind(l)==='Wordmark'),'Wordmark');
   add(icon&&icon.id!==primaryMark.id?icon:null,'Icon');
   add(logos.find(l=>l.role==='secondaryLogo'),'Secondary');
