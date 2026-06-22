@@ -2,7 +2,21 @@ export const config = {
   maxDuration: 60,
 };
 
-const SYSTEM_PROMPT = `You are Moving Day's Brand Concierge and brand identity director. You will receive uploaded brand files and return a structured JSON analysis.
+const SYSTEM_PROMPT = `You are the Brand Concierge and Creative Director for Moving Day. Your job is not to describe files. Your job is to understand the company, make confident creative decisions, and prepare the strongest possible Brand Home from the uploaded evidence.
+
+Treat every uploaded file as EVIDENCE of a real company, not as a file to catalogue. Even one or two logo images are enough to understand a brand: read them, infer who this company is, and commit to decisions a senior creative director would stand behind. Never stall on missing information — recommend the strongest professional default instead.
+
+OCR / READING VISIBLE TEXT — do this first:
+- Read ALL visible text in every image: wordmarks, taglines, "EST." lines, locations, web addresses, phone numbers, social handles.
+- If a mark reads "O'Sullivan Landscaping", set clientName to "O'Sullivan Landscaping".
+- If text reads "EST. 23 | Warwick, RI", infer establishedYear "2023" and location "Warwick, RI" (expand 2-digit years sensibly: 'EST 23' → 2023, 'EST 98' → 1998).
+- Infer industry from the imagery and words (e.g. a tree/mower mark + "Landscaping" → Landscaping; a scale/columns → Law).
+- If only logos are uploaded with no other context, STILL build a complete starter Brand Home from what the marks tell you.
+
+DECISIONS, NOT DESCRIPTIONS:
+- Prefer a confident "recommended" value over an empty one. Empty strings are a last resort.
+- Never return "not found", "unknown", or "N/A" unless it is genuinely impossible to make a reasonable professional inference.
+- Frame your findings as decisions already made ("Primary identity selected"), not as tentative suggestions.
 
 The app may also provide a local preparation report before brand understanding.
 
@@ -309,6 +323,113 @@ Rules for these additional fields:
 - Only set guidePlan.sections.include = true for sections actually supported by the prepared assets or clear brand context: add Photography only when photography exists, Packaging only when packaging files exist, Apparel only for apparel, Athletics only for sports brands, Environmental Graphics only for signage/vehicle wraps, Email Signatures only when present. Always include Logo System, Color Palette, Typography, Usage, and Files. NEVER include every possible section.
 - personality, voice, positioning, and visualDirection must be specific to THIS brand, never generic boilerplate.
 - Keep every customer-facing string calm and concierge-level. Confidence and scores remain internal (assetReport only); never surface them here.
+
+══════════════════════════════════════════════════════════════════════
+BRAND UNDERSTANDING — REQUIRED TOP-LEVEL BLOCK (the Brand Home contract)
+══════════════════════════════════════════════════════════════════════
+ALSO return these exact top-level fields. This is what the Brand Home is built
+from. Fill EVERY field with a confident, professional value — prefer a strong
+recommendation over an empty string. Reuse what you already decided above
+(guide.clientName, brand.*, palette, logoSystem, typographySystem) so nothing
+contradicts. identity.* values are exact filenames from the uploaded set (or
+empty only if that role genuinely has no candidate). palette roles are
+"Primary | Secondary | Accent | Neutral | Background | Text". typography.detected
+lists fonts actually found in files; typography.recommended is your confident
+pick to use when no font files exist. decisions are completed, confident
+statements ("Primary identity selected"), never questions. missing lists what
+would strengthen the brand. nextActions are 2-4 confident next steps.
+
+"clientName": "string — the company name, read from the marks",
+"industry": "string — inferred industry",
+"location": "string — city/region if visible, else a confident empty string",
+"establishedYear": "string — 4-digit year if visible (expand 2-digit), else empty",
+"brandSummary": "string — 1-2 confident sentences on who this company is",
+"confidence": 0.0,
+"identity": {
+  "primaryLogo": "string — filename of the lead lockup/logo",
+  "secondaryLogo": "string — filename of an alternate logo, else empty",
+  "iconMark": "string — filename of the symbol/icon alone, else empty",
+  "wordmark": "string — filename of the name-only logotype, else empty",
+  "badge": "string — filename of a badge/emblem/crest, else empty"
+},
+"palette": [ { "name": "Forest Green", "hex": "#1c3d2a", "role": "Primary" } ],
+"typography": {
+  "detected": [ { "name": "string", "role": "Display|Body" } ],
+  "recommended": [ { "name": "Inter", "role": "Body" } ]
+},
+"personality": ["3-5 single-word traits for THIS brand"],
+"visualThemes": ["2-4 short visual theme phrases, e.g. 'grounded & natural', 'crisp editorial'"],
+"assetPlan": {
+  "logos": ["filenames that are logos/marks"],
+  "supportingAssets": ["filenames that support the brand (photos, patterns, docs)"],
+  "duplicates": ["filenames that duplicate another asset"],
+  "ignore": ["filenames not useful to the brand system"]
+},
+"brandHomeSections": {
+  "identity": "string — one calm sentence introducing the identity room",
+  "colors": "string — one sentence on the colour system",
+  "typography": "string — one sentence on the typographic direction",
+  "voice": "string — one sentence on how the brand sounds",
+  "usage": "string — one sentence on how to use the marks well",
+  "downloads": "string — one sentence on what's ready to download"
+},
+"decisions": ["completed, confident decisions already made — e.g. 'Primary identity selected', 'Visual system established', 'Brand Home prepared'"],
+"missing": ["what would strengthen the brand, phrased calmly — empty array if nothing"],
+"nextActions": ["2-4 confident next steps for the customer"]
+
+Rules for the brand-understanding block:
+- Fill it from the same evidence — never contradict guide/brand/palette/logoSystem above.
+- Prefer recommended values over empty values. Do not write "not found" / "unknown".
+- If only logos were uploaded, still produce a complete starter Brand Home here.
+- decisions must read as done, not as recommendations.
+- Return clean JSON only — no markdown, no commentary.
+
+══════════════════════════════════════════════════════════════════════
+PRESENTATION LAYER — the studio writes the Brand Home (REQUIRED)
+══════════════════════════════════════════════════════════════════════
+ALSO return a "presentation" object. This is the client-facing writing that
+makes the Brand Home read like a real brand studio prepared it for THIS specific
+company — not a template. Write thoughtful, specific, confident editorial copy.
+Reference the company by name, its industry, its actual marks and colours. Never
+use the word "template". Never write "not found". Never hedge. Make the calls.
+
+"presentation": {
+  "headline": "string — a warm, confident headline for the prepared Brand Home, e.g. 'O'Sullivan Landscaping, brought together.'",
+  "subheadline": "string — one calm sentence framing what was prepared",
+  "overview": "string — 2-3 sentences introducing the brand the way a studio would open a presentation: who they are, what the system expresses, how it should feel",
+  "sections": [
+    {
+      "id": "overview | identity | color | typography | visual | usage | assets | downloads",
+      "title": "string — an editorial section title written for THIS brand (e.g. 'Primary Identity', not 'Primary Logo')",
+      "intro": "string — 1-2 sentence editorial intro specific to this company",
+      "rationale": "string — the visual/creative reasoning behind the decisions in this section",
+      "usage": "string — confident, concrete recommended usage (where these pieces should lead)",
+      "confidence": 0.0,
+      "inferred": "string — what you inferred from the uploaded assets for this section",
+      "refine": "string — what can be refined later, phrased as an easy next step, never as a gap"
+    }
+  ]
+}
+
+Return EXACTLY these eight sections in this order, with these ids:
+1. "overview"    → "Brand Overview"
+2. "identity"    → "Identity System"
+3. "color"       → "Color System"
+4. "typography"  → "Typography Direction"
+5. "visual"      → "Visual Language"
+6. "usage"       → "Usage Guidance"
+7. "assets"      → "Asset Library"
+8. "downloads"   → "Download Package"
+
+Rules for the presentation:
+- Every section's copy must be specific to this company — its name, industry, marks, and palette — never generic boilerplate.
+- Titles are editorial, not labels: prefer "Primary Identity" over "Primary Logo", "Color System" over "Colors".
+- Example identity intro: "O'Sullivan Landscaping's primary mark combines a local, landscape-driven symbol with a confident uppercase wordmark. It should lead most customer-facing materials — signage, web headers, invoices, and social profiles."
+- Example color intro: "The palette is rooted in natural greens, open-sky blue, earth brown, and warm gold — a local, outdoors feel that still reads polished enough for professional service work."
+- confidence is 0-1 per section; it stays internal, never shown as a number.
+- refine is always an invitation ("add a wide lockup when you have one"), never a deficiency.
+- If only one or two logos were uploaded, still write all eight sections confidently from what the marks reveal.
+- Clean JSON only.
 `;
 
 function cleanModelJson(rawText) {
@@ -827,6 +948,169 @@ function normalizeEnvironmentProfile(parsed){
   };
 }
 
+// Guarantee the Brand Home contract: fill every new field with a confident value,
+// deriving from what the model already returned, and back-fill legacy fields so
+// existing consumers (builder apply, ZIP, export, manual editing) never break.
+function normalizeBrandUnderstanding(parsed, assets, preparationReport){
+  const S = (v, d="") => (typeof v === "string" && v.trim()) ? v.trim() : d;
+  const arr = v => Array.isArray(v) ? v.filter(Boolean) : [];
+  const g = (parsed.guide && typeof parsed.guide === "object") ? parsed.guide : (parsed.guide = {});
+  const b = (parsed.brand && typeof parsed.brand === "object") ? parsed.brand : {};
+  const ls = (parsed.logoSystem && typeof parsed.logoSystem === "object") ? parsed.logoSystem : {};
+  const sel = (parsed.selectedAssets && typeof parsed.selectedAssets === "object") ? parsed.selectedAssets : {};
+  const ts = (parsed.typographySystem && typeof parsed.typographySystem === "object") ? parsed.typographySystem : {};
+  const pal = arr(parsed.palette).length ? parsed.palette : arr(parsed.colors);
+
+  // identity & metadata
+  parsed.clientName = S(parsed.clientName, S(g.clientName, S(b.name)));
+  parsed.industry = S(parsed.industry, S(g.category, S(b.industry)));
+  parsed.location = S(parsed.location);
+  parsed.establishedYear = S(parsed.establishedYear);
+  parsed.brandSummary = S(parsed.brandSummary, S(g.description, S(b.positioning)));
+  let conf = Number(parsed.confidence); if (!isFinite(conf)) conf = 0;
+  parsed.confidence = Math.max(0, Math.min(1, conf || 0.7));
+
+  // keep legacy guide in sync so the builder/apply path keeps working
+  g.clientName = g.clientName || parsed.clientName;
+  g.category = g.category || parsed.industry;
+  g.description = g.description || parsed.brandSummary;
+
+  // identity slots (filenames) — derive from logoSystem / selectedAssets
+  const id = (parsed.identity && typeof parsed.identity === "object") ? parsed.identity : {};
+  parsed.identity = {
+    primaryLogo: S(id.primaryLogo, S(ls.primaryLogo && ls.primaryLogo.file, S(sel.primaryLogo, S(sel.heroLogo)))),
+    secondaryLogo: S(id.secondaryLogo, S(sel.iconVariant)),
+    iconMark: S(id.iconMark, S(ls.iconMark && ls.iconMark.file, S(sel.iconMark))),
+    wordmark: S(id.wordmark, S(ls.wordmark && ls.wordmark.file)),
+    badge: S(id.badge)
+  };
+
+  // palette with roles
+  const ROLES = ["Primary","Secondary","Accent","Neutral","Background","Text"];
+  parsed.palette = arr(pal).slice(0,6).map((c,i) => ({
+    name: S(c && c.name, "Colour " + (i+1)),
+    hex: _normHex(c && (c.hex || c.value)) || "#15140f",
+    role: S(c && (c.role || c.name), ROLES[i] || "Accent"),
+    usage: S(c && c.usage)
+  }));
+  if (!parsed.palette.length && parsed.identity) parsed.palette = [{ name:"Ink", hex:"#15140f", role:"Primary" }];
+
+  // typography — detected vs recommended
+  const tIn = (parsed.typography && typeof parsed.typography === "object") ? parsed.typography : {};
+  const detected = arr(tIn.detected);
+  let recommended = arr(tIn.recommended);
+  if (!recommended.length) {
+    const disp = S(ts.display && ts.display.name, S(parsed.typographyDisplay));
+    const body = S(ts.body && ts.body.name, "Inter");
+    recommended = [
+      { name: disp || "Fraunces", role: "Display" },
+      { name: body || "Inter", role: "Body" }
+    ];
+  }
+  parsed.typography = Object.assign({}, tIn, { detected, recommended });
+
+  parsed.personality = arr(parsed.personality).length ? parsed.personality : arr(b.personality);
+  parsed.visualThemes = arr(parsed.visualThemes);
+
+  // asset plan — derive from assetReport if absent
+  const ap = (parsed.assetPlan && typeof parsed.assetPlan === "object") ? parsed.assetPlan : {};
+  const report = arr(parsed.assetReport);
+  parsed.assetPlan = {
+    logos: arr(ap.logos).length ? ap.logos : report.filter(r => /logo|mark|wordmark|icon|badge/i.test(S(r.assetType))).map(r => r.name).filter(Boolean),
+    supportingAssets: arr(ap.supportingAssets).length ? ap.supportingAssets : report.filter(r => /photo|pattern|document/i.test(S(r.assetType))).map(r => r.name).filter(Boolean),
+    duplicates: arr(ap.duplicates),
+    ignore: arr(ap.ignore)
+  };
+
+  // brand home section copy
+  const bh = (parsed.brandHomeSections && typeof parsed.brandHomeSections === "object") ? parsed.brandHomeSections : {};
+  const nm = parsed.clientName || "this brand";
+  parsed.brandHomeSections = {
+    identity: S(bh.identity, "The lead identity for " + nm + ", ready to use."),
+    colors: S(bh.colors, "A colour system drawn from the marks."),
+    typography: S(bh.typography, "A typographic direction set for clarity and character."),
+    voice: S(bh.voice, S(b.voice, "A calm, confident brand voice.")),
+    usage: S(bh.usage, "Clear rules so the marks always read well."),
+    downloads: S(bh.downloads, "Your logos, colours, and type — ready to download.")
+  };
+
+  // decisions (completed) / missing / nextActions
+  parsed.decisions = arr(parsed.decisions);
+  if (!parsed.decisions.length) {
+    const d = ["Primary identity selected"];
+    if (parsed.identity.secondaryLogo || parsed.identity.badge || parsed.identity.iconMark) d.push("Supporting badge organized");
+    if (parsed.palette.length) d.push("Color system established");
+    d.push("Typography direction prepared");
+    d.push("Brand Home content written");
+    parsed.decisions = d;
+  }
+  parsed.missing = arr(parsed.missing);
+  parsed.nextActions = arr(parsed.nextActions).length
+    ? parsed.nextActions
+    : arr(parsed.recommendations).map(r => S(r.nextAction)).filter(Boolean).slice(0,4);
+  if (!parsed.nextActions.length) parsed.nextActions = ["Confirm the foundation", "Open your Brand Home"];
+
+  return parsed;
+}
+
+// Guarantee the presentation layer: a complete, brand-specific studio write-up
+// for all eight sections, derived from the understanding when the model is thin.
+function normalizePresentation(parsed){
+  const S = (v, d="") => (typeof v === "string" && v.trim()) ? v.trim() : d;
+  const arr = v => Array.isArray(v) ? v.filter(Boolean) : [];
+  const nm = parsed.clientName || "this brand";
+  const ind = parsed.industry || "";
+  const indLc = ind ? ind.toLowerCase() : "its field";
+  const bh = parsed.brandHomeSections || {};
+  const palNames = arr(parsed.palette).map(c => c.name).filter(Boolean);
+  const palText = palNames.length ? palNames.slice(0,4).join(", ") : "a focused set of brand tones";
+  const rec = arr(parsed.typography && parsed.typography.recommended);
+  const disp = S(rec.find(r => /display|head/i.test(r.role || ""))?.name, "a confident display face");
+  const body = S(rec.find(r => /body|text/i.test(r.role || ""))?.name, "a clean, readable body face");
+  const traits = arr(parsed.personality).slice(0,3).join(", ") || "considered and grounded";
+  const themes = arr(parsed.visualThemes).slice(0,2).join(" · ");
+
+  const DEF = {
+    overview:   { title:"Brand Overview",        intro:S(parsed.brandSummary, nm + " is a " + indLc + " brand with a clear, ownable identity."), rationale:"Everything here was drawn from the marks " + nm + " already uses, so the system reads as one voice.", usage:"Lead with this overview when introducing the brand to a new client, partner, or teammate." },
+    identity:   { title:"Identity System",       intro:S(bh.identity, nm + "'s primary mark is the lead signature of the brand and should front most customer-facing materials."), rationale:"The primary lockup carries the most recognition, so it anchors the system; supporting marks step in where space is tight.", usage:"Use the primary identity on signage, web headers, invoices, and social profiles; reserve the icon for compact placements." },
+    color:      { title:"Color System",          intro:S(bh.colors, "The palette is built from " + palText + " — drawn straight from the marks."), rationale:"These colours come from " + nm + "'s own artwork, so the system stays authentic rather than imposed.", usage:"Let the primary colour lead, support with the secondary tones, and keep neutrals for type and backgrounds." },
+    typography: { title:"Typography Direction",  intro:S(bh.typography, "A pairing of " + disp + " for display and " + body + " for body sets a clear, confident voice."), rationale:"Display carries character at large sizes; the body face keeps everything legible and calm.", usage:"Use display for headlines and hero moments, and the body face for running copy, captions, and UI." },
+    visual:     { title:"Visual Language",       intro:(themes ? "The visual language reads " + themes + " — " : "") + "a look that feels " + traits + ".", rationale:"The personality of " + nm + " guides texture, spacing, and imagery so every touchpoint feels related.", usage:"Apply this language to photography, layouts, and social so the brand feels consistent everywhere." },
+    usage:      { title:"Usage Guidance",        intro:S(bh.usage, "Clear, simple rules keep " + nm + "'s identity strong wherever it appears."), rationale:"Consistency is what makes a brand feel established; these guardrails protect the marks without slowing anyone down.", usage:"Give the marks room, keep contrast strong, and avoid stretching, recolouring, or crowding them." },
+    assets:     { title:"Asset Library",         intro:"Every uploaded asset has been organised, named, and sorted into a clean library.", rationale:"A tidy library means the right file is always one click away — primary marks, variants, and supporting assets in their place.", usage:"Pull from here whenever you need a logo, colour, or asset for a new piece." },
+    downloads:  { title:"Download Package",      intro:S(bh.downloads, "Your logos, colours, and type are packaged and ready to hand off."), rationale:"Everything is exported in the formats a printer, developer, or partner will ask for.", usage:"Download the package to share the brand, or publish the Brand Home as a living link." }
+  };
+  const ORDER = ["overview","identity","color","typography","visual","usage","assets","downloads"];
+
+  const inModel = {};
+  const p = (parsed.presentation && typeof parsed.presentation === "object") ? parsed.presentation : {};
+  arr(p.sections).forEach(s => { if (s && s.id) inModel[String(s.id).toLowerCase()] = s; });
+
+  const sections = ORDER.map(id => {
+    const m = inModel[id] || {};
+    const d = DEF[id];
+    let conf = Number(m.confidence); if (!isFinite(conf)) conf = parsed.confidence || 0.85;
+    return {
+      id,
+      title: S(m.title, d.title),
+      intro: S(m.intro, d.intro),
+      rationale: S(m.rationale, d.rationale),
+      usage: S(m.usage, d.usage),
+      confidence: Math.max(0, Math.min(1, conf)),
+      inferred: S(m.inferred, "Read from the assets " + nm + " uploaded."),
+      refine: S(m.refine, "Add more brand material anytime and this section sharpens automatically.")
+    };
+  });
+
+  parsed.presentation = {
+    headline: S(p.headline, nm + ", brought together."),
+    subheadline: S(p.subheadline, "A starter brand system, prepared from your assets."),
+    overview: S(p.overview, S(parsed.brandSummary, nm + "'s identity, colour, and type — organised into one calm, client-ready system.")),
+    sections
+  };
+  return parsed;
+}
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -974,7 +1258,7 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL || "gpt-4o",
         temperature: 0.25,
-        max_tokens: 6000,
+        max_tokens: 8000,
         response_format: { type: "json_object" },
         messages: [
           {
@@ -1098,6 +1382,11 @@ export default async function handler(req, res) {
   parsed.brandWorld = normalizeBrandWorld(parsed);
   // designStrategy tells the app how to design this brand's applications — always present.
   parsed.designStrategy = normalizeDesignStrategy(parsed);
+
+  // Brand Home contract: guarantee the new understanding fields + back-fill legacy.
+  parsed = normalizeBrandUnderstanding(parsed, assets, preparationReport);
+  // Presentation layer: studio-written copy for every Brand Home section.
+  parsed = normalizePresentation(parsed);
 
   return res.status(200).json(parsed);
 }
