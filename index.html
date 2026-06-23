@@ -527,6 +527,13 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .asset-card{position:relative;}
 .asset-remove{position:absolute;top:6px;right:6px;z-index:6;width:22px;height:22px;border-radius:50%;display:none;place-items:center;font-size:15px;line-height:1;color:var(--ink-soft);background:rgba(255,255,255,.9);box-shadow:var(--shadow);}
 .asset-remove:hover{color:#b3261e;}
+.pub-actions{display:flex;gap:6px;margin-top:9px;}
+.pub-act{flex:1;font-size:9.5px;letter-spacing:.07em;font-weight:600;text-transform:uppercase;color:var(--ink-soft);background:rgba(255,255,255,.9);box-shadow:inset 0 0 0 1px var(--sage-line);border:0;border-radius:99px;padding:7px 6px;cursor:pointer;transition:color .2s,box-shadow .2s,transform .15s;}
+.pub-act:hover{color:var(--ink);box-shadow:inset 0 0 0 1px rgba(44,90,60,.34);transform:translateY(-1px);}
+.pub-act:active{transform:translateY(0);}
+.asset-card.pub .asset-name{text-align:center;}
+body.deep-immerse .pub-act{background:rgba(16,20,26,.72);color:rgba(246,248,244,.88);box-shadow:inset 0 0 0 1px rgba(255,255,255,.15);}
+body.deep-immerse .pub-act:hover{color:#fff;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);}
 .asset-replace{position:absolute;left:8px;bottom:8px;z-index:4;font-size:9px;letter-spacing:.04em;color:var(--ink-soft);background:rgba(255,255,255,.86);padding:3px 8px;border-radius:99px;box-shadow:inset 0 0 0 1px var(--sage-line);opacity:0;transition:opacity .2s;pointer-events:none;}
 .editing .asset-remove{display:grid;}
 .editing .asset-thumb{cursor:pointer;}
@@ -1563,10 +1570,26 @@ function assetStatus(a){                                         // [class,label
   return ['ready','Ready'];
 }
 
-function assetCardHTML(a,isLogoGroup,variantLabel){
+function assetCardHTML(a,isLogoGroup,variantLabel,pub){
   if(!a.id) a.id=newId();
   const onDark = a.variant==='white' ? ' on-dark' : '';
   const isImg = a.url && (/^data:image/i.test(a.url) || IMG_EXT.includes(String(a.ext||'').toLowerCase()) || /\.(png|jpe?g|webp|svg|gif)$/i.test(a.ext||''));
+  if(pub){                                                     // PUBLISHED home: a clean, grab-and-go client card
+    let fn=String(a.name||'asset').replace(/[\/:*?"<>|]+/g,'').trim();
+    if(!/\.[a-z0-9]+$/i.test(fn)) fn+='.'+String(a.ext||(isImg?'png':'file')).toLowerCase();
+    const pthumb = isImg
+      ? '<div class="asset-thumb '+(isLogoGroup||a.ext==='svg'?'':'cover')+onDark+'"><img alt="" src="'+a.url+'"></div>'
+      : '<div class="asset-thumb doc" data-file="'+a.url+'">'+((a.ext||'file').toUpperCase())+'</div>';
+    const acts = isImg
+      ? '<button class="pub-act" type="button" data-aact="dl" data-aname="'+esc(fn)+'">Download</button><button class="pub-act" type="button" data-aact="copy">Copy</button><button class="pub-act" type="button" data-aact="send">Send</button>'
+      : '<button class="pub-act" type="button" data-aact="dl" data-aname="'+esc(fn)+'">Download</button>';
+    return '<div class="asset-card pub">'
+      +pthumb
+      +(variantLabel?'<div class="asset-varchip">'+esc(variantLabel)+'</div>':'')
+      +'<div class="asset-meta"><div class="asset-name">'+esc(a.name||'asset')+'</div></div>'
+      +'<div class="pub-actions">'+acts+'</div>'
+    +'</div>';
+  }
   const thumb = isImg
     ? '<div class="asset-thumb '+(isLogoGroup||a.ext==='svg'?'':'cover')+onDark+'" data-asset="'+a.id+'"><img alt="" src="'+a.url+'"><span class="asset-replace">Replace</span></div>'
     : '<div class="asset-thumb doc" data-asset="'+a.id+'">'+((a.ext||'file').toUpperCase())+'<span class="asset-replace">Replace</span></div>';
@@ -1827,9 +1850,9 @@ async function renderRoomForPublish(key){
       if(ar){
         if(brand.logos.length||brand.photos.length||brand.docs.length){
           let h='';
-          if(brand.logos.length){ h+=logosByFamily().map(function(g){ return '<div class="sect-label">'+esc(g.family)+'</div><div class="asset-grid">'+g.items.map(function(it){ return assetCardHTML(it.logo,true,it.variant); }).join('')+'</div>'; }).join(''); }
-          if(brand.photos.length){ h+='<div class="sect-label">Photography</div><div class="asset-grid">'+brand.photos.map(a=>assetCardHTML(a,false)).join('')+'</div>'; }
-          if(brand.docs.length){ h+='<div class="sect-label">Documents</div><div class="asset-grid">'+brand.docs.map(a=>assetCardHTML(a,false)).join('')+'</div>'; }
+          if(brand.logos.length){ h+=logosByFamily().map(function(g){ return '<div class="sect-label">'+esc(g.family)+'</div><div class="asset-grid">'+g.items.map(function(it){ return assetCardHTML(it.logo,true,it.variant,true); }).join('')+'</div>'; }).join(''); }
+          if(brand.photos.length){ h+='<div class="sect-label">Photography</div><div class="asset-grid">'+brand.photos.map(a=>assetCardHTML(a,false,null,true)).join('')+'</div>'; }
+          if(brand.docs.length){ h+='<div class="sect-label">Documents</div><div class="asset-grid">'+brand.docs.map(a=>assetCardHTML(a,false,null,true)).join('')+'</div>'; }
           ar.innerHTML=h;
         } else { ar.innerHTML='<div class="asset-empty">No assets yet.</div>'; }
       }
@@ -1894,6 +1917,48 @@ const PUBLISHED_TOOLBAR_JS = `(function(){
     var act=b.getAttribute("data-pub");
     if(act==="share") share();
     else if(act==="download") download();
+  });
+
+  // ---- Per-asset actions in the published home: Download / Copy / Send ----
+  function srcOf(card){
+    var im=card.querySelector("img"); if(im) return im.getAttribute("src")||"";
+    var df=card.querySelector("[data-file]"); return df?(df.getAttribute("data-file")||""):"";
+  }
+  function blobFrom(src){ return fetch(src).then(function(r){ return r.blob(); }); }
+  function saveURL(src,name){ var x=document.createElement("a"); x.href=src; x.download=name||"asset"; document.body.appendChild(x); x.click(); setTimeout(function(){ x.remove(); },800); }
+  function dlAsset(src,name){ saveURL(src,name); toast("Downloaded "+(name||"")); }
+  function isSvg(t,name){ return (t&&t.indexOf("svg")>-1) || (name||"").toLowerCase().slice(-4)===".svg"; }
+  function copyAsset(src,name){
+    blobFrom(src).then(function(blob){
+      var t=blob.type||"";
+      if(isSvg(t,name)){
+        return blob.text().then(function(txt){ return navigator.clipboard.writeText(txt); }).then(function(){ toast("SVG markup copied"); });
+      }
+      if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+        var o={}; o[t||"image/png"]=blob;
+        return navigator.clipboard.write([new ClipboardItem(o)]).then(function(){ toast("Copied to clipboard"); });
+      }
+      throw new Error("unsupported");
+    }).catch(function(){ toast("Copy isn't supported here \u2014 use Download"); });
+  }
+  function sendAsset(src,name){
+    blobFrom(src).then(function(blob){
+      var file=new File([blob], name||"asset", {type:blob.type||"application/octet-stream"});
+      if(navigator.canShare && navigator.share && navigator.canShare({files:[file]})){
+        return navigator.share({files:[file], title:name||document.title});
+      }
+      saveURL(src,name); toast("Saved \u2014 attach it to share");
+    }).catch(function(){ saveURL(src,name); });
+  }
+  document.addEventListener("click", function(e){
+    var b=e.target.closest(".pub-act"); if(!b) return;
+    var card=b.closest(".asset-card"); if(!card) return;
+    var src=srcOf(card); if(!src){ toast("Nothing to grab"); return; }
+    var nm=b.getAttribute("data-aname"); if(!nm){ var ne=card.querySelector(".asset-name"); nm=ne?ne.textContent.trim():"asset"; }
+    var act=b.getAttribute("data-aact");
+    if(act==="dl") dlAsset(src,nm);
+    else if(act==="copy") copyAsset(src,nm);
+    else if(act==="send") sendAsset(src,nm);
   });
 
   // ---- Files section inside the published Brand Guide (read-only links) ----
