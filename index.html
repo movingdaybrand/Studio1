@@ -1616,40 +1616,7 @@ async function publishWebGuide(){
    Each public room is fully rendered here (in the studio, where every renderer + the live brand state exist),
    embedded as a <template>, and re-shown by a tiny nav-only script. No studio runtime or re-serialized state
    ships to the published page; the rooms are the real, edited DOM, captured once at publish time. */
-const PUBLISH_ROOMS=['identity','assets','guide','typography','deliverables'];   // public, read-only rooms (founder stays private)
-
-function publicDownloadableAssets(){
-  const all=[...(brand.logos||[]),...(brand.photos||[]),...(brand.docs||[])];
-  return all.filter(a=>a&&a.url&&/^data:/i.test(a.url)).map((a,i)=>({
-    id:a.id||('asset-'+i),
-    name:a.name||('asset-'+(i+1)),
-    role:a.role||'',
-    type:a.ext||'file',
-    url:a.url
-  }));
-}
-function publicAssetFilename(a){
-  const base=(brandSlug()+'-'+(a.role||a.name||'asset')).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')||'brand-asset';
-  const ext=String(a.type||'').replace(/^\./,'').toLowerCase()||'png';
-  return /\.[a-z0-9]+$/i.test(base)?base:(base+'.'+ext);
-}
-function buildPublicDeliverablesRoomHTML(){
-  const assets=publicDownloadableAssets();
-  const logos=assets.filter(a=>/logo|mark|wordmark|icon/i.test(a.role+' '+a.name));
-  const logoLinks=logos.slice(0,8).map(a=>'<a class="deliv-link public-download" href="'+a.url+'" download="'+esc(publicAssetFilename(a))+'">Download '+esc((a.role||a.name||'logo').replace(/([A-Z])/g,' $1').trim())+'</a>').join('');
-  return '<div class="vault vault-2">'
-    +'<button class="vaultcard primary" data-public-download="zip"><span class="vic">Brand package</span><b>Download Package</b><i>Approved assets and Brand Guide, zipped</i></button>'
-    +'<button class="vaultcard" data-public-download="share"><span class="vic">Share</span><b>Copy Brand Home Link</b><i>Send this home to your team or client</i></button>'
-    +'</div>'
-    +'<div class="deliv-more">'
-    +(logoLinks||'')
-    +'<button class="deliv-link" data-public-download="guide">Download Brand Guide</button>'
-    +'<button class="deliv-link" data-public-download="home">Download Brand Home</button>'
-    +'<button class="deliv-link" data-public-download="pdf">Save as PDF</button>'
-    +'</div>'
-    +'<p class="deliv-note">This published Brand Home is read-only. Everything here is safe to share, download, and preserve.</p>';
-}
-
+const PUBLISH_ROOMS=['identity','assets','guide','typography'];   // the public rooms (founder/deliverables stay private)
 async function renderRoomForPublish(key){
   const tmp=document.createElement('div');
   tmp.style.cssText='position:absolute;left:-9999px;top:0;width:980px;';
@@ -1665,17 +1632,15 @@ async function renderRoomForPublish(key){
           if(brand.photos.length){ h+='<div class="sect-label">Photography</div><div class="asset-grid">'+brand.photos.map(a=>assetCardHTML(a,false)).join('')+'</div>'; }
           if(brand.docs.length){ h+='<div class="sect-label">Documents</div><div class="asset-grid">'+brand.docs.map(a=>assetCardHTML(a,false)).join('')+'</div>'; }
           ar.innerHTML=h;
-        } else { ar.innerHTML='<div class="asset-empty">This archive is waiting for the first approved assets.</div>'; }
+        } else { ar.innerHTML='<div class="asset-empty">No assets yet.</div>'; }
       }
     }
-    if(key==='deliverables'){ tmp.innerHTML=buildPublicDeliverablesRoomHTML(); }
     applyUploads(tmp);                                 // full brand paint: name · tagline · colours · type · counts
     await placeLogos(tmp); await renderIdMarks(tmp); await renderLogoSystem(tmp); await fillHeroLogo(tmp);   // settle async logo renders before snapshot
   }catch(e){ console.warn('[publish] room render failed:',key,e); }
   // strip editor-only chrome → clean read-only capture
   tmp.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
-  tmp.querySelectorAll('[data-action],.asset-replace,.asset-remove,.asset-expand,.role-select,.edit-hint,.mk-dl,.gd-logo-dl,.ig-dl,.lib-upload,.id-edit,.edit-dot,.id-read,.color-read,.type-read,.assets-read,.apps-read').forEach(n=>n.remove());
-  tmp.querySelectorAll('.asset-name').forEach(n=>{ n.removeAttribute('data-name'); n.removeAttribute('contenteditable'); });
+  tmp.querySelectorAll('[data-action],.asset-replace,.edit-hint,.mk-dl,.gd-logo-dl,.ig-dl,.lib-upload,.id-edit,.edit-dot,.id-read,.color-read,.type-read,.assets-read,.apps-read').forEach(n=>n.remove());
   const html=tmp.innerHTML; tmp.remove();
   return html;
 }
@@ -1688,7 +1653,7 @@ async function buildHomeHTML(){
 
   // HOME view: keep the four public room cards working, strip editor-only chrome
   const homeView=clone.querySelector('#home'); if(homeView){ homeView.className='view show'; }
-  clone.querySelectorAll('.movein, #homePrepared, [data-open="founder"]').forEach(n=>n.remove());
+  clone.querySelectorAll('.movein, #homePrepared, [data-open="founder"], [data-open="deliverables"]').forEach(n=>n.remove());
   // ROOM view: keep the shell (back button + title), empty the body — the nav script fills it on demand
   const roomView=clone.querySelector('#room'); if(roomView){ roomView.className='view'; }
   const rb=clone.querySelector('#roomBody'); if(rb) rb.innerHTML='';
@@ -1719,25 +1684,18 @@ async function buildHomeHTML(){
   const links=[...document.querySelectorAll('link[rel="stylesheet"]')].map(l=>'<link rel="stylesheet" href="'+esc(l.href)+'">').join('');
   const css=document.querySelector('style').textContent;
   const metaJSON=JSON.stringify(meta).replace(/<\//g,'<\\/');
-  const publicAssetsJSON=JSON.stringify(publicDownloadableAssets().map(a=>({ id:a.id, name:a.name, role:a.role, type:a.type, url:a.url, filename:publicAssetFilename(a) }))).replace(/<\//g,'<\/');
 
   // tiny nav-only runtime: open/close rooms with the same transitions, no studio runtime needed
   const nav='<script>(function(){'
     +'var rooms={};document.querySelectorAll("template[data-room]").forEach(function(t){rooms[t.getAttribute("data-room")]=t.innerHTML;});'
-    +'var meta='+metaJSON+';var publicAssets='+publicAssetsJSON+';'
+    +'var meta='+metaJSON+';'
     +'var home=document.getElementById("home"),room=document.getElementById("room"),pane=document.querySelector(".glasspane");'
     +'var body=document.getElementById("roomBody"),kick=document.getElementById("roomKicker"),title=document.getElementById("roomTitle");'
-    +'function slug(){var n=(document.querySelector("#home .welcome")||{}).textContent||document.title||"brand-home";return n.toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"")||"brand-home";}'
-    +'function save(name,content,mime){var b=content instanceof Blob?content:new Blob([content],{type:mime||"text/plain"});var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1200);}'
-    +'function guideHTML(){var g=rooms.guide||"";return "<!doctype html><html><head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width,initial-scale=1\"><title>Brand Guide</title>"+[...document.querySelectorAll("link[rel=stylesheet]")].map(function(l){return "<link rel=\"stylesheet\" href=\""+l.href+"\">";}).join("")+"<style>"+(document.querySelector("style")?document.querySelector("style").textContent:"")+"body{padding:24px}</style></head><body>"+g+"</body></html>";}'
-    +'function downloadZip(){if(!window.JSZip){save(slug()+"-brand-home.html",document.documentElement.outerHTML,"text/html");return;}var z=new JSZip(),root=z.folder(slug());publicAssets.forEach(function(a){if(!a.url||!/^data:/.test(a.url))return;var m=a.url.match(/^data:[^;]+;base64,(.+)$/);if(m)root.file(a.filename||a.name||"asset",m[1],{base64:true});});root.file("brand-guide.html",guideHTML());root.file("brand-home.html",document.documentElement.outerHTML);z.generateAsync({type:"blob"}).then(function(b){save(slug()+"-deliverables.zip",b,"application/zip");});}'
-    +'function action(k){if(k==="share"){navigator.clipboard&&navigator.clipboard.writeText(location.href.replace(/[?&]arrive=1/,""));return;}if(k==="guide"){save(slug()+"-brand-guide.html",guideHTML(),"text/html");return;}if(k==="home"){save(slug()+"-brand-home.html",document.documentElement.outerHTML,"text/html");return;}if(k==="pdf"){window.print();return;}if(k==="zip"){downloadZip();return;}}'
-    +'function setShell(k){pane.className=pane.className.replace(/\bmd-room-\S+/g,"").replace(/\s+/g," ").trim();pane.classList.add("md-room-"+k);}'
+    +'function setShell(k){pane.className=pane.className.replace(/\\bmd-room-\\S+/g,"").replace(/\\s+/g," ").trim();pane.classList.add("md-room-"+k);}'
     +'function open(k){if(!rooms[k])return;body.innerHTML=rooms[k];if(meta[k]){if(kick)kick.textContent=meta[k].kicker;if(title)title.innerHTML=meta[k].title;}setShell(k);'
     +'home.classList.add("entering");setTimeout(function(){home.classList.remove("show","entering");room.classList.remove("leaving");room.classList.add("show");window.scrollTo(0,0);},300);}'
     +'function close(){setShell("home");room.classList.remove("show");home.classList.remove("entering");home.classList.add("show");window.scrollTo(0,0);}'
     +'document.querySelectorAll("#home [data-open]").forEach(function(b){b.addEventListener("click",function(){open(b.getAttribute("data-open"));});});'
-    +'document.addEventListener("click",function(e){var b=e.target.closest("[data-public-download]");if(b){e.preventDefault();action(b.getAttribute("data-public-download"));}});'
     +'var back=document.getElementById("backBtn");if(back)back.addEventListener("click",close);'
     +'})();<\/script>';
 
@@ -1762,7 +1720,7 @@ async function buildHomeHTML(){
     +"})();<\/script>";
 
   return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(brand.name||'Brand Home')+'</title>'
-    +links+'<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>'
+    +links
     +'<style>'+css+'\n:root{'+vars+'}\nbody{margin:0}</style></head>'
     +'<body class="'+bodyCls+'"'+mood+material+'><div class="env">'+inner+'</div>'+templates+nav+arrive+'</body></html>';
 }
