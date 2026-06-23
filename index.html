@@ -1671,7 +1671,7 @@ const PUBLISHED_TOOLBAR_JS = `(function(){
       var d=document.createElement("div"); d.innerHTML=t.innerHTML;
       d.querySelectorAll("img[src^='data:image']").forEach(function(im){
         var src=im.getAttribute("src"); if(!src||seen[src]) return; seen[src]=1; n++;
-        var ext=(/^data:image\/([a-z0-9+]+)/i.exec(src)||[])[1]||"png"; if(ext==="svg+xml")ext="svg"; if(ext==="jpeg")ext="jpg";
+        var ext=(src.split(";")[0].split("/")[1]||"png").toLowerCase(); if(ext==="svg+xml")ext="svg"; if(ext==="jpeg")ext="jpg";
         out.push({url:src, name:"asset-"+n+"."+ext});
       });
     });
@@ -1695,6 +1695,39 @@ const PUBLISHED_TOOLBAR_JS = `(function(){
     var act=b.getAttribute("data-pub");
     if(act==="share") share();
     else if(act==="download") download();
+  });
+
+  // ---- Files section inside the published Brand Guide (read-only links) ----
+  function collectColors(){
+    var out=[], seen={};
+    document.querySelectorAll("template[data-room]").forEach(function(t){
+      var d=document.createElement("div"); d.innerHTML=t.innerHTML;
+      d.querySelectorAll("[data-hex]").forEach(function(el){
+        var hex=(el.getAttribute("data-hex")||"").trim(); if(!hex) return;
+        var key=hex.toLowerCase(); if(seen[key]) return; seen[key]=1;
+        var nameEl=el.querySelector("span:not(.hex)")||el.querySelector("span");
+        var name=((nameEl&&nameEl.textContent)||"Color").trim();
+        out.push({hex:hex, name:name});
+      });
+    });
+    return out;
+  }
+  function downloadColors(){
+    var cols=collectColors(); if(!cols.length){ toast("No colors to download yet"); return; }
+    var NL=String.fromCharCode(10);
+    var lines=cols.map(function(c,i){ return "  --brand-"+(i+1)+": "+c.hex+"; /* "+c.name+" */"; });
+    var css=":root{"+NL+lines.join(NL)+NL+"}"+NL;
+    var x=document.createElement("a"); x.href=URL.createObjectURL(new Blob([css],{type:"text/css"})); x.download=(HOME.slug||"brand")+"-colors.css";
+    document.body.appendChild(x); x.click(); setTimeout(function(){ URL.revokeObjectURL(x.href); x.remove(); },1200); toast("Color styles downloaded");
+  }
+  function printGuide(){ try{ window.print(); }catch(e){ toast("Use your browser print to save a PDF"); } }
+  // Files buttons live inside #roomBody when the Brand Guide room is open — delegate at document level
+  document.addEventListener("click", function(e){
+    var f=e.target.closest(".gd-file"); if(!f) return;
+    var label=(f.textContent||"").toLowerCase();
+    if(/colou?r/.test(label)) downloadColors();
+    else if(/pdf|full guide/.test(label)) printGuide();
+    else download();
   });
 })();`;
 async function buildHomeHTML(){
