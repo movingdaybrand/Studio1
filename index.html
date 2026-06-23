@@ -1117,6 +1117,7 @@ async function addBrandFiles(fileList){            // additive: bring new files 
     }
   }
   if(!added){ announceWorkspaceUpdate('Nothing to add from those files.','assets'); return; }
+  try{ autoAssignFontRoles(); }catch(e){}
   try{ renderAssetsRoom(); }catch(e){}
   try{ applyUploads(roomBody); }catch(e){}
   updateWorkspaceState({},{source:'assets',announce: added+(added===1?' file added':' files added')+' \u2014 colours, type, and copy untouched.'});
@@ -1558,7 +1559,7 @@ async function buildGuideHTML(opts){
   const inner=node?node.outerHTML:''; tmp.remove();
   const rs=getComputedStyle(document.documentElement);
   const vars=['--b1','--b2','--b3','--b4','--b5'].map(v=>v+':'+(rs.getPropertyValue(v).trim()||'')).join(';');
-  const css=document.querySelector('style').textContent;
+  const css=document.querySelector('style').textContent + (document.getElementById('mdUploadedFonts')?('\n'+document.getElementById('mdUploadedFonts').textContent):'');
   return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+(brand.name||'Brand Guide')+'</title>'
     +'<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">'
     +'<style>'+css+'\nbody{padding:24px}:root{'+vars+'}</style></head><body>'+inner+'</body></html>';
@@ -1768,7 +1769,7 @@ async function buildHomeHTML(){
 
   // bring along every stylesheet link (Fraunces/Inter + any brand display font ensureFont injected)
   const links=[...document.querySelectorAll('link[rel="stylesheet"]')].map(l=>'<link rel="stylesheet" href="'+esc(l.href)+'">').join('');
-  const css=document.querySelector('style').textContent;
+  const css=document.querySelector('style').textContent + (document.getElementById('mdUploadedFonts')?('\n'+document.getElementById('mdUploadedFonts').textContent):'');
   const metaJSON=JSON.stringify(meta).replace(/<\//g,'<\\/');
 
   // tiny nav-only runtime: open/close rooms with the same transitions, no studio runtime needed
@@ -2168,6 +2169,14 @@ function registerUploadedFont(font){
     st.textContent += "@font-face{font-family:'"+fam+"';src:url("+font.url+") format('"+fmt+"');font-display:swap;}\n";
   }catch(e){ console.warn('[fonts] register failed', e); }
 }
+function autoAssignFontRoles(){               // confirmed brand fonts apply automatically: first unroled → Display, next → Body (honours AI/manual roles)
+  const fonts=(brand.fonts||[]).filter(Boolean); if(!fonts.length) return false;
+  const has=r=>fonts.some(f=>f.role===r); let changed=false;
+  if(!has('Display')){ const f=fonts.find(f=>!f.role); if(f){ f.role='Display'; f._autoRole=true; changed=true; } }
+  if(!has('Body')){ const f=fonts.find(f=>!f.role); if(f){ f.role='Body'; f._autoRole=true; changed=true; } }
+  if(changed) syncTypeFromFonts();
+  return changed;
+}
 function syncTypeFromFonts(){               // mirror assigned roles into brand.type / typeSystem so the whole app wears them
   const find=r=>(brand.fonts||[]).find(f=>f.role===r);
   const d=find('Display'), b=find('Body'), h=find('Heading'), a=find('Accent');
@@ -2191,7 +2200,7 @@ function addFontFiles(fileList){
   (async()=>{ let added=0;
     for(const f of files){ const ext=(String(f.name||'').split('.').pop()||'').toLowerCase(); if(!FONT_EXT.includes(ext)) continue;
       const ft=await fileToFont(f); if(ft && !(brand.fonts||[]).some(x=>x.family===ft.family)){ (brand.fonts=brand.fonts||[]).push(ft); registerUploadedFont(ft); added++; } }
-    if(added){ try{ saveBrand(); }catch(e){} renderFontUploads(roomBody); setStatus(added+' font'+(added>1?'s':'')+' added \u2014 assign a role to use it.'); }
+    if(added){ try{ autoAssignFontRoles(); }catch(e){} try{ saveBrand(); }catch(e){} try{ applyType(roomBody); }catch(e){} try{ applyBrandHome(); }catch(e){} renderFontUploads(roomBody); setStatus(added+' font'+(added>1?'s':'')+' added \u2014 assign a role to use it.'); }
   })();
 }
 function renderFontUploads(root){
@@ -3827,6 +3836,7 @@ async function finishIntake(imgs,folderName){
     setStatus(total? `${total} file${total===1?'':'s'} moved in.` : 'Nothing readable found — try images, a PDF, a folder, or a .zip.');
   }
   assignRoles();
+  try{ autoAssignFontRoles(); }catch(e){}
   ensureBrandName();                                         // read a name from the mark/filename when the AI didn't set one — never leave the demo name showing
   if(currentRoom && room.classList.contains('show')) openRoom(currentRoom);
   applyBrandHome();
@@ -3880,7 +3890,7 @@ function restoreBrand(snap){
   if(!snap) return;
   brand.name=snap.name||''; brand.tagline=snap.tagline||''; brand.category=snap.category||'';
   brand.logos=snap.logos||[]; brand.photos=snap.photos||[]; brand.docs=snap.docs||[];
-  brand.fonts=snap.fonts||[]; try{ (brand.fonts||[]).forEach(registerUploadedFont); }catch(e){}
+  brand.fonts=snap.fonts||[]; try{ (brand.fonts||[]).forEach(registerUploadedFont); }catch(e){} try{ autoAssignFontRoles(); }catch(e){}
   try{ mergeGuidelines(); }catch(e){}
   brand.colors=snap.colors||[]; brand.type=snap.type||null;
   brand.colorSystem=snap.colorSystem||null; brand.typeSystem=snap.typeSystem||null;
@@ -3994,7 +4004,7 @@ async function importFromExperience(){
   try{ assignRoles(); brand.logos.sort((x,y)=>((y.role==='primaryLogo')-(x.role==='primaryLogo'))); }catch(e){}
   ensureBrandName();         // never move in nameless, even from an old or hand-built handoff
   try{ projectWorkspaceState(); }catch(e){ console.warn('[brand-home] project skipped:',e); }
-  try{ applyBrandHome(); }catch(e){ console.warn('[brand-home] applyBrandHome skipped:',e); }
+  try{ autoAssignFontRoles(); }catch(e){} try{ applyBrandHome(); }catch(e){ console.warn('[brand-home] applyBrandHome skipped:',e); }
   saveBrand();               // the brand persists no matter what rendering did
   await bridgeClear(); try{ localStorage.removeItem(BRAND_DNA_KEY); }catch(e){}
   const n=brand.logos.length+brand.photos.length+brand.docs.length;
