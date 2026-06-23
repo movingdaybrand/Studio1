@@ -1594,8 +1594,10 @@ async function buildGuideHTML(opts){
   const rs=getComputedStyle(document.documentElement);
   const vars=['--b1','--b2','--b3','--b4','--b5'].map(v=>v+':'+(rs.getPropertyValue(v).trim()||'')).join(';');
   const css=document.querySelector('style').textContent + (document.getElementById('mdUploadedFonts')?('\n'+document.getElementById('mdUploadedFonts').textContent):'');
+  let favTag=''; try{ const _f=resolvePlacement('favicon'); if(_f&&_f.url){ const _fu=(await cleanMark(_f.url,/svg/i.test(_f.ext||'')))||_f.url; favTag='<link rel="icon" href="'+_fu+'">'; } }catch(e){}
   return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+(brand.name||'Brand Guide')+'</title>'
     +'<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@200;300;400;500&display=swap" rel="stylesheet">'
+    +favTag
     +'<style>'+css+'\nbody{padding:24px}:root{'+vars+'}</style></head><body>'+inner+'</body></html>';
 }
 async function downloadPackage(){
@@ -1958,8 +1960,9 @@ async function buildHomeHTML(){
     + '<div class="md-pubtoast" id="mdPubToast"></div>';
   const pubScript = '<script>'+PUBLISHED_TOOLBAR_JS+'<\/script>';
 
+  let favTag=''; try{ const _f=resolvePlacement('favicon'); if(_f&&_f.url){ const _fu=(await cleanMark(_f.url,/svg/i.test(_f.ext||'')))||_f.url; favTag='<link rel="icon" href="'+_fu+'">'; } }catch(e){}
   return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+esc(brand.name||'Brand Home')+'</title>'
-    +links
+    +links+favTag
     +pubHead
     +'<style>'+css+'\n:root{'+vars+'}\nbody{margin:0}\n'+pubCSS+'</style></head>'
     +'<body class="'+bodyCls+'"'+mood+material+'><div class="env">'+inner+'</div>'+templates+nav+arrive+pubBar+pubScript+'</body></html>';
@@ -2619,9 +2622,9 @@ function legibilityFix(root){            // guarantee readable text on any palet
 }
 async function fillHeroLogo(root){
   const slot=root.querySelector('[data-herologo]'); const title=root.querySelector('.gd-title'); if(!slot) return;
-  const m=(logoSystemMarks().primary)||pickMark('primaryLogo','wordmark','secondaryLogo');
+  const m=resolvePlacement('guideHeader')||(logoSystemMarks().primary)||pickMark('primaryLogo','wordmark','secondaryLogo');
   if(!m){ slot.className='gd-herologo'; slot.innerHTML=''; if(title) title.style.display=''; return; }
-  try{ const url=await exportLogoFor('color'); if(url){ slot.className='gd-herologo on'; slot.innerHTML='<img alt="">'; slot.querySelector('img').src=url;
+  try{ const url=(await cleanMark(m.url,/svg/i.test(m.ext||'')))||m.url; if(url){ slot.className='gd-herologo on'; slot.innerHTML='<img alt="">'; slot.querySelector('img').src=url;
     if(title) title.style.display=(m.aspect!=null && m.aspect>2.4) ? 'none' : '';   // a wordmark already says the name
   } }catch(e){}
 }
@@ -3477,7 +3480,7 @@ function applyBrandHome(){
       else { w.style.fontFamily=''; }                                            // otherwise the house display face
     }
     if(sub) sub.textContent=brand.tagline||'Everything has a place. Choose a room to continue.';
-    const mark=heroMark();
+    const mark=resolvePlacement('brandHomeHeader')||heroMark();
     let logo=document.getElementById('homeLogo');
     if(mark){
       if(!logo){ logo=document.createElement('div'); logo.id='homeLogo'; logo.className='home-logo'; head.insertBefore(logo,head.firstChild); }
@@ -3854,7 +3857,7 @@ async function placeLogos(root){
   const photoish=l=>(l.transparentRatio!=null&&l.transparentRatio<0.03)&&(l.variety!=null&&l.variety>120);
   const clean=all.filter(l=>!photoish(l)); const logos=clean.length?clean:all;      // never pick document/photo screenshots when a real mark exists
   const {primary}=logoSystemMarks();
-  const primaryMark = primary || logos.find(l=>l.role==='primaryLogo') || logos[0];
+  const primaryMark = resolvePlacement('coverHero') || primary || logos.find(l=>l.role==='primaryLogo') || logos[0];
   if(!primaryMark) return;
   const cleaned=await cleanMark(primaryMark.url, /svg/i.test(primaryMark.ext||''));
   for(const fr of frames){ setFrameImage(fr, cleaned||primaryMark.url, true, primaryMark.id); }   // original primary logo, background knocked out, on any ground
@@ -3951,6 +3954,19 @@ function defaultPlacements(){            // who appears where - sensible default
     favicon:{assetType:'iconMark',variant:'fullColor'},
     downloadPreview:{assetType:'primaryLogo',variant:'fullColor'}
   };
+}
+function _variantRec(fam,variant){ if(!fam) return null; if(variant==='other') return (fam.variants.other&&fam.variants.other[0])||null; return fam.variants[variant]||null; }
+function resolvePlacement(slot){
+  // Returns the live logo a Review placement points at, or null -> the renderer keeps its current behaviour.
+  try{
+    const P=brand.placements; if(!P||!P[slot]) return null;        // only honour explicit Review choices
+    const pl=P[slot]; if(!pl||!pl.assetType) return null;
+    const fam=logoFamilies()[pl.assetType]; if(!fam||Array.isArray(fam)) return null;
+    let rec=_variantRec(fam,pl.variant) || _variantRec(fam,fam.selectedVariant)
+          || fam.variants.fullColor || fam.variants.dark || fam.variants.light || (fam.variants.other&&fam.variants.other[0]) || null;
+    if(!rec||!rec.id) return null;
+    return (brand.logos||[]).find(l=>l.id===rec.id) || rec;     // hand back the live asset (with aspect/lum) when we can
+  }catch(e){ return null; }
 }
 function logoSystemMarks(){
   const L=brand.logos.filter(l=>l&&l.url); if(!L.length) return {};
