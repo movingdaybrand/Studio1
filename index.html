@@ -527,6 +527,8 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .asset-card{position:relative;}
 .asset-remove{position:absolute;top:6px;right:6px;z-index:6;width:22px;height:22px;border-radius:50%;display:none;place-items:center;font-size:15px;line-height:1;color:var(--ink-soft);background:rgba(255,255,255,.9);box-shadow:var(--shadow);}
 .asset-remove:hover{color:#b3261e;}
+.md-build{position:fixed;left:10px;bottom:9px;z-index:9999;font-size:9.5px;letter-spacing:.06em;font-weight:600;color:rgba(120,130,120,.6);background:rgba(255,255,255,.5);box-shadow:inset 0 0 0 1px rgba(120,140,120,.18);border-radius:99px;padding:3px 9px;pointer-events:none;font-family:ui-monospace,Menlo,monospace;}
+body.deep-immerse .md-build{color:rgba(220,228,220,.5);background:rgba(20,26,22,.5);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);}
 .pub-actions{display:flex;gap:6px;margin-top:9px;}
 .pub-act{flex:1;font-size:9.5px;letter-spacing:.07em;font-weight:600;text-transform:uppercase;color:var(--ink-soft);background:rgba(255,255,255,.9);box-shadow:inset 0 0 0 1px var(--sage-line);border:0;border-radius:99px;padding:7px 6px;cursor:pointer;transition:color .2s,box-shadow .2s,transform .15s;}
 .pub-act:hover{color:var(--ink);box-shadow:inset 0 0 0 1px rgba(44,90,60,.34);transform:translateY(-1px);}
@@ -851,6 +853,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
+const MD_BUILD='2026.06.23.1';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -1063,6 +1066,11 @@ document.querySelectorAll('[data-action="edit"]').forEach(b=>b.addEventListener(
   announceWorkspaceUpdate('Editing your Brand Home. Changes save as you go.','edit');
 }));
 document.getElementById('backBtn').addEventListener('click',closeRoom);
+(function(){ try{
+  console.log('%cMoving Day%c  build '+MD_BUILD,'font-weight:700;color:#3a5a40','color:#9aa');
+  var p=document.createElement('div'); p.className='md-build'; p.textContent='build '+MD_BUILD;
+  p.title='Deployed build — not shown to clients'; document.body.appendChild(p);
+}catch(_){ } })();
 /* Cmd/Ctrl-Z undo · Cmd/Ctrl-Shift-Z or Ctrl-Y redo — left native undo alone inside a text field */
 document.addEventListener('keydown',e=>{
   if(!(e.metaKey||e.ctrlKey)) return;
@@ -4226,6 +4234,7 @@ async function markRow(mark,kind,role){
 async function familyVariationRow(fam,kind,label){
   // the strongest variant for each ground: full-colour (or dark) on a light card, the white/light version on a dark card
   const fc=fam.variants.fullColor, dk=fam.variants.dark, lt=fam.variants.light;
+  const other=(fam.variants.other&&fam.variants.other[0])||null;
   const lightMark=fc||dk, darkMark=lt;
   if(lightMark && darkMark){
     return '<div class="gd-logos two">'
@@ -4233,8 +4242,8 @@ async function familyVariationRow(fam,kind,label){
       + await logoCell(darkMark, kind,'dark', label+' \u2014 on dark')
       + '</div>';
   }
-  const only=fc||dk||lt; if(!only) return '';
-  return await markRow(only,kind,label);              // single variant -> let it choose the grounds it reads on
+  const only=fc||dk||lt||other; if(!only) return '';
+  return await markRow(only,kind,label);              // single variant -> markRow shows it on light and/or dark, whichever it reads on
 }
 async function renderLogoSystem(root){
   const wrap=root.querySelector('[data-logosys]'); if(!wrap) return;
@@ -4242,7 +4251,7 @@ async function renderLogoSystem(root){
   const ORDER=[['primaryLogo','Primary logo','logo'],['secondaryLogo','Secondary logo','secondary'],['wordmark','Wordmark','wordmark'],['iconMark','Compact mark','icon']];
   const rows=[];
   for(const grp of ORDER){ const fam=fams[grp[0]]; if(!fam) continue;
-    if(!(fam.variants.fullColor||fam.variants.dark||fam.variants.light)) continue;   // skip empty families
+    if(!(fam.variants.fullColor||fam.variants.dark||fam.variants.light||(fam.variants.other&&fam.variants.other.length))) continue;   // skip only truly empty families
     const row=await familyVariationRow(fam,grp[2],grp[1]);
     if(row) rows.push('<div class="gd-logogroup"><div class="gd-logogroup-label">'+esc(grp[1])+'</div>'+row+'</div>');
   }
