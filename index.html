@@ -3993,32 +3993,33 @@ async function renderIdMarks(root){
   const fams=logoFamilies();
   const byId=id=>(brand.logos||[]).find(l=>l&&l.id===id);
   const repOf=fam=> (fam && (fam.variants.fullColor||fam.variants.dark||fam.variants.light||(fam.variants.other&&fam.variants.other[0]))) || null;
-  // Curated supporting wall: ONE of each non-primary family, then the genuine supporting marks.
-  // The primary family owns the hero, so it is never shown here (and never repeated per colour).
   const items=[];
-  const push=(rec,kind,forceDark)=>{ if(rec&&rec.id) items.push({mark:byId(rec.id)||rec, kind:kind, forceDark:!!forceDark}); };
+  const push=(rec,kind,forceDark)=>{ if(rec&&rec.id && items.length<8) items.push({mark:byId(rec.id)||rec, kind:kind, forceDark:!!forceDark}); };
   const prim=fams.primaryLogo;
-  if(prim && prim.variants.light) push(prim.variants.light,'Reversed',true);   // the hero mark shown on dark — completes the system
+  if(prim && prim.variants.light) push(prim.variants.light,'Reversed',true);   // primary reversed leads
   push(repOf(fams.secondaryLogo),'Secondary');
   push(repOf(fams.wordmark),'Wordmark');
   push(repOf(fams.iconMark),'Icon');
-  (fams.supporting||[]).forEach(rec=>{ if(items.length<8) push(rec,'Supporting'); });
-  if(!items.length){                                            // only a primary so far → a calm waiting line
+  (fams.supporting||[]).forEach(rec=>push(rec,'Supporting'));
+  if(!items.length){
     wrap.innerHTML='<p class="id-read-line" style="margin:2px 2px 0">One mark, shown as it should be \u2014 a secondary, icon or supporting mark will join it here as it\u2019s added.</p>';
     return;
   }
   const isSvg=m=>/svg/i.test(m.ext||'');
-  const full=async m=> await cleanMark(m.url,isSvg(m)) || m.url;
+  const full=async m=> (await cleanMark(m.url,isSvg(m)))||m.url;
   const PAPER=brandGround('light'), INK=brandGround('dark');
   const frame=dark=>{ const d=document.createElement('div'); d.className='vframe markframe '+(dark?'dark':'paper');
     d.style.setProperty('background', dark?INK:PAPER,'important');
     d.innerHTML='<span class="vframe-tag'+(dark?' on-dark':'')+'"></span>'; return d; };
-  const fill=async (d,url,lbl,assetId)=>{ setFrameImage(d,url,true,assetId);
-    d.style.setProperty('background', d.classList.contains('dark')?INK:PAPER,'important');
-    const t=d.querySelector('.vframe-tag'); if(t) t.textContent=lbl; };
   wrap.innerHTML='';
   const rowEl=document.createElement('div'); rowEl.className='id-markrow';
-  for(const it of items){ const dark=it.forceDark || bestGround(it.mark)==='dark'; const d=frame(dark); rowEl.appendChild(d); await fill(d, await full(it.mark), it.kind, it.mark.id); }
+  for(const it of items){
+    const dark=it.forceDark || bestGround(it.mark)==='dark';
+    const d=frame(dark); rowEl.appendChild(d);
+    setFrameImage(d, await full(it.mark), true, it.mark.id);
+    d.style.setProperty('background', dark?INK:PAPER,'important');
+    const t=d.querySelector('.vframe-tag'); if(t) t.textContent=it.kind;
+  }
   wrap.appendChild(rowEl);
 }
 const LOGOVAR={};                          // markId|treatment -> generated data URL (for hover download)
