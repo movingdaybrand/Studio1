@@ -18,12 +18,13 @@ export default async function handler(req, res) {
     const hit = (blobs || []).find(b => b.pathname === `guides/${g}.html`) || (blobs || [])[0];
     if (!hit) { res.status(404).send('Guide not found.'); return; }
 
-    const r = await fetch(hit.url);                 // server-side fetch ignores the attachment header
+    const bust = hit.url + (hit.url.indexOf('?') >= 0 ? '&' : '?') + 'v=' + encodeURIComponent(hit.uploadedAt || Date.now());
+    const r = await fetch(bust, { cache: 'no-store' });   // server-side fetch ignores the attachment header; bust CDN so re-publishes show instantly
     if (!r.ok) { res.status(502).send('Could not load guide.'); return; }
     const html = await r.text();
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
+    res.setHeader('Cache-Control', 'no-store, max-age=0');   // always reflect the latest publish
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.status(200).send(html);
   } catch (err) {
