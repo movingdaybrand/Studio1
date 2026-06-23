@@ -1328,6 +1328,8 @@ function syncBrandState(){            // project the existing `brand` into brand
     brandState.applications = { ready:(b.logos||[]).length>0, fromAI:!!b.presentation };
     brandState.rules      = { plan:b.guidePlan||null, world:b.brandWorld||null };
     brandState.delivery   = { name:b.name||'', assetCount:(b.logos||[]).length+(b.photos||[]).length+(b.docs||[]).length, hasGuide:!!b.name };
+    brandState.identity.families = logoFamilies();
+    brandState.placements = brandState.placements || defaultPlacements();
   }catch(e){ console.warn('[brandState] sync skipped:', e); }
   return brandState;
 }
@@ -1579,11 +1581,26 @@ async function downloadPackage(){
       while(used[fkey+'/'+(base+'-'+k+ext).toLowerCase()]) k++; const nn=base+'-'+k+ext; used[fkey+'/'+nn.toLowerCase()]=1; return nn; };
     const place=(folder,fkey,name,url)=>{ const data=b64(url); if(!data) return false; folder.file(uniq(fkey,name),data,{base64:true}); return true; };
 
-    // 01 Logos - organized copies, named by role
+    // 01 Logos - organized into families and colour variants
     const ROLEFN={primaryLogo:'primary-logo',secondaryLogo:'secondary-logo',iconMark:'icon',wordmark:'wordmark'};
     if(brand.logos.length){
       const lf=root.folder('01 Logos');
-      brand.logos.forEach((a,i)=>{ const base=ROLEFN[a.role]||('logo-'+(i+1)); place(lf,'01',ensureExt(base,a.ext||'png'),a.url); });
+      const fams=logoFamilies();
+      const FAMS=[['primaryLogo','Primary Logo'],['secondaryLogo','Secondary Logo'],['wordmark','Wordmark'],['iconMark','Icon - Mark']];
+      const VARS=[['fullColor','Full Color'],['dark','Dark - Black'],['light','Light - White']];
+      FAMS.forEach(([key,label])=>{
+        const fam=fams[key]; if(!fam) return;
+        const any=fam.variants.fullColor||fam.variants.dark||fam.variants.light||(fam.variants.other&&fam.variants.other.length);
+        if(!any) return;
+        const ff=lf.folder(label);
+        VARS.forEach(([vk,vlabel])=>{ const a=fam.variants[vk]; if(a&&a.url){ const vf=ff.folder(vlabel); place(vf,'01-'+key+'-'+vk,ensureExt(ROLEFN[key]||vk,a.ext||'png'),a.url); } });
+        if(fam.variants.other&&fam.variants.other.length){ const of=ff.folder('Other'); fam.variants.other.forEach((a,n)=>{ if(a&&a.url) place(of,'01-'+key+'-other',ensureExt(a.name||((ROLEFN[key]||'logo')+'-'+(n+1)),a.ext||'png'),a.url); }); }
+      });
+      if(fams.supporting && fams.supporting.length){
+        const sf=lf.folder('Supporting Marks');
+        const VLBL={fullColor:'Full Color',dark:'Dark - Black',light:'Light - White',other:'Other'};
+        fams.supporting.forEach((a,n)=>{ if(!a||!a.url) return; const vlabel=VLBL[a.variant]||'Other'; const vf=sf.folder(vlabel); place(vf,'01-supporting-'+(a.variant||'other'),ensureExt(a.name||('mark-'+(n+1)),a.ext||'png'),a.url); });
+      }
     }
     // 02 Colors - generated notes
     if(brand.colors.length){
@@ -3749,6 +3766,54 @@ async function renderIdMarks(root){
 const LOGOVAR={};                          // markId|treatment -> generated data URL (for hover download)
 const DLICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v12"/><path d="M6.5 11l5.5 5.5 5.5-5.5"/><path d="M5 20.5h14"/></svg>';
 function dlDataURL(name,url){ const a=document.createElement('a'); a.href=url; a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>a.remove(),800); }
+/* ---------- Logo families: group marks by identity role + colour variant (derived read-model) ----------
+   Additive. `brand.logos` stays the flat write store; this derives the family/variant view the guide,
+   ZIP, placements and review read from. Variants: fullColor / dark / light / other. */
+function classifyVariant(a){
+  if(!a) return 'other';
+  const n=String(a.name||'').toLowerCase();
+  if(/\b(white|light|reverse|reversed|knockout|ko)\b/.test(n)) return 'light';
+  if(/\b(black|dark|mono|monochrome|grayscale|greyscale|1c)\b/.test(n)) return 'dark';
+  if(/\b(colou?r|full|fullcolou?r|rgb|cmyk)\b/.test(n)) return 'fullColor';
+  if(a.variety!=null && a.variety>90) return 'fullColor';                 // many distinct colours -> full colour
+  const lum=(a.lum==null)?null:a.lum;
+  if(lum!=null){ if(lum>=188) return 'light'; if(lum<=92) return 'dark'; if(a.variety!=null && a.variety>45) return 'fullColor'; }
+  return 'other';
+}
+function logoVariantOf(a){ return (a&&a.variantClass) || classifyVariant(a); }
+function logoFamilyOf(a){
+  if(!a) return 'supporting';
+  if(a.role==='primaryLogo') return 'primaryLogo';
+  if(a.role==='secondaryLogo') return 'secondaryLogo';
+  if(a.role==='wordmark') return 'wordmark';
+  if(a.role==='iconMark') return 'iconMark';
+  return 'supporting';
+}
+function _famFields(a){ return {id:a.id,name:a.name,ext:a.ext,url:a.url,role:a.role||'',variant:logoVariantOf(a)}; }
+function logoFamilies(){
+  const emptyFam=()=>({ selectedVariant:'fullColor', variants:{ fullColor:null, dark:null, light:null, other:[] } });
+  const fam={ primaryLogo:emptyFam(), secondaryLogo:emptyFam(), wordmark:emptyFam(), iconMark:emptyFam(), supporting:[] };
+  (brand.logos||[]).forEach(a=>{ if(!a||!a.url) return;
+    const key=logoFamilyOf(a), v=logoVariantOf(a), rec=_famFields(a);
+    if(key==='supporting'){ fam.supporting.push(rec); return; }
+    const slot=fam[key].variants;
+    if(v==='other') slot.other.push(rec);
+    else if(!slot[v]) slot[v]=rec;        // first of each variant wins its slot...
+    else slot.other.push(rec);            // ...extra same-variant marks never overwrite -> Other
+  });
+  ['primaryLogo','secondaryLogo','wordmark','iconMark'].forEach(k=>{ const v=fam[k].variants;
+    fam[k].selectedVariant = v.fullColor?'fullColor':(v.dark?'dark':(v.light?'light':(v.other.length?'other':'fullColor'))); });
+  return fam;
+}
+function defaultPlacements(){            // who appears where - sensible defaults; editable in review (next pass)
+  return {
+    brandHomeHeader:{assetType:'primaryLogo',variant:'fullColor'},
+    guideHeader:{assetType:'wordmark',variant:'fullColor'},
+    coverHero:{assetType:'primaryLogo',variant:'fullColor'},
+    favicon:{assetType:'iconMark',variant:'fullColor'},
+    downloadPreview:{assetType:'primaryLogo',variant:'fullColor'}
+  };
+}
 function logoSystemMarks(){
   const L=brand.logos.filter(l=>l&&l.url); if(!L.length) return {};
   const tr=l=>(l.transparentRatio==null?0.08:l.transparentRatio), vary=l=>(l.variety==null?40:l.variety), asp=l=>(l.aspect==null?1:l.aspect);
