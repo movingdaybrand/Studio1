@@ -779,7 +779,7 @@ body.deep-immerse .id-primary .wm small{color:rgba(243,239,230,.62)!important;}
   <section id="room" class="view" aria-label="Room">
     <div class="room-top">
       <button class="back" id="backBtn"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="11 18 5 12 11 6"/></svg>Brand Home</button>
-      <div class="room-id"><div class="rk" id="roomKicker">Identity</div><h1 id="roomTitle">Everything that makes you, you.</h1></div>
+      <div class="room-id"><div class="rk" id="roomKicker">Identity</div><h1 id="roomTitle">Everything that makes you, you.</h1><div class="room-desc" id="roomDesc"></div></div>
     </div>
     <div id="roomBody"></div>
   </section>
@@ -2319,6 +2319,25 @@ function applyGuideSections(root){
   const frag=document.createElement('div'); frag.innerHTML=extras.map(e=>dynSectionHTML(e.section,e.reason,tiles)).join('');
   [...frag.children].forEach(n=>{ anchor?doc.insertBefore(n,anchor):doc.appendChild(n); });
 }
+function applyGuideCopy(root){
+  // Flow the AI's studio copy into the Brand Guide section intros, brand-specific,
+  // with the existing generic lines as fallback. The Logo section keeps its own sub.
+  try{
+    const p=brand.presentation; if(!p||!Array.isArray(p.sections)) return;
+    const doc=root.querySelector('.guidedoc'); if(!doc) return;
+    const byId={}; p.sections.forEach(s=>{ if(s&&s.id) byId[String(s.id).toLowerCase()]=s; });
+    const MAP=[[/color/i,'color'],[/typograph/i,'typography'],[/in use/i,'visual'],[/usage/i,'usage'],[/files/i,'downloads']];
+    doc.querySelectorAll('.gd-section').forEach(sec=>{
+      const num=((sec.querySelector('.gd-num')||{}).textContent)||'';
+      const head=sec.querySelector('.gd-head'); if(!head) return;
+      const hit=MAP.find(m=>m[0].test(num)); if(!hit) return;
+      const ai=byId[hit[1]]; const intro=ai&&ai.intro?String(ai.intro):''; if(!intro) return;
+      let sub=sec.querySelector('.gd-sub[data-ai-copy]');
+      if(!sub){ sub=document.createElement('p'); sub.className='gd-sub'; sub.setAttribute('data-ai-copy','1'); head.insertAdjacentElement('afterend',sub); }
+      sub.textContent=intro;
+    });
+  }catch(e){ console.warn('[guide] AI copy skipped:', e); }
+}
 function paintSwatches(root){
   if(!brand.colors.length) return;
   // Clean the palette for display: drop exact-duplicate hexes, then disambiguate repeated names by tone.
@@ -2571,7 +2590,9 @@ function applyTypeProse(root){
     if(pl) pl.innerHTML='<span><b>Display</b> '+(t.display||'—')+(t.displayUsage?' · '+t.displayUsage:'')+'</span>'
                        +'<span><b>Body</b> '+(t.body||'—')+(t.bodyUsage?' · '+t.bodyUsage:'')+'</span>';
     const bp=root.querySelector('.spec .body');
-    if(bp&&(t.body||t.display)) bp.textContent='Body copy set in '+(t.body||'the body face')+' — quiet and readable for long passages and interface labels. '+(t.display||'The display face')+' carries the character.';
+    const _aiTy=(brand.presentation&&Array.isArray(brand.presentation.sections))?brand.presentation.sections.find(s=>s&&String(s.id).toLowerCase()==='typography'):null;
+    if(bp&&_aiTy&&_aiTy.intro) bp.textContent=String(_aiTy.intro);
+    else if(bp&&(t.body||t.display)) bp.textContent='Body copy set in '+(t.body||'the body face')+' — quiet and readable for long passages and interface labels. '+(t.display||'The display face')+' carries the character.';
   }
 }
 function applyDeliverables(root){
@@ -2625,6 +2646,7 @@ function applyUploads(root){
     root.querySelectorAll('.gframe:not(.glogo),.gd-mock').forEach(fr=>{ const P=brand.photos[pi]; if(P){ setFrameImage(fr,P.url,false,P.id); pi++; } }); });
   if(brand.colors.length){ step(()=>legibilityFix(root)); step(()=>applyMockups(root)); }
   step(()=>applyGuideSections(root));
+  step(()=>applyGuideCopy(root));
 }
 function pickMark(...roles){
   for(const r of roles){ const m=brand.logos.find(l=>l.role===r); if(m) return m; }
@@ -3436,7 +3458,8 @@ function applyPresentation(){
   const p=brand.presentation; if(!p||!Array.isArray(p.sections)) return;
   const byId={}; p.sections.forEach(s=>{ if(s&&s.id) byId[String(s.id).toLowerCase()]=s; });
   const set=(room,secId)=>{ const s=byId[secId]; if(s&&s.intro&&ROOM_META[room]) ROOM_META[room].desc=s.intro; };
-  set('identity','identity');   // studio copy lives on Logo/identity + the overview only — Color, Type, Files stay clean, matching the printed guide
+  set('identity','identity'); set('typography','typography'); set('assets','assets'); set('deliverables','downloads');   // every room now reads its own studio copy — personalizing the home per brand
+  const gsec=byId['overview']||byId['identity']; if(gsec&&gsec.intro&&ROOM_META.guide) ROOM_META.guide.desc=gsec.intro;
   // if the current room is open, refresh its visible subtitle in place
   try{ if(currentRoom&&roomDesc&&ROOM_META[currentRoom]) roomDesc.textContent=ROOM_META[currentRoom].desc||''; }catch(e){}
 }
@@ -3558,13 +3581,18 @@ function mapAiToBrand(d, picked){     // map the AI's response into the brand �
   if(Array.isArray(d.brandHomeImprovements)) brand.brandHomeImprovements=d.brandHomeImprovements;
   // roles + logo/photo split straight from the AI's assignments, exactly like Experience
   const asg = Array.isArray(d.assetAssignments) ? d.assetAssignments
-            : (Array.isArray(d.assetReport) ? d.assetReport.map(a=>({fileId:a.fileId||a.id, slot:a.assetRole||a.role||a.slot, name:a.name})) : []);
+            : (Array.isArray(d.assetReport) ? d.assetReport.map(a=>({fileId:a.fileId||a.id, slot:a.assetRole||a.role||a.slot, name:a.name, tone:a.tone||a.colorVariant, transparentBackground:a.transparentBackground})) : []);
   if(asg.length && picked && picked.length){
     const byId={}; picked.forEach((im,i)=>{ byId['asset_'+(i+1)]=im; });
     const reLog=[], rePho=[], seen=new Set();
     asg.forEach(a=>{ let im=(a.fileId&&byId[a.fileId])||(a.name&&picked.find(p=>p.name===a.name)); if(!im||seen.has(im)) return; seen.add(im);
       const role=slotToRole(a.slot);
-      if(role){ im.role=role; im._autoRole=false; reLog.push(im); } else { im.role='photography'; rePho.push(im); }
+      if(role){ im.role=role; im._autoRole=false;
+        const tone=String(a.tone||'').toLowerCase();   // the AI's read of the mark's ink → our colour variant
+        if(tone==='light') im.variantClass='light'; else if(tone==='dark') im.variantClass='dark'; else if(tone==='mixed'||/full|colou?r/.test(tone)) im.variantClass='fullColor';
+        if(a.transparentBackground!=null) im.transparent=!!a.transparentBackground;
+        reLog.push(im);
+      } else { im.role='photography'; rePho.push(im); }
     });
     if(reLog.length||rePho.length){
       brand.logos.forEach(im=>{ if(!seen.has(im)) reLog.push(im); });
