@@ -684,6 +684,28 @@ body.deep-immerse .id-primary .wm small{color:rgba(243,239,230,.62)!important;}
 .becoming .glyph svg{width:100%;height:100%;stroke:currentColor;stroke-width:1.3;fill:none;stroke-linecap:round;stroke-linejoin:round;}
 .becoming h2{font-family:var(--display);font-weight:300;font-size:clamp(20px,2.6vw,28px);letter-spacing:-.01em;margin:0 0 .5em;}
 .becoming p{font-size:14px;line-height:1.65;color:var(--ink-soft);margin:0;font-weight:300;}
+/* ── Concierge review: logo families, variant cards, placement pickers ── */
+.review-panel{width:min(680px,95vw);max-height:88vh;}
+.rv-places{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:6px 0 2px;}
+@media(max-width:520px){.rv-places{grid-template-columns:1fr;}}
+.rv-place{display:flex;flex-direction:column;gap:2px;padding:9px 12px;border-radius:10px;background:rgba(255,255,255,.6);box-shadow:inset 0 0 0 1px rgba(44,90,60,.12);}
+.rv-place-k{font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:rgba(28,43,34,.5);font-weight:600;}
+.rv-place-v{font-size:12.5px;color:#1c2b22;}
+.rv-body{overflow:auto;margin-top:10px;padding-right:2px;}
+.rv-fam{margin-bottom:18px;}
+.rv-fam-h{display:flex;align-items:center;gap:9px;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:rgba(28,43,34,.55);font-weight:600;margin:0 0 10px;}
+.rv-fam-n{margin-left:auto;color:rgba(28,43,34,.4);font-variant-numeric:tabular-nums;}
+.rv-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;}
+.rv-card{border-radius:12px;background:rgba(255,255,255,.62);box-shadow:inset 0 0 0 1px rgba(44,90,60,.12);padding:9px;display:flex;flex-direction:column;gap:8px;}
+.rv-thumb{position:relative;aspect-ratio:4/3;border-radius:8px;background:#fff;overflow:hidden;}
+.rv-card.on-dark .rv-thumb{background:#1c2b22;}
+.rv-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:12%;}
+.rv-meta{display:flex;gap:6px;}
+.rv-sel{flex:1;min-width:0;font-family:inherit;font-size:11px;color:#1c2b22;background:rgba(255,255,255,.82);border:none;box-shadow:inset 0 0 0 1px rgba(44,90,60,.16);border-radius:7px;padding:6px 7px;cursor:pointer;}
+.rv-places-set{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.rv-place-btn{font-family:inherit;font-size:9.5px;letter-spacing:.02em;color:rgba(28,43,34,.72);background:rgba(255,255,255,.72);border:none;box-shadow:inset 0 0 0 1px rgba(44,90,60,.14);border-radius:7px;padding:6px 4px;cursor:pointer;transition:background .15s,color .15s,box-shadow .15s;}
+.rv-place-btn:hover{box-shadow:inset 0 0 0 1px rgba(44,90,60,.34);}
+.rv-place-btn.on{background:var(--sage,#2c5a3c);color:#f3efe6;box-shadow:inset 0 0 0 1px rgba(44,90,60,.5);}
 </style>
 </head>
 <body>
@@ -802,6 +824,15 @@ body.deep-immerse .id-primary .wm small{color:rgba(243,239,230,.62)!important;}
   </div>
 </div>
 
+<div class="pub-overlay" id="reviewModal" hidden>
+  <div class="pub-panel review-panel">
+    <div class="pub-head"><span>Concierge review</span><button class="pub-x" id="reviewClose" aria-label="Close">&times;</button></div>
+    <p class="pub-sub">Confirm each mark, its colour variant, and where it appears — before you publish.</p>
+    <div class="rv-places" id="rvPlaces"></div>
+    <div class="rv-body" id="rvBody"></div>
+  </div>
+</div>
+
 <input type="file" id="editFile" accept="image/*" hidden>
 <input type="color" id="editColor" hidden>
 <input type="file" id="zipInput" accept=".zip,.pdf,.svg,.png,.jpg,.jpeg,.webp,.gif,image/*,application/pdf,application/zip" multiple hidden>
@@ -916,6 +947,7 @@ const ROOMS={
       <button class="deliv-link" data-deliv="pdf">Download PDF</button>
       <button class="deliv-link" data-deliv="palette">Colour styles</button>
       <button class="deliv-link" data-deliv="save">Save working file</button>
+      <button class="deliv-link" data-deliv="review">Review marks</button>
       <button class="deliv-link" data-deliv="versions">Version history</button>
     </div>
     <p class="deliv-note">Deliverables always use the <b>latest version</b> of your Brand Home — current logo, colors, type, and assets.</p>
@@ -1329,7 +1361,7 @@ function syncBrandState(){            // project the existing `brand` into brand
     brandState.rules      = { plan:b.guidePlan||null, world:b.brandWorld||null };
     brandState.delivery   = { name:b.name||'', assetCount:(b.logos||[]).length+(b.photos||[]).length+(b.docs||[]).length, hasGuide:!!b.name };
     brandState.identity.families = logoFamilies();
-    brandState.placements = brandState.placements || defaultPlacements();
+    brandState.placements = brand.placements || defaultPlacements();
   }catch(e){ console.warn('[brandState] sync skipped:', e); }
   return brandState;
 }
@@ -1677,6 +1709,7 @@ function handleDeliverable(kind){
   else if(kind==='home'){ publishBrandHome(); }
   else if(kind==='guide-render'){ renderFounderGuide(); }
   else if(kind==='zip'){ downloadPackage(); }
+  else if(kind==='review'){ openConciergeReview(); }
   else if(kind==='palette'){ const css=':root{\n'+(brand.colors.map((c,i)=>'  --brand-'+(i+1)+': '+c.hex+'; /* '+(c.name||'Color')+' */').join('\n')||'  /* no colours yet */')+'\n}'; dl(brandSlug()+'-colors.css', css, 'text/css'); announceWorkspaceUpdate('Color styles downloaded.','deliverables'); }
   else if(kind==='pdf'){ announceWorkspaceUpdate('Opening print — choose “Save as PDF”.','deliverables'); if(currentRoom!=='guide') openRoom('guide'); setTimeout(()=>window.print(),650); }
   else if(kind==='guides'){ openSavedGuides(); }
@@ -2038,6 +2071,83 @@ async function openSavedGuides(){
     const url=btn.dataset.url||'';
     try{ await navigator.clipboard.writeText(url); }catch(_){}
     btn.textContent='Copied'; setTimeout(()=>{ btn.textContent='Copy'; },1400);
+  });
+})();
+/* ════════ Concierge review: confirm each mark, its colour variant, and where it appears ════════
+   Reads logoFamilies() (derived) and writes choices to brand.placements + per-mark role/variantClass.
+   Self-contained modal opened from Deliverables. Does NOT touch the live renderers — the published
+   output begins honouring these placements in the next pass. */
+const RV_FAM_ORDER=[['primaryLogo','Primary Logo'],['secondaryLogo','Secondary Logo'],['wordmark','Wordmark'],['iconMark','Icon / Mark'],['supporting','Supporting Marks']];
+const RV_VAR_LABEL={fullColor:'Full Color',dark:'Dark / Black',light:'Light / White',other:'Other'};
+const RV_PLACES=[['brandHomeHeader','Brand Home header'],['guideHeader','Guide header'],['coverHero','Cover / hero'],['favicon','Favicon']];
+const RV_TYPE_OPTS=[['primaryLogo','Primary Logo'],['secondaryLogo','Secondary Logo'],['wordmark','Wordmark'],['iconMark','Icon / Mark'],['','Supporting']];
+const RV_VAR_OPTS=[['fullColor','Full Color'],['dark','Dark / Black'],['light','Light / White'],['other','Other']];
+function currentPlacements(){ if(!brand.placements) brand.placements=defaultPlacements(); return brand.placements; }
+function renderConciergeReview(){
+  const body=document.getElementById('rvBody'), places=document.getElementById('rvPlaces'); if(!body) return;
+  const fams=logoFamilies(), P=currentPlacements();
+  if(places){
+    places.innerHTML=RV_PLACES.map(function(pr){ const slot=pr[0], label=pr[1], pl=P[slot]||{};
+      const fam=(RV_FAM_ORDER.find(function(f){return f[0]===pl.assetType;})||[])[1]||'\u2014';
+      const v=pl.variant?(RV_VAR_LABEL[pl.variant]||pl.variant):'';
+      return '<div class="rv-place"><span class="rv-place-k">'+esc(label)+'</span><span class="rv-place-v">'+esc(fam)+(v?' \u00b7 '+esc(v):'')+'</span></div>';
+    }).join('');
+  }
+  let html='';
+  RV_FAM_ORDER.forEach(function(fr){ const key=fr[0], label=fr[1]; let cards=[];
+    if(key==='supporting'){ cards=(fams.supporting||[]).map(function(a){ return {a:a,variant:a.variant||'other'}; }); }
+    else { const fam=fams[key]; if(fam){ ['fullColor','dark','light'].forEach(function(v){ if(fam.variants[v]) cards.push({a:fam.variants[v],variant:v}); }); (fam.variants.other||[]).forEach(function(a){ cards.push({a:a,variant:a.variant||'other'}); }); } }
+    if(!cards.length) return;
+    html+='<div class="rv-fam"><div class="rv-fam-h">'+esc(label)+'<span class="rv-fam-n">'+cards.length+'</span></div><div class="rv-cards">';
+    cards.forEach(function(c){ const a=c.a, onDark=(c.variant==='light');
+      html+='<div class="rv-card'+(onDark?' on-dark':'')+'">'
+        +'<div class="rv-thumb"><img alt="" src="'+esc(a.url)+'"></div>'
+        +'<div class="rv-meta">'
+          +'<select class="rv-sel rv-variant" data-rv-asset="'+esc(a.id)+'">'+RV_VAR_OPTS.map(function(o){ return '<option value="'+o[0]+'"'+(o[0]===c.variant?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select>'
+          +'<select class="rv-sel rv-type" data-rv-asset="'+esc(a.id)+'">'+RV_TYPE_OPTS.map(function(o){ return '<option value="'+o[0]+'"'+(o[0]===(a.role||'')?' selected':'')+'>'+o[1]+'</option>'; }).join('')+'</select>'
+        +'</div>';
+      if(key!=='supporting'){
+        html+='<div class="rv-places-set">'+RV_PLACES.map(function(pr){ const slot=pr[0], plabel=pr[1], pl=P[slot]||{}, on=(pl.assetType===key&&pl.variant===c.variant);
+          return '<button type="button" class="rv-place-btn'+(on?' on':'')+'" data-rv-place="'+slot+'" data-rv-asset="'+esc(a.id)+'">'+esc(plabel)+'</button>'; }).join('')+'</div>';
+      }
+      html+='</div>';
+    });
+    html+='</div></div>';
+  });
+  body.innerHTML=html||'<p class="guides-empty">Move a logo in to review marks.</p>';
+}
+function openConciergeReview(){
+  const ov=document.getElementById('reviewModal'); if(!ov) return;
+  if(!(brand.logos&&brand.logos.length)){ announceWorkspaceUpdate('Move a logo in first \u2014 then you can review the marks.','deliverables'); return; }
+  renderConciergeReview(); ov.hidden=false;
+}
+(function wireReviewModal(){
+  const ov=document.getElementById('reviewModal'); if(!ov) return;
+  const x=document.getElementById('reviewClose'), body=document.getElementById('rvBody');
+  const close=function(){ ov.hidden=true; };
+  if(x) x.addEventListener('click',close);
+  ov.addEventListener('pointerdown',function(e){ if(e.target===ov) close(); });
+  if(!body) return;
+  const findA=function(id){ return (brand.logos||[]).find(function(l){ return l.id===id; })||null; };
+  body.addEventListener('change',function(e){
+    const sel=e.target.closest('.rv-sel'); if(!sel) return;
+    const a=findA(sel.getAttribute('data-rv-asset')); if(!a) return;
+    if(sel.classList.contains('rv-variant')){ a.variantClass=sel.value; }
+    else if(sel.classList.contains('rv-type')){ const role=sel.value;
+      if(['primaryLogo','secondaryLogo','iconMark','wordmark'].indexOf(role)>-1) (brand.logos||[]).forEach(function(l){ if(l!==a && l.role===role) l.role=''; });
+      a.role=role; a._autoRole=false;
+    }
+    try{ saveBrand(); }catch(_){ } try{ syncBrandState(); }catch(_){ }
+    renderConciergeReview();
+  });
+  body.addEventListener('click',function(e){
+    const b=e.target.closest('.rv-place-btn'); if(!b) return;
+    const a=findA(b.getAttribute('data-rv-asset')); if(!a) return;
+    const slot=b.getAttribute('data-rv-place'), P=currentPlacements();
+    P[slot]={assetType:logoFamilyOf(a), variant:logoVariantOf(a)};
+    try{ saveBrand(); }catch(_){ } try{ syncBrandState(); }catch(_){ }
+    renderConciergeReview();
+    try{ announceWorkspaceUpdate('Placement set \u2014 it applies when you publish.','deliverables'); }catch(_){ }
   });
 })();
 function prettify(s){return s.replace(/[._-]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase()).trim();}
@@ -4015,7 +4125,7 @@ const SAVE_DB='mdBrandHomeSave', SAVE_STORE='brand', SAVE_KEY='current';
 function _db(){return new Promise((res,rej)=>{ if(typeof indexedDB==='undefined') return rej(new Error('no idb')); const r=indexedDB.open(SAVE_DB,1); r.onupgradeneeded=()=>{ try{r.result.createObjectStore(SAVE_STORE);}catch(e){} }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });}
 function saveBrand(){
   try{ syncBrandState(); }catch(e){}
-  const snap={name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type,fonts:(brand.fonts||[]),
+  const snap={name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type,placements:brand.placements||null,fonts:(brand.fonts||[]),
     colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null,designStrategy:brand.designStrategy||null,environmentProfile:brand.environmentProfile||null,signature:brand.signature||null};
   if(!snap.name && !snap.logos.length && !snap.photos.length && !(snap.colors&&snap.colors.length)) return;
   try{ pushUndoSnapshot(); }catch(e){}
@@ -4032,7 +4142,7 @@ function restoreBrand(snap){
   brand.logos=snap.logos||[]; brand.photos=snap.photos||[]; brand.docs=snap.docs||[];
   brand.fonts=snap.fonts||[]; try{ (brand.fonts||[]).forEach(registerUploadedFont); }catch(e){} try{ autoAssignFontRoles(); }catch(e){}
   try{ mergeGuidelines(); }catch(e){}
-  brand.colors=snap.colors||[]; brand.type=snap.type||null;
+  brand.colors=snap.colors||[]; brand.type=snap.type||null; brand.placements=snap.placements||null;
   brand.colorSystem=snap.colorSystem||null; brand.typeSystem=snap.typeSystem||null;
   brand.personality=snap.personality||null; brand.guidePlan=snap.guidePlan||null; brand.brandHomeImprovements=snap.brandHomeImprovements||null;
   brand.brandWorld=snap.brandWorld||null; brand.designStrategy=snap.designStrategy||null;
