@@ -1408,6 +1408,21 @@ const MDWorkspaceState={
   colors:[], typography:{displayFont:'',bodyFont:'',displayNote:'',bodyNote:''},
   sections:[], assets:[], deliverables:{htmlReady:false,pdfReady:false,zipReady:false}, preparation:null, updatedAt:''
 };
+function normalizeRoles(){
+  // The Primary slot should hold the brand's main logo, not a stray square symbol.
+  const L=(brand.logos||[]); if(!L.length) return;
+  const sq=function(l){ const a=(l.aspect==null?1:l.aspect); return a>0.7 && a<1.45; };   // roughly square -> a symbol/icon
+  const byRole=function(r){ return L.filter(function(l){ return l.role===r; }); };
+  const hasWide=L.some(function(l){ const a=(l.aspect==null?1:l.aspect); return a>=1.6; }); // a lockup/wordmark exists
+  let prim=byRole('primaryLogo');
+  if(prim.length && hasWide && prim.every(sq)){                 // "primary" is only square symbols, but lockups exist
+    prim.forEach(function(l){ l.role='iconMark'; l._autoRole=true; });
+  }
+  if(!byRole('primaryLogo').length){                            // nothing left as primary -> the wordmark IS the primary
+    const word=byRole('wordmark');
+    if(word.length) word.forEach(function(l){ l.role='primaryLogo'; l._autoRole=true; });
+  }
+}
 function inferLogoRoles(){
   // Group the SAME mark in different colours together: by silhouette (colour-invariant) first,
   // then by base filename. Variants of one mark then share its family instead of scattering.
@@ -1460,6 +1475,7 @@ function assignRoles(){
   // ICON: squarest free mark
   if(!taken().includes('iconMark')){ const i=[...free()].sort((a,b)=>Math.abs(1-asp(a))-Math.abs(1-asp(b)))[0]; if(i){ i.role='iconMark'; i._autoRole=true; } }
   try{ inferLogoRoles(); }catch(e){}                 // group each mark's colour variants into its family
+  try{ normalizeRoles(); }catch(e){}                 // keep a sensible Primary; a stray symbol is an icon, not the primary
   // keep the primary first for any sequential consumers
   L.sort((a,b)=>((b.role==='primaryLogo')-(a.role==='primaryLogo')));
 }
