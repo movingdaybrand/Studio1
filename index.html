@@ -1425,7 +1425,11 @@ function normalizeRoles(){
   }
   if(!byRole('primaryLogo').length){                                 // nothing primary -> promote the main wordmark
     const word=byRole('wordmark').filter(function(l){ return !l.roleLocked; });
-    if(word.length) word.forEach(function(l){ l.role='primaryLogo'; l._autoRole=true; });
+    if(word.length){
+      const byClu={}; word.forEach(function(l){ const k=l._clu||l.id; (byClu[k]=byClu[k]||[]).push(l); });
+      let best=null,bn=-1; Object.keys(byClu).forEach(function(k){ if(byClu[k].length>bn){ bn=byClu[k].length; best=byClu[k]; } });
+      if(best) best.forEach(function(l){ l.role='primaryLogo'; l._autoRole=true; });   // other wordmark families stay wordmarks
+    }
   }
 }
 function inferLogoRoles(){
@@ -1452,6 +1456,7 @@ function inferLogoRoles(){
   const median=function(arr){ arr=arr.slice().sort(function(a,b){return a-b;}); return arr.length?arr[arr.length>>1]:1; };
   const clusters={};
   for(let i=0;i<n;i++){ const r=find(i); (clusters[r]=clusters[r]||[]).push(L[i]); }
+  Object.keys(clusters).forEach(function(k){ clusters[k].forEach(function(l){ l._clu=k; }); });   // remember which mark each logo belongs to
   Object.keys(clusters).forEach(function(k){ const g=clusters[k]; if(g.length<2) return;
     // one mark, one family. A locked (user-chosen) member decides the family; else majority, then shape.
     const locked=g.filter(function(l){ return l.roleLocked && l.role; });
@@ -1549,7 +1554,7 @@ function refreshFounderState(){
 }
 
 /* ── Assets room: real assets, categorized, with role assignment ── */
-const ROLE_OPTS=[['','— role —'],['primaryLogo','Primary Logo'],['secondaryLogo','Secondary Logo'],['iconMark','Icon Mark'],['wordmark','Wordmark'],['photography','Photography'],['guideline','Guideline'],['document','Document']];
+const ROLE_OPTS=[['','— role —'],['primaryLogo','Primary Logo'],['secondaryLogo','Secondary Logo'],['iconMark','Icon Mark'],['wordmark','Wordmark'],['supporting','Supporting / Social'],['photography','Photography'],['guideline','Guideline'],['document','Document']];
 function assetStatus(a){                                         // [class,label] — quiet and honest, no fake completion
   const ext=String(a.ext||'').toLowerCase();
   if(ext==='pdf' && a.extracted && a.extracted.pending) return ['reading','Reading'];
