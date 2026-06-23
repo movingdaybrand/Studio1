@@ -3808,6 +3808,40 @@ function dedupeColors(list){            // drop identical + near-identical so no
   }
   return out.map(o=>({hex:o.hex,name:o.name}));
 }
+function refinePalette(list){
+  // Turn any colour list into a clean, deduped, dark->light ramp focused on real brand colours.
+  const arr=(list||[]).map(function(c){ const hx=normHex(c&&c.hex!==undefined?c.hex:c); return hx?{hex:hx.toUpperCase(),name:(c&&c.name)||'',role:(c&&c.role)||'brand'}:null; }).filter(Boolean);
+  if(!arr.length) return [];
+  const rgb=function(h){ return hexToRgb(h); };
+  const lum=function(h){ const p=rgb(h); return 0.299*p[0]+0.587*p[1]+0.114*p[2]; };
+  const chroma=function(h){ const p=rgb(h); return Math.max(p[0],p[1],p[2])-Math.min(p[0],p[1],p[2]); };
+  const dist=function(a,b){ const x=rgb(a),y=rgb(b); return Math.abs(x[0]-y[0])+Math.abs(x[1]-y[1])+Math.abs(x[2]-y[2]); };
+  const isGrey=function(h){ return chroma(h)<22; };
+  const clusters=[];                       // greys merge across a wide band; real hues stay distinct
+  arr.forEach(function(c){
+    const g=isGrey(c.hex);
+    const hit=clusters.find(function(cl){ if(isGrey(cl.rep.hex)!==g) return false; return dist(cl.rep.hex,c.hex) < (g?96:46); });
+    if(hit) hit.members.push(c); else clusters.push({rep:c,members:[c]});
+  });
+  const reps=clusters.map(function(cl){
+    if(isGrey(cl.rep.hex)){                 // a grey cluster snaps to its canonical end
+      const avgL=cl.members.reduce(function(s,m){ return s+lum(m.hex); },0)/cl.members.length;
+      if(avgL<64)  return {hex:'#000000',name:'Black',role:'neutral'};
+      if(avgL>198) return {hex:'#FFFFFF',name:'White',role:'neutral'};
+      let best=cl.members[0],bd=1e9; cl.members.forEach(function(m){ const dd=Math.abs(lum(m.hex)-avgL); if(dd<bd){ bd=dd; best=m; } });
+      return {hex:best.hex,name:best.name||homeColorName(best.hex),role:'neutral'};
+    }
+    let best=cl.members.find(function(m){ return m.name; })||cl.members[0];
+    cl.members.forEach(function(m){ if(chroma(m.hex)>chroma(best.hex)) best=m; });   // the truest, most saturated take
+    return {hex:best.hex,name:best.name||homeColorName(best.hex),role:best.role||'brand'};
+  });
+  if(!reps.some(function(c){ return lum(c.hex)<40; }))  reps.push({hex:'#000000',name:'Black',role:'neutral'});  // a ramp needs both ends
+  if(!reps.some(function(c){ return lum(c.hex)>215; })) reps.push({hex:'#FFFFFF',name:'White',role:'neutral'});
+  reps.sort(function(a,b){ return lum(a.hex)-lum(b.hex); });                          // dark -> light
+  const out=[]; reps.forEach(function(c){ if(out.length<6 || chroma(c.hex)>=22) out.push(c); });   // never drop a real accent
+  const seen=new Set();
+  return out.filter(function(c){ const k=c.hex.toUpperCase(); if(seen.has(k)) return false; seen.add(k); return true; }).slice(0,7);
+}
 async function extractPalette(urls){            // EXACT hex codes pulled from the uploaded pixels — nothing averaged or invented
   const counts=new Map();
   for(const url of urls.slice(0,6)){
@@ -4239,7 +4273,8 @@ async function finishIntake(imgs,folderName){
       }catch(e){ console.warn('Brand Concierge unavailable — organized locally:',e); }
     }
     // colours come from the actual uploads even when the AI didn't run/return them
-    if(!brand.colors.length){ try{ const pal=await extractPalette(urls); if(pal.length) brand.colors=pal; }catch(e){} }
+    try{ const _lurls=(brand.logos||[]).map(l=>l.url).filter(Boolean); const _lp=_lurls.length?await extractPalette(_lurls):[]; const _merged=refinePalette(_lp.concat(brand.colors||[])); if(_merged.length) brand.colors=_merged; }
+    catch(e){ if(!brand.colors.length){ try{ const pal=await extractPalette(urls); if(pal.length) brand.colors=refinePalette(pal); }catch(_){} } }
     setStatus(total
       ? (!aiOn ? `${total} file${total===1?'':'s'} moved in — organized on-device (Concierge is off).`
               : aiOK ? (brand.name?brand.name+' is moved in — same read as your Experience flow.':'Moved in — same read as your Experience flow.')
@@ -4306,7 +4341,7 @@ function restoreBrand(snap){
   brand.logos=snap.logos||[]; brand.photos=snap.photos||[]; brand.docs=snap.docs||[];
   brand.fonts=snap.fonts||[]; try{ (brand.fonts||[]).forEach(registerUploadedFont); }catch(e){} try{ autoAssignFontRoles(); }catch(e){}
   try{ mergeGuidelines(); }catch(e){}
-  brand.colors=snap.colors||[]; brand.type=snap.type||null; brand.placements=snap.placements||null;
+  brand.colors=refinePalette(snap.colors||[]); brand.type=snap.type||null; brand.placements=snap.placements||null;
   brand.colorSystem=snap.colorSystem||null; brand.typeSystem=snap.typeSystem||null;
   brand.personality=snap.personality||null; brand.guidePlan=snap.guidePlan||null; brand.brandHomeImprovements=snap.brandHomeImprovements||null;
   brand.brandWorld=snap.brandWorld||null; brand.designStrategy=snap.designStrategy||null;
