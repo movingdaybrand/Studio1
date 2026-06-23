@@ -4002,7 +4002,10 @@ async function renderIdMarks(root){
   push(repOf(fams.secondaryLogo),'Secondary');
   push(repOf(fams.wordmark),'Wordmark');
   push(repOf(fams.iconMark),'Icon');
-  (fams.supporting||[]).forEach(rec=>push(rec,'Supporting'));
+  const seenSup=new Set();                                                    // one plate per supporting mark, not per colourway
+  (fams.supporting||[]).forEach(rec=>{ const lg=byId(rec.id)||rec;
+    const k=(lg._clu!=null)?('c'+lg._clu):String(lg.name||lg.id||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+    if(seenSup.has(k)) return; seenSup.add(k); push(rec,'Supporting'); });
   if(!items.length){
     wrap.innerHTML='<p class="id-read-line" style="margin:2px 2px 0">One mark, shown as it should be \u2014 a secondary, icon or supporting mark will join it here as it\u2019s added.</p>';
     return;
