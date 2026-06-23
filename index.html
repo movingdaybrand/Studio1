@@ -355,6 +355,8 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .gd-sub{font-size:14px;line-height:1.65;color:var(--gd-faint);max-width:62ch;margin:0 0 22px;}
 .gd-logos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:10px;}
 .gd-logos.two{grid-template-columns:1fr 1fr;}
+.gd-logogroup{margin-bottom:14px;}
+.gd-logogroup-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin:0 0 7px;}
 .gd-logocell{position:relative;min-height:clamp(150px,18vw,200px);display:grid;place-items:center;border-radius:var(--r-sm);padding:30px 22px 40px;}
 .gd-logocell.paper{background:#ebe5d6;}.gd-logocell.dark{background:linear-gradient(160deg,var(--gd-glass),var(--gd-panel));box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 0 0 1px var(--gd-line);}.gd-logocell.brand{background:var(--b4);}
 .gd-logocell img{max-width:82%;max-height:clamp(96px,13vw,150px);object-fit:contain;}
@@ -4118,15 +4120,37 @@ async function markRow(mark,kind,role){
   if(!cells.length) cells.push(await logoCell(mark,kind,'paper',role));   // always show it somewhere
   return '<div class="gd-logos'+(cells.length<3?' two':'')+'">'+cells.join('')+'</div>';
 }
+async function familyVariationRow(fam,kind,label){
+  // the strongest variant for each ground: full-colour (or dark) on a light card, the white/light version on a dark card
+  const fc=fam.variants.fullColor, dk=fam.variants.dark, lt=fam.variants.light;
+  const lightMark=fc||dk, darkMark=lt;
+  if(lightMark && darkMark){
+    return '<div class="gd-logos two">'
+      + await logoCell(lightMark,kind,'paper',label+' \u2014 on light')
+      + await logoCell(darkMark, kind,'dark', label+' \u2014 on dark')
+      + '</div>';
+  }
+  const only=fc||dk||lt; if(!only) return '';
+  return await markRow(only,kind,label);              // single variant -> let it choose the grounds it reads on
+}
 async function renderLogoSystem(root){
   const wrap=root.querySelector('[data-logosys]'); if(!wrap) return;
-  const {primary,icon}=logoSystemMarks(); if(!primary) return;        // keep template placeholder until a real mark exists
-  const intro = (icon&&icon.id!==primary.id)
-    ? "Your logo and a compact mark for tight spaces, each shown on the backgrounds it sits on best. Use the full logo wherever there's room; let the compact mark stand alone for avatars and small placements. Hover any mark to download the original file."
-    : "Your logo, shown on the backgrounds it sits on best. Hover any mark to download the original file.";
-  wrap.innerHTML='<p class="gd-sub">'+esc(intro)+'</p>'
-    + await markRow(primary,'logo','Primary')
-    + ((icon&&icon.id!==primary.id) ? await markRow(icon,'icon','Compact mark') : '');
+  const fams=logoFamilies();
+  const ORDER=[['primaryLogo','Primary logo','logo'],['secondaryLogo','Secondary logo','secondary'],['wordmark','Wordmark','wordmark'],['iconMark','Compact mark','icon']];
+  const rows=[];
+  for(const grp of ORDER){ const fam=fams[grp[0]]; if(!fam) continue;
+    if(!(fam.variants.fullColor||fam.variants.dark||fam.variants.light)) continue;   // skip empty families
+    const row=await familyVariationRow(fam,grp[2],grp[1]);
+    if(row) rows.push('<div class="gd-logogroup"><div class="gd-logogroup-label">'+esc(grp[1])+'</div>'+row+'</div>');
+  }
+  if(!rows.length){                                    // un-analysed brand -> keep the simple primary view
+    const {primary,icon}=logoSystemMarks(); if(!primary) return;
+    wrap.innerHTML='<p class="gd-sub">Your logo, shown on the backgrounds it sits on best. Hover any mark to download the original file.</p>'
+      + await markRow(primary,'logo','Primary')
+      + ((icon&&icon.id!==primary.id) ? await markRow(icon,'icon','Compact mark') : '');
+    return;
+  }
+  wrap.innerHTML='<p class="gd-sub">Your logo system \u2014 the strongest version of each mark, shown on the backgrounds it sits on best. Hover any mark to download the original file.</p>'+rows.join('');
 }
 /* ════════════════ STAGE 1 — LOCAL PREPARATION ════════════════
    Build a full asset inventory, drop exact duplicates, sort into the brand
