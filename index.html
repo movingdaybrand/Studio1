@@ -193,7 +193,7 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .id-pedestal::before{content:'';position:absolute;left:50%;top:44%;width:min(60%,380px);height:min(60%,300px);transform:translate(-50%,-50%);background:radial-gradient(ellipse at center,var(--b3,#4e6b5a) 0%,transparent 68%);opacity:.42;filter:blur(34px);z-index:0;pointer-events:none;}
 .id-pedestal::after{content:'';position:absolute;left:50%;bottom:clamp(14px,2vw,22px);width:min(46%,280px);height:24px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(20,30,24,.20),transparent 72%);filter:blur(7px);z-index:0;pointer-events:none;}
 .id-primary{min-height:0;display:grid;place-items:center;}
-.id-hero .id-primary{position:relative;z-index:1;width:min(74%,340px);height:clamp(116px,16vw,170px);background:transparent;box-shadow:none;border-radius:0;overflow:visible;animation:idFloat 6.5s ease-in-out infinite;}
+.id-hero .id-primary{position:relative;z-index:1;width:min(82%,420px);height:clamp(150px,19vw,210px);background:transparent;box-shadow:none;border-radius:0;overflow:visible;animation:idFloat 6.5s ease-in-out infinite;}
 .id-hero .id-primary>img{filter:drop-shadow(0 18px 30px rgba(20,30,24,.20));}
 .id-hero .id-primary .vframe-tag{display:none;}
 @keyframes idFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
@@ -642,7 +642,7 @@ body.deep-immerse .id-primary .wm small{color:rgba(243,239,230,.62)!important;}
 .review .sect-label{display:flex!important;align-items:center;gap:10px;font-size:9.5px!important;letter-spacing:.22em!important;color:var(--ink-faint)!important;margin:clamp(30px,4.4vh,52px) 2px clamp(15px,2.2vh,20px)!important;}
 .review .sect-label::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--sage);opacity:.7;flex:none;}
 /* supporting marks → a gallery wall of plates */
-.id-marks .id-markrow{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(158px,1fr))!important;gap:clamp(12px,1.5vw,18px)!important;}
+.id-marks .id-markrow{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(170px,1fr))!important;gap:clamp(14px,1.7vw,22px)!important;}
 .id-marks .markframe{aspect-ratio:5/4!important;max-width:none!important;flex:none!important;border-radius:var(--r-md)!important;overflow:hidden;box-shadow:var(--shadow)!important;padding:18px!important;transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s ease;}
 .id-marks .markframe:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover)!important;}
 .id-marks .markframe .vframe-tag{left:12px!important;bottom:11px!important;font-size:8.5px!important;letter-spacing:.16em!important;}
@@ -3989,14 +3989,16 @@ async function placeLogos(root){
 async function renderIdMarks(root){
   const wrap=root.querySelector('.id-marks'); if(!wrap) return;
   const label=wrap.previousElementSibling;
-  if(label&&label.classList&&label.classList.contains('sect-label')) label.textContent='Supporting marks';
+  if(label&&label.classList&&label.classList.contains('sect-label')) label.textContent='The marks';
   const fams=logoFamilies();
   const byId=id=>(brand.logos||[]).find(l=>l&&l.id===id);
   const repOf=fam=> (fam && (fam.variants.fullColor||fam.variants.dark||fam.variants.light||(fam.variants.other&&fam.variants.other[0]))) || null;
   // Curated supporting wall: ONE of each non-primary family, then the genuine supporting marks.
   // The primary family owns the hero, so it is never shown here (and never repeated per colour).
   const items=[];
-  const push=(rec,kind)=>{ if(rec&&rec.id) items.push({mark:byId(rec.id)||rec, kind:kind}); };
+  const push=(rec,kind,forceDark)=>{ if(rec&&rec.id) items.push({mark:byId(rec.id)||rec, kind:kind, forceDark:!!forceDark}); };
+  const prim=fams.primaryLogo;
+  if(prim && prim.variants.light) push(prim.variants.light,'Reversed',true);   // the hero mark shown on dark — completes the system
   push(repOf(fams.secondaryLogo),'Secondary');
   push(repOf(fams.wordmark),'Wordmark');
   push(repOf(fams.iconMark),'Icon');
@@ -4016,7 +4018,7 @@ async function renderIdMarks(root){
     const t=d.querySelector('.vframe-tag'); if(t) t.textContent=lbl; };
   wrap.innerHTML='';
   const rowEl=document.createElement('div'); rowEl.className='id-markrow';
-  for(const it of items){ const dark=bestGround(it.mark)==='dark'; const d=frame(dark); rowEl.appendChild(d); await fill(d, await full(it.mark), it.kind, it.mark.id); }
+  for(const it of items){ const dark=it.forceDark || bestGround(it.mark)==='dark'; const d=frame(dark); rowEl.appendChild(d); await fill(d, await full(it.mark), it.kind, it.mark.id); }
   wrap.appendChild(rowEl);
 }
 const LOGOVAR={};                          // markId|treatment -> generated data URL (for hover download)
