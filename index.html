@@ -1566,17 +1566,92 @@ async function buildGuideHTML(opts){
 }
 async function downloadPackage(){
   if(typeof JSZip==='undefined'){ announceWorkspaceUpdate('Packaging needs the live site.','deliverables'); return; }
-  announceWorkspaceUpdate('Preparing your package…','deliverables');
-  const zip=new JSZip(), root=zip.folder(brandSlug());
-  const lf=root.folder('logos'), pf=root.folder('photography');
-  const put=(folder,a,fallback)=>{ if(!a.url) return; const m=/^data:[^;]+;base64,(.+)$/.exec(a.url); if(!m) return;
-    let n=a.name||fallback; if(!/\.[a-z0-9]+$/i.test(n)) n+='.'+(a.ext||'png'); folder.file(n,m[1],{base64:true}); };
-  brand.logos.forEach((a,i)=>put(lf,a,'logo_'+(i+1))); brand.photos.forEach((a,i)=>put(pf,a,'photo_'+(i+1)));
-  root.file('colors.txt', brand.colors.length?brand.colors.map(c=>(c.name||'Color')+'  '+c.hex.toUpperCase()).join('\n'):'No colours yet');
-  root.file('guide.html', await buildGuideHTML());
-  projectWorkspaceState(); root.file('brand-home.json', JSON.stringify(MDWorkspaceState,(k,v)=>k==='url'?undefined:v,2));
-  try{ const blob=await zip.generateAsync({type:'blob'}); dl(brandSlug()+'-deliverables.zip',blob,'application/zip'); announceWorkspaceUpdate('Package downloaded — built from the latest version.','deliverables'); }
-  catch(e){ announceWorkspaceUpdate('Could not build the package.','deliverables'); }
+  announceWorkspaceUpdate('Preparing your Brand Home\u2026','deliverables');
+  try{
+    const zip=new JSZip();
+    const homeName=((brand.name||'Brand').trim()||'Brand')+' Brand Home';
+    const root=zip.folder(homeName);
+    const b64=u=>{ const m=/^data:[^;]+;base64,(.+)$/.exec(u||''); return m?m[1]:null; };
+    const ensureExt=(n,ext)=>(/\.[a-z0-9]+$/i.test(n)?n:(n+'.'+(ext||'png')));
+    const used={};
+    const uniq=(fkey,n)=>{ let key=fkey+'/'+n.toLowerCase(); if(!used[key]){ used[key]=1; return n; }
+      const dot=n.lastIndexOf('.'), base=dot>0?n.slice(0,dot):n, ext=dot>0?n.slice(dot):''; let k=2;
+      while(used[fkey+'/'+(base+'-'+k+ext).toLowerCase()]) k++; const nn=base+'-'+k+ext; used[fkey+'/'+nn.toLowerCase()]=1; return nn; };
+    const place=(folder,fkey,name,url)=>{ const data=b64(url); if(!data) return false; folder.file(uniq(fkey,name),data,{base64:true}); return true; };
+
+    // 01 Logos - organized copies, named by role
+    const ROLEFN={primaryLogo:'primary-logo',secondaryLogo:'secondary-logo',iconMark:'icon',wordmark:'wordmark'};
+    if(brand.logos.length){
+      const lf=root.folder('01 Logos');
+      brand.logos.forEach((a,i)=>{ const base=ROLEFN[a.role]||('logo-'+(i+1)); place(lf,'01',ensureExt(base,a.ext||'png'),a.url); });
+    }
+    // 02 Colors - generated notes
+    if(brand.colors.length){
+      const cf=root.folder('02 Colors');
+      const css=':root{\n'+brand.colors.map((c,i)=>'  --brand-'+(i+1)+': '+(c.hex||'#000000')+'; /* '+(c.name||'Color')+' */').join('\n')+'\n}\n';
+      const txt=brand.colors.map(c=>(c.name||'Color')+'   '+String(c.hex||'').toUpperCase()+(c.role?'   ('+c.role+')':'')).join('\n')+'\n';
+      cf.file('colors.css',css); cf.file('colors.txt',txt);
+    }
+    // 03 Typography - uploaded fonts + notes
+    const fonts=(brand.fonts||[]).filter(f=>f&&f.url);
+    const t=brand.type||{};
+    if(fonts.length || t.display || t.body){
+      const tf=root.folder('03 Typography');
+      fonts.forEach((f,i)=>{ const nm=ensureExt((f.family||('font-'+(i+1))).replace(/\s+/g,'-'),f.ext||'otf'); place(tf,'03',nm,f.url); });
+      const lines=[];
+      if(t.display) lines.push('Display - '+t.display+(t.displayUsage?'  ('+t.displayUsage+')':''));
+      if(t.body) lines.push('Body - '+t.body+(t.bodyUsage?'  ('+t.bodyUsage+')':''));
+      if(!fonts.length && (t.display||t.body)) lines.push('','These typefaces are referenced by name. Install or license them from their foundry.');
+      if(lines.length) tf.file('type-notes.txt', lines.join('\n')+'\n');
+    }
+    // 04 Brand Guide - the living guide + any uploaded guideline documents
+    const gf=root.folder('04 Brand Guide');
+    try{ gf.file('guide.html', await buildGuideHTML()); }catch(e){}
+    (brand.docs||[]).forEach((d,i)=>{ if(d.url) place(gf,'04',ensureExt(d.name||('document-'+(i+1)),d.ext||'pdf'),d.url); });
+    // 05 Supporting Assets - photography / imagery
+    if(brand.photos.length){
+      const sf=root.folder('05 Supporting Assets');
+      brand.photos.forEach((a,i)=>place(sf,'05',ensureExt(a.name||('image-'+(i+1)),a.ext||'png'),a.url));
+    }
+    // 06 Original Files - every upload, original names, untouched
+    const originals=[].concat(brand.logos||[],brand.photos||[],brand.docs||[],fonts);
+    if(originals.length){
+      const of=root.folder('06 Original Files');
+      originals.forEach((a,i)=>{ if(a.url) place(of,'06',ensureExt(a.name||('file-'+(i+1)),a.ext||'png'),a.url); });
+    }
+    // Brand Copy - evidence only, never invented
+    const copy=[];
+    if(brand.name) copy.push(brand.name);
+    if(brand.tagline && !looksGenericTag(brand.tagline)) copy.push(brand.tagline);
+    const pres=(brand.presentation&&Array.isArray(brand.presentation.sections))?brand.presentation.sections:[];
+    const overview=pres.find(s=>s&&/overview|identity/i.test(s.id||''));
+    if(overview&&overview.intro) copy.push('',String(overview.intro));
+    if(copy.length>1) root.file('Brand Copy.txt', copy.join('\n')+'\n');
+    // README - concierge voice
+    const when=new Date().toLocaleDateString(undefined,{month:'long',day:'numeric',year:'numeric'});
+    const readme=[
+      (brand.name||'Your brand')+' - Brand Home',
+      'Prepared by Moving Day - '+when,
+      '',
+      'Inside this folder:',
+      brand.logos.length?'  01 Logos - your marks, ready to place':null,
+      brand.colors.length?'  02 Colors - palette values (CSS + plain text)':null,
+      (fonts.length||t.display||t.body)?'  03 Typography - your fonts and how they are used':null,
+      '  04 Brand Guide - your living guide (open guide.html)',
+      brand.photos.length?'  05 Supporting Assets - photography and imagery':null,
+      originals.length?'  06 Original Files - every file you brought, untouched':null,
+      '',
+      'Open 04 Brand Guide/guide.html in any browser to view the full guide.',
+      'To save it as a PDF, open your published Brand Home and choose Print, then Save as PDF.',
+      '',
+      'You bring the brand. We will do the moving.'
+    ].filter(x=>x!==null);
+    root.file('README.txt', readme.join('\n')+'\n');
+
+    const blob=await zip.generateAsync({type:'blob'});
+    dl(brandSlug()+'-brand-home.zip',blob,'application/zip');
+    announceWorkspaceUpdate('Brand Home packaged - organized and ready to hand off.','deliverables');
+  }catch(e){ console.warn('[deliverables] package failed:',e); announceWorkspaceUpdate('Could not build the package.','deliverables'); }
 }
 function handleDeliverable(kind){
   refreshDeliverablesState();
