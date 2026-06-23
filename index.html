@@ -1140,7 +1140,7 @@ async function addBrandFiles(fileList){            // additive: bring new files 
     if(IMG_EXT.includes(ext)){
       if(!dataUrl) continue;
       const a={id:newId(),name,url:dataUrl,ext,role:''};
-      try{ const m=await analyzeAsset(dataUrl); if(m){ a.lum=m.lum; a.aspect=m.aspect; a.variety=m.variety; a.transparentRatio=m.transparentRatio; a.softRatio=m.softRatio; a._an=true; } }catch(e){}
+      try{ const m=await analyzeAsset(dataUrl); if(m){ a.lum=m.lum; a.aspect=m.aspect; a.variety=m.variety; a.transparentRatio=m.transparentRatio; a.softRatio=m.softRatio; a.sig=m.sig; a._an=true; } }catch(e){}
       if(categoryForAsset(a)==='Photography'){ a.role='photography'; brand.photos.push(a); }
       else { if(wantRole && !rolePlaced){ a.role=wantRole; rolePlaced=true; } brand.logos.push(a); }
       added++;
@@ -1409,17 +1409,32 @@ const MDWorkspaceState={
   sections:[], assets:[], deliverables:{htmlReady:false,pdfReady:false,zipReady:false}, preparation:null, updatedAt:''
 };
 function inferLogoRoles(){
-  // Variants of the same mark (Logo / Logo White / Logo Black) share a family, so they group
-  // under one role instead of scattering into "Supporting". Genuinely distinct marks stay separate.
+  // Group the SAME mark in different colours together: by silhouette (colour-invariant) first,
+  // then by base filename. Variants of one mark then share its family instead of scattering.
   const L=(brand.logos||[]); if(L.length<2) return;
   const STRIP=/\b(white|light|reversed?|knockout|ko|black|dark|monochrome|mono|grayscale|greyscale|colou?r|fullcolou?r|full|rgb|cmyk|1c|2c|primary|secondary|alternate|alt|version|v\d+|copy|final|transparent|vector|hires|hi-?res|small|large|on-?dark|on-?light)\b/g;
-  const base=function(n){ return String(n||'').toLowerCase().replace(/\.[a-z0-9]+$/,'').replace(/[_\-]+/g,' ').replace(STRIP,' ').replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim(); };
-  const groups={};
-  L.forEach(function(l,i){ const k=base(l.name)||('#'+i); (groups[k]=groups[k]||[]).push(l); });   // empty bases get a unique key -> never over-merged
-  Object.keys(groups).forEach(function(k){ const g=groups[k]; if(g.length<2) return;
-    const anchor=g.find(function(l){return l.role==='primaryLogo';})||g.find(function(l){return l.role==='wordmark';})
-               ||g.find(function(l){return l.role==='iconMark';})||g.find(function(l){return l.role==='secondaryLogo';})
-               ||g.find(function(l){return l.role;})||null;
+  const base=function(name){ return String(name||'').toLowerCase().replace(/\.[a-z0-9]+$/,'').replace(/[_\-]+/g,' ').replace(STRIP,' ').replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim(); };
+  const ham=function(p,q){ let dd=0; for(let i=0;i<p.length;i++) if(p[i]!==q[i]) dd++; return dd; };
+  const asp=function(l){ return l.aspect==null?1:l.aspect; };
+  const n=L.length, parent=L.map(function(_,i){ return i; });
+  const find=function(i){ while(parent[i]!==i){ parent[i]=parent[parent[i]]; i=parent[i]; } return i; };
+  const union=function(i,j){ parent[find(i)]=find(j); };
+  const bkey=L.map(function(l){ return base(l.name); });
+  for(let i=0;i<n;i++){ for(let j=i+1;j<n;j++){
+    let same=false;
+    if(bkey[i] && bkey[i]===bkey[j]) same=true;                                 // same base filename
+    else if(L[i].sig && L[j].sig && L[i].sig.length===L[j].sig.length){         // OR same silhouette, whatever the names
+      const a1=asp(L[i]), a2=asp(L[j]);
+      if(Math.abs(a1-a2)/Math.max(a1,a2)<0.18 && ham(L[i].sig,L[j].sig)<=Math.round(L[i].sig.length*0.12)) same=true;
+    }
+    if(same) union(i,j);
+  } }
+  const clusters={};
+  for(let i=0;i<n;i++){ const r=find(i); (clusters[r]=clusters[r]||[]).push(L[i]); }
+  Object.keys(clusters).forEach(function(k){ const g=clusters[k]; if(g.length<2) return;
+    const anchor=g.find(function(l){ return l.role==='primaryLogo'; })||g.find(function(l){ return l.role==='wordmark'; })
+               ||g.find(function(l){ return l.role==='iconMark'; })||g.find(function(l){ return l.role==='secondaryLogo'; })
+               ||g.find(function(l){ return l.role; })||null;
     const role=anchor?anchor.role:'primaryLogo';
     g.forEach(function(l){ if(!l.role){ l.role=role; l._autoRole=true; } });
   });
@@ -3839,13 +3854,27 @@ async function analyzeAsset(url){
     const r=d[i],g=d[i+1],b=d[i+2]; lumSum+=0.299*r+0.587*g+0.114*b;
     hues.add((r>>5)+'·'+(g>>5)+'·'+(b>>5));
   }
+  // colour-invariant silhouette: same mark in any colour shares the same alpha shape
+  let minX=S,minY=S,maxX=-1,maxY=-1;
+  for(let y=0;y<S;y++){ for(let xx=0;xx<S;xx++){ if(d[(y*S+xx)*4+3]>40){ if(xx<minX)minX=xx; if(xx>maxX)maxX=xx; if(y<minY)minY=y; if(y>maxY)maxY=y; } } }
+  let sig='';
+  if(maxX>=0 && (opaque/total)<0.97){            // needs some transparency to read a shape
+    const bw=maxX-minX+1, bh=maxY-minY+1, G=12, bits=[];
+    for(let gy=0;gy<G;gy++){ for(let gx=0;gx<G;gx++){
+      const x0=minX+((gx*bw/G)|0), x1=minX+(((gx+1)*bw/G)|0), y0=minY+((gy*bh/G)|0), y1=minY+(((gy+1)*bh/G)|0);
+      let on=0,cnt=0;
+      for(let y=y0;y<=Math.min(maxY,Math.max(y0,y1-1));y++){ for(let xx=x0;xx<=Math.min(maxX,Math.max(x0,x1-1));xx++){ cnt++; if(d[(y*S+xx)*4+3]>40) on++; } }
+      bits.push(cnt&&(on/cnt)>0.42?'1':'0');
+    } }
+    sig=bits.join('');
+  }
   return { aspect, lum: opaque?lumSum/opaque:255, variety: hues.size,
-           transparentRatio:(total-opaque)/total, softRatio: opaque?soft/opaque:0 };
+           transparentRatio:(total-opaque)/total, softRatio: opaque?soft/opaque:0, sig };
 }
 async function analyzeAssets(list){
   for(const a of list.slice(0,16)){ if(!a||!a.url||a._an) continue;
     const r=await analyzeAsset(a.url);
-    if(r){ if(r.lum!=null) a.lum=r.lum; a.aspect=r.aspect; a.variety=r.variety; a.transparentRatio=r.transparentRatio; a.softRatio=r.softRatio; a._an=true; }
+    if(r){ if(r.lum!=null) a.lum=r.lum; a.aspect=r.aspect; a.variety=r.variety; a.transparentRatio=r.transparentRatio; a.softRatio=r.softRatio; a.sig=r.sig; a._an=true; }
   }
 }
 /* ── place the right logo on the right ground, labelled for what it actually is ── */
