@@ -1646,29 +1646,25 @@ async function renderRoomForPublish(key){
 }
 const PUBLISHED_TOOLBAR_JS = `(function(){
   if(window.__MD_TOOLBAR__) return; window.__MD_TOOLBAR__=1;
-  var PUB = window.__MD_PUB__ || {};
+  var HOME = window.__MD_HOME__ || {};
   var bar = document.getElementById("mdPubBar");
-  var fileInput = document.getElementById("mdPubFile");
   if(!bar) return;
   var toastT;
   function toast(msg){ var t=document.getElementById("mdPubToast"); if(!t) return; t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(function(){ t.classList.remove("show"); },2600); }
-  function setDirty(d){ bar.classList.toggle("dirty", !!d); }
-  function escapeHtml(s){ return String(s||"").replace(/[&<>"]/g,function(c){ return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"})[c]; }); }
 
   // ---- SHARE ----
   function share(){
-    var url = location.href;
+    var url=location.href;
     if(navigator.share){ navigator.share({title:document.title, url:url}).catch(function(){}); return; }
-    copyText(url, "Link copied");
+    copyText(url,"Link copied");
   }
-  function copyText(text, msg){
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(text).then(function(){ toast(msg||"Copied"); }).catch(function(){ legacyCopy(text,msg); });
-    } else legacyCopy(text,msg);
+  function copyText(text,msg){
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(text).then(function(){ toast(msg||"Copied"); }).catch(function(){ legacyCopy(text,msg); }); }
+    else legacyCopy(text,msg);
   }
   function legacyCopy(text,msg){ try{ var i=document.createElement("textarea"); i.value=text; i.style.position="fixed"; i.style.left="-9999px"; document.body.appendChild(i); i.select(); document.execCommand("copy"); i.remove(); toast(msg||"Copied"); }catch(e){ toast("Couldn't copy"); } }
 
-  // ---- DOWNLOAD (zip embedded brand assets) ----
+  // ---- DOWNLOAD (zip the embedded brand assets — read-only) ----
   function collectAssets(){
     var out=[], seen={}, n=0;
     document.querySelectorAll("template[data-room]").forEach(function(t){
@@ -1683,84 +1679,15 @@ const PUBLISHED_TOOLBAR_JS = `(function(){
   }
   function download(){
     var imgs=collectAssets();
-    if(!imgs.length){ toast("No downloadable assets yet"); return; }
-    if(typeof JSZip==="undefined"){
-      imgs.forEach(function(a){ var x=document.createElement("a"); x.href=a.url; x.download=a.name; document.body.appendChild(x); x.click(); x.remove(); });
-      toast("Downloaded"); return;
-    }
+    if(!imgs.length){ toast("Nothing to download yet"); return; }
+    if(typeof JSZip==="undefined"){ imgs.forEach(function(a){ var x=document.createElement("a"); x.href=a.url; x.download=a.name; document.body.appendChild(x); x.click(); x.remove(); }); toast("Downloaded"); return; }
     toast("Preparing download...");
-    var zip=new JSZip(), folder=zip.folder((PUB.slug||"brand"));
+    var zip=new JSZip(), folder=zip.folder((HOME.slug||"brand"));
     imgs.forEach(function(a){ var m=/^data:[^;]+;base64,(.+)$/.exec(a.url); if(m) folder.file(a.name, m[1], {base64:true}); });
     zip.generateAsync({type:"blob"}).then(function(blob){
-      var x=document.createElement("a"); x.href=URL.createObjectURL(blob); x.download=(PUB.slug||"brand")+"-assets.zip";
-      document.body.appendChild(x); x.click(); setTimeout(function(){ URL.revokeObjectURL(x.href); x.remove(); },1500);
-      toast("Downloaded");
+      var x=document.createElement("a"); x.href=URL.createObjectURL(blob); x.download=(HOME.slug||"brand")+"-assets.zip";
+      document.body.appendChild(x); x.click(); setTimeout(function(){ URL.revokeObjectURL(x.href); x.remove(); },1500); toast("Downloaded");
     }).catch(function(){ toast("Download failed"); });
-  }
-
-  // ---- ADD FILES (into the Assets room, then mark unsaved) ----
-  function assetCard(url,name){
-    var isImg=/^data:image/i.test(url);
-    var thumb = isImg
-      ? "<div class='asset-thumb'><img alt='' src='"+url+"'></div>"
-      : "<div class='asset-thumb doc'>"+((/\.([a-z0-9]+)$/i.exec(name)||[])[1]||"FILE").toUpperCase()+"</div>";
-    return "<div class='asset-card'>"+thumb+"<div class='asset-meta'><div class='asset-name'>"+escapeHtml(name||"file")+"</div></div></div>";
-  }
-  function addedGrid(scope){
-    var root = scope.querySelector("#assetRoot") || scope;
-    var shelf = scope.querySelector("[data-added-shelf]");
-    if(!shelf){
-      shelf=document.createElement("div"); shelf.className="asset-shelf"; shelf.setAttribute("data-added-shelf","1");
-      shelf.innerHTML="<div class='shelf-eyebrow'>Added files</div><div class='asset-grid'></div>";
-      if(root.firstChild) root.insertBefore(shelf, root.firstChild); else root.appendChild(shelf);
-    }
-    return shelf.querySelector(".asset-grid");
-  }
-  function injectAsset(url,name){
-    var card=assetCard(url,name);
-    var tpl=document.querySelector("template[data-room='assets']");
-    if(tpl){ var holder=document.createElement("div"); holder.innerHTML=tpl.innerHTML; addedGrid(holder).insertAdjacentHTML("beforeend", card); tpl.innerHTML=holder.innerHTML; }
-    var roomEl=document.getElementById("room");
-    if(roomEl && roomEl.classList.contains("show")){
-      var rb=document.getElementById("roomBody");
-      if(rb && rb.querySelector("#assetRoot")) addedGrid(rb).insertAdjacentHTML("beforeend", card);
-    }
-  }
-  function addFiles(list){
-    var files=[].slice.call(list||[]).filter(Boolean); if(!files.length) return;
-    var pending=files.length, added=0;
-    files.forEach(function(f){
-      var rd=new FileReader();
-      rd.onload=function(){ injectAsset(rd.result, f.name); added++; if(--pending===0) finishAdd(added); };
-      rd.onerror=function(){ if(--pending===0) finishAdd(added); };
-      rd.readAsDataURL(f);
-    });
-  }
-  function finishAdd(n){ if(n){ setDirty(true); toast(n+(n===1?" file added":" files added")+" - Save to keep it on this page"); } else toast("Nothing added"); }
-
-  // ---- SAVE (re-publish this page in place) ----
-  function snapshotHtml(){
-    var root=document.documentElement.cloneNode(true);
-    try{
-      var home=root.querySelector("#home"); if(home) home.className="view show";
-      var room=root.querySelector("#room"); if(room) room.className="view";
-      var rb=root.querySelector("#roomBody"); if(rb) rb.innerHTML="";
-      var pane=root.querySelector(".glasspane"); if(pane) pane.className=(pane.className.replace(/\bmd-room-\S+/g,"").replace(/\s+/g," ").trim()+" md-room-home").trim();
-      var body=root.querySelector("body"); if(body){ body.classList.remove("md-arrive","md-arrive-go"); }
-      var b=root.querySelector("#mdPubBar"); if(b) b.classList.remove("dirty","busy");
-      var tt=root.querySelector("#mdPubToast"); if(tt){ tt.classList.remove("show"); tt.textContent=""; }
-    }catch(e){}
-    return "<!doctype html>\n"+root.outerHTML;
-  }
-  function save(){
-    if(!PUB.endpoint || !PUB.slug){ toast("Saving runs on the live site"); return; }
-    var html=snapshotHtml();
-    if(html.length > 4.2*1024*1024){ toast("Too large to save in place - use Download instead"); return; }
-    bar.classList.add("busy"); toast("Saving...");
-    fetch(PUB.endpoint,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({html:html, slug:PUB.slug, id:PUB.id})})
-      .then(function(r){ return r.json().catch(function(){ return {}; }); })
-      .then(function(d){ bar.classList.remove("busy"); if(d && d.url){ setDirty(false); toast("Saved to this page"); } else toast("Saving runs on the live site"); })
-      .catch(function(){ bar.classList.remove("busy"); toast("Couldn't save - try the live site"); });
   }
 
   bar.addEventListener("click", function(e){
@@ -1768,10 +1695,7 @@ const PUBLISHED_TOOLBAR_JS = `(function(){
     var act=b.getAttribute("data-pub");
     if(act==="share") share();
     else if(act==="download") download();
-    else if(act==="add"){ if(fileInput) fileInput.click(); }
-    else if(act==="save") save();
   });
-  if(fileInput) fileInput.addEventListener("change", function(){ addFiles(fileInput.files); fileInput.value=""; });
 })();`;
 async function buildHomeHTML(){
   applyBrandHome();                                    // hero/logo/atmosphere reflect the current brand
@@ -1848,22 +1772,14 @@ async function buildHomeHTML(){
     +"}catch(e){try{document.body.classList.remove('md-arrive','md-arrive-go');}catch(_){}}"
     +"})();<\/script>";
 
-  // ── Published-home toolbar: Share · Download · Add files · Save-in-place (published page only) ──
-  const pubSlug = brandSlug()+'-home';
-  const pubId = (typeof ensurePublishId==='function') ? ensurePublishId() : '';
+  // ── Published-home toolbar: Share · Download (read-only — published page only) ──
   const pubHead = '<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"><\/script>'
-    + '<script>window.__MD_PUB__={slug:'+JSON.stringify(pubSlug)+',id:'+JSON.stringify(pubId)+',endpoint:"/api/publish"};<\/script>';
+    + '<script>window.__MD_HOME__={slug:'+JSON.stringify(brandSlug())+'};<\/script>';
   const pubCSS = [
     '.md-pubbar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:9500;display:flex;gap:6px;padding:7px;border-radius:99px;background:rgba(255,255,255,.62);backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);box-shadow:0 10px 34px rgba(20,60,36,.18),inset 0 0 0 1px rgba(44,90,60,.10);}',
     '.md-pubbar button{font:inherit;font-size:12.5px;letter-spacing:.01em;color:#1c2b22;background:transparent;border:none;border-radius:99px;padding:9px 15px;cursor:pointer;transition:background .2s,color .2s,opacity .2s;display:inline-flex;align-items:center;gap:7px;}',
     '.md-pubbar button svg{width:14px;height:14px;stroke:currentColor;stroke-width:1.7;fill:none;stroke-linecap:round;stroke-linejoin:round;}',
     '.md-pubbar button:hover{background:rgba(44,90,60,.10);}',
-    '.md-pubbar button.save{color:#f3efe6;background:#2c5a3c;}',
-    '.md-pubbar button.save:hover{background:#2c5a3c;filter:brightness(1.08);}',
-    '.md-pubbar:not(.dirty) button.save{opacity:.45;}',
-    '.md-pubbar.dirty button.save{animation:mdPubPulse 1.6s ease infinite;}',
-    '@keyframes mdPubPulse{0%{box-shadow:0 0 0 0 rgba(44,90,60,.4);}100%{box-shadow:0 0 0 10px rgba(44,90,60,0);}}',
-    '.md-pubbar.busy{pointer-events:none;opacity:.7;}',
     '.md-pubtoast{position:fixed;left:50%;bottom:74px;transform:translateX(-50%) translateY(8px);z-index:9600;max-width:80vw;text-align:center;padding:9px 16px;border-radius:99px;background:rgba(20,40,28,.92);color:#f3efe6;font-size:12px;letter-spacing:.01em;opacity:0;pointer-events:none;transition:opacity .4s,transform .4s;}',
     '.md-pubtoast.show{opacity:1;transform:translateX(-50%) translateY(0);}',
     'body.deep-immerse .md-pubbar{background:rgba(16,20,26,.66);box-shadow:0 10px 34px rgba(0,0,0,.4),inset 0 0 0 1px rgba(255,255,255,.10);}',
@@ -1874,16 +1790,11 @@ async function buildHomeHTML(){
   ].join('');
   const _pubIc = {
     share:'<svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.6" y1="13.5" x2="15.4" y2="17.5"/><line x1="15.4" y1="6.5" x2="8.6" y2="10.5"/></svg>',
-    download:'<svg viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="7 10 12 15 17 10"/><path d="M5 20h14"/></svg>',
-    add:'<svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
-    save:'<svg viewBox="0 0 24 24"><path d="M5 4h11l3 3v13H5z"/><path d="M8 4v5h7"/><path d="M8 20v-6h8v6"/></svg>'
+    download:'<svg viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="7 10 12 15 17 10"/><path d="M5 20h14"/></svg>'
   };
-  const pubBar = '<input type="file" id="mdPubFile" multiple hidden>'
-    + '<div class="md-pubbar" id="mdPubBar">'
+  const pubBar = '<div class="md-pubbar" id="mdPubBar">'
     +   '<button data-pub="share" type="button">'+_pubIc.share+'<span>Share</span></button>'
     +   '<button data-pub="download" type="button">'+_pubIc.download+'<span>Download</span></button>'
-    +   '<button data-pub="add" type="button">'+_pubIc.add+'<span>Add files</span></button>'
-    +   '<button data-pub="save" type="button" class="save">'+_pubIc.save+'<span>Save</span></button>'
     + '</div>'
     + '<div class="md-pubtoast" id="mdPubToast"></div>';
   const pubScript = '<script>'+PUBLISHED_TOOLBAR_JS+'<\/script>';
