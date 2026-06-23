@@ -1019,7 +1019,7 @@ function setShellRoom(key){ SHELL.className=SHELL.className.replace(/\bmd-room-\
 function renderActiveRoom(){
   const key=currentRoom, r=ROOMS[key]; if(!r) return;
   roomBody.innerHTML=r.html; roomTitle.innerHTML=r.title; roomKicker.textContent=r.kicker;
-  if(roomDesc) roomDesc.textContent=(ROOM_META[key]&&ROOM_META[key].desc)||'';
+  if(roomDesc){ var _rd=(ROOM_META[key]&&ROOM_META[key].desc)||'', _rt=(ROOM_META[key]&&ROOM_META[key].title)||''; roomDesc.textContent=(_rd&&_rd!==_rt)?_rd:''; }
   try{ if(window.MD&&MD.brain){ MD.brain.refresh(); const st=MD.brain.roomStatus()[key]; if(st!=null) roomBody.dataset.brainStatus=st; } }catch(e){}   // room reads the Brain
   const g=(label,fn)=>{ try{ fn(); }catch(e){ console.warn('[brand-home] room render ('+label+') failed:', e); } };
   syncBrandState();                                                    // keep the shared read-model current for whatever this room reads
@@ -1429,14 +1429,15 @@ function inferLogoRoles(){
     }
     if(same) union(i,j);
   } }
+  const median=function(arr){ arr=arr.slice().sort(function(a,b){return a-b;}); return arr.length?arr[arr.length>>1]:1; };
   const clusters={};
   for(let i=0;i<n;i++){ const r=find(i); (clusters[r]=clusters[r]||[]).push(L[i]); }
   Object.keys(clusters).forEach(function(k){ const g=clusters[k]; if(g.length<2) return;
-    const anchor=g.find(function(l){ return l.role==='primaryLogo'; })||g.find(function(l){ return l.role==='wordmark'; })
-               ||g.find(function(l){ return l.role==='iconMark'; })||g.find(function(l){ return l.role==='secondaryLogo'; })
-               ||g.find(function(l){ return l.role; })||null;
-    const role=anchor?anchor.role:'primaryLogo';
-    g.forEach(function(l){ if(!l.role){ l.role=role; l._autoRole=true; } });
+    // one mark, one family: every colour variant of the same silhouette is reconciled to a single role
+    const cnt={}; g.forEach(function(l){ if(l.role) cnt[l.role]=(cnt[l.role]||0)+1; });
+    let role=null,bnv=-1; Object.keys(cnt).forEach(function(r){ if(cnt[r]>bnv){ bnv=cnt[r]; role=r; } });
+    if(!role){ const a=median(g.map(asp)); role=(a>=2.2?'wordmark':((a>0.8&&a<1.25)?'iconMark':'primaryLogo')); }
+    g.forEach(function(l){ if(l.role!==role){ l.role=role; l._autoRole=true; } });
   });
 }
 function assignRoles(){
@@ -3503,7 +3504,7 @@ function applyPresentation(){
   set('identity','identity'); set('typography','typography'); set('assets','assets'); set('deliverables','downloads');   // every room now reads its own studio copy — personalizing the home per brand
   const gsec=byId['overview']||byId['identity']; if(gsec&&gsec.intro&&ROOM_META.guide) ROOM_META.guide.desc=gsec.intro;
   // if the current room is open, refresh its visible subtitle in place
-  try{ if(currentRoom&&roomDesc&&ROOM_META[currentRoom]) roomDesc.textContent=ROOM_META[currentRoom].desc||''; }catch(e){}
+  try{ if(currentRoom&&roomDesc&&ROOM_META[currentRoom]){ var _rd2=ROOM_META[currentRoom].desc||'', _rt2=ROOM_META[currentRoom].title||''; roomDesc.textContent=(_rd2&&_rd2!==_rt2)?_rd2:''; } }catch(e){}
 }
 function applyBrandHome(){
   applyPresentation();
@@ -3854,16 +3855,22 @@ async function analyzeAsset(url){
     const r=d[i],g=d[i+1],b=d[i+2]; lumSum+=0.299*r+0.587*g+0.114*b;
     hues.add((r>>5)+'·'+(g>>5)+'·'+(b>>5));
   }
-  // colour-invariant silhouette: same mark in any colour shares the same alpha shape
-  let minX=S,minY=S,maxX=-1,maxY=-1;
-  for(let y=0;y<S;y++){ for(let xx=0;xx<S;xx++){ if(d[(y*S+xx)*4+3]>40){ if(xx<minX)minX=xx; if(xx>maxX)maxX=xx; if(y<minY)minY=y; if(y>maxY)maxY=y; } } }
+  // colour-invariant silhouette: read the mark's shape (ink vs background) so the SAME mark
+  // in any colour — or sitting on a baked-in background — shares one signature.
+  let bR=0,bGc=0,bB=0,bN=0;
+  for(let i2=0;i2<S;i2++){ const ring=[[i2,0],[i2,S-1],[0,i2],[S-1,i2]];
+    for(let k=0;k<4;k++){ const o=((ring[k][1]*S+ring[k][0])*4); if(d[o+3]>200){ bR+=d[o]; bGc+=d[o+1]; bB+=d[o+2]; bN++; } } }
+  const hasBg=bN>(S*4*0.5), BR=bN?bR/bN:0, BGc=bN?bGc/bN:0, BB=bN?bB/bN:0;
+  const ink=function(o){ if(d[o+3]<=40) return false; if(hasBg){ const dr=d[o]-BR,dg=d[o+1]-BGc,db=d[o+2]-BB; if(dr*dr+dg*dg+db*db<1900) return false; } return true; };
+  let minX=S,minY=S,maxX=-1,maxY=-1,inkN=0;
+  for(let y=0;y<S;y++){ for(let xx=0;xx<S;xx++){ if(ink((y*S+xx)*4)){ inkN++; if(xx<minX)minX=xx; if(xx>maxX)maxX=xx; if(y<minY)minY=y; if(y>maxY)maxY=y; } } }
   let sig='';
-  if(maxX>=0 && (opaque/total)<0.97){            // needs some transparency to read a shape
+  if(maxX>=0 && inkN>total*0.015 && inkN<total*0.93){     // a real, distinguishable shape
     const bw=maxX-minX+1, bh=maxY-minY+1, G=12, bits=[];
     for(let gy=0;gy<G;gy++){ for(let gx=0;gx<G;gx++){
       const x0=minX+((gx*bw/G)|0), x1=minX+(((gx+1)*bw/G)|0), y0=minY+((gy*bh/G)|0), y1=minY+(((gy+1)*bh/G)|0);
       let on=0,cnt=0;
-      for(let y=y0;y<=Math.min(maxY,Math.max(y0,y1-1));y++){ for(let xx=x0;xx<=Math.min(maxX,Math.max(x0,x1-1));xx++){ cnt++; if(d[(y*S+xx)*4+3]>40) on++; } }
+      for(let y=y0;y<=Math.min(maxY,Math.max(y0,y1-1));y++){ for(let xx=x0;xx<=Math.min(maxX,Math.max(x0,x1-1));xx++){ cnt++; if(ink((y*S+xx)*4)) on++; } }
       bits.push(cnt&&(on/cnt)>0.42?'1':'0');
     } }
     sig=bits.join('');
