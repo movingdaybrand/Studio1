@@ -684,6 +684,8 @@ body.deep-immerse .id-primary .wm small{color:rgba(243,239,230,.62)!important;}
 .becoming .glyph svg{width:100%;height:100%;stroke:currentColor;stroke-width:1.3;fill:none;stroke-linecap:round;stroke-linejoin:round;}
 .becoming h2{font-family:var(--display);font-weight:300;font-size:clamp(20px,2.6vw,28px);letter-spacing:-.01em;margin:0 0 .5em;}
 .becoming p{font-size:14px;line-height:1.65;color:var(--ink-soft);margin:0;font-weight:300;}
+.asset-varchip{text-align:center;font-size:8.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin-top:7px;}
+body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 /* ── Concierge review: logo families, variant cards, placement pickers ── */
 .review-panel{width:min(680px,95vw);max-height:88vh;}
 .rv-places{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:6px 0 2px;}
@@ -1498,7 +1500,7 @@ function assetStatus(a){                                         // [class,label
   return ['ready','Ready'];
 }
 
-function assetCardHTML(a,isLogoGroup){
+function assetCardHTML(a,isLogoGroup,variantLabel){
   if(!a.id) a.id=newId();
   const onDark = a.variant==='white' ? ' on-dark' : '';
   const isImg = a.url && (/^data:image/i.test(a.url) || IMG_EXT.includes(String(a.ext||'').toLowerCase()) || /\.(png|jpe?g|webp|svg|gif)$/i.test(a.ext||''));
@@ -1513,6 +1515,7 @@ function assetCardHTML(a,isLogoGroup){
     +thumb
     +'<span class="asset-rolechip">'+esc(roleLabel)+'</span>'
     +'<span class="asset-statusdot '+st[0]+'" title="'+st[1]+'"></span>'
+    +(variantLabel?'<div class="asset-varchip">'+esc(variantLabel)+'</div>':'')
     +'<button class="asset-expand" data-expand type="button" aria-label="Show details">Details</button>'
     +'<div class="asset-meta">'
       +'<div class="asset-name" data-name="'+a.id+'" spellcheck="false">'+esc(a.name||'asset')+'</div>'
@@ -1531,16 +1534,23 @@ function renderAssetsRoom(){
       +'<p>Logos, photography, documents and type each find a shelf \u2014 organized by what they\u2019re for, not what they\u2019re called. Roles are read automatically; step in only when the read is wrong.</p></div>';
     enhanceAssetThumbs(root); return;
   }
-  const shelves=[
-    ['Identity',     "The brand\u2019s marks, organized by role.",       brand.logos, true],
-    ['Photography',  "Imagery that carries the brand\u2019s world.",      brand.photos, false],
-    ['Documents',    "Guidelines, decks and the written brand.",         brand.docs,  false]
-  ].filter(s=>s[2] && s[2].length);
   let html=addRow;
-  shelves.forEach(s=>{
+  // Identity marks -> grouped by family (role/shape) and ordered by colour variant — no longer one scattered grid
+  logosByFamily().forEach(function(g){
+    const vs=[]; g.items.forEach(function(it){ if(vs.indexOf(it.variant)<0) vs.push(it.variant); });
+    const line=(g.family==='Supporting Marks')?'Alternate and supporting marks.':('Organized by colour variant'+(vs.length>1?' \u2014 '+vs.join(', ').toLowerCase():'')+'.');
+    html+='<div class="asset-shelf"><div class="shelf-eyebrow">'+esc(g.family)+'<span class="shelf-count">'+g.items.length+'</span></div>'
+        +'<p class="shelf-line">'+esc(line)+'</p>'
+        +'<div class="asset-grid">'+g.items.map(function(it){ return assetCardHTML(it.logo,true,it.variant); }).join('')+'</div></div>';
+  });
+  const shelves=[
+    ['Photography',  "Imagery that carries the brand's world.",      brand.photos, false],
+    ['Documents',    "Guidelines, decks and the written brand.",     brand.docs,  false]
+  ].filter(function(s){ return s[2] && s[2].length; });
+  shelves.forEach(function(s){
     html+='<div class="asset-shelf"><div class="shelf-eyebrow">'+esc(s[0])+'<span class="shelf-count">'+s[2].length+'</span></div>'
         +'<p class="shelf-line">'+esc(s[1])+'</p>'
-        +'<div class="asset-grid">'+s[2].map(a=>assetCardHTML(a,s[3])).join('')+'</div></div>';
+        +'<div class="asset-grid">'+s[2].map(function(a){ return assetCardHTML(a,s[3]); }).join('')+'</div></div>';
   });
   const fonts=(brand.fonts||[]);                                 // Typography shelf — read-only specimens, no asset plumbing to break
   if(fonts.length){
@@ -1756,7 +1766,7 @@ async function renderRoomForPublish(key){
       if(ar){
         if(brand.logos.length||brand.photos.length||brand.docs.length){
           let h='';
-          if(brand.logos.length){ h+='<div class="sect-label">Logos &amp; marks</div><div class="asset-grid">'+brand.logos.map(a=>assetCardHTML(a,true)).join('')+'</div>'; }
+          if(brand.logos.length){ h+=logosByFamily().map(function(g){ return '<div class="sect-label">'+esc(g.family)+'</div><div class="asset-grid">'+g.items.map(function(it){ return assetCardHTML(it.logo,true,it.variant); }).join('')+'</div>'; }).join(''); }
           if(brand.photos.length){ h+='<div class="sect-label">Photography</div><div class="asset-grid">'+brand.photos.map(a=>assetCardHTML(a,false)).join('')+'</div>'; }
           if(brand.docs.length){ h+='<div class="sect-label">Documents</div><div class="asset-grid">'+brand.docs.map(a=>assetCardHTML(a,false)).join('')+'</div>'; }
           ar.innerHTML=h;
@@ -3967,6 +3977,23 @@ function resolvePlacement(slot){
     if(!rec||!rec.id) return null;
     return (brand.logos||[]).find(l=>l.id===rec.id) || rec;     // hand back the live asset (with aspect/lum) when we can
   }catch(e){ return null; }
+}
+function logosByFamily(){
+  // Ordered groups of the LIVE logo objects: by family (role/shape), then by colour variant.
+  // Drives the Assets room so marks are organized instead of scattered. Reuses logoFamilies().
+  const fams=logoFamilies();
+  const byId={}; (brand.logos||[]).forEach(function(l){ if(l&&l.id) byId[l.id]=l; });
+  const live=function(rec){ return (rec&&byId[rec.id])?byId[rec.id]:rec; };
+  const FAM=[['primaryLogo','Primary Logo'],['secondaryLogo','Secondary Logo'],['wordmark','Wordmark'],['iconMark','Icon / Mark']];
+  const ORDER=['fullColor','dark','light'];
+  const groups=[];
+  FAM.forEach(function(f){ const key=f[0], label=f[1], fam=fams[key]; if(!fam) return; const items=[];
+    ORDER.forEach(function(vk){ if(fam.variants[vk]) items.push({variant:RV_VAR_LABEL[vk], logo:live(fam.variants[vk])}); });
+    (fam.variants.other||[]).forEach(function(rec){ items.push({variant:RV_VAR_LABEL[rec.variant]||'Other', logo:live(rec)}); });
+    if(items.length) groups.push({family:label, items:items});
+  });
+  if(fams.supporting&&fams.supporting.length){ groups.push({family:'Supporting Marks', items:fams.supporting.map(function(rec){ return {variant:RV_VAR_LABEL[rec.variant]||'Other', logo:live(rec)}; })}); }
+  return groups;
 }
 function logoSystemMarks(){
   const L=brand.logos.filter(l=>l&&l.url); if(!L.length) return {};
