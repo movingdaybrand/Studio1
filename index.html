@@ -3954,30 +3954,21 @@ async function placeLogos(root){
 }
 async function renderIdMarks(root){
   const wrap=root.querySelector('.id-marks'); if(!wrap) return;
-  const label=wrap.previousElementSibling;                       // the "Marks" sect-label
-  const photoish=l=>(l.transparentRatio!=null&&l.transparentRatio<0.03)&&(l.variety!=null&&l.variety>120);
-  const logos=(brand.logos||[]).filter(l=>l&&l.url&&!photoish(l));
-  if(!logos.length) return;                                      // no real marks yet → keep the sample template
+  const label=wrap.previousElementSibling;
   if(label&&label.classList&&label.classList.contains('sect-label')) label.textContent='Supporting marks';
-  const {primary,icon}=logoSystemMarks();
-  const primaryMark = primary || logos.find(l=>l.role==='primaryLogo') || logos[0];
-  // SUPPORTING marks only — the primary already owns the hero, so it is never repeated here
-  const roleLabel=l=>{
-    if(l.role==='wordmark' || markKind(l)==='Wordmark') return 'Wordmark';
-    if(l.role==='iconMark' || markKind(l)==='Icon') return 'Icon';
-    if(l.role==='secondaryLogo') return 'Reverse';
-    return 'Alternate';
-  };
-  const items=[], seen=new Set();
-  if(primaryMark) seen.add(primaryMark.id);
-  const add=(m,forced)=>{ if(!m||seen.has(m.id)) return; seen.add(m.id); items.push({mark:m,kind:forced||roleLabel(m)}); };
-  add(logos.find(l=>l.role==='wordmark') || logos.find(l=>l!==primaryMark&&markKind(l)==='Wordmark'));
-  add(icon && (!primaryMark||icon.id!==primaryMark.id) ? icon : null);
-  add(logos.find(l=>l.role==='secondaryLogo'));
-  logos.forEach(l=>{ if(items.length<5) add(l); });             // remaining real marks, each by its own role
-  logos.forEach(l=>{ if(items.length<8) add(l,'Archive'); });   // overflow lands quietly in Archive — never a duplicate
-  if(!items.length){                                            // a single mark → show it beautifully, with a calm waiting line
-    wrap.innerHTML='<p class="id-read-line" style="margin:2px 2px 0">One mark, shown as it should be \u2014 a wordmark, icon or reverse will take its place here as it\u2019s added.</p>';
+  const fams=logoFamilies();
+  const byId=id=>(brand.logos||[]).find(l=>l&&l.id===id);
+  const repOf=fam=> (fam && (fam.variants.fullColor||fam.variants.dark||fam.variants.light||(fam.variants.other&&fam.variants.other[0]))) || null;
+  // Curated supporting wall: ONE of each non-primary family, then the genuine supporting marks.
+  // The primary family owns the hero, so it is never shown here (and never repeated per colour).
+  const items=[];
+  const push=(rec,kind)=>{ if(rec&&rec.id) items.push({mark:byId(rec.id)||rec, kind:kind}); };
+  push(repOf(fams.secondaryLogo),'Secondary');
+  push(repOf(fams.wordmark),'Wordmark');
+  push(repOf(fams.iconMark),'Icon');
+  (fams.supporting||[]).forEach(rec=>{ if(items.length<8) push(rec,'Supporting'); });
+  if(!items.length){                                            // only a primary so far → a calm waiting line
+    wrap.innerHTML='<p class="id-read-line" style="margin:2px 2px 0">One mark, shown as it should be \u2014 a secondary, icon or supporting mark will join it here as it\u2019s added.</p>';
     return;
   }
   const isSvg=m=>/svg/i.test(m.ext||'');
