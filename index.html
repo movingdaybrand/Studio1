@@ -4079,6 +4079,12 @@ async function renderIdMarks(root){
   (fams.supporting||[]).forEach(rec=>{ const lg=byId(rec.id)||rec;
     const k=(lg._clu!=null)?('c'+lg._clu):String(lg.name||lg.id||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
     if(seenSup.has(k)) return; seenSup.add(k); push(rec,'Supporting'); });
+  // never show the same emblem twice, even if it carries two roles (first/strongest role wins)
+  const seenMark=new Set(), uniq=[];
+  for(const it of items){ const lg=it.mark||{};
+    const key=(lg._clu!=null)?('c'+lg._clu):(lg.sig||lg.url||lg.id||'');
+    if(key && seenMark.has(key)) continue; seenMark.add(key); uniq.push(it); }
+  items.length=0; for(const it of uniq) items.push(it);
   if(!items.length){
     wrap.innerHTML='<p class="id-read-line" style="margin:2px 2px 0">One mark, shown as it should be \u2014 a secondary, icon or supporting mark will join it here as it\u2019s added.</p>';
     return;
