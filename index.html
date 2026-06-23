@@ -635,6 +635,55 @@ body.deep-immerse .sig-preview{box-shadow:0 14px 34px rgba(0,0,0,.45);}   /* the
 body.deep-immerse .id-hero .id-primary{background:transparent!important;}                 /* the primary logo keeps floating — no frame box */
 body.deep-immerse .id-primary .wm{color:#f3efe6!important;}                                 /* text-fallback wordmark reads on the dark room */
 body.deep-immerse .id-primary .wm small{color:rgba(243,239,230,.62)!important;}
+/* ════════ Identity + Assets — quiet gallery / curated archive (scoped, additive) ════════ */
+/* curatorial eyebrows — only inside the Identity room (.review) */
+.review .sect-label{display:flex!important;align-items:center;gap:10px;font-size:9.5px!important;letter-spacing:.22em!important;color:var(--ink-faint)!important;margin:clamp(30px,4.4vh,52px) 2px clamp(15px,2.2vh,20px)!important;}
+.review .sect-label::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--sage);opacity:.7;flex:none;}
+/* supporting marks → a gallery wall of plates */
+.id-marks .id-markrow{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(158px,1fr))!important;gap:clamp(12px,1.5vw,18px)!important;}
+.id-marks .markframe{aspect-ratio:5/4!important;max-width:none!important;flex:none!important;border-radius:var(--r-md)!important;overflow:hidden;box-shadow:var(--shadow)!important;padding:18px!important;transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s ease;}
+.id-marks .markframe:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover)!important;}
+.id-marks .markframe .vframe-tag{left:12px!important;bottom:11px!important;font-size:8.5px!important;letter-spacing:.16em!important;}
+/* assets → shelves */
+#assetRoot .asset-shelf{margin-bottom:clamp(6px,.8vh,10px);}
+#assetRoot .shelf-eyebrow{display:flex;align-items:center;gap:10px;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin:clamp(30px,4.4vh,52px) 2px 8px;}
+#assetRoot .shelf-eyebrow::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--sage);opacity:.7;flex:none;}
+#assetRoot .asset-shelf:first-of-type .shelf-eyebrow{margin-top:clamp(8px,1.2vh,16px);}
+#assetRoot .shelf-count{margin-left:auto;color:var(--ink-faint);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:.06em;}
+#assetRoot .shelf-line{font-size:12px;color:var(--ink-soft);font-weight:300;margin:0 2px clamp(13px,1.8vh,17px);max-width:52ch;}
+#assetRoot .asset-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))!important;}
+/* asset cards → placed previews, quiet chrome */
+#assetRoot .asset-thumb{border-radius:var(--r-md)!important;box-shadow:var(--shadow)!important;background:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,.32))!important;transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s ease;}
+#assetRoot .asset-card:hover .asset-thumb{transform:translateY(-4px);box-shadow:var(--shadow-hover)!important;}
+#assetRoot .asset-thumb.on-dark{background:var(--b1)!important;}
+/* auto-assigned role — a corner chip, not a dropdown */
+#assetRoot .asset-rolechip{position:absolute;top:9px;left:9px;z-index:3;font-size:8px;letter-spacing:.12em;text-transform:uppercase;font-weight:600;color:var(--ink-soft);background:rgba(255,255,255,.82);backdrop-filter:blur(6px);padding:3px 8px;border-radius:99px;box-shadow:inset 0 0 0 1px var(--sage-line);opacity:0;transition:opacity .25s;pointer-events:none;}
+#assetRoot .asset-card:hover .asset-rolechip,#assetRoot .asset-card.open .asset-rolechip{opacity:1;}
+/* status dot */
+#assetRoot .asset-statusdot{position:absolute;top:9px;right:9px;z-index:3;width:8px;height:8px;border-radius:50%;box-shadow:0 0 0 3px rgba(255,255,255,.55);}
+.asset-statusdot.ready{background:#5b9e6e;}.asset-statusdot.prepare{background:var(--b3);}.asset-statusdot.reading{background:#7da3c4;animation:mdblink 1.4s ease infinite;}
+@keyframes mdblink{0%,100%{opacity:1}50%{opacity:.35}}
+/* the meta drawer — filename + role hidden until "Details" */
+#assetRoot .asset-expand{display:block;width:100%;text-align:center;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-faint);background:none;border:none;padding:8px 0 2px;cursor:pointer;transition:color .2s;}
+#assetRoot .asset-expand:hover{color:var(--ink-soft);}
+#assetRoot .asset-card.open .asset-expand{color:var(--sage);}
+#assetRoot .asset-meta{max-height:0!important;overflow:hidden;opacity:0;padding:0 2px!important;margin-top:0!important;transition:max-height .4s cubic-bezier(.22,1,.36,1),opacity .3s ease,margin .4s ease;}
+#assetRoot .asset-card.open .asset-meta{max-height:220px!important;opacity:1;margin-top:10px!important;}
+#assetRoot .asset-name{white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;}
+#assetRoot .asset-metarow{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px;}
+#assetRoot .asset-metarow .amk{font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;}
+.asset-statuspill{font-size:9px;letter-spacing:.06em;text-transform:uppercase;font-weight:600;padding:3px 9px;border-radius:99px;}
+.asset-statuspill.ready{color:#2c6440;background:rgba(91,158,110,.16);}.asset-statuspill.prepare{color:#8a6a2e;background:rgba(180,145,90,.18);}.asset-statuspill.reading{color:#3f6087;background:rgba(125,163,196,.18);}
+/* Typography specimens — read-only */
+#assetRoot .asset-card.font{cursor:default;}
+#assetRoot .asset-card.font .asset-thumb.font-specimen{display:grid;place-items:center;font-size:2.5rem;color:var(--b1);background:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,.32))!important;border-radius:var(--r-md);box-shadow:var(--shadow);}
+#assetRoot .asset-card.font .font-fam{font-size:11px;color:var(--ink-soft);text-align:center;margin-top:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+/* empty states — an invitation, never "no assets" */
+.becoming{border-radius:var(--r-md);background:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,.3));box-shadow:var(--shadow);padding:clamp(34px,5vw,60px);max-width:60ch;margin:clamp(20px,3vh,34px) auto 0;text-align:center;}
+.becoming .glyph{width:38px;height:38px;margin:0 auto 18px;color:var(--sage);opacity:.7;}
+.becoming .glyph svg{width:100%;height:100%;stroke:currentColor;stroke-width:1.3;fill:none;stroke-linecap:round;stroke-linejoin:round;}
+.becoming h2{font-family:var(--display);font-weight:300;font-size:clamp(20px,2.6vw,28px);letter-spacing:-.01em;margin:0 0 .5em;}
+.becoming p{font-size:14px;line-height:1.65;color:var(--ink-soft);margin:0;font-weight:300;}
 </style>
 </head>
 <body>
@@ -1105,6 +1154,11 @@ roomBody.addEventListener('click',e=>{
   const fr=e.target.closest('.vframe');
   if(fr){editTarget=fr;editAssetId=fr.dataset.asset||null;openReplacePicker();return;}
 });
+// tap "Details" to open a card's filename + role drawer (additive — leaves the main handler untouched)
+roomBody.addEventListener('click',e=>{
+  const ex=e.target.closest('[data-expand]'); if(!ex) return;
+  const card=ex.closest('.asset-card'); if(card) card.classList.toggle('open');
+});
 // live email-signature editing → updates the preview as you type
 roomBody.addEventListener('input',e=>{ const f=e.target.closest('[data-sig-field]'); if(!f) return; if(!brand.signature) brand.signature=defaultSignature(); brand.signature[f.dataset.sigField]=f.value; renderSigPreview(roomBody); });
 // asset role assignment (Assets) → connects Identity, Brand Guide, Deliverables
@@ -1401,6 +1455,14 @@ function refreshFounderState(){
 
 /* ── Assets room: real assets, categorized, with role assignment ── */
 const ROLE_OPTS=[['','— role —'],['primaryLogo','Primary Logo'],['secondaryLogo','Secondary Logo'],['iconMark','Icon Mark'],['wordmark','Wordmark'],['photography','Photography'],['guideline','Guideline'],['document','Document']];
+function assetStatus(a){                                         // [class,label] — quiet and honest, no fake completion
+  const ext=String(a.ext||'').toLowerCase();
+  if(ext==='pdf' && a.extracted && a.extracted.pending) return ['reading','Reading'];
+  if(!a.role) return ['prepare','Unassigned'];
+  if(['primaryLogo','secondaryLogo','iconMark','wordmark'].includes(a.role) && ext && ext!=='svg') return ['prepare','Prepare'];
+  return ['ready','Ready'];
+}
+
 function assetCardHTML(a,isLogoGroup){
   if(!a.id) a.id=newId();
   const onDark = a.variant==='white' ? ' on-dark' : '';
@@ -1408,25 +1470,52 @@ function assetCardHTML(a,isLogoGroup){
   const thumb = isImg
     ? '<div class="asset-thumb '+(isLogoGroup||a.ext==='svg'?'':'cover')+onDark+'" data-asset="'+a.id+'"><img alt="" src="'+a.url+'"><span class="asset-replace">Replace</span></div>'
     : '<div class="asset-thumb doc" data-asset="'+a.id+'">'+((a.ext||'file').toUpperCase())+'<span class="asset-replace">Replace</span></div>';
+  const roleLabel = ((ROLE_OPTS.find(o=>o[0]===a.role)||['',''])[1]||'').replace(/—\s*role\s*—/,'').trim() || 'Unassigned';
+  const st = assetStatus(a);
   const opts=ROLE_OPTS.map(o=>'<option value="'+o[0]+'"'+(a.role===o[0]?' selected':'')+'>'+o[1]+'</option>').join('');
   return '<div class="asset-card">'
     +'<button class="asset-remove" data-remove="'+a.id+'" title="Remove asset" aria-label="Remove asset">\u00d7</button>'
     +thumb
-    +'<div class="asset-meta"><div class="asset-name" data-name="'+a.id+'" spellcheck="false">'+esc(a.name||'asset')+'</div>'
-    +'<select class="role-select" data-asset="'+a.id+'">'+opts+'</select></div></div>';
+    +'<span class="asset-rolechip">'+esc(roleLabel)+'</span>'
+    +'<span class="asset-statusdot '+st[0]+'" title="'+st[1]+'"></span>'
+    +'<button class="asset-expand" data-expand type="button" aria-label="Show details">Details</button>'
+    +'<div class="asset-meta">'
+      +'<div class="asset-name" data-name="'+a.id+'" spellcheck="false">'+esc(a.name||'asset')+'</div>'
+      +'<div class="asset-metarow"><span class="amk">Role</span><select class="role-select" data-asset="'+a.id+'">'+opts+'</select></div>'
+      +'<div class="asset-metarow"><span class="amk">Status</span><span class="asset-statuspill '+st[0]+'">'+st[1]+'</span></div>'
+    +'</div></div>';
 }
+
 function renderAssetsRoom(){
   const root=document.getElementById('assetRoot'); if(!root) return;
   const addRow='<div class="asset-addrow"><button class="asset-add" data-addfiles type="button"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Add files</button></div>';
   if(!(brand.logos.length||brand.photos.length||brand.docs.length)){
-    root.innerHTML=addRow+'<div class="asset-empty">No assets yet — add files here, or move your brand in from Home.</div>'; return;
+    root.innerHTML=addRow
+      +'<div class="becoming"><div class="glyph"><svg viewBox="0 0 24 24"><path d="M3 7l2-2h5l2 2h8v12H3z"/></svg></div>'
+      +'<h2>The archive fills as the brand moves in.</h2>'
+      +'<p>Logos, photography, documents and type each find a shelf \u2014 organized by what they\u2019re for, not what they\u2019re called. Roles are read automatically; step in only when the read is wrong.</p></div>';
+    enhanceAssetThumbs(root); return;
   }
+  const shelves=[
+    ['Identity',     "The brand\u2019s marks, organized by role.",       brand.logos, true],
+    ['Photography',  "Imagery that carries the brand\u2019s world.",      brand.photos, false],
+    ['Documents',    "Guidelines, decks and the written brand.",         brand.docs,  false]
+  ].filter(s=>s[2] && s[2].length);
   let html=addRow;
-  if(brand.logos.length){ html+='<div class="sect-label">Logos &amp; marks</div><div class="asset-grid">'+brand.logos.map(a=>assetCardHTML(a,true)).join('')+'</div>'; }
-  if(brand.photos.length){ html+='<div class="sect-label">Photography</div><div class="asset-grid">'+brand.photos.map(a=>assetCardHTML(a,false)).join('')+'</div>'; }
-  if(brand.docs.length){ html+='<div class="sect-label">Documents</div><div class="asset-grid">'+brand.docs.map(a=>assetCardHTML(a,false)).join('')+'</div>'; }
+  shelves.forEach(s=>{
+    html+='<div class="asset-shelf"><div class="shelf-eyebrow">'+esc(s[0])+'<span class="shelf-count">'+s[2].length+'</span></div>'
+        +'<p class="shelf-line">'+esc(s[1])+'</p>'
+        +'<div class="asset-grid">'+s[2].map(a=>assetCardHTML(a,s[3])).join('')+'</div></div>';
+  });
+  const fonts=(brand.fonts||[]);                                 // Typography shelf — read-only specimens, no asset plumbing to break
+  if(fonts.length){
+    html+='<div class="asset-shelf"><div class="shelf-eyebrow">Typography<span class="shelf-count">'+fonts.length+'</span></div>'
+        +'<p class="shelf-line">The brand\u2019s faces, ready to set.</p>'
+        +'<div class="asset-grid">'+fonts.map(f=>{ const fam=esc(f.family||f.name||'Font');
+            return '<div class="asset-card font"><div class="asset-thumb font-specimen" style="font-family:\''+fam+'\',var(--display)">Ag</div><div class="font-fam">'+fam+'</div></div>'; }).join('')+'</div></div>';
+  }
   root.innerHTML=html;
-  enhanceAssetThumbs(root);                                  // float the marks: transparent, trimmed, on the brand ground
+  enhanceAssetThumbs(root);                                      // keep the floating, knocked-out marks
 }
 async function enhanceAssetThumbs(root){                     // swap logo thumbnails for their knocked-out, trimmed version so they float instead of sitting on a white tile
   for(const thumb of root.querySelectorAll('.asset-thumb[data-asset]')){
@@ -3419,36 +3508,45 @@ async function placeLogos(root){
 }
 async function renderIdMarks(root){
   const wrap=root.querySelector('.id-marks'); if(!wrap) return;
-  const lum=l=>(l.lum==null?120:l.lum);
+  const label=wrap.previousElementSibling;                       // the "Marks" sect-label
   const photoish=l=>(l.transparentRatio!=null&&l.transparentRatio<0.03)&&(l.variety!=null&&l.variety>120);
   const logos=(brand.logos||[]).filter(l=>l&&l.url&&!photoish(l));
-  if(!logos.length) return;                          // keep the static template until real marks arrive
+  if(!logos.length) return;                                      // no real marks yet → keep the sample template
+  if(label&&label.classList&&label.classList.contains('sect-label')) label.textContent='Supporting marks';
   const {primary,icon}=logoSystemMarks();
   const primaryMark = primary || logos.find(l=>l.role==='primaryLogo') || logos[0];
-  const isSvg=m=>/svg/i.test(m.ext||'');
-  const full=async m=> await cleanMark(m.url,isSvg(m)) || m.url;     // the exact mark, background knocked out
-
-  // distinct REAL items — each labelled for what it actually is, no fabricated variants
+  // SUPPORTING marks only — the primary already owns the hero, so it is never repeated here
+  const roleLabel=l=>{
+    if(l.role==='wordmark' || markKind(l)==='Wordmark') return 'Wordmark';
+    if(l.role==='iconMark' || markKind(l)==='Icon') return 'Icon';
+    if(l.role==='secondaryLogo') return 'Reverse';
+    return 'Alternate';
+  };
   const items=[], seen=new Set();
-  const add=(m,kind)=>{ if(!m||seen.has(m.id)) return; seen.add(m.id); items.push({mark:m,kind:kind||markKind(m)}); };
-  add(primaryMark,'Primary');
-  add(logos.find(l=>l.role==='wordmark') || logos.find(l=>l!==primaryMark&&markKind(l)==='Wordmark'),'Wordmark');
-  add(icon&&icon.id!==primaryMark.id?icon:null,'Icon');
-  add(logos.find(l=>l.role==='secondaryLogo'),'Secondary');
-
+  if(primaryMark) seen.add(primaryMark.id);
+  const add=(m,forced)=>{ if(!m||seen.has(m.id)) return; seen.add(m.id); items.push({mark:m,kind:forced||roleLabel(m)}); };
+  add(logos.find(l=>l.role==='wordmark') || logos.find(l=>l!==primaryMark&&markKind(l)==='Wordmark'));
+  add(icon && (!primaryMark||icon.id!==primaryMark.id) ? icon : null);
+  add(logos.find(l=>l.role==='secondaryLogo'));
+  logos.forEach(l=>{ if(items.length<5) add(l); });             // remaining real marks, each by its own role
+  logos.forEach(l=>{ if(items.length<8) add(l,'Archive'); });   // overflow lands quietly in Archive — never a duplicate
+  if(!items.length){                                            // a single mark → show it beautifully, with a calm waiting line
+    wrap.innerHTML='<p class="id-read-line" style="margin:2px 2px 0">One mark, shown as it should be \u2014 a wordmark, icon or reverse will take its place here as it\u2019s added.</p>';
+    return;
+  }
+  const isSvg=m=>/svg/i.test(m.ext||'');
+  const full=async m=> await cleanMark(m.url,isSvg(m)) || m.url;
   const PAPER=brandGround('light'), INK=brandGround('dark');
   const frame=dark=>{ const d=document.createElement('div'); d.className='vframe markframe '+(dark?'dark':'paper');
-    d.style.setProperty('background', dark?INK:PAPER, 'important');     // a real reference card, independent of room atmosphere
+    d.style.setProperty('background', dark?INK:PAPER,'important');
     d.innerHTML='<span class="vframe-tag'+(dark?' on-dark':'')+'"></span>'; return d; };
-  const fill=async (d,url,label,assetId)=>{ setFrameImage(d,url,true,assetId);
+  const fill=async (d,url,lbl,assetId)=>{ setFrameImage(d,url,true,assetId);
     d.style.setProperty('background', d.classList.contains('dark')?INK:PAPER,'important');
-    const t=d.querySelector('.vframe-tag'); if(t) t.textContent=label; };
-
+    const t=d.querySelector('.vframe-tag'); if(t) t.textContent=lbl; };
   wrap.innerHTML='';
-  // The exact uploaded marks, each as its original file on the ground that lets it read — no recoloured or invented variants.
-  const row1=document.createElement('div'); row1.className='id-markrow';
-  for(const it of items){ const dark=bestGround(it.mark)==='dark'; const d=frame(dark); row1.appendChild(d); await fill(d, await full(it.mark), it.kind, it.mark.id); }
-  wrap.appendChild(row1);
+  const rowEl=document.createElement('div'); rowEl.className='id-markrow';
+  for(const it of items){ const dark=bestGround(it.mark)==='dark'; const d=frame(dark); rowEl.appendChild(d); await fill(d, await full(it.mark), it.kind, it.mark.id); }
+  wrap.appendChild(rowEl);
 }
 const LOGOVAR={};                          // markId|treatment -> generated data URL (for hover download)
 const DLICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v12"/><path d="M6.5 11l5.5 5.5 5.5-5.5"/><path d="M5 20.5h14"/></svg>';
