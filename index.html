@@ -1408,6 +1408,22 @@ const MDWorkspaceState={
   colors:[], typography:{displayFont:'',bodyFont:'',displayNote:'',bodyNote:''},
   sections:[], assets:[], deliverables:{htmlReady:false,pdfReady:false,zipReady:false}, preparation:null, updatedAt:''
 };
+function inferLogoRoles(){
+  // Variants of the same mark (Logo / Logo White / Logo Black) share a family, so they group
+  // under one role instead of scattering into "Supporting". Genuinely distinct marks stay separate.
+  const L=(brand.logos||[]); if(L.length<2) return;
+  const STRIP=/\b(white|light|reversed?|knockout|ko|black|dark|monochrome|mono|grayscale|greyscale|colou?r|fullcolou?r|full|rgb|cmyk|1c|2c|primary|secondary|alternate|alt|version|v\d+|copy|final|transparent|vector|hires|hi-?res|small|large|on-?dark|on-?light)\b/g;
+  const base=function(n){ return String(n||'').toLowerCase().replace(/\.[a-z0-9]+$/,'').replace(/[_\-]+/g,' ').replace(STRIP,' ').replace(/[^a-z0-9]+/g,' ').replace(/\s+/g,' ').trim(); };
+  const groups={};
+  L.forEach(function(l,i){ const k=base(l.name)||('#'+i); (groups[k]=groups[k]||[]).push(l); });   // empty bases get a unique key -> never over-merged
+  Object.keys(groups).forEach(function(k){ const g=groups[k]; if(g.length<2) return;
+    const anchor=g.find(function(l){return l.role==='primaryLogo';})||g.find(function(l){return l.role==='wordmark';})
+               ||g.find(function(l){return l.role==='iconMark';})||g.find(function(l){return l.role==='secondaryLogo';})
+               ||g.find(function(l){return l.role;})||null;
+    const role=anchor?anchor.role:'primaryLogo';
+    g.forEach(function(l){ if(!l.role){ l.role=role; l._autoRole=true; } });
+  });
+}
 function assignRoles(){
   brand.logos.forEach(l=>{ if(!l.id) l.id=newId(); });
   brand.photos.forEach(p=>{ if(!p.id) p.id=newId(); if(!p.role) p.role='photography'; });
@@ -1427,6 +1443,7 @@ function assignRoles(){
   if(!taken().includes('secondaryLogo')){ const s=[...free()].sort((a,b)=>lum(b)-lum(a))[0]; if(s && lum(s)>170){ s.role='secondaryLogo'; s._autoRole=true; } }
   // ICON: squarest free mark
   if(!taken().includes('iconMark')){ const i=[...free()].sort((a,b)=>Math.abs(1-asp(a))-Math.abs(1-asp(b)))[0]; if(i){ i.role='iconMark'; i._autoRole=true; } }
+  try{ inferLogoRoles(); }catch(e){}                 // group each mark's colour variants into its family
   // keep the primary first for any sequential consumers
   L.sort((a,b)=>((b.role==='primaryLogo')-(a.role==='primaryLogo')));
 }
@@ -1537,10 +1554,7 @@ function renderAssetsRoom(){
   let html=addRow;
   // Identity marks -> grouped by family (role/shape) and ordered by colour variant — no longer one scattered grid
   logosByFamily().forEach(function(g){
-    const vs=[]; g.items.forEach(function(it){ if(vs.indexOf(it.variant)<0) vs.push(it.variant); });
-    const line=(g.family==='Supporting Marks')?'Alternate and supporting marks.':('Organized by colour variant'+(vs.length>1?' \u2014 '+vs.join(', ').toLowerCase():'')+'.');
     html+='<div class="asset-shelf"><div class="shelf-eyebrow">'+esc(g.family)+'<span class="shelf-count">'+g.items.length+'</span></div>'
-        +'<p class="shelf-line">'+esc(line)+'</p>'
         +'<div class="asset-grid">'+g.items.map(function(it){ return assetCardHTML(it.logo,true,it.variant); }).join('')+'</div></div>';
   });
   const shelves=[
