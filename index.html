@@ -1640,6 +1640,7 @@ function dl(filename,content,mime){
 function brandSlug(){ return (brand.name||'brand-home').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'')||'brand-home'; }
 async function buildGuideHTML(opts){
   const linkFiles=!!(opts&&opts.linkFiles);
+  try{ assignRoles(); }catch(_){}                      // guide logo system mirrors the latest Assets organization
   try{ if(window.MD&&MD.brain){ MD.brain.refresh(true); MD.brain.applyToGuide(); } }catch(e){}   // guide reflects the Brain
   const tmp=document.createElement('div'); tmp.style.cssText='position:absolute;left:-9999px;top:0;width:900px;';
   tmp.innerHTML=ROOMS.guide.html; document.body.appendChild(tmp);
@@ -1930,6 +1931,7 @@ const PUBLISHED_TOOLBAR_JS = `(function(){
 })();`;
 async function buildHomeHTML(){
   applyBrandHome();                                    // hero/logo/atmosphere reflect the current brand
+  try{ assignRoles(); }catch(_){}                      // re-derive families/roles so every published room mirrors Assets
   const pane=document.querySelector('.glasspane');
   if(!pane) throw new Error('home shell not found');
   const clone=pane.cloneNode(true);
