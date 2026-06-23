@@ -1202,10 +1202,12 @@ roomBody.addEventListener('change',e=>{
   const id=sel.dataset.asset, role=sel.value;
   const all=[...brand.logos,...brand.photos,...brand.docs];
   const asset=all.find(a=>a.id===id); if(!asset) return;
-  if(['primaryLogo','secondaryLogo','iconMark','wordmark'].includes(role)) all.forEach(a=>{ if(a!==asset && a.role===role) a.role=''; });
   asset.role=role;
-  brand.logos.sort((x,y)=>((y.role==='primaryLogo')-(x.role==='primaryLogo')));
-  updateWorkspaceState({},{source:'assets',announce:'Asset role updated. Brand Guide refreshed.'});
+  asset.roleLocked=!!role;          // you chose it -> lock it so re-analysis can't move it; "\u2014 role \u2014" unlocks
+  asset._autoRole=false;
+  try{ assignRoles(); }catch(_){}   // re-group around your choice; colour variants of the same mark follow it
+  try{ renderAssetsRoom(); }catch(_){}
+  updateWorkspaceState({},{source:'assets',announce: role?'Set. I\u2019ll keep this even when files change.':'Back to automatic.'});
 });
 // ── live text editing → flows back into the brand + autosaves ──
 let saveTimer=null;
@@ -1409,17 +1411,18 @@ const MDWorkspaceState={
   sections:[], assets:[], deliverables:{htmlReady:false,pdfReady:false,zipReady:false}, preparation:null, updatedAt:''
 };
 function normalizeRoles(){
-  // The Primary slot should hold the brand's main logo, not a stray square symbol.
+  // The Primary slot should hold the brand's main logo, not a stray square symbol — unless you've locked a choice.
   const L=(brand.logos||[]); if(!L.length) return;
-  const sq=function(l){ const a=(l.aspect==null?1:l.aspect); return a>0.7 && a<1.45; };   // roughly square -> a symbol/icon
+  const sq=function(l){ const a=(l.aspect==null?1:l.aspect); return a>0.7 && a<1.45; };
   const byRole=function(r){ return L.filter(function(l){ return l.role===r; }); };
-  const hasWide=L.some(function(l){ const a=(l.aspect==null?1:l.aspect); return a>=1.6; }); // a lockup/wordmark exists
-  let prim=byRole('primaryLogo');
-  if(prim.length && hasWide && prim.every(sq)){                 // "primary" is only square symbols, but lockups exist
-    prim.forEach(function(l){ l.role='iconMark'; l._autoRole=true; });
+  const hasWide=L.some(function(l){ const a=(l.aspect==null?1:l.aspect); return a>=1.6; });
+  const prim=byRole('primaryLogo');
+  const lockedPrimary=prim.some(function(l){ return l.roleLocked; });
+  if(prim.length && hasWide && !lockedPrimary && prim.every(sq)){     // square-only "primary" with lockups around -> icons
+    prim.forEach(function(l){ if(!l.roleLocked){ l.role='iconMark'; l._autoRole=true; } });
   }
-  if(!byRole('primaryLogo').length){                            // nothing left as primary -> the wordmark IS the primary
-    const word=byRole('wordmark');
+  if(!byRole('primaryLogo').length){                                 // nothing primary -> promote the main wordmark
+    const word=byRole('wordmark').filter(function(l){ return !l.roleLocked; });
     if(word.length) word.forEach(function(l){ l.role='primaryLogo'; l._autoRole=true; });
   }
 }
@@ -1448,11 +1451,15 @@ function inferLogoRoles(){
   const clusters={};
   for(let i=0;i<n;i++){ const r=find(i); (clusters[r]=clusters[r]||[]).push(L[i]); }
   Object.keys(clusters).forEach(function(k){ const g=clusters[k]; if(g.length<2) return;
-    // one mark, one family: every colour variant of the same silhouette is reconciled to a single role
-    const cnt={}; g.forEach(function(l){ if(l.role) cnt[l.role]=(cnt[l.role]||0)+1; });
-    let role=null,bnv=-1; Object.keys(cnt).forEach(function(r){ if(cnt[r]>bnv){ bnv=cnt[r]; role=r; } });
-    if(!role){ const a=median(g.map(asp)); role=(a>=2.2?'wordmark':((a>0.8&&a<1.25)?'iconMark':'primaryLogo')); }
-    g.forEach(function(l){ if(l.role!==role){ l.role=role; l._autoRole=true; } });
+    // one mark, one family. A locked (user-chosen) member decides the family; else majority, then shape.
+    const locked=g.filter(function(l){ return l.roleLocked && l.role; });
+    let role=null,bnv=-1;
+    if(locked.length){ const lc={}; locked.forEach(function(l){ lc[l.role]=(lc[l.role]||0)+1; });
+      Object.keys(lc).forEach(function(r){ if(lc[r]>bnv){ bnv=lc[r]; role=r; } }); }
+    else { const cnt={}; g.forEach(function(l){ if(l.role) cnt[l.role]=(cnt[l.role]||0)+1; });
+      Object.keys(cnt).forEach(function(r){ if(cnt[r]>bnv){ bnv=cnt[r]; role=r; } });
+      if(!role){ const a=median(g.map(asp)); role=(a>=2.2?'wordmark':((a>0.8&&a<1.25)?'iconMark':'primaryLogo')); } }
+    g.forEach(function(l){ if(!l.roleLocked && l.role!==role){ l.role=role; l._autoRole=true; } });
   });
 }
 function assignRoles(){
@@ -1460,7 +1467,7 @@ function assignRoles(){
   brand.photos.forEach(p=>{ if(!p.id) p.id=newId(); if(!p.role) p.role='photography'; });
   brand.docs.forEach(d=>{ if(!d.id) d.id=newId(); if(!d.role) d.role=/guide|brand/i.test(d.name||'')?'guideline':'document'; });
   const L=brand.logos; if(!L.length) return;
-  L.forEach(l=>{ if(l._autoRole){ l.role=''; l._autoRole=false; } });   // recompute auto roles, keep manual ones
+  L.forEach(l=>{ if(l._autoRole && !l.roleLocked){ l.role=''; l._autoRole=false; } });   // recompute auto roles, keep locked/manual ones
   const taken=()=>L.filter(l=>l.role).map(l=>l.role);
   const lum=l=>(l.lum==null?128:l.lum), asp=l=>(l.aspect==null?1:l.aspect), vary=l=>(l.variety==null?40:l.variety);
   // PRIMARY: the most complete mark — colourful, balanced shape, named, not a pale reversed version
