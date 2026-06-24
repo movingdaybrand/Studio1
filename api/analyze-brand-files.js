@@ -1275,6 +1275,7 @@ export default async function handler(req, res) {
 
     if (!response.ok) {
       const errorText = await response.text();
+      console.error("[analyze-brand-files] OpenAI " + response.status + ": " + errorText);
 
       return res.status(502).json({
         error: `OpenAI API error: ${response.status}`,
@@ -1284,6 +1285,7 @@ export default async function handler(req, res) {
 
     openAiResponse = await response.json();
   } catch (err) {
+    console.error("[analyze-brand-files] fetch to OpenAI failed: " + err.message);
     return res.status(502).json({
       error: "Failed to reach OpenAI API.",
       detail: err.message
