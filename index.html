@@ -853,7 +853,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.2';
+const MD_BUILD='2026.06.24.3';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -4119,6 +4119,7 @@ async function placeLogos(root){
 }
 async function renderIdMarks(root){
   const wrap=root.querySelector('.id-marks'); if(!wrap) return;
+  const _tok={}; wrap.__idtok=_tok;   // re-entrancy guard: if a newer render starts, this one aborts (publish calls this twice)
   const label=wrap.previousElementSibling;
   if(label&&label.classList&&label.classList.contains('sect-label')) label.textContent='The marks';
   const fams=logoFamilies();
@@ -4142,6 +4143,7 @@ async function renderIdMarks(root){
     if(key && seenMark.has(key)) continue; seenMark.add(key); uniq.push(it); }
   items.length=0; for(const it of uniq) items.push(it);
   if(!items.length){
+    if(wrap.__idtok!==_tok) return;
     wrap.innerHTML='<p class="id-read-line" style="margin:2px 2px 0">One mark, shown as it should be \u2014 a secondary, icon or supporting mark will join it here as it\u2019s added.</p>';
     return;
   }
@@ -4151,6 +4153,7 @@ async function renderIdMarks(root){
   const frame=dark=>{ const d=document.createElement('div'); d.className='vframe markframe '+(dark?'dark':'paper');
     d.style.setProperty('background', dark?INK:PAPER,'important');
     d.innerHTML='<span class="vframe-tag'+(dark?' on-dark':'')+'"></span>'; return d; };
+  if(wrap.__idtok!==_tok) return;
   wrap.innerHTML='';
   const rowEl=document.createElement('div'); rowEl.className='id-markrow';
   for(const it of items){
@@ -4160,6 +4163,7 @@ async function renderIdMarks(root){
     d.style.setProperty('background', dark?INK:PAPER,'important');
     const t=d.querySelector('.vframe-tag'); if(t) t.textContent=it.kind;
   }
+  if(wrap.__idtok!==_tok) return;
   wrap.appendChild(rowEl);
 }
 const LOGOVAR={};                          // markId|treatment -> generated data URL (for hover download)
