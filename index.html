@@ -855,7 +855,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.11';
+const MD_BUILD='2026.06.24.12';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -3758,7 +3758,10 @@ async function requestReview(assets, report){
   try{
     const res=await fetch('/api/analyze-brand-files',{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl.signal,
       body:JSON.stringify({preparationReport, assets, websiteLookup: websiteLookupOn()})});
-    if(!res.ok) throw new Error('route '+res.status);
+    if(!res.ok){
+      let _d=''; try{ const _j=await res.json(); _d=(_j&&(_j.detail||_j.error))||''; }catch(_){ try{ _d=await res.text(); }catch(__){} }
+      throw new Error('route '+res.status+(_d?' — '+String(_d).slice(0,500):''));   // surface OpenAI's actual reason in the console
+    }
     return await res.json();
   } finally { clearTimeout(t); }
 }
