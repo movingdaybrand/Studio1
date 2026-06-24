@@ -203,6 +203,7 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .id-primary .wm small{display:block;font-size:.32em;letter-spacing:.32em;text-transform:uppercase;color:var(--b3);margin-top:1em;font-weight:500;}
 .id-namecard{padding:0;display:flex;flex-direction:column;align-items:center;text-align:center;background:none;backdrop-filter:none;box-shadow:none;max-width:46ch;}
 .id-name{font-family:var(--display);font-weight:400;font-size:clamp(22px,2.4vw,30px);line-height:1.04;letter-spacing:-.02em;outline:none;border-radius:6px;}
+.id-hero.logo-named .id-name{font-size:clamp(15px,1.6vw,19px);font-weight:300;color:var(--ink-soft);letter-spacing:0;margin-top:4px;}
 .id-name:focus{box-shadow:0 0 0 2px rgba(44,90,60,.22);}
 .id-tag{font-family:var(--display);font-style:italic;font-weight:300;font-size:clamp(15px,1.5vw,18px);color:var(--ink-soft);margin-top:10px;max-width:34ch;outline:none;border-radius:6px;line-height:1.3;}
 .id-tag:focus{box-shadow:0 0 0 2px rgba(44,90,60,.22);}
@@ -854,7 +855,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.4';
+const MD_BUILD='2026.06.24.5';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -1875,6 +1876,7 @@ async function renderRoomForPublish(key){
   // strip editor-only chrome → clean read-only capture
   tmp.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
   tmp.querySelectorAll('[data-action],.asset-replace,.edit-hint,.mk-dl,.gd-logo-dl,.lib-upload,.id-edit,.edit-dot,.id-read,.color-read,.type-read,.assets-read,.apps-read').forEach(n=>n.remove());
+  if(key==='identity'){ const h=tmp.querySelector('.id-hero.logo-named'); if(h){ const nm=h.querySelector('.id-name'); if(nm) nm.remove(); } }   // wordmark logo carries the name → no duplicate in the client view
   // Deliverables: drop editor-only actions + non-functional inputs; keep client downloads (package, PDF, signature, icon)
   tmp.querySelectorAll('[data-deliv="home"],[data-deliv="guides"],[data-deliv="palette"],[data-deliv="save"],[data-deliv="review"],[data-deliv="versions"],.sig-fields,.ig-bgs').forEach(n=>n.remove());
   const html=tmp.innerHTML; tmp.remove();
@@ -2836,6 +2838,11 @@ function applyUploads(root){
   if(!(brand.logos.length||brand.photos.length||brand.name||brand.colors.length)) return;   // nothing moved in yet
   const step=(fn)=>{ try{ fn(); }catch(e){ console.warn('[brand-home] live-update step failed:', e); } };
   if(brand.name) step(()=>root.querySelectorAll('.id-name,.gd-title').forEach(e=>e.textContent=brand.name));
+  step(()=>{                                            // Identity: a wordmark logo already says the name — tuck the typed name so the logo stays the hero
+    const hero=root.querySelector('.id-hero'); if(!hero) return;
+    const mk=resolvePlacement('brandHomeHeader')||heroMark();
+    hero.classList.toggle('logo-named', !!mk && (mk.role==='wordmark' || (mk.aspect!=null && mk.aspect>2.2)));
+  });
   step(()=>applyNameMarks(root));
   step(()=>{
     const tag = looksGenericTag(brand.tagline) ? '' : brand.tagline;
