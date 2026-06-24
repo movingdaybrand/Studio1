@@ -855,7 +855,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.6';
+const MD_BUILD='2026.06.24.7';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -959,12 +959,9 @@ const ROOMS={
       <button class="vaultcard" data-deliv="home"><span class="vic">Web</span><b>Publish Home</b><i>The branded home as a live, shareable link</i></button>
     </div>
     <div class="deliv-more">
-      <button class="deliv-link" data-deliv="guides">Saved guides</button>
       <button class="deliv-link" data-deliv="pdf">Download PDF</button>
       <button class="deliv-link" data-deliv="palette">Colour styles</button>
-      <button class="deliv-link" data-deliv="save">Save working file</button>
-      <button class="deliv-link" data-deliv="review">Review marks</button>
-      <button class="deliv-link" data-deliv="versions">Version history</button>
+      <button class="deliv-link" data-deliv="guides">Saved guides</button>
     </div>
     <p class="deliv-note">Deliverables always use the <b>latest version</b> of your Brand Home — current logo, colors, type, and assets.</p>
     <div class="apps-wrap">
@@ -984,6 +981,9 @@ const ROOMS={
     </div>
     <div class="flist" style="margin-top:14px">
       <div class="frow"><div><b>Render brand guide</b><i>Founder-only — a standalone guide with linked, downloadable files</i></div><button class="deliv-link" data-deliv="guide-render" style="white-space:nowrap">Render &rarr;</button></div>
+      <div class="frow"><div><b>Review marks</b><i>Confirm each mark, its colour variant, and where it appears</i></div><button class="deliv-link" data-deliv="review" style="white-space:nowrap">Review &rarr;</button></div>
+      <div class="frow"><div><b>Save working file</b><i>Download the editable Brand Home state</i></div><button class="deliv-link" data-deliv="save" style="white-space:nowrap">Save</button></div>
+      <div class="frow"><div><b>Version history</b><i>Every save is kept in this browser</i></div><button class="deliv-link" data-deliv="versions" style="white-space:nowrap">History</button></div>
       <div class="frow"><div><b>Reset rooms</b><i>Clear what you moved in and start from the sample brand</i></div><button class="deliv-link" data-deliv="reset" style="white-space:nowrap">Reset</button></div>
     </div>
     <div class="founder-state" id="founderState"><div class="fs-bar"><span>Live workspace state</span><span id="fsUpdated"></span></div><pre id="fsJson"></pre></div>`}
