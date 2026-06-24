@@ -853,7 +853,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.23.1';
+const MD_BUILD='2026.06.24.1';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -1934,7 +1934,10 @@ const PUBLISHED_TOOLBAR_JS = `(function(){
   }
   function blobFrom(src){ return fetch(src).then(function(r){ return r.blob(); }); }
   function saveURL(src,name){ var x=document.createElement("a"); x.href=src; x.download=name||"asset"; document.body.appendChild(x); x.click(); setTimeout(function(){ x.remove(); },800); }
-  function dlAsset(src,name){ saveURL(src,name); toast("Downloaded "+(name||"")); }
+  function dlAsset(src,name){
+    if(/^https?:/i.test(src)){ blobFrom(src).then(function(b){ var u=URL.createObjectURL(b); saveURL(u,name); setTimeout(function(){ URL.revokeObjectURL(u); },4000); toast("Downloaded "+(name||"")); }).catch(function(){ saveURL(src,name); }); }
+    else { saveURL(src,name); toast("Downloaded "+(name||"")); }
+  }
   function isSvg(t,name){ return (t&&t.indexOf("svg")>-1) || (name||"").toLowerCase().slice(-4)===".svg"; }
   function copyAsset(src,name){
     blobFrom(src).then(function(blob){
@@ -2112,11 +2115,36 @@ async function buildHomeHTML(){
     +'<style>'+css+'\n:root{'+vars+'}\nbody{margin:0}\n'+pubCSS+'</style></head>'
     +'<body class="'+bodyCls+'"'+mood+material+'><div class="env">'+inner+'</div>'+templates+nav+arrive+pubBar+pubScript+'</body></html>';
 }
+const PUB_EXTERNALIZE_MIN = 24*1024;   // upload embedded images larger than ~24KB to Blob; keep tiny ones (and fonts) inline
+async function uploadOneAsset(dataUrl){
+  try{
+    const res = await fetch('/api/upload-asset',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ data:dataUrl }) });
+    if(!res.ok) return null;
+    const j = await res.json(); return (j && j.url) || null;
+  }catch(_){ return null; }
+}
+// Replace big base64 image data-URLs in the built HTML with hosted Blob URLs, so the
+// published file stays well under the 4.5MB publish limit. Fonts stay inline (no CORS surprises);
+// any upload that fails simply stays embedded, so this can only help, never break a publish.
+async function externalizeAssets(html){
+  const re=/data:image\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+/gi;
+  const found=[], seen=new Set(); let m;
+  while((m=re.exec(html))){ const full=m[0]; if(full.length>=PUB_EXTERNALIZE_MIN && !seen.has(full)){ seen.add(full); found.push(full); } }
+  if(!found.length) return html;
+  let done=0;
+  for(const full of found){
+    const url=await uploadOneAsset(full);
+    if(url) html=html.split(full).join(url);
+    done++; announceWorkspaceUpdate('Uploading assets… ('+done+'/'+found.length+')','deliverables');
+  }
+  return html;
+}
 async function publishBrandHome(){
   const tab=window.open('','_blank');                  // claim the tab inside the click gesture so the popup isn't blocked after the await
   announceWorkspaceUpdate('Publishing your home…','deliverables');
   let html='';
   try{ html=await buildHomeHTML(); }catch(e){ if(tab) tab.close(); announceWorkspaceUpdate('Couldn’t build the home page.','deliverables'); return; }
+  try{ html=await externalizeAssets(html); }catch(_){}   // slim the payload so publish never hits the 4.5MB cap
   try{
     const res=await fetch('/api/publish',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ html, slug:brandSlug()+'-home', id:ensurePublishId() })});   // -home namespace → never clobbers the guide
