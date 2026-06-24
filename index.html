@@ -194,7 +194,7 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .id-pedestal::before{content:'';position:absolute;left:50%;top:44%;width:min(60%,380px);height:min(60%,300px);transform:translate(-50%,-50%);background:radial-gradient(ellipse at center,var(--b3,#4e6b5a) 0%,transparent 68%);opacity:.42;filter:blur(34px);z-index:0;pointer-events:none;}
 .id-pedestal::after{content:'';position:absolute;left:50%;bottom:clamp(14px,2vw,22px);width:min(46%,280px);height:24px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(20,30,24,.20),transparent 72%);filter:blur(7px);z-index:0;pointer-events:none;}
 .id-primary{min-height:0;display:grid;place-items:center;}
-.id-hero .id-primary{position:relative;z-index:1;width:min(82%,420px);height:clamp(150px,19vw,210px);background:transparent;box-shadow:none;border-radius:0;overflow:visible;animation:idFloat 6.5s ease-in-out infinite;}
+.id-hero .id-primary{position:relative;z-index:1;width:min(64%,340px);height:clamp(106px,13vw,150px);background:transparent;box-shadow:none;border-radius:0;overflow:visible;animation:idFloat 6.5s ease-in-out infinite;}
 .id-hero .id-primary>img{filter:drop-shadow(0 18px 30px rgba(20,30,24,.20));}
 .id-hero .id-primary .vframe-tag{display:none;}
 @keyframes idFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
@@ -657,6 +657,19 @@ body.deep-immerse .id-primary .wm small{color:rgba(243,239,230,.62)!important;}
 .id-marks .markframe{aspect-ratio:5/4!important;max-width:none!important;flex:none!important;border-radius:var(--r-md)!important;overflow:hidden;box-shadow:var(--shadow)!important;padding:18px!important;transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s ease;}
 .id-marks .markframe:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover)!important;}
 .id-marks .markframe .vframe-tag{left:12px!important;bottom:11px!important;font-size:8.5px!important;letter-spacing:.16em!important;}
+/* identity hierarchy: hero caption + tiered marks */
+.id-primarycap{display:flex;flex-direction:column;align-items:center;gap:3px;margin-top:clamp(4px,.9vw,10px);}
+.id-primarycap-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;}
+.id-primarycap-note{font-size:12px;color:var(--ink-soft);font-weight:300;max-width:40ch;text-align:center;line-height:1.4;}
+.markcell{display:flex;flex-direction:column;gap:10px;}
+.markmeta{padding:0 2px;}
+.markmeta-label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin-bottom:3px;}
+.markmeta-note{font-size:11.5px;color:var(--ink-soft);font-weight:300;line-height:1.4;max-width:30ch;}
+.id-suphead{margin:clamp(22px,3vh,34px) 2px clamp(10px,1.4vh,14px);}
+.id-suphead-label{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin-bottom:4px;}
+.id-suphead-note{font-size:11.5px;color:var(--ink-soft);font-weight:300;line-height:1.4;max-width:48ch;}
+.id-suprow{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:clamp(10px,1.2vw,14px);}
+.id-suprow .markframe{aspect-ratio:1/1!important;padding:12px!important;}
 /* assets → shelves */
 #assetRoot .asset-shelf{margin-bottom:clamp(6px,.8vh,10px);}
 #assetRoot .shelf-eyebrow{display:flex;align-items:center;gap:10px;font-size:9.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;margin:clamp(30px,4.4vh,52px) 2px 8px;}
@@ -866,7 +879,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.15';
+const MD_BUILD='2026.06.24.17';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -874,6 +887,7 @@ const ROOMS={
         <div class="id-pedestal">
           <div class="vframe contain id-primary"><div class="wm" id="wmBig">${NAME}<small>Private Advisory</small></div><span class="vframe-tag">Primary logo</span></div>
         </div>
+        <div class="id-primarycap"><div class="id-primarycap-label">Primary Logo</div><div class="id-primarycap-note">The lead mark for recognition across your core brand moments.</div></div>
         <div class="id-namecard">
           <div class="id-name" id="bName" contenteditable="true" spellcheck="false">${NAME}</div>
           <div class="id-tag" contenteditable="true" spellcheck="false">${TAG}</div>
@@ -1651,7 +1665,7 @@ function renderAssetsRoom(){
   const _present=_order.filter(function(e){ return _counts[e]; }).concat(Object.keys(_counts).filter(function(e){ return _order.indexOf(e)<0; }));
   if(_assetFilter!=='all' && !(_assetFilter==='fonts'?_fonts.length:_counts[_assetFilter])) _assetFilter='all';   // drop a stale filter
   let filterRow='';
-  if(_present.length+(_fonts.length?1:0) > 1){
+  if(_present.length || _fonts.length){            // show whenever there are assets, even a single type
     const _tot=(brand.logos||[]).length+(brand.photos||[]).length+(brand.docs||[]).length+_fonts.length;
     let chips='<button class="afilter'+(_assetFilter==='all'?' is-active':'')+'" data-assetfilter="all" type="button">All<span class="afilter-n">'+_tot+'</span></button>';
     _present.forEach(function(e){ chips+='<button class="afilter'+(_assetFilter===e?' is-active':'')+'" data-assetfilter="'+e+'" type="button">'+e.toUpperCase()+'<span class="afilter-n">'+_counts[e]+'</span></button>'; });
@@ -4188,28 +4202,34 @@ async function renderIdMarks(root){
   const wrap=root.querySelector('.id-marks'); if(!wrap) return;
   const _tok={}; wrap.__idtok=_tok;   // re-entrancy guard: if a newer render starts, this one aborts (publish calls this twice)
   const label=wrap.previousElementSibling;
-  if(label&&label.classList&&label.classList.contains('sect-label')) label.textContent='The marks';
+  if(label&&label.classList&&label.classList.contains('sect-label')) label.textContent='The system';
+  const LS=(brand.brandIntelligence&&brand.brandIntelligence.logoSystem)||{};
+  // hero primary-logo usage note from the shared intelligence
+  try{ const cap=root.querySelector('.id-primarycap-note'); const pn=LS.primaryLogo; if(cap&&pn&&String(pn).trim()) cap.textContent=String(pn); }catch(e){}
   const fams=logoFamilies();
   const byId=id=>(brand.logos||[]).find(l=>l&&l.id===id);
   const repOf=fam=> (fam && (fam.variants.fullColor||fam.variants.dark||fam.variants.light||(fam.variants.other&&fam.variants.other[0]))) || null;
-  const items=[];
-  const push=(rec,kind,forceDark)=>{ if(rec&&rec.id && items.length<8) items.push({mark:byId(rec.id)||rec, kind:kind, forceDark:!!forceDark}); };
+  const noteFor={
+    Reversed:(LS.reversedLogo&&String(LS.reversedLogo).trim())||'Use on dark, image-heavy, or high-contrast backgrounds.',
+    Wordmark:(LS.wordmark&&String(LS.wordmark).trim())||'The name set as type \u2014 best where the brand needs to be read.',
+    Icon:(LS.icon&&String(LS.icon).trim())||'The compact mark \u2014 for avatars, favicons, and tight spaces.',
+    Secondary:'A secondary lockup for supporting placements.'
+  };
+  // ── core system: reversed (primary), secondary, wordmark, icon ──
+  const core=[];
   const prim=fams.primaryLogo;
-  if(prim && prim.variants.light) push(prim.variants.light,'Reversed',true);   // primary reversed leads
-  push(repOf(fams.secondaryLogo),'Secondary');
-  push(repOf(fams.wordmark),'Wordmark');
-  push(repOf(fams.iconMark),'Icon');
-  const seenSup=new Set();                                                    // one plate per supporting mark, not per colourway
+  if(prim && prim.variants.light) core.push({mark:byId(prim.variants.light.id)||prim.variants.light, kind:'Reversed', forceDark:true});
+  [['secondaryLogo','Secondary'],['wordmark','Wordmark'],['iconMark','Icon']].forEach(pair=>{ const r=repOf(fams[pair[0]]); if(r) core.push({mark:byId(r.id)||r, kind:pair[1], forceDark:false}); });
+  // ── supporting marks (one plate per mark, not per colourway) ──
+  const sup=[]; const seenSup=new Set();
   (fams.supporting||[]).forEach(rec=>{ const lg=byId(rec.id)||rec;
     const k=(lg._clu!=null)?('c'+lg._clu):String(lg.name||lg.id||'').toLowerCase().replace(/[^a-z0-9]+/g,'');
-    if(seenSup.has(k)) return; seenSup.add(k); push(rec,'Supporting'); });
-  // never show the same emblem twice, even if it carries two roles (first/strongest role wins)
-  const seenMark=new Set(), uniq=[];
-  for(const it of items){ const lg=it.mark||{};
-    const key=(lg._clu!=null)?('c'+lg._clu):(lg.sig||lg.url||lg.id||'');
-    if(key && seenMark.has(key)) continue; seenMark.add(key); uniq.push(it); }
-  items.length=0; for(const it of uniq) items.push(it);
-  if(!items.length){
+    if(seenSup.has(k)) return; seenSup.add(k); sup.push({mark:lg, kind:'Supporting', forceDark:false}); });
+  // never show the same emblem twice across tiers (core wins)
+  const seenMark=new Set();
+  const dedupe=list=>{ const out=[]; for(const it of list){ const lg=it.mark||{}; const key=(lg._clu!=null)?('c'+lg._clu):(lg.sig||lg.url||lg.id||''); if(key&&seenMark.has(key)) continue; if(key) seenMark.add(key); out.push(it);} return out; };
+  const coreU=dedupe(core).slice(0,6), supU=dedupe(sup).slice(0,8);
+  if(!coreU.length && !supU.length){
     if(wrap.__idtok!==_tok) return;
     wrap.innerHTML='<p class="id-read-line" style="margin:2px 2px 0">One mark, shown as it should be \u2014 a secondary, icon or supporting mark will join it here as it\u2019s added.</p>';
     return;
@@ -4217,21 +4237,39 @@ async function renderIdMarks(root){
   const isSvg=m=>/svg/i.test(m.ext||'');
   const full=async m=> (await cleanMark(m.url,isSvg(m)))||m.url;
   const PAPER=brandGround('light'), INK=brandGround('dark');
-  const frame=dark=>{ const d=document.createElement('div'); d.className='vframe markframe '+(dark?'dark':'paper');
-    d.style.setProperty('background', dark?INK:PAPER,'important');
-    d.innerHTML='<span class="vframe-tag'+(dark?' on-dark':'')+'"></span>'; return d; };
+  const buildCell=async(it,small)=>{
+    const dark=it.forceDark || bestGround(it.mark)==='dark';
+    const cell=document.createElement('div'); cell.className='markcell'+(small?' sm':'');
+    const fr=document.createElement('div'); fr.className='vframe markframe '+(dark?'dark':'paper');
+    fr.style.setProperty('background', dark?INK:PAPER,'important');
+    fr.innerHTML='<span class="vframe-tag'+(dark?' on-dark':'')+'" style="display:none"></span>';
+    cell.appendChild(fr);
+    setFrameImage(fr, await full(it.mark), true, it.mark.id);
+    fr.style.setProperty('background', dark?INK:PAPER,'important');
+    if(!small){
+      const meta=document.createElement('div'); meta.className='markmeta';
+      let h='<div class="markmeta-label">'+esc(it.kind)+'</div>';
+      if(noteFor[it.kind]) h+='<div class="markmeta-note">'+esc(noteFor[it.kind])+'</div>';
+      meta.innerHTML=h; cell.appendChild(meta);
+    }
+    return cell;
+  };
   if(wrap.__idtok!==_tok) return;
   wrap.innerHTML='';
   const rowEl=document.createElement('div'); rowEl.className='id-markrow';
-  for(const it of items){
-    const dark=it.forceDark || bestGround(it.mark)==='dark';
-    const d=frame(dark); rowEl.appendChild(d);
-    setFrameImage(d, await full(it.mark), true, it.mark.id);
-    d.style.setProperty('background', dark?INK:PAPER,'important');
-    const t=d.querySelector('.vframe-tag'); if(t) t.textContent=it.kind;
-  }
+  for(const it of coreU){ rowEl.appendChild(await buildCell(it,false)); }
   if(wrap.__idtok!==_tok) return;
   wrap.appendChild(rowEl);
+  if(supU.length){
+    const head=document.createElement('div'); head.className='id-suphead';
+    const supNote=(LS.supportingMarks&&String(LS.supportingMarks).trim())||'Secondary marks for supporting moments \u2014 use sparingly, behind the primary system.';
+    head.innerHTML='<div class="id-suphead-label">Supporting marks</div><div class="id-suphead-note">'+esc(supNote)+'</div>';
+    wrap.appendChild(head);
+    const supRow=document.createElement('div'); supRow.className='id-suprow';
+    for(const it of supU){ supRow.appendChild(await buildCell(it,true)); }
+    if(wrap.__idtok!==_tok) return;
+    wrap.appendChild(supRow);
+  }
 }
 const LOGOVAR={};                          // markId|treatment -> generated data URL (for hover download)
 const DLICON='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5v12"/><path d="M6.5 11l5.5 5.5 5.5-5.5"/><path d="M5 20.5h14"/></svg>';
