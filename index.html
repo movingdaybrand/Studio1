@@ -189,14 +189,12 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 
 /* identity */
 .id-hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:clamp(10px,1.6vw,20px);padding:clamp(18px,3vw,40px) 0 clamp(6px,1.2vw,16px);}
-.id-herolabel{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;}
-.id-herouse{font-size:clamp(13px,1.15vw,15px);font-weight:300;color:var(--ink-soft);max-width:42ch;line-height:1.5;margin-top:-2px;}
 /* the primary logo floats above a soft, glowing pedestal */
 .id-pedestal{position:relative;display:grid;place-items:center;width:100%;padding:clamp(22px,3.4vw,48px) clamp(20px,4vw,60px) clamp(34px,4vw,54px);}
 .id-pedestal::before{content:'';position:absolute;left:50%;top:44%;width:min(60%,380px);height:min(60%,300px);transform:translate(-50%,-50%);background:radial-gradient(ellipse at center,var(--b3,#4e6b5a) 0%,transparent 68%);opacity:.42;filter:blur(34px);z-index:0;pointer-events:none;}
 .id-pedestal::after{content:'';position:absolute;left:50%;bottom:clamp(14px,2vw,22px);width:min(46%,280px);height:24px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(20,30,24,.20),transparent 72%);filter:blur(7px);z-index:0;pointer-events:none;}
 .id-primary{min-height:0;display:grid;place-items:center;}
-.id-hero .id-primary{position:relative;z-index:1;width:min(70%,340px);height:clamp(92px,11.5vw,140px);background:transparent;box-shadow:none;border-radius:0;overflow:visible;animation:idFloat 6.5s ease-in-out infinite;}
+.id-hero .id-primary{position:relative;z-index:1;width:min(82%,420px);height:clamp(150px,19vw,210px);background:transparent;box-shadow:none;border-radius:0;overflow:visible;animation:idFloat 6.5s ease-in-out infinite;}
 .id-hero .id-primary>img{filter:drop-shadow(0 18px 30px rgba(20,30,24,.20));}
 .id-hero .id-primary .vframe-tag{display:none;}
 @keyframes idFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
@@ -857,16 +855,14 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.13';
+const MD_BUILD='2026.06.24.12';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
       <div class="id-hero">
-        <div class="id-herolabel">Primary Logo</div>
         <div class="id-pedestal">
           <div class="vframe contain id-primary"><div class="wm" id="wmBig">${NAME}<small>Private Advisory</small></div><span class="vframe-tag">Primary logo</span></div>
         </div>
-        <div class="id-herouse">The main lockup — your strongest signature, used across headers, covers, and primary brand moments.</div>
         <div class="id-namecard">
           <div class="id-name" id="bName" contenteditable="true" spellcheck="false">${NAME}</div>
           <div class="id-tag" contenteditable="true" spellcheck="false">${TAG}</div>
