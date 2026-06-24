@@ -855,7 +855,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.12';
+const MD_BUILD='2026.06.24.13';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -1368,9 +1368,9 @@ function cpClose(){
 }
 
 // ── upload & set: a dropped .zip unzips and populates the rooms ──
-const brand={name:'',tagline:'',category:'',logos:[],photos:[],docs:[],colors:[],type:null,colorSystem:null,typeSystem:null,personality:null,visualDirection:'',guidePlan:null,brandHomeImprovements:null,brandWorld:null,designStrategy:null,presentation:null,fonts:[]};
+const brand={name:'',tagline:'',category:'',logos:[],photos:[],docs:[],colors:[],type:null,colorSystem:null,typeSystem:null,personality:null,visualDirection:'',guidePlan:null,brandHomeImprovements:null,brandWorld:null,designStrategy:null,presentation:null,fonts:[],brandIntelligence:null};
 const brandState = {                 // one shared, structured read-model. `brand` stays the write target for now; syncBrandState() keeps this in step so every room reads one source of truth.
-  overview:{}, identity:{}, colors:[], typography:{}, voice:{}, assets:[], applications:{}, rules:{}, delivery:{}
+  overview:{}, identity:{}, colors:[], typography:{}, voice:{}, assets:[], applications:{}, rules:{}, delivery:{}, brandIntelligence:{}
 };
 function syncBrandState(){            // project the existing `brand` into brandState — non-destructive, never replaces brand
   try{
@@ -1386,6 +1386,7 @@ function syncBrandState(){            // project the existing `brand` into brand
     brandState.delivery   = { name:b.name||'', assetCount:(b.logos||[]).length+(b.photos||[]).length+(b.docs||[]).length, hasGuide:!!b.name };
     brandState.identity.families = logoFamilies();
     brandState.placements = brand.placements || defaultPlacements();
+    brandState.brandIntelligence = brand.brandIntelligence || {};
   }catch(e){ console.warn('[brandState] sync skipped:', e); }
   return brandState;
 }
@@ -1394,7 +1395,7 @@ let undoStack=[], redoStack=[], _undoLast=null, _undoing=false;
 function _brandSnap(){
   try{ return JSON.parse(JSON.stringify({
     name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type,
-    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null,designStrategy:brand.designStrategy||null,environmentProfile:brand.environmentProfile||null,signature:brand.signature||null
+    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null,designStrategy:brand.designStrategy||null,environmentProfile:brand.environmentProfile||null,signature:brand.signature||null,brandIntelligence:brand.brandIntelligence||null
   })); }catch(e){ return null; }
 }
 function pushUndoSnapshot(){            // store the prior committed state so we can step back to it
@@ -2394,6 +2395,7 @@ function cleanBrandName(n){          // tidy a candidate; strip descriptors, wat
   s=s.replace(/\b(logo|logotype|wordmark|word\s*mark|brandmark|brand\s*mark|favicon|primary|secondary|reverse|transparent|vector|hi-?res|rgb|cmyk|final|draft|export|version|v\d+)\b/ig,' ');  // descriptors, not the name
   s=s.replace(/\b(sportslogos(?:net)?|shutterstock|istock|adobe\s*stock|adobestock|dreamstime|vecteezy|freepik|pngwing|pngegg|pngitem|pngtree|seeklogo|flaticon|stockvector|getty(?:images)?|123rf|depositphotos|alamy)\b/ig,' ');   // stock/watermark sources baked into export names
   s=s.replace(/[-–—]+/g,' ').replace(/\b\d{4,}\b/g,' ').replace(/\s+0?\d{1,3}\b\s*$/,'');   // separators, years/id numbers, trailing counters
+  s=s.replace(/\s+/g,' ').trim().replace(/^(.+?)\s+\1(?=\s|$)/i,'$1').replace(/\b(\w[\w]*)\s+\1\b/ig,'$1');   // collapse repeated words/phrases: Moving Day Moving Day -> Moving Day
   s=tidyName(s);
   if(s.length>40) s=s.split(/\s+/).slice(0,4).join(' ');                 // a brand is a few words — keep the lead, drop trailing cruft instead of rejecting
   if(s && !/[A-Z]/.test(s)) s=s.replace(/\b([a-z])/g,c=>c.toUpperCase()); // title-case a raw lowercase filename, but never re-case a name that already has intentional caps
@@ -4403,6 +4405,100 @@ function buildPreparationReport(inv){
     summary: inv.length+' asset'+(inv.length===1?'':'s')+' prepared — '+present.map(([c,n])=>n+' '+c).join(', ')
   };
 }
+/* ── Shared brand intelligence ─────────────────────────────────────────────
+   One object every room reads. Pulls from the AI response when present, and
+   ALWAYS backfills from grounded local observations so rooms are never empty
+   or fake. AI decides the intelligence; this only normalizes + fills gaps.
+   It never invents facts — unknown industry/audience stay blank, not guessed. */
+function normalizeBrandIntelligence(aiResponse, inventory, picked, source){
+  const d  = (aiResponse && typeof aiResponse==='object') ? aiResponse : {};
+  const g  = d.guide||{}, br = d.brand||{}, world = d.brandWorld||{}, strat = d.designStrategy||{};
+  const logos = (brand.logos||[]), docs = (brand.docs||[]);
+  const has   = r => logos.some(l=>l&&l.role===r);
+  const persArr = Array.isArray(brand.personality) ? brand.personality
+                : (brand.personality ? [brand.personality] : (Array.isArray(world.keywords)?world.keywords:[]));
+
+  // identity facts — AI first, else honest blanks (never invented)
+  const brandName = brand.name||'';
+  const industry  = g.category || br.industry || brand.category || '';
+  const vibe      = world.tone || strat.voice || (persArr.length?persArr.slice(0,3).join(', '):'') || '';
+  const audience  = strat.audience || world.audience || '';
+  const visualPersonality = persArr.slice(0,6);
+
+  // logo system — AI notes if given, else grounded local notes from what's present
+  const aiLS = (d.logoSystem && typeof d.logoSystem==='object') ? d.logoSystem : {};
+  const note = (aiVal, local) => { const v = aiVal && (typeof aiVal==='string'?aiVal:(aiVal.usage||aiVal.note||aiVal.recommendation)); return (v && String(v).trim()) || local; };
+  const hasReversed = logos.some(l=> l && (l.variantClass==='light' || /revers|white|on\s*dark|knockout/i.test((l.name||'')+' '+(l.role||''))));
+  const logoSystem = {
+    primaryLogo: note(aiLS.primaryLogo, 'The lead mark for recognition across your core brand moments.'),
+    wordmark:    note(aiLS.wordmark,    'The name set as type — best where the brand needs to be read, not just recognized.'),
+    icon:        note(aiLS.icon||aiLS.iconMark, 'The compact mark — reserve it for avatars, favicons, and tight spaces.'),
+    reversedLogo: hasReversed
+        ? note(aiLS.reversedLogo, 'A light version for dark, image-heavy, or high-contrast backgrounds.')
+        : note(aiLS.reversedLogo, 'No reversed mark detected — a white version would help on dark or photo backgrounds.'),
+    supportingMarks: note(aiLS.supportingMarks, 'Secondary marks for supporting moments — use sparingly, behind the primary system.')
+  };
+
+  // colours — prefer AI creative names, then colorSystem, then existing, then local hue name
+  const aiPal = (Array.isArray(d.palette)?d.palette:(Array.isArray(d.colors)?d.colors:[]));
+  const csArr = (function(){ try{ const cs=brand.colorSystem||{}; return [].concat(cs.colors||[],cs.palette||[],cs.roles||[]); }catch(e){ return []; } })();
+  const byHex = (arr,hex)=>{ const h=String(hex||'').toLowerCase(); return arr.find(c=>String((c&&c.hex)||'').toLowerCase()===h)||null; };
+  const colors = (brand.colors||[]).map((c,i)=>{
+    const hex = c.hex||'';
+    const aiHit = byHex(aiPal,hex), csHit = byHex(csArr,hex);
+    const creativeName = (aiHit&&aiHit.name) || (csHit&&(csHit.name||csHit.creativeName))
+                       || (c.name && c.name!=='Color' ? c.name : '')
+                       || (typeof homeColorName==='function'?homeColorName(hex):'') || 'Color';
+    const role = c.role || (i===0?'primary':i===1?'secondary':'accent');
+    const usage = (csHit&&csHit.usage) ? String(csHit.usage)
+                : i===0 ? 'Primary atmosphere colour — hero sections and premium backgrounds.'
+                : i===1 ? 'Secondary colour — supporting surfaces and accents.'
+                        : 'Accent — small highlights and detail.';
+    const sourceReason = (aiHit||csHit) ? 'named by your Concierge read' : 'read from your logo files';
+    return { role, creativeName, hex, usage, sourceReason };
+  });
+
+  // recommendations — AI when present, else grounded local observations (no fake certainty)
+  const aiRecs = [].concat(
+      Array.isArray(d.brandHomeImprovements)?d.brandHomeImprovements:[],
+      Array.isArray(strat.recommendations)?strat.recommendations:[],
+      Array.isArray(d.recommendations)?d.recommendations:[]
+    ).map(x=>typeof x==='string'?x:(x&&(x.text||x.note||x.recommendation))).filter(Boolean);
+  let identityRecommendations;
+  if(aiRecs.length){ identityRecommendations = aiRecs.slice(0,4); }
+  else {
+    const local=[];
+    if(has('wordmark') && has('iconMark')) local.push('Your wordmark carries the name; reserve the compact icon for avatars, favicons, and tight spaces.');
+    else if(has('wordmark')) local.push('The wordmark is your most legible mark — lead with it in wide placements.');
+    else if(has('iconMark')) local.push('The icon reads at small sizes — pair it with the name in wide placements so the brand is spelled out.');
+    if(!hasReversed && logos.length) local.push('No reversed (white) mark detected — add one for dark, photo, or high-contrast backgrounds.');
+    if((brand.colors||[]).length) local.push('Keep one colour leading; let the others support so the palette reads as a system, not a set.');
+    identityRecommendations = local.slice(0,4);
+  }
+
+  const assetRecommendations = (function(){ const r=[];
+    if(!docs.some(x=>/guide|guideline|brand\s*book/i.test((x.name||'')+' '+(x.role||'')))) r.push('No brand guidelines document detected — a short PDF keeps everyone consistent.');
+    return r; })();
+
+  // format guidance — static concierge copy, always present (AI-independent)
+  const formatGuidance = {
+    svg: 'Best for websites, signage, print, and anything that needs to scale perfectly.',
+    png: 'Best for social posts, decks, quick sharing, and transparent-background placement.',
+    pdf: 'Best for printing, sharing, guidelines, and client-ready documents.',
+    fonts: 'Use when installing or recreating the brand’s typography system.',
+    templates: 'Ready-made layouts for repeatable brand materials.'
+  };
+
+  return {
+    brandName, industry, vibe, audience, visualPersonality,
+    logoSystem, colors,
+    assetNaming: [], assetUsage: {},
+    identityRecommendations, assetRecommendations, duplicateWarnings: [],
+    formatGuidance,
+    source: { usedAI: !!(source&&source.usedAI), usedLocalFallback: !!(source&&source.usedLocalFallback), analyzedAt: new Date().toISOString() }
+  };
+}
+
 async function finishIntake(imgs,folderName){
   // baseline local sort — also the fallback if the AI route isn't reachable
   await analyzeAssets(imgs);                         // look at the pixels first
@@ -4423,17 +4519,17 @@ async function finishIntake(imgs,folderName){
   // prep the images once — used for both the AI call and the local colour read
   let urls=null;
   if(imgs.length){
-    const picked=[...imgs].sort((a,b)=>scoreForVision(b.name)-scoreForVision(a.name)).slice(0,8);  // quick test: lean set
+    const picked=[...imgs].sort((a,b)=>scoreForVision(b.name)-scoreForVision(a.name)).slice(0,6);  // lean set - fewer images to fit the 60s analysis budget
     urls=await Promise.all(picked.map(prepDataUrl));
     const aiOn=conciergeOn();
-    let aiOK=false;
+    let aiOK=false, aiResp=null;
     if(aiOn){
       setStatus('Quick read of your brand…');
       try{
         const assets=picked.map((im,i)=>({ id:'asset_'+(i+1), name:im.name,
           type:(/^data:([^;,]+)/.exec(urls[i]||'')||[])[1]||('image/'+im.ext),
           category:im.ext==='svg'?'logo':'image', dataUrl:urls[i] }));
-        aiOK=mapAiToBrand(await requestReview(assets, report), picked);
+        aiResp=await requestReview(assets, report); aiOK=mapAiToBrand(aiResp, picked);
       }catch(e){ console.warn('Brand Concierge unavailable — organized locally:',e); }
     }
     // colours come from the actual uploads even when the AI didn't run/return them
@@ -4445,8 +4541,10 @@ async function finishIntake(imgs,folderName){
                      : (brand.colors.length?`${total} file${total===1?'':'s'} moved in — colours read from your logos (full AI runs on your live site).`
                                             :`${total} file${total===1?'':'s'} moved in — organized locally (AI runs on your live site).`))
       : 'Nothing readable found — try images, a PDF, a folder, or a .zip.');
+    try{ brand.brandIntelligence = normalizeBrandIntelligence(aiResp, inventory, picked, {usedAI:!!aiOK, usedLocalFallback:!aiOK}); }catch(e){ console.warn('[intelligence] build skipped:',e); }
   } else {
     setStatus(total? `${total} file${total===1?'':'s'} moved in.` : 'Nothing readable found — try images, a PDF, a folder, or a .zip.');
+    try{ brand.brandIntelligence = normalizeBrandIntelligence(null, inventory, [], {usedAI:false, usedLocalFallback:true}); }catch(e){}
   }
   assignRoles();
   try{ autoAssignFontRoles(); }catch(e){}
@@ -4489,7 +4587,7 @@ function _db(){return new Promise((res,rej)=>{ if(typeof indexedDB==='undefined'
 function saveBrand(){
   try{ syncBrandState(); }catch(e){}
   const snap={name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type,placements:brand.placements||null,fonts:(brand.fonts||[]),
-    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null,designStrategy:brand.designStrategy||null,environmentProfile:brand.environmentProfile||null,signature:brand.signature||null};
+    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null,designStrategy:brand.designStrategy||null,environmentProfile:brand.environmentProfile||null,signature:brand.signature||null,brandIntelligence:brand.brandIntelligence||null};
   if(!snap.name && !snap.logos.length && !snap.photos.length && !(snap.colors&&snap.colors.length)) return;
   try{ pushUndoSnapshot(); }catch(e){}
   _db().then(db=>{ try{ db.transaction(SAVE_STORE,'readwrite').objectStore(SAVE_STORE).put(snap,SAVE_KEY); }catch(e){} })
@@ -4509,7 +4607,7 @@ function restoreBrand(snap){
   brand.colorSystem=snap.colorSystem||null; brand.typeSystem=snap.typeSystem||null;
   brand.personality=snap.personality||null; brand.guidePlan=snap.guidePlan||null; brand.brandHomeImprovements=snap.brandHomeImprovements||null;
   brand.brandWorld=snap.brandWorld||null; brand.designStrategy=snap.designStrategy||null;
-  brand.environmentProfile=snap.environmentProfile||null; brand.signature=snap.signature||null;
+  brand.environmentProfile=snap.environmentProfile||null; brand.signature=snap.signature||null; brand.brandIntelligence=snap.brandIntelligence||null;
   assignRoles(); projectWorkspaceState();
   if(brand.name||brand.logos.length||brand.photos.length||brand.colors.length){
     ensureBrandName();       // a saved session with a blank name still shows something real
@@ -4599,6 +4697,7 @@ async function importFromExperience(){
     if(dna.personality) brand.personality=dna.personality;
     if(dna.visualDirection) brand.visualDirection=dna.visualDirection;
     if(dna.presentation && typeof dna.presentation==='object') brand.presentation=dna.presentation;
+    if(dna.brandIntelligence && typeof dna.brandIntelligence==='object') brand.brandIntelligence=dna.brandIntelligence;
   }
   brand.logos=[]; brand.photos=[]; brand.docs=[];
   for(const rec of (recs||[])){
@@ -4618,6 +4717,7 @@ async function importFromExperience(){
   ensureBrandName();         // never move in nameless, even from an old or hand-built handoff
   try{ projectWorkspaceState(); }catch(e){ console.warn('[brand-home] project skipped:',e); }
   try{ autoAssignFontRoles(); }catch(e){} try{ applyBrandHome(); }catch(e){ console.warn('[brand-home] applyBrandHome skipped:',e); }
+  if(!brand.brandIntelligence){ try{ brand.brandIntelligence=normalizeBrandIntelligence(null, null, [], {usedAI:false, usedLocalFallback:true}); }catch(e){} }
   saveBrand();               // the brand persists no matter what rendering did
   await bridgeClear(); try{ localStorage.removeItem(BRAND_DNA_KEY); }catch(e){}
   const n=brand.logos.length+brand.photos.length+brand.docs.length;
