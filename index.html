@@ -855,7 +855,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.8';
+const MD_BUILD='2026.06.24.9';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -2864,6 +2864,7 @@ function pickMark(...roles){
   for(const r of roles){ const m=brand.logos.find(l=>l.role===r); if(m) return m; }
   return brand.logos[0]||null;
 }
+function igMark(){ return pickMark('iconMark','primaryLogo','wordmark','secondaryLogo'); }   // a round profile icon wants the compact mark, not the wide wordmark
 function heroMark(){            // the most logo-like mark for the home hero — avoids photo-ish images
   const L=brand.logos.filter(l=>l&&l.url); if(!L.length) return null;
   const tr=l=>(l.transparentRatio==null?0.08:l.transparentRatio), vary=l=>(l.variety==null?40:l.variety), asp=l=>(l.aspect==null?1:l.aspect);
@@ -2880,9 +2881,10 @@ async function renderMockups(root){
   if(!brand.signature) brand.signature=defaultSignature();
   const sigLogo=await logoSized(pm.url,46);
   const sigHTML=buildSignatureHTML(sigLogo);
-  const igc=await trimmedLogoCanvas(pm.url);
-  const igSrc=igc?igc.toDataURL('image/png'):pm.url;
-  const igBg=igBgChoice || (bestGround(pm)==='dark' ? (cssVar('--b1','#14291f')||'#14291f') : (brandGround('light')||'#F4F1E8'));
+  const im=igMark()||pm;                                 // round icon → compact mark when one exists
+  const igc=await trimmedLogoCanvas(im.url);
+  const igSrc=igc?igc.toDataURL('image/png'):im.url;
+  const igBg=igBgChoice || (bestGround(im)==='dark' ? (cssVar('--b1','#14291f')||'#14291f') : (brandGround('light')||'#F4F1E8'));
   box.className='inuse-two';
   box.innerHTML=
     '<div class="inuse-card"><div class="inuse-sig">'+sigHTML+'</div><span class="inuse-tag">Email signature</span></div>'
@@ -3046,7 +3048,7 @@ function igBgOptions(){
 function renderIgBgs(root){
   const wrap=root.querySelector('[data-ig-bgs]'); if(!wrap) return;
   const opts=igBgOptions();
-  if(!igBgChoice){ const pm=pickMark('primaryLogo','wordmark','secondaryLogo');
+  if(!igBgChoice){ const pm=igMark();
     const pick=(pm && bestGround(pm)==='paper') ? (opts.find(o=>/light/i.test(o.name))||opts[0]) : opts[0];
     igBgChoice=pick.hex; }
   wrap.innerHTML=opts.map(o=>`<span class="ig-bg${o.hex.toUpperCase()===igBgChoice.toUpperCase()?' sel':''}" data-ig-bg="${o.hex}" title="${o.name}" style="background:${o.hex}"></span>`).join('');
@@ -3135,12 +3137,12 @@ async function cleanMark(url,isSvg){                                   // transp
 }
 async function renderIgPreview(root){          // show the trimmed mark so the preview matches the download
   const prev=root.querySelector('[data-ig-preview]'); if(!prev) return;
-  const pm=pickMark('primaryLogo','wordmark','secondaryLogo'); if(!pm) return;
+  const pm=igMark(); if(!pm) return;
   const c=await trimmedLogoCanvas(pm.url); const img=prev.querySelector('img');
   if(img&&c){ img.src=c.toDataURL('image/png'); }
 }
 async function exportInstagramIcon(){
-  const pm=pickMark('primaryLogo','wordmark','secondaryLogo'); if(!pm) return;
+  const pm=igMark(); if(!pm) return;
   const S=1080, c=document.createElement('canvas'); c.width=S; c.height=S; const x=c.getContext('2d');
   x.fillStyle=igBgChoice||'#14291f'; x.fillRect(0,0,S,S);
   const lc=await trimmedLogoCanvas(pm.url);
@@ -3174,7 +3176,7 @@ function renderApplications(root){
     <div class="apptool">
       <div class="apptool-h"><b>Instagram profile icon</b><i>1080 × 1080</i></div>
       <div class="ig-cols">
-        <div class="ig-preview" data-ig-preview><img alt="" src="${pm.url}"></div>
+        <div class="ig-preview" data-ig-preview><img alt="" src="${(igMark()||pm).url}"></div>
         <div class="ig-controls">
           <div class="ig-bgs" data-ig-bgs></div>
           <button class="ig-dl" data-ig-download>Download icon</button>
