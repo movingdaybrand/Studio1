@@ -855,7 +855,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.10';
+const MD_BUILD='2026.06.24.11';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -3741,13 +3741,12 @@ function scoreForVision(n){ n=n.toLowerCase(); let s=0;
   if(/\.svg$/.test(n)) s+=2; if(/\.png$/.test(n)) s+=1;
   if(/photo|image|img|dsc|banner|hero|cover|background|screenshot/.test(n)) s-=3;
   return s; }
-function prepDataUrl(im){            // rasterize SVGs + flatten transparency so the vision model can see them
+function prepDataUrl(im){            // downscale + flatten EVERY image (not just SVG) so the vision model sees it AND the payload stays small — full-res originals here are what caused the 413 fallback on multi-file brands
   return new Promise(res=>{
-    if(im.ext!=='svg' && /^data:image\/(png|jpeg|jpg|webp)/i.test(im.url)) return res(im.url);
     try{ const img=new Image();
       img.onload=()=>{ try{ const max=768; let w=img.width||512,h=img.height||512; const sc=Math.min(1,max/Math.max(w,h));
-          w=Math.round(w*sc); h=Math.round(h*sc); const c=document.createElement('canvas'); c.width=w; c.height=h;
-          const x=c.getContext('2d'); x.fillStyle='#808080'; x.fillRect(0,0,w,h); x.drawImage(img,0,0,w,h); res(c.toDataURL('image/png'));
+          w=Math.max(1,Math.round(w*sc)); h=Math.max(1,Math.round(h*sc)); const c=document.createElement('canvas'); c.width=w; c.height=h;
+          const x=c.getContext('2d'); x.fillStyle='#808080'; x.fillRect(0,0,w,h); x.drawImage(img,0,0,w,h); res(c.toDataURL('image/jpeg',0.82));   // JPEG keeps each asset ~100KB even for large PNG/AVIF originals
         }catch(e){ res(im.url); } };
       img.onerror=()=>res(im.url); img.src=im.url;
     }catch(e){ res(im.url); }
