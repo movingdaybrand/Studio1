@@ -855,7 +855,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.8';
+const MD_BUILD='2026.06.24.10';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -1034,7 +1034,7 @@ function setShellRoom(key){ SHELL.className=SHELL.className.replace(/\bmd-room-\
 function renderActiveRoom(){
   const key=currentRoom, r=ROOMS[key]; if(!r) return;
   roomBody.innerHTML=r.html; roomTitle.innerHTML=r.title; roomKicker.textContent=r.kicker;
-  if(roomDesc){ var _rd=(ROOM_META[key]&&ROOM_META[key].desc)||'', _rt=(ROOM_META[key]&&ROOM_META[key].title)||''; roomDesc.textContent=(_rd&&_rd!==_rt)?_rd:''; }
+  if(roomDesc){ var _rd=(ROOM_META[key]&&ROOM_META[key].desc)||'', _rt=(ROOMS[key]&&ROOMS[key].title)||''; var _nrm=function(s){return String(s||'').replace(/\.$/,'').trim().toLowerCase();}; roomDesc.textContent=(_rd && _nrm(_rd)!==_nrm(_rt))?_rd:''; }
   try{ if(window.MD&&MD.brain){ MD.brain.refresh(); const st=MD.brain.roomStatus()[key]; if(st!=null) roomBody.dataset.brainStatus=st; } }catch(e){}   // room reads the Brain
   const g=(label,fn)=>{ try{ fn(); }catch(e){ console.warn('[brand-home] room render ('+label+') failed:', e); } };
   syncBrandState();                                                    // keep the shared read-model current for whatever this room reads
@@ -1867,7 +1867,7 @@ async function renderRoomForPublish(key){
         } else { ar.innerHTML='<div class="asset-empty">No assets yet.</div>'; }
       }
     }
-    if(key==='deliverables'){ try{ renderApplications(tmp); }catch(_){} }   // email signature + Instagram icon, baked
+    if(key==='deliverables'){ try{ renderApplications(tmp); await renderSigPreview(tmp); await renderIgPreview(tmp); }catch(_){} }   // email signature + Instagram icon, baked (await async previews so they're in the snapshot)
     applyUploads(tmp);                                 // full brand paint: name · tagline · colours · type · counts
     await placeLogos(tmp); await renderIdMarks(tmp); await renderLogoSystem(tmp); await fillHeroLogo(tmp);   // settle async logo renders before snapshot
   }catch(e){ console.warn('[publish] room render failed:',key,e); }
@@ -2050,6 +2050,7 @@ async function buildHomeHTML(){
   // ROOM view: keep the shell (back button + title), empty the body — the nav script fills it on demand
   const roomView=clone.querySelector('#room'); if(roomView){ roomView.className='view'; }
   const rb=clone.querySelector('#roomBody'); if(rb) rb.innerHTML='';
+  const rdsc=clone.querySelector('#roomDesc'); if(rdsc) rdsc.textContent='';
 
   // pre-render every public room and embed each as an inert <template>
   let templates='', meta={};
