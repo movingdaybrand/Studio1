@@ -664,6 +664,11 @@ body.deep-immerse .id-primary .wm small{color:rgba(243,239,230,.62)!important;}
 #assetRoot .asset-shelf:first-of-type .shelf-eyebrow{margin-top:clamp(8px,1.2vh,16px);}
 #assetRoot .shelf-count{margin-left:auto;color:var(--ink-faint);font-weight:500;font-variant-numeric:tabular-nums;letter-spacing:.06em;}
 #assetRoot .shelf-line{font-size:12px;color:var(--ink-soft);font-weight:300;margin:0 2px clamp(13px,1.8vh,17px);max-width:52ch;}
+#assetRoot .fmt-guide{margin-top:clamp(18px,2.6vh,32px);}
+#assetRoot .fmt-rows{display:flex;flex-direction:column;gap:7px;margin:0 2px;}
+#assetRoot .fmt-row{display:flex;gap:16px;align-items:baseline;padding:13px 16px;border-radius:var(--r-md);background:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,.32));box-shadow:var(--shadow);}
+#assetRoot .fmt-tag{flex:0 0 66px;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;color:var(--sage);padding-top:1px;}
+#assetRoot .fmt-note{flex:1;font-size:12.5px;line-height:1.5;color:var(--ink-soft);font-weight:300;}
 #assetRoot .asset-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))!important;}
 /* asset cards → placed previews, quiet chrome */
 #assetRoot .asset-thumb{border-radius:var(--r-md)!important;box-shadow:var(--shadow)!important;background:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,.32))!important;transition:transform .4s cubic-bezier(.22,1,.36,1),box-shadow .4s ease;}
@@ -855,7 +860,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.13';
+const MD_BUILD='2026.06.24.14';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -1652,6 +1657,20 @@ function renderAssetsRoom(){
         +'<div class="asset-grid">'+fonts.map(f=>{ const fam=esc(f.family||f.name||'Font');
             return '<div class="asset-card font"><div class="asset-thumb font-specimen" style="font-family:\''+fam+'\',var(--display)">Ag</div><div class="font-fam">'+fam+'</div></div>'; }).join('')+'</div></div>';
   }
+  // ── Choosing the right file: quiet concierge guidance (reads brandIntelligence.formatGuidance) ──
+  (function(){
+    const fg=(brand.brandIntelligence&&brand.brandIntelligence.formatGuidance)||{};
+    const rows=[
+      ['SVG', fg.svg||'Best for websites, signage, print, and anything that needs to scale perfectly.'],
+      ['PNG', fg.png||'Best for social posts, decks, quick sharing, and transparent-background placement.'],
+      ['PDF', fg.pdf||'Best for printing, sharing, guidelines, and client-ready documents.'],
+      ['Fonts', fg.fonts||'Use when installing or recreating the brand’s typography system.'],
+      ['Templates', fg.templates||'Ready-made layouts for repeatable brand materials.']
+    ];
+    html+='<div class="asset-shelf fmt-guide"><div class="shelf-eyebrow">Choosing the right file</div>'
+        +'<p class="shelf-line">A quiet guide to which format to reach for, and when.</p>'
+        +'<div class="fmt-rows">'+rows.map(function(r){ return '<div class="fmt-row"><span class="fmt-tag">'+esc(r[0])+'</span><span class="fmt-note">'+esc(r[1])+'</span></div>'; }).join('')+'</div></div>';
+  })();
   root.innerHTML=html;
   enhanceAssetThumbs(root);                                      // keep the floating, knocked-out marks
 }
