@@ -64,13 +64,13 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 @keyframes viewIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
 
 /* HOME */
-.home-head{text-align:center;margin:clamp(12px,4vh,40px) 0 clamp(18px,3.5vh,32px);}
-.kicker{font-size:10px;letter-spacing:.3em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;}
-.welcome{font-family:var(--display);font-weight:300;font-size:clamp(28px,3.8vw,40px);letter-spacing:-.02em;margin:.26em 0 .14em;}
+.home-head{text-align:center;margin:clamp(10px,3vh,28px) 0 clamp(14px,2.6vh,24px);}
+.kicker{font-size:10px;letter-spacing:.34em;text-transform:uppercase;color:var(--ink-faint);font-weight:500;}
+.welcome{font-family:var(--display);font-weight:300;font-size:clamp(24px,3.2vw,34px);letter-spacing:-.02em;margin:.18em 0 .12em;}
 .welcome .soft{color:var(--ink-faint);}
-.welcome-sub{color:var(--ink-soft);font-weight:300;font-size:14px;}
-.home-logo{display:flex;justify-content:center;margin:0 0 clamp(14px,2.4vh,24px);}
-.home-logo img{height:clamp(62px,8vw,96px);max-width:clamp(220px,36vw,400px);object-fit:contain;mix-blend-mode:normal;}
+.welcome-sub{color:var(--ink-soft);font-weight:300;font-size:13.5px;letter-spacing:.01em;}
+.home-logo{display:flex;justify-content:center;margin:0 0 clamp(10px,1.8vh,18px);}
+.home-logo img{height:clamp(44px,5.4vw,68px);max-width:clamp(180px,28vw,300px);object-fit:contain;mix-blend-mode:normal;}
 body.deep-immerse .home-logo img{mix-blend-mode:normal;}   /* multiply darkens a mark on the dark immersive ground — keep it true on dark */
 #mdWelcome{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;pointer-events:none;background:#0b1116;opacity:0;transition:opacity .9s ease;overflow:hidden;}
 #mdWelcome.on{opacity:1;}
@@ -140,7 +140,7 @@ body.deep-immerse .home-logo img{mix-blend-mode:normal;}   /* multiply darkens a
 .room-ic{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:var(--surface);box-shadow:inset 0 0 0 1px var(--sage-line);}
 .room-ic svg{width:18px;height:18px;stroke:var(--mark-ink);stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round;}
 .room-card b{display:block;font-weight:400;font-size:1rem;letter-spacing:-.01em;margin-top:auto;}
-.room-card i{display:block;font-style:normal;font-size:.76rem;font-weight:300;color:var(--ink-soft);margin-top:2px;}
+.room-card i{display:block;font-style:normal;font-size:.76rem;font-weight:300;color:var(--ink-soft);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .room-card .go{position:absolute;top:16px;right:16px;opacity:0;transform:translateX(-4px);transition:.25s;color:var(--ink-faint);}
 .room-card:hover .go{opacity:1;transform:none;}
 .room-no{position:absolute;top:14px;right:16px;left:auto;font-size:.62rem;letter-spacing:.14em;font-variant-numeric:tabular-nums;color:var(--ink-faint);opacity:.55;font-weight:500;transition:opacity .25s ease;}
@@ -148,8 +148,9 @@ body.deep-immerse .home-logo img{mix-blend-mode:normal;}   /* multiply darkens a
 .room-card[data-open="founder"]{opacity:.5;}
 .room-card[data-open="founder"]:hover{opacity:1;}
 /* home: quiet "already prepared" line — the concierge speaking */
-.home-prepared{display:flex;justify-content:center;flex-wrap:wrap;gap:clamp(20px,4vw,52px);margin:clamp(14px,2.6vh,26px) auto 0;max-width:640px;}
+.home-prepared{text-align:center;margin:clamp(11px,2vh,18px) auto 0;max-width:640px;}
 .home-prepared.empty{display:none;}
+.prep-line{font-size:.78rem;color:var(--ink-faint);font-weight:300;letter-spacing:.02em;}
 /* ═══════════════ HOME ENTRANCE — cinematic arrival (walking through the door) ═══════════════ */
 .home-veil{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;
   background:radial-gradient(125% 125% at 50% 30%,#2e5a40 0%,#1f3d2e 58%,#16281e 100%);
@@ -853,7 +854,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.3';
+const MD_BUILD='2026.06.24.4';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -982,6 +983,7 @@ const ROOMS={
     </div>
     <div class="flist" style="margin-top:14px">
       <div class="frow"><div><b>Render brand guide</b><i>Founder-only — a standalone guide with linked, downloadable files</i></div><button class="deliv-link" data-deliv="guide-render" style="white-space:nowrap">Render &rarr;</button></div>
+      <div class="frow"><div><b>Reset rooms</b><i>Clear what you moved in and start from the sample brand</i></div><button class="deliv-link" data-deliv="reset" style="white-space:nowrap">Reset</button></div>
     </div>
     <div class="founder-state" id="founderState"><div class="fs-bar"><span>Live workspace state</span><span id="fsUpdated"></span></div><pre id="fsJson"></pre></div>`}
 };
@@ -1818,6 +1820,7 @@ function handleDeliverable(kind){
   else if(kind==='pdf'){ announceWorkspaceUpdate('Opening print — choose “Save as PDF”.','deliverables'); if(currentRoom!=='guide') openRoom('guide'); setTimeout(()=>window.print(),650); }
   else if(kind==='guides'){ openSavedGuides(); }
   else if(kind==='versions'){ announceWorkspaceUpdate('Every save is kept in this browser.','deliverables'); }
+  else if(kind==='reset'){ resetBrand(); }
 }
 /* ── Publish: upload the built guide to Vercel Blob and surface a live, shareable link (falls back to a download) ── */
 function ensurePublishId(){            // a stable id per brand so re-publishing updates the SAME link
@@ -3470,14 +3473,14 @@ window.MD = window.MD || {};
     get(domain){ return domain ? brain[domain] : brain; },
     // what each specialist currently knows — for rooms to read without re-deriving
     roomStatus(){ try{
-      const apps=(brain.applications&&brain.applications.items)||[]; const ready=apps.filter(a=>a.ready).length;
+      const apps=(brain.applications&&brain.applications.items)||[];
       return {
-      identity: brain.identity.count? (brain.identity.count+' mark'+(brain.identity.count>1?'s':'')+(brain.identity.primary?' · primary set':'')) : '',
+      identity: brain.identity.count? 'The marks' : '',
       color:    brain.color.count? (brain.color.count+' colour'+(brain.color.count>1?'s':'')) : '',
-      typography: brain.typography.pairing || (brain.typography.display&&brain.typography.display.name) || '',
-      assets:   brain.assets.files? (brain.assets.files+' file'+(brain.assets.files>1?'s':'')+(brain.assets.missing.length?' · '+brain.assets.missing.length+' to prepare':'')) : '',
-      deliverables: apps.length? (ready+' of '+apps.length+' ready to use') : '',
-      guide:    brain.meta.hasAI? 'Written from your brand' : (brain.voice.tagline||'')
+      typography: (brain.typography.display&&brain.typography.display.name) || brain.typography.pairing || '',
+      assets:   brain.assets.files? (brain.assets.files+' file'+(brain.assets.files>1?'s':'')) : '',
+      deliverables: apps.length? 'Ready to hand off' : '',
+      guide:    brain.meta.name? 'The living document' : ''
     }; }catch(e){ return {}; } },
     // fill blank brand fields from what the Brain knows, so the guide reflects it
     applyToGuide(){ try{
@@ -3672,22 +3675,28 @@ function applyBrandHome(){
   const head=document.querySelector('.home-head');
   if(head && brand.name){
     const k=head.querySelector('.kicker'), w=head.querySelector('.welcome'), sub=head.querySelector('.welcome-sub');
-    if(k) k.textContent='Brand home';
-    if(w){
-      w.style.display=''; w.textContent=brand.name;
-      const t=brand.type||{}, ts=brand.typeSystem||{};
-      const df=t.display || (ts.display&&ts.display.name) || (ts.heading&&ts.heading.name) || '';
-      if(df){ ensureFont(df); w.style.fontFamily='"'+df+'", var(--display)'; }   // wear the brand's own type when we know it
-      else { w.style.fontFamily=''; }                                            // otherwise the house display face
-    }
-    if(sub) sub.textContent=brand.tagline||'Everything has a place. Choose a room to continue.';
+    if(k) k.textContent='Welcome home';
     const mark=resolvePlacement('brandHomeHeader')||heroMark();
+    const carriesName = !!mark && (mark.role==='wordmark' || (mark.aspect!=null && mark.aspect>2.2));   // a wide wordmark already says the name
     let logo=document.getElementById('homeLogo');
     if(mark){
-      if(!logo){ logo=document.createElement('div'); logo.id='homeLogo'; logo.className='home-logo'; head.insertBefore(logo,head.firstChild); }
+      if(!logo){ logo=document.createElement('div'); logo.id='homeLogo'; logo.className='home-logo'; }
+      if(k){ if(logo.previousElementSibling!==k) k.insertAdjacentElement('afterend',logo); }            // eyebrow → logo → name
+      else if(!logo.parentNode){ head.insertBefore(logo,head.firstChild); }
       logo.innerHTML='<img alt="">'; const _li=logo.querySelector('img'); _li.src=mark.url; logo.style.display='';
-      try{ cleanMark(mark.url, /svg/i.test(mark.ext||mark.url||'')).then(u=>{ if(u) _li.src=u; }).catch(()=>{}); }catch(e){}   // knock the flat background out so the mark floats free
+      try{ cleanMark(mark.url, /svg/i.test(mark.ext||mark.url||'')).then(u=>{ if(u) _li.src=u; }).catch(()=>{}); }catch(e){}
     } else if(logo){ logo.style.display='none'; }
+    if(w){
+      if(carriesName){ w.style.display='none'; }                                                        // logo carries the name → don't repeat it
+      else {
+        w.style.display=''; w.textContent=brand.name;
+        const t=brand.type||{}, ts=brand.typeSystem||{};
+        const df=t.display || (ts.display&&ts.display.name) || (ts.heading&&ts.heading.name) || '';
+        if(df){ ensureFont(df); w.style.fontFamily='"'+df+'", var(--display)'; }
+        else { w.style.fontFamily=''; }
+      }
+    }
+    if(sub) sub.textContent=brand.tagline||'Everything has a place. Choose a room to continue.';
   } else if(head){                                   // no brand → restore the default greeting
     const k=head.querySelector('.kicker'), w=head.querySelector('.welcome'), sub=head.querySelector('.welcome-sub');
     if(k) k.textContent='Good evening';
@@ -3712,15 +3721,14 @@ function renderPrepared(){
   if(!brand.name){ box.className='home-prepared empty'; box.innerHTML=''; return; }
   const assetN=(brand.logos.length||0)+(brand.photos.length||0)+(brand.docs.length||0);
   const ready=(brand.logos.length>0 && brand.colors.length>0);
-  const appN=heroMark()? 2 : 0;
-  const items=[];
-  if(assetN) items.push(['Archive', assetN+(assetN===1?' asset organized':' assets organized')]);
-  items.push(['Guide', ready?'Ready to review':'Taking shape']);
-  if(appN) items.push(['Applications', 'Signature & icon ready']);
-  box.className='home-prepared'+(items.length?'':' empty');
-  box.innerHTML=items.map(([k,v])=>'<span class="prep-item"><span class="prep-k">'+esc(k)+'</span><span class="prep-v">'+esc(v)+'</span></span>').join('');
+  const parts=[];
+  if(assetN) parts.push(assetN+(assetN===1?' asset organized':' assets organized'));
+  parts.push(ready?'guide ready':'guide taking shape');
+  if(heroMark()) parts.push('signature & icon ready');
+  box.className='home-prepared';
+  box.innerHTML='<span class="prep-line">'+parts.map(esc).join('&nbsp;&nbsp;·&nbsp;&nbsp;')+'</span>';
 }
-function showReset(){ const b=document.getElementById('resetBtn'); if(b) b.hidden=!(brand.name||brand.logos.length||brand.photos.length||brand.colors.length); }
+function showReset(){ const b=document.getElementById('resetBtn'); if(b) b.hidden=true; }   // Reset now lives in Founder Tools
 /* ── Brand Concierge API: same contract experience.html uses ── */
 function scoreForVision(n){ n=n.toLowerCase(); let s=0;
   if(/logo|wordmark|icon|mark|brand|symbol|emblem/.test(n)) s+=5;
