@@ -855,7 +855,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.7';
+const MD_BUILD='2026.06.24.8';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -3482,7 +3482,7 @@ window.MD = window.MD || {};
       return {
       identity: brain.identity.count? 'The marks' : '',
       color:    brain.color.count? (brain.color.count+' colour'+(brain.color.count>1?'s':'')) : '',
-      typography: (brain.typography.display&&brain.typography.display.name) || brain.typography.pairing || '',
+      typography: (function(){ var d=(brain.typography.display&&brain.typography.display.name)||''; if(!d) return brain.typography.pairing||''; if(d.length<=20) return d; var base=d.replace(/\s+(extra|ultra|semi|demi|condensed|compressed|expanded|extended|narrow|wide|thin|light|book|regular|medium|semibold|smbd|demibold|bold|black|heavy|italic|it|oblique|roman)\b/ig,'').replace(/\s{2,}/g,' ').trim(); return base.length>=3? base : d; })(),
       assets:   brain.assets.files? (brain.assets.files+' file'+(brain.assets.files>1?'s':'')) : '',
       deliverables: apps.length? 'Ready to hand off' : '',
       guide:    brain.meta.name? 'The living document' : ''
