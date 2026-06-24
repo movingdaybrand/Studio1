@@ -853,7 +853,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.1';
+const MD_BUILD='2026.06.24.2';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -1846,7 +1846,7 @@ async function publishWebGuide(){
    Each public room is fully rendered here (in the studio, where every renderer + the live brand state exist),
    embedded as a <template>, and re-shown by a tiny nav-only script. No studio runtime or re-serialized state
    ships to the published page; the rooms are the real, edited DOM, captured once at publish time. */
-const PUBLISH_ROOMS=['identity','assets','guide','typography'];   // the public rooms (founder/deliverables stay private)
+const PUBLISH_ROOMS=['identity','assets','guide','typography','deliverables'];   // the public rooms (founder/deliverables stay private)
 async function renderRoomForPublish(key){
   const tmp=document.createElement('div');
   tmp.style.cssText='position:absolute;left:-9999px;top:0;width:980px;';
@@ -1865,12 +1865,15 @@ async function renderRoomForPublish(key){
         } else { ar.innerHTML='<div class="asset-empty">No assets yet.</div>'; }
       }
     }
+    if(key==='deliverables'){ try{ renderApplications(tmp); }catch(_){} }   // email signature + Instagram icon, baked
     applyUploads(tmp);                                 // full brand paint: name · tagline · colours · type · counts
     await placeLogos(tmp); await renderIdMarks(tmp); await renderLogoSystem(tmp); await fillHeroLogo(tmp);   // settle async logo renders before snapshot
   }catch(e){ console.warn('[publish] room render failed:',key,e); }
   // strip editor-only chrome → clean read-only capture
   tmp.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
-  tmp.querySelectorAll('[data-action],.asset-replace,.edit-hint,.mk-dl,.gd-logo-dl,.ig-dl,.lib-upload,.id-edit,.edit-dot,.id-read,.color-read,.type-read,.assets-read,.apps-read').forEach(n=>n.remove());
+  tmp.querySelectorAll('[data-action],.asset-replace,.edit-hint,.mk-dl,.gd-logo-dl,.lib-upload,.id-edit,.edit-dot,.id-read,.color-read,.type-read,.assets-read,.apps-read').forEach(n=>n.remove());
+  // Deliverables: drop editor-only actions + non-functional inputs; keep client downloads (package, PDF, signature, icon)
+  tmp.querySelectorAll('[data-deliv="home"],[data-deliv="guides"],[data-deliv="palette"],[data-deliv="save"],[data-deliv="review"],[data-deliv="versions"],.sig-fields,.ig-bgs').forEach(n=>n.remove());
   const html=tmp.innerHTML; tmp.remove();
   return html;
 }
@@ -1972,6 +1975,31 @@ const PUBLISHED_TOOLBAR_JS = `(function(){
     else if(act==="send") sendAsset(src,nm);
   });
 
+  // ---- Deliverables room actions: package ZIP, PDF, signature copy, Instagram icon ----
+  document.addEventListener("click", function(e){
+    var d=e.target.closest("[data-deliv]");
+    if(d){ var k=d.getAttribute("data-deliv");
+      if(k==="zip") download();
+      else if(k==="pdf") window.print();
+      return; }
+    if(e.target.closest("[data-sig-copy]")){ copySignature(); return; }
+    if(e.target.closest("[data-ig-download],.ig-dl")){ downloadIcon(); return; }
+  });
+  function copySignature(){
+    var p=document.querySelector("[data-sig-preview]"); if(!p){ toast("No signature"); return; }
+    var html=p.innerHTML, text=(p.textContent||"").trim();
+    if(window.ClipboardItem && navigator.clipboard && navigator.clipboard.write){
+      var o={}; o["text/html"]=new Blob([html],{type:"text/html"}); o["text/plain"]=new Blob([text],{type:"text/plain"});
+      navigator.clipboard.write([new ClipboardItem(o)]).then(function(){ toast("Signature copied \u2014 paste into Gmail or Outlook"); }).catch(function(){ copyText(text,"Signature copied"); });
+    } else { copyText(text,"Signature copied"); }
+  }
+  function downloadIcon(){
+    var im=document.querySelector("[data-ig-preview] img"); if(!im){ toast("No icon"); return; }
+    var src=im.getAttribute("src"), nm=(HOME.slug||"brand")+"-instagram.png";
+    if(/^https?:/i.test(src)){ blobFrom(src).then(function(b){ var u=URL.createObjectURL(b); saveURL(u,nm); setTimeout(function(){ URL.revokeObjectURL(u); },3000); toast("Downloaded"); }).catch(function(){ saveURL(src,nm); }); }
+    else { saveURL(src,nm); toast("Downloaded"); }
+  }
+
   // ---- Files section inside the published Brand Guide (read-only links) ----
   function collectColors(){
     var out=[], seen={};
@@ -2015,7 +2043,7 @@ async function buildHomeHTML(){
 
   // HOME view: keep the four public room cards working, strip editor-only chrome
   const homeView=clone.querySelector('#home'); if(homeView){ homeView.className='view show'; }
-  clone.querySelectorAll('.movein, #homePrepared, [data-open="founder"], [data-open="deliverables"]').forEach(n=>n.remove());
+  clone.querySelectorAll('.movein, #homePrepared, [data-open="founder"]').forEach(n=>n.remove());   // client home = builder minus Founder Tools
   // ROOM view: keep the shell (back button + title), empty the body — the nav script fills it on demand
   const roomView=clone.querySelector('#room'); if(roomView){ roomView.className='view'; }
   const rb=clone.querySelector('#roomBody'); if(rb) rb.innerHTML='';
