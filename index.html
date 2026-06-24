@@ -855,7 +855,7 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
 
 <script>
 const NAME='Marlowe &amp; Finch', TAG='Considered counsel for considered lives.';
-const MD_BUILD='2026.06.24.5';
+const MD_BUILD='2026.06.24.6';
 const ROOMS={
   identity:{kicker:'Identity',title:'Everything that makes you, you.',html:`
     <div class="review">
@@ -1610,8 +1610,6 @@ function assetCardHTML(a,isLogoGroup,variantLabel,pub){
   return '<div class="asset-card">'
     +'<button class="asset-remove" data-remove="'+a.id+'" title="Remove asset" aria-label="Remove asset">\u00d7</button>'
     +thumb
-    +'<span class="asset-rolechip">'+esc(roleLabel)+'</span>'
-    +'<span class="asset-statusdot '+st[0]+'" title="'+st[1]+'"></span>'
     +(variantLabel?'<div class="asset-varchip">'+esc(variantLabel)+'</div>':'')
     +'<button class="asset-expand" data-expand type="button" aria-label="Show details">Details</button>'
     +'<div class="asset-meta">'
