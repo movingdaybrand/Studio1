@@ -4611,13 +4611,16 @@ async function finishIntake(imgs,folderName){
     const aiOn=conciergeOn();
     let aiOK=false, aiResp=null;
     if(aiOn){
-      setStatus('Quick read of your brand…');
+      const _narr=['Receiving your brand…','Unpacking the files…','Reading the marks…','Studying the palette…','Settling everything into place…'];
+      let _ni=0; setStatus(_narr[0]);
+      const _narrTimer=setInterval(()=>{ _ni=Math.min(_ni+1,_narr.length-1); setStatus(_narr[_ni]); },1600);
       try{
         const assets=picked.map((im,i)=>({ id:'asset_'+(i+1), name:im.name,
           type:(/^data:([^;,]+)/.exec(urls[i]||'')||[])[1]||('image/'+im.ext),
           category:im.ext==='svg'?'logo':'image', dataUrl:urls[i] }));
         aiResp=await requestReview(assets, report); aiOK=mapAiToBrand(aiResp, picked);
       }catch(e){ console.warn('Brand Concierge unavailable — organized locally:',e); }
+      finally{ clearInterval(_narrTimer); }
     }
     // colours come from the actual uploads even when the AI didn't run/return them
     try{ const _lurls=(brand.logos||[]).map(l=>l.url).filter(Boolean); const _lp=_lurls.length?await extractPalette(_lurls):[]; const _merged=refinePalette(_lp.concat(brand.colors||[])); if(_merged.length) brand.colors=_merged; }
