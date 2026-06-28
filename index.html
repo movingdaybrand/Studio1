@@ -4864,7 +4864,7 @@ function renderIdentityPedestal(){
   const ov=document.createElement('div'); ov.id='mdPedestalPreview';
   ov.innerHTML=`
   <style>
-    #mdPedestalPreview{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;
+#mdPedestalPreview{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;padding:60px 0;
       background:radial-gradient(130% 120% at 50% 18%,#22382a 0%,#16261d 55%,#0e1a14 100%);
       font-family:'Inter',-apple-system,system-ui,sans-serif;color:#f3efe6;
       animation:mdPedFade .5s ease both;}
