@@ -4846,7 +4846,7 @@ function renderIdentityPedestal(){
   let col; try{ col=buildIdentityCollection(); }catch(e){ console.warn('[pedestal] collection unavailable',e); return; }
   const piece=(col&&col.pieces||[]).find(p=>p.id==='primaryLogo');
   if(!piece){ console.warn('[pedestal] no primaryLogo piece'); return; }
-
+  document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') saveBrand(); });
   // best displayable file from the piece's variants (full color → dark → light → any)
   const pickUrl=()=>{ const v=piece.variants||{};
     const order=['Full Color','Dark','Light']; 
