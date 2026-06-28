@@ -4708,6 +4708,134 @@ function restoreBrand(snap){
   }
 }
 window.addEventListener('beforeunload', saveBrand);
+/* ════════════════ THE MOVING DAY BRAND STANDARD ════════════════
+   Moving Day's opinion about what a well-cared-for brand looks like.
+   A PRODUCT ASSET, not config — the source of truth Brand Health, Recommendations,
+   Concierge guidance, and future automation all DERIVE from. It defines the IDEAL
+   only: it knows nothing about uploaded files.
+   NAMING NOTE (provisional, under review): completion → "Brand Health",
+   expectations → "Brand Standard", missing → "Opportunities". Field names below
+   stay stable for Step 1; rename intentionally once the model is proven. */
+   const PRIORITY_WEIGHTS = { required: 3, recommended: 1, professional: 0.5 };
+const LOGO_EXPECTATIONS = [
+  { variant:'Full Color', format:'SVG', priority:'required' },
+  { variant:'Full Color', format:'PNG', priority:'required' },
+  { variant:'Full Color', format:'PDF', priority:'recommended' },
+  { variant:'Dark',  format:'SVG', priority:'recommended' },
+  { variant:'Dark',  format:'PNG', priority:'recommended' },
+  { variant:'Light', format:'SVG', priority:'recommended' },
+  { variant:'Light', format:'PNG', priority:'recommended' },
+  { variant:'Source', format:['AI','EPS'], priority:'professional', satisfiedByAny:true }
+];
+const BRAND_STANDARD = {
+  primaryLogo:   { type:'logo', label:'Primary Logo',   family:'primaryLogo',   expectations:LOGO_EXPECTATIONS },
+  secondaryLogo: { type:'logo', label:'Secondary Logo', family:'secondaryLogo', expectations:LOGO_EXPECTATIONS },
+  wordmark:      { type:'logo', label:'Wordmark',       family:'wordmark',      expectations:LOGO_EXPECTATIONS },
+  icon:          { type:'logo', label:'Icon',           family:'iconMark',      expectations:LOGO_EXPECTATIONS },
+  socialAvatar:  { type:'logo', label:'Social Avatar',  family:null,            expectations:LOGO_EXPECTATIONS },
+  lockup:        { type:'logo', label:'Lockups',        family:null,            expectations:LOGO_EXPECTATIONS },
+  brandPattern:  { type:'logo', label:'Brand Pattern',  family:null,            expectations:LOGO_EXPECTATIONS },
+  signature:     { type:'logo', label:'Signature',      family:null,            expectations:LOGO_EXPECTATIONS, onlyWhenPresent:true }
+};
+
+/* ════════════════ MEASUREMENT ENGINE ════════════════
+   A registry of measurement strategies, keyed by Piece type. Each strategy compares
+   reality against ONE piece's expectations and returns the universal contract:
+   { present, missing, completion, variants, fileCount }. The Collection Builder
+   never knows HOW a type is measured — it just asks the engine. Add a new piece type
+   (colors, typography, …) by registering a new strategy here; the Builder is untouched. */
+const MeasurementEngine = (function(){
+  const strategies = {};
+  function register(type, fn){ strategies[type] = fn; }
+  function measure(spec, ctx){
+    const fn = strategies[spec.type];
+    if(!fn) return { present:[], missing:[], completion:0, variants:{}, fileCount:0, unmeasured:true };
+    return fn(spec, ctx);
+  }
+
+  // ── LOGO strategy: measured by variants × formats, weighted by priority ──
+  register('logo', function(spec, ctx){
+    const VARIANT_MAP = { fullColor:'Full Color', dark:'Dark', light:'Light' };
+    const realFiles = (ctx.logos||[]).filter(Boolean).map(function(l){
+      return { id:l.id, name:l.name, url:l.url,
+        family:(typeof logoFamilyOf==='function')?logoFamilyOf(l):(l.role||'supporting'),
+        variant: VARIANT_MAP[(typeof logoVariantOf==='function')?logoVariantOf(l):'other'] || 'Other',
+        format: String(l.ext||'').toUpperCase() };
+    });
+    const mine = spec.family ? realFiles.filter(function(f){ return f.family===spec.family; }) : [];
+    const present=[], missing=[]; let earned=0, possible=0;
+    spec.expectations.forEach(function(exp){
+      const w = PRIORITY_WEIGHTS[exp.priority]!=null ? PRIORITY_WEIGHTS[exp.priority] : 1;
+      possible += w;
+      const wantFormats = Array.isArray(exp.format)?exp.format:[exp.format];
+      const found = (exp.variant==='Source')
+        ? mine.find(function(f){ return wantFormats.includes(f.format); })
+        : mine.find(function(f){ return f.variant===exp.variant && wantFormats.includes(f.format); });
+      const rec = { variant:exp.variant, format:exp.format, priority:exp.priority, weight:w,
+        file: found ? {id:found.id,name:found.name,url:found.url} : null };
+      if(found){ present.push(rec); earned += w; } else { missing.push(rec); }
+    });
+    const variants={};
+    mine.forEach(function(f){ (variants[f.variant]=variants[f.variant]||[]).push({format:f.format, file:{id:f.id,name:f.name,url:f.url}}); });
+    return { present:present, missing:missing,
+      completion: possible ? Math.round((earned/possible)*100)/100 : 0,
+      variants:variants, fileCount:mine.length };
+  });
+
+  return { register:register, measure:measure };
+})();
+
+/* ════════════════ COLLECTION BUILDER ════════════════
+   Generic. Reads brand; never writes. Loops the Brand Standard and asks the
+   Measurement Engine to measure each Piece by its type. Knows nothing about logos. */
+/* ════════════════ COLLECTION BUILDER ════════════════
+   Generic and standard-agnostic. RECEIVES a Brand Standard — never names one — so the
+   same builder works for the Core Standard today and SaaS/Restaurant/Nonprofit standards
+   later. Reads brand; never writes. Asks the Measurement Engine to measure each Piece by type. */
+   function buildCollection(standard, room, question){
+  const ctx = { logos: brand.logos||[], colors: brand.colors||[] };   // reality, read-only
+  const pieces = Object.keys(standard).map(function(id){
+    const spec = standard[id];
+    const m = MeasurementEngine.measure(spec, ctx);
+    return { id:id, type:spec.type, label:spec.label, detected:!!spec.family,
+      expected:spec.expectations.length,
+      present:m.present, missing:m.missing, completion:m.completion,
+      variants:m.variants, fileCount:m.fileCount };
+  });
+  return { room:room||'identity', question:question||'', pieces:pieces };
+}
+
+/* ════════════════ STANDARD RESOLVER (seam for the Living Brand Standard) ════════════════
+   Today: returns the one Core Standard. Tomorrow: a Business Profile (industry, type, stage)
+   selects and MERGES standards — Core + SaaS, Core + Restaurant, etc. — and returns the result.
+   Nothing downstream changes when that arrives: the Builder already just receives whatever this hands it. */
+function resolveBrandStandard(/* businessProfile */){
+  return BRAND_STANDARD;   // Core Standard for now
+}
+
+/* Identity collection = the resolved Standard, measured against reality. */
+function buildIdentityCollection(){
+  return buildCollection(resolveBrandStandard(), 'identity', 'Do I have everything I need to identify this brand?');
+}
+
+/* Step 1 verification — logs the model against the live brand. No UI, no writes.
+   Auto-runs on move-in/edit; also callable by hand: mdLogIdentityCollection() */
+function mdLogIdentityCollection(){
+  try{
+    const c = buildIdentityCollection(); window.__mdIdentityCollection = c;
+    console.log('%c[Moving Day] '+c.question,'font-weight:700;color:#2c5a3c');
+    c.pieces.forEach(function(p){
+      const pct=Math.round(p.completion*100);
+      console.log('%c'+p.label+'%c  '+pct+'% cared for · '+p.fileCount+' file'+(p.fileCount===1?'':'s')+(p.detected?'':'  (no detection source yet)'),
+        'font-weight:600','color:#888',
+        { present:p.present.map(function(r){ return r.variant+' '+(Array.isArray(r.format)?r.format.join('/'):r.format); }),
+          missing:p.missing.map(function(r){ return r.variant+' '+(Array.isArray(r.format)?r.format.join('/'):r.format)+' ['+r.priority+']'; }) });
+    });
+    return c;
+  }catch(e){ console.warn('[Moving Day] Collection log skipped:', e); }
+}
+try{ window.addEventListener('md:workspace-update', function(){ mdLogIdentityCollection(); }); }catch(e){}
+try{ setTimeout(mdLogIdentityCollection, 800); }catch(e){}
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') saveBrand(); });
 // Probe whether this context can actually persist storage, then restore.
 function storageProbe(){
