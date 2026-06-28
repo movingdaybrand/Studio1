@@ -4835,7 +4835,12 @@ function mdLogIdentityCollection(){
   }catch(e){ console.warn('[Moving Day] Collection log skipped:', e); }
 }
 try{ window.addEventListener('md:workspace-update', function(){ mdLogIdentityCollection(); }); }catch(e){}
-try{ setTimeout(mdLogIdentityCollection, 800); }catch(e){}
+/* Initial log waits for the brand to finish restoring (async) instead of guessing a fixed delay —
+   fires as soon as a brand is present, or once after ~6s so an empty brand still reports honestly. */
+   try{ (function(){ let _t=0; (function _w(){ _t++;
+  const ready = !!(typeof brand!=='undefined' && brand && ((brand.logos&&brand.logos.length) || brand.name || (brand.colors&&brand.colors.length)));
+  if(ready || _t>=20) mdLogIdentityCollection(); else setTimeout(_w, 300);
+})(); })(); }catch(e){}
 document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='hidden') saveBrand(); });
 // Probe whether this context can actually persist storage, then restore.
 function storageProbe(){
