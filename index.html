@@ -4835,6 +4835,137 @@ function mdLogIdentityCollection(){
   }catch(e){ console.warn('[Moving Day] Collection log skipped:', e); }
 }
 try{ window.addEventListener('md:workspace-update', function(){ mdLogIdentityCollection(); }); }catch(e){}
+/* ════════════════ IDENTITY PEDESTAL — PREVIEW ONLY ════════════════
+   Reads buildIdentityCollection(); never writes. Renders ONE pedestal (Primary Logo)
+   into a removable overlay. Resting = mark-first & quiet. Toggle reveals care/health/
+   variants/opportunities. Calm placeholder if no logo URL. Call: renderIdentityPedestal()
+   Remove: closeIdentityPedestal()  (or the × / Esc). Touches nothing in the real app. */
+   function closeIdentityPedestal(){ const o=document.getElementById('mdPedestalPreview'); if(o) o.remove(); }
+function renderIdentityPedestal(){
+  closeIdentityPedestal();
+  let col; try{ col=buildIdentityCollection(); }catch(e){ console.warn('[pedestal] collection unavailable',e); return; }
+  const piece=(col&&col.pieces||[]).find(p=>p.id==='primaryLogo');
+  if(!piece){ console.warn('[pedestal] no primaryLogo piece'); return; }
+
+  // best displayable file from the piece's variants (full color → dark → light → any)
+  const pickUrl=()=>{ const v=piece.variants||{};
+    const order=['Full Color','Dark','Light']; 
+    for(const k of order){ if(v[k]) for(const f of v[k]){ if(f.file&&f.file.url) return f.file.url; } }
+    for(const k in v){ for(const f of v[k]){ if(f.file&&f.file.url) return f.file.url; } }
+    return ''; };
+  const url=pickUrl();
+  const pct=Math.round((piece.completion||0)*100);
+  const name=(typeof brand!=='undefined'&&brand&&brand.name)||piece.label;
+
+  const fmt=r=>r.variant+' '+(Array.isArray(r.format)?r.format.join('/'):r.format);
+  const present=(piece.present||[]).map(fmt);
+  const opportunities=(piece.missing||[]).map(r=>({label:fmt(r), priority:r.priority}));
+
+  const ov=document.createElement('div'); ov.id='mdPedestalPreview';
+  ov.innerHTML=`
+  <style>
+    #mdPedestalPreview{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;
+      background:radial-gradient(130% 120% at 50% 18%,#22382a 0%,#16261d 55%,#0e1a14 100%);
+      font-family:'Inter',-apple-system,system-ui,sans-serif;color:#f3efe6;
+      animation:mdPedFade .5s ease both;}
+    @keyframes mdPedFade{from{opacity:0}to{opacity:1}}
+    #mdPedestalPreview .ped-close{position:absolute;top:22px;right:24px;width:38px;height:38px;border-radius:50%;
+      background:rgba(255,255,255,.08);color:rgba(243,239,230,.8);font-size:20px;line-height:1;cursor:pointer;
+      border:none;display:grid;place-items:center;transition:background .2s;}
+    #mdPedestalPreview .ped-close:hover{background:rgba(255,255,255,.16);}
+    #mdPedestalPreview .ped-tagprev{position:absolute;top:24px;left:26px;font-size:10px;letter-spacing:.22em;
+      text-transform:uppercase;color:rgba(243,239,230,.4);font-weight:500;}
+    #mdPedestalPreview .ped-stage{display:flex;flex-direction:column;align-items:center;gap:0;padding:24px;max-width:640px;text-align:center;}
+    /* the pedestal: a soft glow the mark rests on */
+    #mdPedestalPreview .ped-plinth{position:relative;display:grid;place-items:center;
+      padding:clamp(30px,5vw,60px) clamp(40px,8vw,90px);margin-bottom:8px;}
+    #mdPedestalPreview .ped-plinth::before{content:'';position:absolute;left:50%;top:46%;
+      width:min(78%,360px);height:min(70%,260px);transform:translate(-50%,-50%);
+      background:radial-gradient(ellipse at center,rgba(180,205,185,.32),transparent 68%);
+      filter:blur(40px);z-index:0;}
+    #mdPedestalPreview .ped-plinth::after{content:'';position:absolute;left:50%;bottom:8px;
+      width:min(54%,260px);height:22px;transform:translateX(-50%);
+      background:radial-gradient(ellipse at center,rgba(0,0,0,.4),transparent 72%);filter:blur(8px);z-index:0;}
+    #mdPedestalPreview .ped-mark{position:relative;z-index:1;animation:mdPedFloat 6.5s ease-in-out infinite;}
+    #mdPedestalPreview .ped-mark img{height:clamp(96px,15vw,164px);max-width:min(64vw,360px);object-fit:contain;
+      filter:drop-shadow(0 20px 44px rgba(0,0,0,.5));}
+    @keyframes mdPedFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+    #mdPedestalPreview .ped-ph{width:clamp(120px,16vw,180px);height:clamp(120px,16vw,180px);border-radius:24px;
+      display:grid;place-items:center;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);
+      font-family:'Fraunces',Georgia,serif;font-weight:300;font-size:clamp(34px,5vw,52px);color:rgba(243,239,230,.5);}
+    #mdPedestalPreview .ped-name{font-family:'Fraunces',Georgia,serif;font-weight:300;
+      font-size:clamp(26px,3.4vw,40px);letter-spacing:-.02em;margin-top:18px;}
+    #mdPedestalPreview .ped-role{font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+      color:rgba(243,239,230,.42);font-weight:500;margin-top:10px;}
+    #mdPedestalPreview .ped-toggle{margin-top:30px;font-family:inherit;font-size:12.5px;letter-spacing:.02em;
+      color:rgba(243,239,230,.74);background:rgba(255,255,255,.07);border:none;border-radius:99px;
+      padding:11px 22px;cursor:pointer;transition:background .25s,color .25s;display:inline-flex;align-items:center;gap:9px;}
+    #mdPedestalPreview .ped-toggle:hover{background:rgba(255,255,255,.13);color:#f3efe6;}
+    #mdPedestalPreview .ped-toggle svg{width:13px;height:13px;stroke:currentColor;stroke-width:1.6;fill:none;
+      transition:transform .35s cubic-bezier(.22,1,.36,1);}
+    #mdPedestalPreview.revealed .ped-toggle svg{transform:rotate(180deg);}
+    /* revealed care panel */
+    #mdPedestalPreview .ped-care{max-height:0;overflow:hidden;opacity:0;width:min(92vw,460px);
+      transition:max-height .55s cubic-bezier(.22,1,.36,1),opacity .4s ease,margin .4s ease;margin-top:0;}
+    #mdPedestalPreview.revealed .ped-care{max-height:520px;opacity:1;margin-top:26px;}
+    #mdPedestalPreview .ped-health{font-size:13px;color:rgba(243,239,230,.86);font-weight:300;margin-bottom:4px;}
+    #mdPedestalPreview .ped-health b{font-weight:500;color:#cfe3d4;}
+    #mdPedestalPreview .ped-bar{height:4px;border-radius:99px;background:rgba(255,255,255,.1);overflow:hidden;margin:14px 0 22px;}
+    #mdPedestalPreview .ped-bar i{display:block;height:100%;border-radius:99px;
+      background:linear-gradient(90deg,#7fb38c,#9ec6a8);transition:width .8s cubic-bezier(.22,1,.36,1);}
+    #mdPedestalPreview .ped-sec{text-align:left;margin-bottom:20px;}
+    #mdPedestalPreview .ped-sec-lbl{font-size:9px;letter-spacing:.2em;text-transform:uppercase;
+      color:rgba(243,239,230,.4);font-weight:600;margin-bottom:11px;}
+    #mdPedestalPreview .ped-chips{display:flex;flex-wrap:wrap;gap:7px;}
+    #mdPedestalPreview .ped-chip{font-size:11.5px;letter-spacing:.01em;padding:6px 12px;border-radius:8px;
+      background:rgba(255,255,255,.06);color:rgba(243,239,230,.78);}
+    #mdPedestalPreview .ped-chip.have{background:rgba(158,198,168,.14);color:#cfe3d4;}
+    #mdPedestalPreview .ped-opp{display:flex;align-items:center;gap:9px;padding:9px 0;
+      border-bottom:1px solid rgba(255,255,255,.06);font-size:13px;color:rgba(243,239,230,.82);font-weight:300;}
+    #mdPedestalPreview .ped-opp:last-child{border-bottom:none;}
+    #mdPedestalPreview .ped-opp .dot{width:5px;height:5px;border-radius:50%;background:rgba(243,239,230,.34);flex:none;}
+    #mdPedestalPreview .ped-opp .pri{margin-left:auto;font-size:9px;letter-spacing:.12em;text-transform:uppercase;
+      color:rgba(243,239,230,.4);font-weight:600;}
+    #mdPedestalPreview .ped-allgood{font-size:13px;font-weight:300;color:#cfe3d4;padding:6px 0;}
+    @media(prefers-reduced-motion:reduce){#mdPedestalPreview .ped-mark{animation:none;}}
+  </style>
+  <button class="ped-close" aria-label="Close preview">&times;</button>
+  <div class="ped-tagprev">Pedestal preview</div>
+  <div class="ped-stage">
+    <div class="ped-plinth">
+      ${url
+        ? `<div class="ped-mark"><img alt="" src="${url}"></div>`
+        : `<div class="ped-ph">${esc((name||'·').trim().charAt(0).toUpperCase())}</div>`}
+    </div>
+    <div class="ped-name">${esc(name)}</div>
+    <div class="ped-role">Primary Logo</div>
+    <button class="ped-toggle">View what's prepared
+      <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="ped-care">
+      <div class="ped-health"><b>${pct}%</b> cared for · ${present.length} of ${present.length+opportunities.length} prepared</div>
+      <div class="ped-bar"><i style="width:0%"></i></div>
+      ${present.length?`<div class="ped-sec"><div class="ped-sec-lbl">Prepared</div><div class="ped-chips">${present.map(p=>`<span class="ped-chip have">${esc(p)}</span>`).join('')}</div></div>`:''}
+      <div class="ped-sec"><div class="ped-sec-lbl">Still worth preparing</div>
+        ${opportunities.length
+          ? opportunities.map(o=>`<div class="ped-opp"><span class="dot"></span>${esc(o.label)}<span class="pri">${esc(o.priority)}</span></div>`).join('')
+          : `<div class="ped-allgood">Everything this mark needs is here.</div>`}
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+
+  const toggle=ov.querySelector('.ped-toggle'), bar=ov.querySelector('.ped-bar i'), label=toggle;
+  toggle.addEventListener('click',()=>{
+    const open=ov.classList.toggle('revealed');
+    toggle.childNodes[0].nodeValue = open ? 'Hide ' : "View what's prepared ";
+    if(open) setTimeout(()=>{ if(bar) bar.style.width=pct+'%'; },120); else if(bar) bar.style.width='0%';
+  });
+  ov.querySelector('.ped-close').addEventListener('click',closeIdentityPedestal);
+  ov.addEventListener('click',e=>{ if(e.target===ov) closeIdentityPedestal(); });
+  const esc2=e=>{ if(e.key==='Escape'){ closeIdentityPedestal(); document.removeEventListener('keydown',esc2); } };
+  document.addEventListener('keydown',esc2);
+}
 /* Initial log waits for the brand to finish restoring (async) instead of guessing a fixed delay —
    fires as soon as a brand is present, or once after ~6s so an empty brand still reports honestly. */
    try{ (function(){ let _t=0; (function _w(){ _t++;
