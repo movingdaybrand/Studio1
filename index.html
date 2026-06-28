@@ -4864,7 +4864,7 @@ function renderIdentityPedestal(){
   const ov=document.createElement('div'); ov.id='mdPedestalPreview';
   ov.innerHTML=`
   <style>
-#mdPedestalPreview{position:fixed;inset:0;z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow-y:auto;padding:60px 0;
+#mdPedestalPreview{position:fixed;inset:0;z-index:99999;display:block;overflow-y:auto;text-align:center;padding:0;
       background:radial-gradient(130% 120% at 50% 18%,#22382a 0%,#16261d 55%,#0e1a14 100%);
       font-family:'Inter',-apple-system,system-ui,sans-serif;color:#f3efe6;
       animation:mdPedFade .5s ease both;}
@@ -4875,7 +4875,7 @@ function renderIdentityPedestal(){
     #mdPedestalPreview .ped-close:hover{background:rgba(255,255,255,.16);}
     #mdPedestalPreview .ped-tagprev{position:absolute;top:24px;left:26px;font-size:10px;letter-spacing:.22em;
       text-transform:uppercase;color:rgba(243,239,230,.4);font-weight:500;}
-    #mdPedestalPreview .ped-stage{display:flex;flex-direction:column;align-items:center;gap:0;padding:24px;max-width:640px;text-align:center;}
+#mdPedestalPreview .ped-stage{display:flex;flex-direction:column;align-items:center;gap:0;padding:clamp(48px,9vh,110px) 24px 80px;max-width:640px;text-align:center;margin:0 auto;min-height:100vh;justify-content:center;box-sizing:border-box;}
     /* the pedestal: a soft glow the mark rests on */
     #mdPedestalPreview .ped-plinth{position:relative;display:grid;place-items:center;
     padding:clamp(48px,8vw,96px) clamp(40px,8vw,90px) clamp(20px,3vw,36px);margin-bottom:18px;}
