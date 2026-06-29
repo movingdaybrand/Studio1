@@ -4835,6 +4835,67 @@ function mdLogIdentityCollection(){
   }catch(e){ console.warn('[Moving Day] Collection log skipped:', e); }
 }
 try{ window.addEventListener('md:workspace-update', function(){ mdLogIdentityCollection(); }); }catch(e){}
+/* ════════════ ASSETS CONCIERGE — OFFERS (read-only, notice-and-offer only) ════════════
+   Reads buildIdentityCollection(). Never generates a file. Turns each piece's missing
+   items into gentle, grouped "want to add this?" offers — concierge tone, no scores,
+   no "incomplete". Proven in console via mdLogAssetsOffers() before any UI.            */
+   function buildAssetsOffers(){
+  let col; try{ col = buildIdentityCollection(); }catch(e){ return []; }
+  const pieces = (col && col.pieces) || [];
+  const priRank = { required:0, recommended:1, professional:2 };
+  const offers = [];
+
+  pieces.forEach(piece=>{
+    // Piece not present at all → one offer to add the whole piece (only if it's a real expectation)
+    if(piece.detected === false){
+      offers.push({
+        pieceId: piece.id,
+        kind: 'add-piece',
+        priority: 'recommended',
+        text: `You haven't added a ${piece.label} yet — want to?`
+      });
+      return;
+    }
+
+    // Piece exists → group its missing items by VARIANT, so we offer "a full-color version",
+    // not three separate file rows.
+    const byVariant = {};
+    (piece.missing || []).forEach(m=>{
+      const v = m.variant || 'Other';
+      (byVariant[v] = byVariant[v] || []).push(m);
+    });
+
+    Object.keys(byVariant).forEach(variant=>{
+      const items = byVariant[variant];
+      // highest priority within the group drives ordering + tone
+      const topPri = items.map(i=>i.priority).sort((a,b)=>priRank[a]-priRank[b])[0] || 'recommended';
+      const vLabel = variant.toLowerCase(); // "full color", "source"
+      let text;
+      if(variant === 'Source'){
+        text = `Your ${piece.label} doesn't have source files yet — want to add them?`;
+      } else {
+        text = `Your ${piece.label} doesn't have a ${vLabel} version yet — want to add one?`;
+      }
+      offers.push({ pieceId: piece.id, kind: 'add-variant', variant, priority: topPri, text });
+    });
+  });
+
+  // required first, then recommended, then professional
+  offers.sort((a,b)=> (priRank[a.priority]??9) - (priRank[b.priority]??9));
+  return offers;
+}
+
+function mdLogAssetsOffers(){
+  const offers = buildAssetsOffers();
+  console.log('%c[Moving Day] How can I help you finish settling in?', 'color:#7fae86;font-weight:600;');
+  if(!offers.length){ console.log('  Everything essential is here — nothing to offer right now.'); return; }
+  offers.forEach(o=>{
+    const tag = o.priority === 'required' ? 'ESSENTIAL'
+              : o.priority === 'recommended' ? 'worth adding' : 'a nice touch';
+    console.log(`  • ${o.text}   %c${tag}`, 'color:#9aa;font-size:11px;');
+  });
+  return offers;
+}
 /* ════════════════ IDENTITY PEDESTAL — PREVIEW ONLY ════════════════
    Reads buildIdentityCollection(); never writes. Renders ONE pedestal (Primary Logo)
    into a removable overlay. Resting = mark-first & quiet. Toggle reveals care/health/
