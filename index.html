@@ -127,7 +127,7 @@ body.deep-immerse .home-logo img{mix-blend-mode:normal;}   /* multiply darkens a
 .reset-link:hover{opacity:1;color:var(--ink-soft);}
 .glasspane.drag{box-shadow:0 0 0 2px var(--sage),var(--shadow);}
 .glasspane.drag::after{content:'Drop your brand — zip, folder, or files';position:absolute;inset:0;display:grid;place-items:center;font-family:var(--display);font-weight:300;font-size:clamp(22px,3vw,32px);color:var(--sage);background:rgba(247,248,243,.72);backdrop-filter:blur(8px);border-radius:var(--r-lg);z-index:30;pointer-events:none;}
-.rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,1.6vw,22px);max-width:1100px;margin:0 auto;transition:opacity .55s cubic-bezier(.22,1,.36,1),filter .55s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1);}
+.rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(9px,1.1vw,14px);max-width:800px;margin:0 auto;transition:opacity .55s cubic-bezier(.22,1,.36,1),filter .55s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1);}
 @media(max-width:720px){.rooms{grid-template-columns:1fr 1fr;}}
 @media(max-width:460px){.rooms{grid-template-columns:1fr;}}
 .room-card{text-align:left;display:flex;flex-direction:column;min-height:112px;padding:clamp(13px,1.5vw,16px);border-radius:var(--r-md);background:var(--glass);backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);box-shadow:var(--shadow);transition:transform .55s cubic-bezier(.22,1,.36,1),box-shadow .4s ease,background .4s ease,opacity .5s ease,filter .5s ease;position:relative;overflow:hidden;}
@@ -212,6 +212,7 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .editing .edit-hint{display:block;}
 /* Identity specialist read — what the room understands, kept quiet and human */
 .id-read,.color-read,.type-read,.assets-read,.apps-read{margin:clamp(10px,1.4vh,16px) 2px 2px;display:grid;gap:7px;}
+.color-read .id-read-note,.type-read .id-read-note,.assets-read .id-read-note,.apps-read .id-read-note{display:none;}
 .id-read-line{font-family:var(--display);font-style:italic;font-weight:300;font-size:clamp(14px,1.4vw,16px);color:var(--ink-soft);margin:0;line-height:1.4;}
 .id-read-note{font-size:11.5px;line-height:1.5;color:var(--ink-faint);margin:0;padding-left:14px;position:relative;}
 .id-read-note::before{content:"";position:absolute;left:0;top:.52em;width:5px;height:5px;border-radius:50%;background:var(--ink-faint);opacity:.55;}
