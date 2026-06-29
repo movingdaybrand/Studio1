@@ -3718,7 +3718,7 @@ window.MD = window.MD || {};
         recommendations:[
           !byRole('primaryLogo') && logos.length && 'Set a primary logo so the rest of the system can anchor to it.',
           !byRole('iconMark') && logos.length && 'No square icon yet — needed for favicons and social avatars.',
-          !byRole('secondaryLogo') && logos.length>1 && 'A reversed (light) version would help on dark grounds.'
+          !byRole('secondaryLogo') && !logoFamilies().primaryLogo.variants.light && logos.length>1 && 'A reversed (light) version would help on dark grounds.'
         ].filter(Boolean) };
     },
     color(b){
