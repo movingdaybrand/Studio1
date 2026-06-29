@@ -44,7 +44,8 @@ body{margin:0;min-height:100vh;font-family:var(--body);color:var(--ink);-webkit-
 button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;}
 :focus-visible{outline:2px solid var(--sage);outline-offset:3px;border-radius:6px;}
 
-.env{max-width:1040px;margin:0 auto;padding:clamp(14px,2.2vw,30px);}
+body{display:flex;flex-direction:column;}
+.env{max-width:1040px;margin:auto;padding:clamp(14px,2.2vw,30px);zoom:.85;}
 .glasspane{position:relative;border-radius:var(--r-lg);min-height:calc(100vh - 60px);
   background:linear-gradient(160deg,var(--ice-1),var(--ice-2));
   backdrop-filter:blur(var(--glass-blur,40px)) saturate(var(--glass-sat,170%));-webkit-backdrop-filter:blur(var(--glass-blur,40px)) saturate(var(--glass-sat,170%));
