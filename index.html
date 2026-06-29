@@ -4909,6 +4909,18 @@ try{ window.addEventListener('md:workspace-update', function(){ mdLogIdentityCol
   return offers;
 }
 
+/* Record a brand-wide intent answer. Namespaced under brand.brandIntent — additive,
+   never touches existing fields — and rides the existing save path. Values: 'wanted' |
+   'intentional' | 'unknown'. Read by buildAssetsOffers(). Call: setBrandIntent('monochrome','intentional') */
+function setBrandIntent(key, state){
+  if(!key) return null;
+  if(typeof brand==='undefined' || !brand) return null;
+  if(!brand.brandIntent || typeof brand.brandIntent!=='object') brand.brandIntent = {};
+  brand.brandIntent[key] = state || 'unknown';
+  try{ saveBrand(); }catch(e){}
+  return brand.brandIntent[key];
+}
+
 function mdLogAssetsOffers(){
   const offers = buildAssetsOffers();
   console.log('%c[Moving Day] How can I help you finish settling in?', 'color:#7fae86;font-weight:600;');
