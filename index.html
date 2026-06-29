@@ -1296,7 +1296,7 @@ const roomRegistry = {
   color:        { id:'color',        label:'Color',        purpose:'The palette and where each colour belongs.',                  emptyState:'Colours appear once a logo is read.',         render:(root)=>{ renderColorBrain(root); } },
   typography:   { id:'typography',   label:'Typography',   purpose:'Display and body type — the voice in letterform.',            emptyState:'Type is detected or set by hand.',            render:(root)=>{ renderTypographyBrain(root); renderFontUploads(root); } },
   voice:        { id:'voice',        label:'Voice',        purpose:'Tone, positioning and the words the brand uses.',             emptyState:"Voice is drawn from the brand's strategy.",    render:()=>{} },
-  assets:       { id:'assets',       label:'Assets',       purpose:'Every logo, photo and document, organized by role.',          emptyState:'Add files, or move a brand in.',              render:(root)=>{ renderAssetsRoom(); renderAssetsBrain(root); renderGuidelineReader(root); } },
+  assets:       { id:'assets',       label:'Assets',       purpose:'Every logo, photo and document, organized by role.',          emptyState:'Add files, or move a brand in.',              render:(root)=>{ renderAssetsRoom(); renderAssetsConcierge(root); renderAssetsBrain(root); renderGuidelineReader(root); } },
   applications: { id:'applications', label:'Applications', purpose:'The brand in use — signature, social and ready pieces.',       emptyState:'Applications build from the identity.',       render:(root)=>{ renderApplications(root); renderApplicationsBrain(root); } },
   rules:        { id:'rules',        label:'Rules',        purpose:'Usage guidance — how to keep the brand consistent.',          emptyState:'Guidance assembles from the system.',         render:()=>{} },
   delivery:     { id:'delivery',     label:'Delivery',     purpose:'The handoff — guide, ZIP, PDF and the published link.',       emptyState:'Prepare deliverables once the brand is set.', render:()=>{} }
@@ -1967,6 +1967,39 @@ function renderAssetsRoom(){
   root.innerHTML=html;
   root.querySelectorAll('[data-assetfilter]').forEach(function(chip){ chip.addEventListener('click',function(){ _assetFilter=chip.getAttribute('data-assetfilter')||'all'; renderAssetsRoom(); }); });
   enhanceAssetThumbs(root);                                      // keep the floating, knocked-out marks
+}
+function renderAssetsConcierge(root){
+  try{
+    var host = (root && root.id==='assetRoot') ? root
+             : (root && root.querySelector && root.querySelector('#assetRoot')) || document.getElementById('assetRoot');
+    if(!host) return;
+    host.querySelectorAll('.assets-concierge').forEach(function(e){ e.remove(); });
+    var offers=[]; try{ offers = buildAssetsOffers(); }catch(e){ return; }
+    var q = (offers||[]).find(function(o){ return o && o.kind==='brand-question' && o.key==='monochrome'; });
+    if(!q) return;
+    var panel=document.createElement('div'); panel.className='assets-concierge';
+    panel.innerHTML =
+        '<div class="ac-text">'
+      +   '<span class="ac-q">Your marks are black &amp; white throughout.</span>'
+      +   '<span class="ac-sub">There\u2019s no full-colour version yet \u2014 is that the intention?</span>'
+      + '</div>'
+      + '<div class="ac-acts">'
+      +   '<button type="button" class="ac-btn" data-intent="intentional">Intentional</button>'
+      +   '<button type="button" class="ac-btn" data-intent="wanted">Add colour versions</button>'
+      + '</div>';
+    host.insertAdjacentElement('afterbegin', panel);
+    panel.querySelectorAll('[data-intent]').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var val=btn.getAttribute('data-intent');
+        try{ setBrandIntent('monochrome', val); }catch(e){}
+        panel.classList.add('dismissing');
+        try{ announceWorkspaceUpdate(val==='intentional'
+          ? 'Noted \u2014 your marks are monochrome by design.'
+          : 'Good to know \u2014 I\u2019ll keep colour versions on the list.','assets'); }catch(e){}
+        setTimeout(function(){ try{ renderAssetsRoom(); renderAssetsConcierge(document.getElementById('assetRoot')); }catch(e){} }, 520);
+      });
+    });
+  }catch(e){ console.warn('[assets-concierge] render skipped:', e); }
 }
 async function enhanceAssetThumbs(root){                     // swap logo thumbnails for their knocked-out, trimmed version so they float instead of sitting on a white tile
   for(const thumb of root.querySelectorAll('.asset-thumb[data-asset]')){
