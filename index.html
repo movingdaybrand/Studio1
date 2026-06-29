@@ -4845,6 +4845,29 @@ try{ window.addEventListener('md:workspace-update', function(){ mdLogIdentityCol
   const priRank = { required:0, recommended:1, professional:2 };
   const offers = [];
 
+  // brand-wide intent (read-only for now; defaults to 'unknown')
+  const intent = (typeof brand!=='undefined' && brand && brand.brandIntent) || {};
+  const monochromeIntent = intent.monochrome || 'unknown';
+
+  // observe the monochrome pattern (never assume): every detected piece has
+  // Dark and/or Light, but NONE has Full Color
+  const detectedPieces = pieces.filter(p=>p.detected !== false);
+  const hasAnyFullColor = detectedPieces.some(p=> (p.variants && p.variants['Full Color']));
+  const hasMonoVariants = detectedPieces.some(p=> p.variants && (p.variants['Dark']||p.variants['Light']));
+  const monochromePattern = detectedPieces.length>0 && hasMonoVariants && !hasAnyFullColor;
+
+  const suppressFullColor = (monochromeIntent === 'intentional') ||
+                            (monochromeIntent === 'unknown' && monochromePattern);
+
+  if(monochromeIntent === 'unknown' && monochromePattern){
+    offers.push({
+      kind: 'brand-question',
+      key: 'monochrome',
+      priority: 'required',
+      text: `Your marks are black & white throughout — is that intentional, or want to add colour versions?`
+    });
+  }
+
   pieces.forEach(piece=>{
     // Piece not present at all → one offer to add the whole piece (only if it's a real expectation)
     if(piece.detected === false){
@@ -4866,6 +4889,7 @@ try{ window.addEventListener('md:workspace-update', function(){ mdLogIdentityCol
     });
 
     Object.keys(byVariant).forEach(variant=>{
+      if(variant === 'Full Color' && suppressFullColor) return;
       const items = byVariant[variant];
       // highest priority within the group drives ordering + tone
       const topPri = items.map(i=>i.priority).sort((a,b)=>priRank[a]-priRank[b])[0] || 'recommended';
