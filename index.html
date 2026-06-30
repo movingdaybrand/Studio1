@@ -901,7 +901,13 @@ body.deep-immerse .asset-varchip{color:rgba(246,248,244,.55);}
     <a class="pub-open" id="pubOpen" target="_blank" rel="noopener">Open in new tab →</a>
   </div>
 </div>
-
+<div class="pub-overlay" id="clientsModal" hidden>
+  <div class="pub-panel guides-panel">
+    <div class="pub-head"><span>Client workspaces</span><button class="pub-x" id="clientsClose" aria-label="Close">&times;</button></div>
+    <p class="pub-sub">Reopen a published client to edit any room, then Publish Home to update their live link in place.</p>
+    <div class="guides-list" id="clientsList"></div>
+  </div>
+</div>
 <div class="pub-overlay" id="guidesModal" hidden>
   <div class="pub-panel guides-panel">
     <div class="pub-head"><span>Saved guides</span><button class="pub-x" id="guidesClose" aria-label="Close">&times;</button></div>
@@ -1057,6 +1063,7 @@ const ROOMS={
       <div class="frow"><div><b>Raw JSON</b><i>Inspect the live workspace state</i></div><div class="toggle"></div></div>
     </div>
     <div class="flist" style="margin-top:14px">
+      <div class="frow"><div><b>Client workspaces</b><i>Reopen a published client &amp; edit any room — re-publish updates their link</i></div><button class="deliv-link" data-deliv="clients" style="white-space:nowrap">Open &rarr;</button></div>
       <div class="frow"><div><b>Render brand guide</b><i>Founder-only — a standalone guide with linked, downloadable files</i></div><button class="deliv-link" data-deliv="guide-render" style="white-space:nowrap">Render &rarr;</button></div>
       <div class="frow"><div><b>Review marks</b><i>Confirm each mark, its colour variant, and where it appears</i></div><button class="deliv-link" data-deliv="review" style="white-space:nowrap">Review &rarr;</button></div>
       <div class="frow"><div><b>Save working file</b><i>Download the editable Brand Home state</i></div><button class="deliv-link" data-deliv="save" style="white-space:nowrap">Save</button></div>
@@ -1967,6 +1974,7 @@ function handleDeliverable(kind){
   else if(kind==='palette'){ const css=':root{\n'+(brand.colors.map((c,i)=>'  --brand-'+(i+1)+': '+c.hex+'; /* '+(c.name||'Color')+' */').join('\n')||'  /* no colours yet */')+'\n}'; dl(brandSlug()+'-colors.css', css, 'text/css'); announceWorkspaceUpdate('Color styles downloaded.','deliverables'); }
   else if(kind==='pdf'){ announceWorkspaceUpdate('Opening print — choose “Save as PDF”.','deliverables'); if(currentRoom!=='guide') openRoom('guide'); setTimeout(()=>window.print(),650); }
   else if(kind==='guides'){ openSavedGuides(); }
+  else if(kind==='clients'){ openClientWorkspaces(); }
   else if(kind==='versions'){ announceWorkspaceUpdate('Every save is kept in this browser.','deliverables'); }
   else if(kind==='reset'){ resetBrand(); }
 }
@@ -2409,6 +2417,61 @@ function recordPublishedGuide(url,name){
     list.unshift({ url, name:(name||brand.name||'Brand'), uploadedAt:new Date().toISOString() });
     localStorage.setItem('movingDay_publishedGuides_v1', JSON.stringify(list.slice(0,60)));
   }catch(e){}
+}
+function guideIdFromUrl(url){            // /api/guide?g={guideId} → guideId, so we can find its state blob
+  try{ const m=/[?&]g=([^&]+)/.exec(String(url||'')); return m?decodeURIComponent(m[1]):''; }catch(e){ return ''; }
+}
+function closeClientsModal(){ const ov=document.getElementById('clientsModal'); if(ov) ov.hidden=true; }
+async function openClientWorkspaces(){
+  const ov=document.getElementById('clientsModal'); if(!ov) return;
+  const listEl=document.getElementById('clientsList');
+  ov.hidden=false; listEl.innerHTML='<p class="guides-empty">Loading…</p>';
+  let guides=[];
+  try{
+    const res=await fetch('/api/guides'); const data=await res.json().catch(()=>({}));
+    if(res.ok && data && Array.isArray(data.guides)) guides=data.guides;
+    else throw new Error((data&&data.error)||'list failed');
+  }catch(e){ guides=localPublishedGuides(); }
+  const homes=guides.filter(g=>/-home(\?|$|-)/.test(String(g.url||'')) || /home/i.test(String(g.name||'')));   // client *homes* — the editable, published workspaces
+  const list=homes.length?homes:guides;                                                                          // fall back to all if naming differs
+  if(!list.length){ listEl.innerHTML='<p class="guides-empty">No published client homes yet. Publish a home and it’ll appear here, ready to reopen.</p>'; return; }
+  listEl.innerHTML=list.map(g=>{
+    const d=g.uploadedAt?new Date(g.uploadedAt):null;
+    const date=d?d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}):'';
+    return '<div class="guide-row"><div class="guide-meta"><b>'+esc(g.name||'Client')+'</b>'+(date?'<span>'+esc(date)+'</span>':'')+'</div>'
+      +'<div class="guide-acts">'
+      +'<button class="guide-open" data-client-edit="'+esc(g.url)+'" data-client-name="'+esc(g.name||'Client')+'">Edit</button>'
+      +'<a class="guide-copy" href="'+esc(g.url)+'" target="_blank" rel="noopener" style="text-decoration:none">Open</a>'
+      +'</div></div>';
+  }).join('');
+}
+(function wireClientsModal(){
+  const ov=document.getElementById('clientsModal'); if(!ov) return;
+  const x=document.getElementById('clientsClose');
+  if(x) x.addEventListener('click',closeClientsModal);
+  ov.addEventListener('pointerdown',e=>{ if(e.target===ov) closeClientsModal(); });
+  const listEl=document.getElementById('clientsList');
+  if(listEl) listEl.addEventListener('click',e=>{
+    const b=e.target.closest('[data-client-edit]'); if(!b) return;
+    editPublishedClient(b.getAttribute('data-client-edit'), b.getAttribute('data-client-name'));
+  });
+})();
+async function editPublishedClient(url,name){
+  announceWorkspaceUpdate('Opening '+(name||'client')+'…','founder');
+  const gid=guideIdFromUrl(url);
+  if(!gid){ announceWorkspaceUpdate('Couldn’t read that client’s id.','founder'); return; }
+  let state=null;
+  try{
+    const res=await fetch('/api/guide-state?g='+encodeURIComponent(gid));
+    if(res.ok){ state=await res.json().catch(()=>null); }
+    else if(res.status===404){ announceWorkspaceUpdate('No editable state saved for this client yet — publish it once more to enable editing.','founder'); return; }
+    else throw new Error('state '+res.status);
+  }catch(e){ announceWorkspaceUpdate('Couldn’t load that client’s workspace.','founder'); return; }
+  if(!state){ announceWorkspaceUpdate('That client’s workspace was empty.','founder'); return; }
+  try{ restoreBrand(state); }catch(e){ console.warn('[clients] restore failed:',e); announceWorkspaceUpdate('Couldn’t restore that workspace.','founder'); return; }
+  try{ closeClientsModal(); }catch(e){}
+  closeRoom();                                    // back to the Brand Home, now showing the loaded client
+  announceWorkspaceUpdate((brand.name||'Client')+' loaded — edit any room, then Publish Home to update their link.','founder');
 }
 async function openSavedGuides(){
   const ov=document.getElementById('guidesModal'); if(!ov) return;
