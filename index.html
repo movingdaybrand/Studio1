@@ -2677,6 +2677,30 @@ function applyGuideSections(root){
   const frag=document.createElement('div'); frag.innerHTML=extras.map(e=>dynSectionHTML(e.section,e.reason,tiles)).join('');
   [...frag.children].forEach(n=>{ anchor?doc.insertBefore(n,anchor):doc.appendChild(n); });
 }
+function applyVoiceSection(root){
+  try{
+    const host=root.querySelector('[data-voice]'); if(!host) return;
+    let V={}; try{ if(window.MD&&MD.brain){ MD.brain.refresh(); V=MD.brain.voice||{}; } }catch(e){}
+    const posEl=host.querySelector('.gd-voice-pos'), tonesEl=host.querySelector('.gd-voice-tones');
+    // positioning line: real summary/positioning, else tagline, else leave the quiet default
+    const pos = (V.positioning && String(V.positioning).trim())
+             || (V.summary && String(V.summary).trim())
+             || (brand.tagline && !looksGenericTag(brand.tagline) ? String(brand.tagline) : '');
+    if(posEl && pos) posEl.textContent=pos;
+    // tone words: only real keywords — never invented
+    const tones=(V.keywords||[]).map(k=>String(k||'').trim()).filter(Boolean).slice(0,6);
+    if(tonesEl){ tonesEl.innerHTML = tones.length
+      ? tones.map(t=>'<span class="gd-voice-tone">'+esc(t)+'</span>').join('')
+      : ''; }
+    // a line of the brand's actual language, if the brain has one — set as a pull-quote
+    const lang=(V.language||[]).map(s=>String(s||'').trim()).filter(Boolean)[0]||'';
+    host.querySelectorAll('.gd-voice-lang').forEach(e=>e.remove());   // never stack
+    if(lang && lang!==pos){
+      const q=document.createElement('p'); q.className='gd-voice-lang'; q.textContent=lang;
+      host.appendChild(q);
+    }
+  }catch(e){ console.warn('[guide] voice section skipped:', e); }
+}
 function applyGuideCopy(root){
   // Flow the AI's studio copy into the Brand Guide section intros, brand-specific,
   // with the existing generic lines as fallback. The Logo section keeps its own sub.
