@@ -130,7 +130,7 @@ body.deep-immerse .home-logo img{mix-blend-mode:normal;}   /* multiply darkens a
 .rooms{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(9px,1.1vw,14px);max-width:800px;margin:0 auto;transition:opacity .55s cubic-bezier(.22,1,.36,1),filter .55s cubic-bezier(.22,1,.36,1),transform .55s cubic-bezier(.22,1,.36,1);}
 @media(max-width:720px){.rooms{grid-template-columns:1fr 1fr;}}
 @media(max-width:460px){.rooms{grid-template-columns:1fr;}}
-.room-card{text-align:left;display:flex;flex-direction:column;min-height:112px;padding:clamp(13px,1.5vw,16px);border-radius:var(--r-md);background:var(--glass);backdrop-filter:blur(22px) saturate(170%);-webkit-backdrop-filter:blur(22px) saturate(170%);box-shadow:var(--shadow);transition:transform .55s cubic-bezier(.22,1,.36,1),box-shadow .4s ease,background .4s ease,opacity .5s ease,filter .5s ease;position:relative;overflow:hidden;}
+.room-card{text-align:left;display:flex;flex-direction:column;min-height:112px;padding:clamp(13px,1.5vw,16px);border-radius:var(--r-md);background:var(--glass);backdrop-filter:blur(var(--glass-card-blur)) saturate(var(--glass-card-sat));-webkit-backdrop-filter:blur(var(--glass-card-blur)) saturate(var(--glass-card-sat));box-shadow:var(--shadow),var(--glass-edge);transition:transform .55s cubic-bezier(.22,1,.36,1),box-shadow .4s ease,background .4s ease,opacity .5s ease,filter .5s ease;position:relative;overflow:hidden;}
 .room-card::after{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(120% 82% at 50% 124%,var(--portal-glow),transparent 70%);opacity:0;transition:opacity .4s ease;pointer-events:none;}
 .room-card:hover{transform:translateY(-4px);background:var(--light);box-shadow:var(--shadow-hover);}
 .room-card:hover::after{opacity:.7;}
