@@ -195,7 +195,7 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .id-pedestal::before{content:'';position:absolute;left:50%;top:44%;width:min(60%,380px);height:min(60%,300px);transform:translate(-50%,-50%);background:radial-gradient(ellipse at center,var(--b3,#4e6b5a) 0%,transparent 68%);opacity:.42;filter:blur(34px);z-index:0;pointer-events:none;}
 .id-pedestal::after{content:'';position:absolute;left:50%;bottom:clamp(14px,2vw,22px);width:min(46%,280px);height:24px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(20,30,24,.20),transparent 72%);filter:blur(7px);z-index:0;pointer-events:none;}
 .id-primary{min-height:0;display:grid;place-items:center;}
-.id-hero .id-primary{position:relative;z-index:1;width:min(64%,340px);height:clamp(106px,13vw,150px);background:transparent;box-shadow:none;border-radius:0;overflow:visible;animation:idFloat 6.5s ease-in-out infinite;}
+.id-hero .id-primary{position:relative;z-index:1;width:min(64%,340px);height:auto;min-height:clamp(80px,9vw,116px);background:transparent;box-shadow:none;border-radius:0;overflow:visible;animation:idFloat 6.5s ease-in-out infinite;}
 .id-hero .id-primary>img{filter:drop-shadow(0 18px 30px rgba(20,30,24,.20));}
 .id-hero .id-primary .vframe-tag{display:none;}
 @keyframes idFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-9px)}}
@@ -660,7 +660,7 @@ body.deep-immerse .id-primary .wm small{color:rgba(243,239,230,.62)!important;}
 .id-marks .markframe:hover{transform:translateY(-4px);box-shadow:var(--shadow-hover)!important;}
 .id-marks .markframe .vframe-tag{left:12px!important;bottom:11px!important;font-size:8.5px!important;letter-spacing:.16em!important;}
 /* identity hierarchy: hero caption + tiered marks */
-.id-primarycap{display:flex;flex-direction:column;align-items:center;gap:3px;margin-top:clamp(-28px,-2vw,-12px);}
+.id-primarycap{display:flex;flex-direction:column;align-items:center;gap:3px;margin-top:clamp(4px,.9vw,10px);}
 .id-primarycap-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-faint);font-weight:600;}
 .id-primarycap-note{font-size:12px;color:var(--ink-soft);font-weight:300;max-width:40ch;text-align:center;line-height:1.4;}
 .markcell{display:flex;flex-direction:column;gap:10px;}
