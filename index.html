@@ -2320,6 +2320,18 @@ async function externalizeAssets(html){
   }
   return html;
 }
+function brandStateSnapshot(){            // the same shape saveBrand() persists — the editable source of a published home
+  try{ syncBrandState(); }catch(e){}
+  return {name:brand.name,tagline:brand.tagline,category:brand.category,logos:brand.logos,photos:brand.photos,docs:brand.docs,colors:brand.colors,type:brand.type,placements:brand.placements||null,fonts:(brand.fonts||[]),
+    colorSystem:brand.colorSystem||null,typeSystem:brand.typeSystem||null,personality:brand.personality||null,guidePlan:brand.guidePlan||null,brandHomeImprovements:brand.brandHomeImprovements||null,brandWorld:brand.brandWorld||null,designStrategy:brand.designStrategy||null,environmentProfile:brand.environmentProfile||null,signature:brand.signature||null,brandIntelligence:brand.brandIntelligence||null};
+}
+async function publishBrandState(){       // store the editable state at guides/{slug}-home-{id}-state.json, beside the published home
+  try{
+    const state=brandStateSnapshot();
+    await fetch('/api/publish-state',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ state, slug:brandSlug()+'-home', id:ensurePublishId() })});   // -home + same id → sits beside the published home HTML
+  }catch(e){ console.warn('[publish] state save skipped:',e); }
+}
 async function publishBrandHome(){
   const tab=window.open('','_blank');                  // claim the tab inside the click gesture so the popup isn't blocked after the await
   announceWorkspaceUpdate('Publishing your home…','deliverables');
@@ -2332,6 +2344,7 @@ async function publishBrandHome(){
     const data=await res.json().catch(()=>({}));
     if(res.ok && data && data.url){
       recordPublishedGuide(data.url,(brand.name||'Brand')+' — Home');                    // still retrievable from Saved guides
+      try{ publishBrandState(); }catch(_){}                                               // save the editable brand state beside the HTML (additive — never blocks publish)
       const arriveUrl=data.url+(data.url.indexOf('?')>=0?'&':'?')+'arrive=1';             // → the published page plays the cinematic arrival
       if(tab){ tab.location.href=arriveUrl; } else { window.open(arriveUrl,'_blank'); }
       announceWorkspaceUpdate('Your home is live — opening it now.','deliverables');
