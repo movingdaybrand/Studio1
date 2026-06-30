@@ -4327,9 +4327,9 @@ function classifyVariant(a){
   if(/\b(white|light|reverse|reversed|knockout|ko)\b/.test(n)) return 'light';
   if(/\b(black|dark|mono|monochrome|grayscale|greyscale|1c)\b/.test(n)) return 'dark';
   if(/\b(colou?r|full|fullcolou?r|rgb|cmyk)\b/.test(n)) return 'fullColor';
-  if(a.variety!=null && a.variety>90) return 'fullColor';                 // many distinct colours -> full colour
+  if(a.variety!=null && a.variety>14) return 'fullColor';                 // carries real colour -> full colour (checked before luminance)
   const lum=(a.lum==null)?null:a.lum;
-  if(lum!=null){ if(lum>=188) return 'light'; if(lum<=92) return 'dark'; if(a.variety!=null && a.variety>45) return 'fullColor'; }
+  if(lum!=null){ if(lum>=188) return 'light'; if(lum<=92) return 'dark'; }
   return 'other';
 }
 function logoVariantOf(a){ return (a&&a.variantClass) || classifyVariant(a); }
