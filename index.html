@@ -4327,7 +4327,8 @@ function classifyVariant(a){
   if(/\b(white|light|reverse|reversed|knockout|ko)\b/.test(n)) return 'light';
   if(/\b(black|dark|mono|monochrome|grayscale|greyscale|1c)\b/.test(n)) return 'dark';
   if(/\b(colou?r|full|fullcolou?r|rgb|cmyk)\b/.test(n)) return 'fullColor';
-  if(a.variety!=null && a.variety>14) return 'fullColor';                 // carries real colour -> full colour (checked before luminance)
+  if(a.url && _markInk.get && _markInk.get(a.url) && _markInk.get(a.url).colorful) return 'fullColor';   // real chroma in the mark -> full colour (checked before luminance)
+  else if(a.variety!=null && a.variety>90) return 'fullColor';            // fallback for marks not yet measured
   const lum=(a.lum==null)?null:a.lum;
   if(lum!=null){ if(lum>=188) return 'light'; if(lum<=92) return 'dark'; }
   return 'other';
