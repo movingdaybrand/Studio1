@@ -307,7 +307,7 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .glogo .wordmark-mini{font-size:18px;}
 
 /* typography specimen */
-.spec{padding:clamp(20px,2.6vw,34px);border-radius:var(--r-md);background:linear-gradient(155deg,rgba(255,255,255,.6),rgba(255,255,255,.38));backdrop-filter:blur(20px) saturate(170%);box-shadow:var(--shadow);}
+.spec{padding:clamp(20px,2.6vw,34px);border-radius:var(--r-md);background:linear-gradient(155deg,rgba(255,255,255,.6),rgba(255,255,255,.38));backdrop-filter:blur(var(--glass-card-blur)) saturate(var(--glass-card-sat));box-shadow:var(--shadow),var(--glass-edge);}
 .spec .big{font-family:var(--display);font-weight:300;font-size:clamp(30px,4.4vw,56px);line-height:.96;letter-spacing:-.03em;color:var(--b1);}
 .spec .scale{display:flex;gap:18px;flex-wrap:wrap;align-items:baseline;margin:18px 0;color:var(--b1);font-family:var(--display);}
 .spec .body{max-width:62ch;color:var(--ink-soft);font-size:14px;line-height:1.65;font-weight:300;}
@@ -324,7 +324,7 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .deliv-link{background:none;border:none;cursor:pointer;font:inherit;font-size:12.5px;color:var(--ink-soft);padding:5px 4px;border-radius:6px;transition:color .2s ease;}
 .deliv-link:hover{color:var(--ink);text-decoration:underline;text-underline-offset:3px;}
 @media(max-width:720px){.vault{grid-template-columns:1fr 1fr;}}
-.vaultcard{padding:clamp(16px,1.8vw,22px);border-radius:var(--r-md);min-height:108px;display:flex;flex-direction:column;background:linear-gradient(160deg,rgba(255,255,255,.58),rgba(255,255,255,.38));backdrop-filter:blur(20px) saturate(170%);box-shadow:var(--shadow);transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease;cursor:pointer;}
+.vaultcard{padding:clamp(16px,1.8vw,22px);border-radius:var(--r-md);min-height:108px;display:flex;flex-direction:column;background:linear-gradient(160deg,rgba(255,255,255,.58),rgba(255,255,255,.38));backdrop-filter:blur(var(--glass-card-blur)) saturate(var(--glass-card-sat));box-shadow:var(--shadow),var(--glass-edge);transition:transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s ease;cursor:pointer;}
 .vaultcard:hover{transform:translateY(-3px);box-shadow:var(--shadow-hover);}
 .vaultcard b{font-family:var(--display);font-weight:400;font-size:1.2rem;margin-top:auto;}
 .vaultcard i{font-style:normal;font-size:.74rem;color:var(--ink-soft);margin-top:2px;}
