@@ -242,7 +242,7 @@ body.md-arrive.md-arrive-go .room-card:nth-child(6){transition-delay:.95s;}
 .cp-overlay{position:fixed;inset:0;z-index:120;display:grid;place-items:center;background:rgba(12,20,15,.42);backdrop-filter:blur(8px);animation:cpFade .2s ease;}
 .cp-overlay[hidden]{display:none;}
 @keyframes cpFade{from{opacity:0}to{opacity:1}}
-.cp-panel{width:min(320px,92vw);padding:18px;border-radius:var(--r-md);display:flex;flex-direction:column;gap:13px;background:linear-gradient(155deg,rgba(255,255,255,.92),rgba(255,255,255,.82));backdrop-filter:blur(30px) saturate(180%);box-shadow:0 30px 70px rgba(12,20,15,.32),inset 0 0 0 1px rgba(255,255,255,.55);}
+.cp-panel{width:min(320px,92vw);padding:18px;border-radius:var(--r-md);display:flex;flex-direction:column;gap:13px;background:linear-gradient(155deg,rgba(255,255,255,.92),rgba(255,255,255,.82));backdrop-filter:blur(var(--glass-panel-blur)) saturate(var(--glass-panel-sat));-webkit-backdrop-filter:blur(var(--glass-panel-blur)) saturate(var(--glass-panel-sat));box-shadow:0 30px 70px rgba(12,20,15,.32),inset 0 0 0 1px rgba(255,255,255,.55),var(--glass-edge);}
 .cp-head{display:flex;justify-content:space-between;align-items:center;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:rgba(28,43,34,.62);font-weight:600;}
 .cp-x{border:none;background:none;font-size:22px;line-height:1;color:rgba(28,43,34,.55);cursor:pointer;padding:0 2px;}
 .cp-sv{position:relative;width:100%;height:158px;border-radius:var(--r-sm);overflow:hidden;cursor:crosshair;touch-action:none;background:hsl(0,100%,50%);}
