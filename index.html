@@ -3034,6 +3034,7 @@ function applyUploads(root){
   if(brand.colors.length){ step(()=>legibilityFix(root)); step(()=>applyMockups(root)); }
   step(()=>applyGuideSections(root));
   step(()=>applyGuideCopy(root));
+  step(()=>applyVoiceSection(root));
 }
 function pickMark(...roles){
   for(const r of roles){ const m=brand.logos.find(l=>l.role===r); if(m) return m; }
