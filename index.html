@@ -2034,6 +2034,10 @@ async function renderRoomForPublish(key){
   if(key==='identity'){ const h=tmp.querySelector('.id-hero.logo-named'); if(h){ const nm=h.querySelector('.id-name'); if(nm) nm.remove(); } }   // wordmark logo carries the name → no duplicate in the client view
   // Deliverables: drop editor-only actions + non-functional inputs; keep client downloads (package, PDF, signature, icon)
   tmp.querySelectorAll('[data-deliv="home"],[data-deliv="guides"],[data-deliv="palette"],[data-deliv="save"],[data-deliv="review"],[data-deliv="versions"],.sig-fields,.ig-bgs').forEach(n=>n.remove());
+  if(key==='guide'){
+    tmp.querySelectorAll('.gd-voice').forEach(n=>{ const sec=n.closest('.gd-section'); if(sec) sec.remove(); });
+    tmp.querySelectorAll('.inuse-two').forEach(n=>{ const sec=n.closest('.gd-section'); if(sec) sec.remove(); });
+  }
   const html=tmp.innerHTML; tmp.remove();
   return html;
 }
