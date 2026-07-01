@@ -2012,32 +2012,22 @@ async function renderRoomForPublish(key){
   tmp.innerHTML=(ROOMS[key]&&ROOMS[key].html)||'';
   document.body.appendChild(tmp);
   try{
-    if(key==='assets'){                                // renderAssetsRoom() targets a global #assetRoot → render into THIS node instead
-      const ar=tmp.querySelector('#assetRoot');
-      if(ar){
-        if(brand.logos.length||brand.photos.length||brand.docs.length){
-          let h='';
-          if(brand.logos.length){ h+=logosByFamily().map(function(g){ return '<div class="sect-label">'+esc(g.family)+'</div><div class="asset-grid">'+g.items.map(function(it){ return assetCardHTML(it.logo,true,it.variant,true); }).join('')+'</div>'; }).join(''); }
-          if(brand.photos.length){ h+='<div class="sect-label">Photography</div><div class="asset-grid">'+brand.photos.map(a=>assetCardHTML(a,false,null,true)).join('')+'</div>'; }
-          if(brand.docs.length){ h+='<div class="sect-label">Documents</div><div class="asset-grid">'+brand.docs.map(a=>assetCardHTML(a,false,null,true)).join('')+'</div>'; }
-          ar.innerHTML=h;
-        } else { ar.innerHTML='<div class="asset-empty">No assets yet.</div>'; }
-      }
-    }
-    if(key==='deliverables'){ try{ renderApplications(tmp); await renderSigPreview(tmp); await renderIgPreview(tmp); }catch(_){} }   // email signature + Instagram icon, baked (await async previews so they're in the snapshot)
-    applyUploads(tmp);                                 // full brand paint: name · tagline · colours · type · counts
-    await placeLogos(tmp); await renderIdMarks(tmp); await renderLogoSystem(tmp); await fillHeroLogo(tmp);   // settle async logo renders before snapshot
+    syncBrandState();                                  // same read-model the builder uses
+    const g=(fn)=>{ try{ fn(); }catch(e){ console.warn('[publish] render step failed:',key,e); } };
+    // ── SAME registry renderers the builder runs in renderActiveRoom → identical output ──
+    if(key==='assets')       g(()=>roomRegistry.assets.render(tmp));
+    if(key==='deliverables'){ g(()=>roomRegistry.applications.render(tmp)); try{ await renderSigPreview(tmp); await renderIgPreview(tmp); }catch(_){} }
+    g(()=>applyUploads(tmp)); g(()=>applyFounder(tmp));
+    if(key==='identity'){ g(()=>roomRegistry.identity.render(tmp)); g(()=>roomRegistry.color.render(tmp)); }
+    if(key==='typography')   g(()=>roomRegistry.typography.render(tmp));
+    // settle async logo renders before snapshot (same calls the builder settles)
+    try{ await placeLogos(tmp); await renderIdMarks(tmp); await renderLogoSystem(tmp); await fillHeroLogo(tmp); }catch(_){}
   }catch(e){ console.warn('[publish] room render failed:',key,e); }
-  // strip editor-only chrome → clean read-only capture
+  // strip editor-only chrome → clean read-only capture (edit OFF; everything else identical to builder)
   tmp.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
   tmp.querySelectorAll('[data-action],.asset-replace,.edit-hint,.mk-dl,.gd-logo-dl,.lib-upload,.id-edit,.edit-dot,.id-read,.color-read,.type-read,.assets-read,.apps-read').forEach(n=>n.remove());
-  if(key==='identity'){ const h=tmp.querySelector('.id-hero.logo-named'); if(h){ const nm=h.querySelector('.id-name'); if(nm) nm.remove(); } }   // wordmark logo carries the name → no duplicate in the client view
-  // Deliverables: drop editor-only actions + non-functional inputs; keep client downloads (package, PDF, signature, icon)
+  if(key==='identity'){ const h=tmp.querySelector('.id-hero.logo-named'); if(h){ const nm=h.querySelector('.id-name'); if(nm) nm.remove(); } }
   tmp.querySelectorAll('[data-deliv="home"],[data-deliv="guides"],[data-deliv="palette"],[data-deliv="save"],[data-deliv="review"],[data-deliv="versions"],.sig-fields,.ig-bgs').forEach(n=>n.remove());
-  if(key==='guide'){
-    tmp.querySelectorAll('.gd-voice').forEach(n=>{ const sec=n.closest('.gd-section'); if(sec) sec.remove(); });
-    tmp.querySelectorAll('.inuse-two').forEach(n=>{ const sec=n.closest('.gd-section'); if(sec) sec.remove(); });
-  }
   const html=tmp.innerHTML; tmp.remove();
   return html;
 }
