@@ -71,7 +71,7 @@ body{display:flex;flex-direction:column;}
 .welcome .soft{color:var(--ink-faint);}
 .welcome-sub{color:var(--ink-soft);font-weight:300;font-size:13.5px;letter-spacing:.01em;}
 .home-logo{display:flex;justify-content:center;margin:0 0 clamp(10px,1.8vh,18px);}
-.home-logo img{height:clamp(52px,6.4vw,84px);max-width:clamp(210px,32vw,360px);object-fit:contain;mix-blend-mode:normal;}
+.home-logo img{height:clamp(44px,5.4vw,68px);max-width:clamp(180px,28vw,300px);object-fit:contain;mix-blend-mode:normal;}
 body.deep-immerse .home-logo img{mix-blend-mode:normal;}   /* multiply darkens a mark on the dark immersive ground — keep it true on dark */
 #mdWelcome{position:fixed;inset:0;z-index:9000;display:flex;align-items:center;justify-content:center;pointer-events:none;background:#0b1116;opacity:0;transition:opacity .9s ease;overflow:hidden;}
 #mdWelcome.on{opacity:1;}
@@ -1063,6 +1063,7 @@ const ROOMS={
       <div class="frow"><div><b>Raw JSON</b><i>Inspect the live workspace state</i></div><div class="toggle"></div></div>
     </div>
     <div class="flist" style="margin-top:14px">
+      <div class="frow"><div><b>Preview published home</b><i>See exactly what Publish Home produces \u2014 no upload, opens in a new tab</i></div><button class="deliv-link" data-deliv="preview" style="white-space:nowrap">Preview &rarr;</button></div>
       <div class="frow"><div><b>Client workspaces</b><i>Reopen a published client &amp; edit any room — re-publish updates their link</i></div><button class="deliv-link" data-deliv="clients" style="white-space:nowrap">Open &rarr;</button></div>
       <div class="frow"><div><b>Render brand guide</b><i>Founder-only — a standalone guide with linked, downloadable files</i></div><button class="deliv-link" data-deliv="guide-render" style="white-space:nowrap">Render &rarr;</button></div>
       <div class="frow"><div><b>Review marks</b><i>Confirm each mark, its colour variant, and where it appears</i></div><button class="deliv-link" data-deliv="review" style="white-space:nowrap">Review &rarr;</button></div>
@@ -1975,6 +1976,7 @@ function handleDeliverable(kind){
   else if(kind==='pdf'){ announceWorkspaceUpdate('Opening print — choose “Save as PDF”.','deliverables'); if(currentRoom!=='guide') openRoom('guide'); setTimeout(()=>window.print(),650); }
   else if(kind==='guides'){ openSavedGuides(); }
   else if(kind==='clients'){ openClientWorkspaces(); }
+  else if(kind==='preview'){ previewPublishedHome(); }
   else if(kind==='versions'){ announceWorkspaceUpdate('Every save is kept in this browser.','deliverables'); }
   else if(kind==='reset'){ resetBrand(); }
 }
@@ -2006,30 +2008,38 @@ async function publishWebGuide(){
    embedded as a <template>, and re-shown by a tiny nav-only script. No studio runtime or re-serialized state
    ships to the published page; the rooms are the real, edited DOM, captured once at publish time. */
 const PUBLISH_ROOMS=['identity','assets','guide','typography','deliverables'];   // the public rooms (founder/deliverables stay private)
+async function settleRoomAsync(key){
+  // await the same async work the builder settles after renderActiveRoom(), so the snapshot is complete
+  const g=async(fn)=>{ try{ await fn(); }catch(e){ console.warn('[publish] settle step failed:',key,e); } };
+  await g(()=>placeLogos(roomBody));
+  await g(()=>renderIdMarks(roomBody));
+  await g(()=>renderLogoSystem(roomBody));
+  await g(()=>fillHeroLogo(roomBody));
+  if(key==='deliverables'){ await g(()=>renderSigPreview(roomBody)); await g(()=>renderIgPreview(roomBody)); }
+  // one more frame so any layout-dependent paint settles before we snapshot
+  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+}
 async function renderRoomForPublish(key){
-  const tmp=document.createElement('div');
-  tmp.style.cssText='position:absolute;left:-9999px;top:0;width:980px;';
-  tmp.innerHTML=(ROOMS[key]&&ROOMS[key].html)||'';
-  document.body.appendChild(tmp);
+  // ── CAPTURE THE LIVE BUILDER RENDER ── render the room exactly as the builder does, into the real
+  // #roomBody (so renderAssetsRoom()'s #assetRoot, live measurements, fonts all behave), then snapshot.
+  const prevRoom=currentRoom, prevActive=activeRoom;
+  currentRoom=key; activeRoom=key;
   try{
-    syncBrandState();                                  // same read-model the builder uses
-    const g=(fn)=>{ try{ fn(); }catch(e){ console.warn('[publish] render step failed:',key,e); } };
-    // ── SAME registry renderers the builder runs in renderActiveRoom → identical output ──
-    if(key==='assets')       g(()=>roomRegistry.assets.render(tmp));
-    if(key==='deliverables'){ g(()=>roomRegistry.applications.render(tmp)); try{ await renderSigPreview(tmp); await renderIgPreview(tmp); }catch(_){} }
-    g(()=>applyUploads(tmp)); g(()=>applyFounder(tmp));
-    if(key==='identity'){ g(()=>roomRegistry.identity.render(tmp)); g(()=>roomRegistry.color.render(tmp)); }
-    if(key==='typography')   g(()=>roomRegistry.typography.render(tmp));
-    // settle async logo renders before snapshot (same calls the builder settles)
-    try{ await placeLogos(tmp); await renderIdMarks(tmp); await renderLogoSystem(tmp); await fillHeroLogo(tmp); }catch(_){}
-  }catch(e){ console.warn('[publish] room render failed:',key,e); }
-  // strip editor-only chrome → clean read-only capture (edit OFF; everything else identical to builder)
-  tmp.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
-  tmp.querySelectorAll('[data-action],.asset-replace,.edit-hint,.mk-dl,.gd-logo-dl,.lib-upload,.id-edit,.edit-dot,.id-read,.color-read,.type-read,.assets-read,.apps-read').forEach(n=>n.remove());
-  if(key==='identity'){ const h=tmp.querySelector('.id-hero.logo-named'); if(h){ const nm=h.querySelector('.id-name'); if(nm) nm.remove(); } }
-  tmp.querySelectorAll('[data-deliv="home"],[data-deliv="guides"],[data-deliv="palette"],[data-deliv="save"],[data-deliv="review"],[data-deliv="versions"],.sig-fields,.ig-bgs').forEach(n=>n.remove());
-  const html=tmp.innerHTML; tmp.remove();
-  return html;
+    renderActiveRoom();                 // the identical builder render path
+    await settleRoomAsync(key);         // wait for async logos / previews to paint
+  }catch(e){ console.warn('[publish] live render failed:',key,e); }
+  const cap=roomBody.cloneNode(true);   // snapshot the real, live-rendered DOM
+  // restore the builder to where it was
+  currentRoom=prevRoom; activeRoom=prevActive;
+  try{ renderActiveRoom(); }catch(_){}
+
+  // ── strip editor / founder chrome from the capture (removing elements can't break layout) ──
+  cap.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
+  cap.querySelectorAll('[data-action],.asset-replace,.edit-hint,.mk-dl,.gd-logo-dl,.lib-upload,.id-edit,.edit-dot,.id-read,.color-read,.type-read,.assets-read,.apps-read').forEach(n=>n.remove());
+  if(key==='identity'){ const h=cap.querySelector('.id-hero.logo-named'); if(h){ const nm=h.querySelector('.id-name'); if(nm) nm.remove(); } }
+  // deliverables: drop editor-only actions + non-functional inputs; keep client downloads (package, PDF, signature, icon)
+  cap.querySelectorAll('[data-deliv="home"],[data-deliv="guides"],[data-deliv="palette"],[data-deliv="save"],[data-deliv="review"],[data-deliv="versions"],.sig-fields,.ig-bgs').forEach(n=>n.remove());
+  return cap.innerHTML;
 }
 const PUBLISHED_TOOLBAR_JS = `(function(){
   if(window.__MD_TOOLBAR__) return; window.__MD_TOOLBAR__=1;
@@ -2333,6 +2343,19 @@ async function publishBrandState(){       // store the editable state at guides/
     await fetch('/api/publish-state',{method:'POST',headers:{'Content-Type':'application/json'},
       body:JSON.stringify({ state, slug:brandSlug()+'-home', id:ensurePublishId() })});   // -home + same id → sits beside the published home HTML
   }catch(e){ console.warn('[publish] state save skipped:',e); }
+}
+async function previewPublishedHome(){
+  // Build the EXACT published HTML (same as Publish Home) and open it locally — no upload, no deploy.
+  const tab=window.open('','_blank');
+  announceWorkspaceUpdate('Building a preview of the published home…','founder');
+  let html='';
+  try{ html=await buildHomeHTML(); }
+  catch(e){ if(tab) tab.close(); announceWorkspaceUpdate('Couldn\u2019t build the preview.','founder'); return; }
+  try{
+    if(tab){ tab.document.open(); tab.document.write(html); tab.document.close(); }
+    else { const b=new Blob([html],{type:'text/html'}); const u=URL.createObjectURL(b); window.open(u,'_blank'); }
+    announceWorkspaceUpdate('Preview opened \u2014 this is exactly what publishing produces.','founder');
+  }catch(e){ if(tab) tab.close(); announceWorkspaceUpdate('Couldn\u2019t open the preview.','founder'); }
 }
 async function publishBrandHome(){
   const tab=window.open('','_blank');                  // claim the tab inside the click gesture so the popup isn't blocked after the await
