@@ -1152,6 +1152,67 @@ export default async function handler(req, res) {
     "image/gif"
   ]);
 
+  // ── Narrow specialist mode: the Identity Lead reads ONE (or few) marks, fast.
+  // Returns just the identity slice and skips the full analysis + website enrichment + post-processing.
+  if (body?.mode === "identity") {
+    const IDENTITY_PROMPT = `You are the Identity specialist for Moving Day. Look only at the uploaded mark(s) and report the identity essentials. Never invent facts about the company. Return ONLY valid JSON, no markdown, in exactly this shape:
+{
+  "name": "string — the brand name read from the artwork's text, or empty if not legible",
+  "tagline": "string — a tagline/line if one is visibly present, else empty",
+  "primaryTone": "dark | light | mixed — the mark's overall tone",
+  "recommendedBackground": "#rrggbb — a background that CONTRASTS with the mark so it never disappears",
+  "palette": [ { "name": "string", "hex": "#rrggbb", "role": "Primary|Secondary|Accent|Neutral|Background|Text" } ],
+  "typeface": "string — the visible typeface if identifiable from the mark, else empty"
+}
+Read colours from the real pixels. Return 3-6 palette entries. If something is not legible, use an empty string rather than guessing.`;
+
+    const idContent = [];
+    for (const asset of assets) {
+      const { type, dataUrl } = asset || {};
+      if (imageTypes.has(String(type || "")) && dataUrl) {
+        idContent.push({ type: "image_url", image_url: { url: dataUrl, detail: "high" } });
+      }
+    }
+    if (!idContent.length) {
+      return res.status(400).json({ error: "Identity mode needs at least one raster image of the mark." });
+    }
+    idContent.push({ type: "text", text: "Read the identity essentials from the mark(s) above. Return only the JSON shape specified." });
+
+    try {
+      const idResp = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+        body: JSON.stringify({
+          model: process.env.OPENAI_MODEL || "gpt-4o",
+          temperature: 0.2,
+          max_tokens: 900,
+          response_format: { type: "json_object" },
+          messages: [
+            { role: "system", content: IDENTITY_PROMPT },
+            { role: "user", content: idContent }
+          ]
+        })
+      });
+      if (!idResp.ok) {
+        const t = await idResp.text();
+        console.error("[analyze-brand-files:identity] OpenAI " + idResp.status + ": " + t);
+        return res.status(502).json({ error: `OpenAI API error: ${idResp.status}`, detail: t });
+      }
+      const idJson = await idResp.json();
+      const idRaw = idJson?.choices?.[0]?.message?.content || "";
+      let idOut;
+      try { idOut = cleanModelJson(idRaw); } catch {
+        return res.status(422).json({ error: "Identity mode returned non-JSON.", raw: idRaw });
+      }
+      if (!Array.isArray(idOut.palette)) idOut.palette = [];
+      idOut.mode = "identity";
+      return res.status(200).json(idOut);
+    } catch (err) {
+      console.error("[analyze-brand-files:identity] fetch failed: " + err.message);
+      return res.status(502).json({ error: "Failed to reach OpenAI API.", detail: err.message });
+    }
+  }
+
   const content = [];
 
   if (preparationReport) {

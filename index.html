@@ -1827,7 +1827,18 @@ const SPECIALISTS = {
   identity: {
     id:'identity', name:'Identity Lead', title:'Primary identity & colour',
     domain:'The lead mark, the name/tagline, and whether a palette is established.',
-    tools:{},   // later: { readMark(asset) } — scoped vision on ONE logo
+    tools:{
+      // Scoped AI: read ONE mark via the identity fast-lane on the existing analyzer. Wired to nothing yet — test from console.
+      async readMark(asset){
+        if(!asset || !asset.url) throw new Error('readMark needs an asset with a url');
+        var m=/^data:([^;]+)/.exec(asset.url||''); 
+        var type=m?m[1]:('image/'+String(asset.ext||'png').toLowerCase().replace(/^jpg$/,'jpeg'));
+        var res=await fetch('/api/analyze-brand-files',{ method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({ mode:'identity', assets:[{ name:asset.name||'mark', type:type, dataUrl:asset.url }] }) });
+        if(!res.ok) throw new Error('identity read failed: '+res.status);
+        return await res.json();
+      }
+    },
     observe(s){
       s=s||{}; var id=s.identity||{}, colors=s.colors||[], ov=s.overview||{}, out=[];
       if(id.markCount>0 && !colors.length){
