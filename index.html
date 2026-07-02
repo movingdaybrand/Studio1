@@ -4838,7 +4838,7 @@ async function finishIntake(imgs,folderName){
       finally{ clearInterval(_narrTimer); }
     }
     // colours come from the actual uploads even when the AI didn't run/return them
-    try{ const _lurls=(brand.logos||[]).map(l=>l.url).filter(Boolean); const _lp=_lurls.length?await extractPalette(_lurls):[]; const _merged=refinePalette(_lp.concat(brand.colors||[])); if(_merged.length) brand.colors=_merged; }
+    try{ const _lurls=(brand.logos||[]).map(l=>l.url).filter(Boolean); const _lp=_lurls.length?await extractPalette(_lurls):[]; const _merged=_lp.length?refinePalette(_lp):refinePalette(brand.colors||[]); if(_merged.length) brand.colors=_merged; }
     catch(e){ if(!brand.colors.length){ try{ const pal=await extractPalette(urls); if(pal.length) brand.colors=refinePalette(pal); }catch(_){} } }
     setStatus(total
       ? (!aiOn ? `${total} file${total===1?'':'s'} moved in — organized on-device (Concierge is off).`
