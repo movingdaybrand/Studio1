@@ -740,6 +740,9 @@ body.deep-immerse #roomBody .room-concierge{background:linear-gradient(160deg,rg
 #roomBody .ac-btn{font-family:inherit;font-size:12.5px;letter-spacing:.01em;color:var(--ink-soft);background:transparent;border:none;box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:99px;padding:9px 16px;cursor:pointer;transition:color .25s,box-shadow .25s,transform .15s;}
 #roomBody .ac-btn:hover{color:var(--ink);box-shadow:inset 0 0 0 1px rgba(127,127,127,.42);transform:translateY(-1px);}
 @media(max-width:560px){#roomBody .room-concierge{flex-direction:column;align-items:flex-start;}}
+#roomBody .room-read{display:flex;align-items:center;gap:9px;margin:clamp(4px,1vh,10px) 2px clamp(10px,1.6vh,16px);font-size:13.5px;color:var(--ink-soft);font-weight:300;line-height:1.5;}
+#roomBody .room-read .rr-dot{width:6px;height:6px;border-radius:50%;background:var(--sage);flex:none;box-shadow:0 0 0 3px rgba(44,90,60,.10);}
+#roomBody .room-read b{font-weight:400;color:var(--ink);}
 @media(max-width:560px){#assetRoot .assets-concierge{flex-direction:column;align-items:flex-start;}}#assetRoot .afilter{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:11px;letter-spacing:.06em;font-weight:500;color:var(--ink-soft);background:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,.32));border:1px solid var(--sage-line);border-radius:99px;padding:7px 14px;cursor:pointer;transition:color .25s,box-shadow .25s,background .25s,transform .25s;}
 #assetRoot .afilter:hover{transform:translateY(-1px);box-shadow:var(--shadow);}
 #assetRoot .afilter.is-active{color:#fff;background:var(--sage);border-color:transparent;box-shadow:var(--shadow);}
@@ -1112,7 +1115,7 @@ const ROOM_META={
 /* Room registry: one definition per room (id, label, purpose, emptyState, render). Render fns delegate to the EXISTING renderers — structure only, behaviour unchanged. */
 const roomRegistry = {
   foyer:        { id:'foyer',        label:'Foyer',        purpose:'The arrival — name, tagline, and the doors into every room.',  emptyState:'Move your brand in to begin.',                render:()=>{ try{ applyBrandHome(); }catch(e){} } },
-  identity:     { id:'identity',     label:'Identity',     purpose:'The lead mark, name and tagline — who the brand is.',          emptyState:'Add a logo to anchor the identity.',          render:(root)=>{ renderIdentityBrain(root); renderRoomConcierge('identity', root); } },
+  identity:     { id:'identity',     label:'Identity',     purpose:'The lead mark, name and tagline — who the brand is.',          emptyState:'Add a logo to anchor the identity.',          render:(root)=>{ renderIdentityBrain(root); renderRoomConcierge('identity', root); renderRoomRead('identity', root); } },
   color:        { id:'color',        label:'Color',        purpose:'The palette and where each colour belongs.',                  emptyState:'Colours appear once a logo is read.',         render:(root)=>{ renderColorBrain(root); } },
   typography:   { id:'typography',   label:'Typography',   purpose:'Display and body type — the voice in letterform.',            emptyState:'Type is detected or set by hand.',            render:(root)=>{ renderTypographyBrain(root); renderFontUploads(root); renderRoomConcierge('typography', root); } },
   voice:        { id:'voice',        label:'Voice',        purpose:'Tone, positioning and the words the brand uses.',             emptyState:"Voice is drawn from the brand's strategy.",    render:()=>{} },
@@ -1839,6 +1842,19 @@ const SPECIALISTS = {
         return await res.json();
       }
     },
+    read(s){
+      s=s||{}; var id=s.identity||{}, colors=s.colors||[], ov=s.overview||{};
+      if(!id.markCount && !(ov.name||id.name)) return null;
+      var name=String(ov.name||id.name||'').trim();
+      var lead = name ? (name+' is settled in.') : (id.primary ? 'Your primary mark is placed.' : null);
+      if(!lead) return null;
+      var bits=[];
+      var lum = id.primary && typeof id.primary.lum==='number' ? id.primary.lum : null;
+      if(lum!=null){ if(lum<90) bits.push('it reads dark'); else if(lum>190) bits.push('it reads light'); }
+      if(colors.length){ var lc=colors.find(function(c){ return String(c&&c.role||'').toLowerCase()==='primary'; })||colors[0]; var cn=lc&&(lc.name||lc.hex)||''; if(cn) bits.push(cn+' leads the palette'); }
+      var detail=bits.join(', '); if(detail) detail=detail.charAt(0).toUpperCase()+detail.slice(1)+'.';
+      return { lead:lead, detail:detail };
+    },
     observe(s){
       s=s||{}; var id=s.identity||{}, colors=s.colors||[], ov=s.overview||{}, out=[];
       if(id.markCount>0 && !colors.length){
@@ -1936,6 +1952,22 @@ function renderRoomConcierge(roomKey, root){
       });
     });
   }catch(e){ console.warn('[room-concierge] render skipped:', e); }
+}
+
+function renderRoomRead(roomKey, root){
+  try{
+    try{ syncBrandState(); }catch(e){}
+    var host = root && root.id==='roomBody' ? root
+             : (root && root.querySelector && root.querySelector('#roomBody')) || document.getElementById('roomBody');
+    if(!host) return;
+    host.querySelectorAll('.room-read').forEach(function(e){ e.remove(); });
+    var spec=SPECIALISTS[roomKey]; if(!spec || typeof spec.read!=='function') return;
+    var r; try{ r=spec.read(brandState); }catch(e){ return; }
+    if(!r || !r.lead) return;
+    var el=document.createElement('div'); el.className='room-read';
+    el.innerHTML='<span class="rr-dot" aria-hidden="true"></span><span><b>'+r.lead+'</b>'+(r.detail?' '+r.detail:'')+'</span>';
+    host.insertAdjacentElement('afterbegin', el);
+  }catch(e){ console.warn('[room-read] skipped:', e); }
 }
 async function enhanceAssetThumbs(root){                     // swap logo thumbnails for their knocked-out, trimmed version so they float instead of sitting on a white tile
   for(const thumb of root.querySelectorAll('.asset-thumb[data-asset]')){
