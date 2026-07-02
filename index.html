@@ -2382,6 +2382,14 @@ async function buildHomeHTML(){
   }
   applyBrandHome();                                    // restore the live home after the off-screen room renders
 
+  // settle the hero mark before snapshot — bake the cleaned (trimmed/knockout) URL so the published home matches the studio
+  try{
+    const _hm = resolvePlacement('brandHomeHeader')||heroMark();
+    if(_hm && _hm.url){
+      const _hu = (await cleanMark(_hm.url, /svg/i.test(_hm.ext||_hm.url||''))) || _hm.url;
+      const _hi = clone.querySelector('#homeLogo img'); if(_hi && _hu) _hi.src=_hu;
+    }
+  }catch(e){ console.warn('[publish] hero mark settle skipped:', e); }
   const inner=clone.outerHTML;
 
   // capture every environment var the brand layer may set on :root (atmosphere/immersion), plus the palette
