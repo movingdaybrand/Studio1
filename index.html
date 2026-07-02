@@ -1112,7 +1112,7 @@ const ROOM_META={
 /* Room registry: one definition per room (id, label, purpose, emptyState, render). Render fns delegate to the EXISTING renderers — structure only, behaviour unchanged. */
 const roomRegistry = {
   foyer:        { id:'foyer',        label:'Foyer',        purpose:'The arrival — name, tagline, and the doors into every room.',  emptyState:'Move your brand in to begin.',                render:()=>{ try{ applyBrandHome(); }catch(e){} } },
-  identity:     { id:'identity',     label:'Identity',     purpose:'The lead mark, name and tagline — who the brand is.',          emptyState:'Add a logo to anchor the identity.',          render:(root)=>{ renderIdentityBrain(root); } },
+  identity:     { id:'identity',     label:'Identity',     purpose:'The lead mark, name and tagline — who the brand is.',          emptyState:'Add a logo to anchor the identity.',          render:(root)=>{ renderIdentityBrain(root); renderRoomConcierge('identity', root); } },
   color:        { id:'color',        label:'Color',        purpose:'The palette and where each colour belongs.',                  emptyState:'Colours appear once a logo is read.',         render:(root)=>{ renderColorBrain(root); } },
   typography:   { id:'typography',   label:'Typography',   purpose:'Display and body type — the voice in letterform.',            emptyState:'Type is detected or set by hand.',            render:(root)=>{ renderTypographyBrain(root); renderFontUploads(root); renderRoomConcierge('typography', root); } },
   voice:        { id:'voice',        label:'Voice',        purpose:'Tone, positioning and the words the brand uses.',             emptyState:"Voice is drawn from the brand's strategy.",    render:()=>{} },
@@ -1821,39 +1821,89 @@ function renderAssetsConcierge(root){
     });
   }catch(e){ console.warn('[assets-concierge] render skipped:', e); }
 }
-/* ── Room concierge: context-aware host prompts, one per room (generalizes the Assets concierge) ── */
-const ROOM_CONCIERGE = {
-  typography(){
-    var t=(typeof brandState!=='undefined'&&brandState.typography)||{}, offers=[];
-    var display=t.display, body=t.body;
-    if(display && !body){
-      offers.push({ key:'body-missing',
-        q:'Your display face is set, but body type isn\u2019t chosen yet.',
-        sub:'Long-form text falls back to a system font until a body face is named.',
-        actions:[
-          {label:'Use display for both', intent:'display-as-body', run:function(){ try{ if(!brand.type)brand.type={}; brand.type.body=display; saveBrand(); }catch(e){} }},
-          {label:'I\u2019ll pick one', intent:'body-pending', run:function(){}}
-        ]});
-    } else if(display && body && String(display).toLowerCase()===String(body).toLowerCase()){
-      offers.push({ key:'one-voice',
-        q:'Display and body are the same face \u2014 one voice throughout.',
-        sub:'A single typeface can read as intentional, or flatten hierarchy.',
-        actions:[
-          {label:'Intentional', intent:'intentional', run:function(){}},
-          {label:'I\u2019ll differentiate', intent:'wanted', run:function(){}}
-        ]});
+/* ── Room specialists: one focused "employee" per room. Local-first —
+   observe() is deterministic and instant; tools[] is where scoped AI plugs in later, per room. ── */
+const SPECIALISTS = {
+  identity: {
+    id:'identity', name:'Identity Lead', title:'Primary identity & colour',
+    domain:'The lead mark, the name/tagline, and whether a palette is established.',
+    tools:{},   // later: { readMark(asset) } — scoped vision on ONE logo
+    observe(s){
+      s=s||{}; var id=s.identity||{}, colors=s.colors||[], ov=s.overview||{}, out=[];
+      if(id.markCount>0 && !colors.length){
+        out.push({ key:'no-palette',
+          q:'Your marks are in, but no palette has been read yet.',
+          sub:'Colour anchors the whole system \u2014 the guide stays neutral until it\u2019s set.',
+          actions:[ {label:'Read colour from the mark', intent:'wants-palette', run:function(){}},
+                    {label:'I\u2019ll set it by hand', intent:'manual-palette', run:function(){}} ]});
+      }
+      if(id.markCount>0 && !ov.tagline){
+        out.push({ key:'no-tagline',
+          q:'You have a name, but no tagline yet.',
+          sub:'A line beside the name sets the tone \u2014 or the name can stand alone.',
+          actions:[ {label:'Name stands alone', intent:'intentional', run:function(){}},
+                    {label:'I\u2019ll add one', intent:'wanted', run:function(){}} ]});
+      }
+      return out;
     }
-    return offers;
+  },
+  typography: {
+    id:'typography', name:'Type Setter', title:'Display & body type',
+    domain:'The display and body faces, and whether hierarchy is established.',
+    tools:{},
+    observe(s){
+      var t=(s&&s.typography)||{}, out=[], display=t.display, body=t.body;
+      if(display && !body){
+        out.push({ key:'body-missing',
+          q:'Your display face is set, but body type isn\u2019t chosen yet.',
+          sub:'Long-form text falls back to a system font until a body face is named.',
+          actions:[ {label:'Use display for both', intent:'display-as-body', run:function(){ try{ if(!brand.type)brand.type={}; brand.type.body=display; saveBrand(); }catch(e){} }},
+                    {label:'I\u2019ll pick one', intent:'body-pending', run:function(){}} ]});
+      } else if(display && body && String(display).toLowerCase()===String(body).toLowerCase()){
+        out.push({ key:'one-voice',
+          q:'Display and body are the same face \u2014 one voice throughout.',
+          sub:'A single typeface can read as intentional, or flatten hierarchy.',
+          actions:[ {label:'Intentional', intent:'intentional', run:function(){}},
+                    {label:'I\u2019ll differentiate', intent:'wanted', run:function(){}} ]});
+      }
+      return out;
+    }
+  },
+  assets: {
+    id:'assets', name:'Assets Manager', title:'Files, formats, usage & sharing',
+    domain:'Every file\u2019s type and role, what\u2019s print-ready vs web-only, and what\u2019s missing.',
+    tools:{},
+    observe(s){
+      s=s||{}; var id=s.identity||{}, assets=s.assets||[], out=[];
+      var prim=id.primary;
+      if(prim && prim.ext && String(prim.ext).toLowerCase()!=='svg'){
+        out.push({ key:'primary-not-vector',
+          q:'Your primary mark is a '+String(prim.ext).toUpperCase()+', not a vector.',
+          sub:'It won\u2019t scale cleanly for large print or signage \u2014 an SVG would.',
+          actions:[ {label:'Fine for now', intent:'raster-ok', run:function(){}},
+                    {label:'Flag to prepare SVG', intent:'wants-vector', run:function(){}} ]});
+      }
+      var unassigned=(assets||[]).filter(function(a){ return a && !a.role; }).length;
+      if(!out.length && unassigned>0){
+        out.push({ key:'unassigned',
+          q:unassigned+' file'+(unassigned===1?'':'s')+' still '+(unassigned===1?'has':'have')+' no role.',
+          sub:'Assigning roles is what lets the guide and downloads organise themselves.',
+          actions:[ {label:'I\u2019ll assign them', intent:'will-assign', run:function(){}},
+                    {label:'Leave as supporting', intent:'leave', run:function(){}} ]});
+      }
+      return out;
+    }
   }
 };
 function renderRoomConcierge(roomKey, root){
   try{
+    try{ syncBrandState(); }catch(e){}
     var host = root && root.id==='roomBody' ? root
              : (root && root.querySelector && root.querySelector('#roomBody')) || document.getElementById('roomBody');
     if(!host) return;
     host.querySelectorAll('.room-concierge').forEach(function(e){ e.remove(); });
-    var build = ROOM_CONCIERGE[roomKey]; if(typeof build!=='function') return;
-    var offers=[]; try{ offers = build()||[]; }catch(e){ return; }
+    var spec = SPECIALISTS[roomKey]; if(!spec || typeof spec.observe!=='function') return;
+    var offers=[]; try{ offers = spec.observe(brandState)||[]; }catch(e){ return; }
     var offer = offers.find(function(o){
       try{ return !(brand && brand.brandIntent && brand.brandIntent[roomKey+':'+o.key]); }catch(e){ return true; }
     });
@@ -1870,7 +1920,7 @@ function renderRoomConcierge(roomKey, root){
         try{ if(typeof a.run==='function') a.run(); }catch(e){}
         try{ setBrandIntent(roomKey+':'+offer.key, a.intent||'answered'); }catch(e){}
         panel.classList.add('dismissing');
-        try{ announceWorkspaceUpdate('Noted \u2014 I\u2019ll keep that in mind.', roomKey); }catch(e){}
+        try{ announceWorkspaceUpdate('Noted \u2014 '+spec.name+' has it.', roomKey); }catch(e){}
         setTimeout(function(){ try{ renderRoomConcierge(roomKey, document.getElementById('roomBody')); }catch(e){} }, 520);
       });
     });
