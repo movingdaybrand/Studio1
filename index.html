@@ -729,6 +729,17 @@ body.deep-immerse #assetRoot .assets-concierge{background:linear-gradient(160deg
 #assetRoot .ac-acts{display:flex;gap:9px;flex:none;flex-wrap:wrap;}
 #assetRoot .ac-btn{font-family:inherit;font-size:12.5px;letter-spacing:.01em;color:var(--ink-soft);background:transparent;border:none;box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:99px;padding:9px 16px;cursor:pointer;transition:color .25s,box-shadow .25s,transform .15s;}
 #assetRoot .ac-btn:hover{color:var(--ink);box-shadow:inset 0 0 0 1px rgba(127,127,127,.42);transform:translateY(-1px);}
+/* Room concierge — generic host prompt panel, mirrors .assets-concierge for any room */
+#roomBody .room-concierge{display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap;margin:clamp(4px,1vh,10px) 2px clamp(18px,2.4vh,26px);padding:clamp(16px,2vw,22px) clamp(18px,2.2vw,24px);border-radius:var(--r-md);background:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,.32));box-shadow:inset 0 0 0 1px var(--sage-line),var(--shadow);transition:opacity .5s ease,transform .5s ease;}
+body.deep-immerse #roomBody .room-concierge{background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.03));}
+#roomBody .room-concierge.dismissing{opacity:0;transform:translateY(-6px);}
+#roomBody .ac-text{display:flex;flex-direction:column;gap:4px;min-width:0;}
+#roomBody .ac-q{font-family:var(--display);font-weight:300;font-size:clamp(16px,1.8vw,20px);letter-spacing:-.01em;color:var(--ink);line-height:1.2;}
+#roomBody .ac-sub{font-size:12px;color:var(--ink-faint);font-weight:300;line-height:1.4;}
+#roomBody .ac-acts{display:flex;gap:9px;flex:none;flex-wrap:wrap;}
+#roomBody .ac-btn{font-family:inherit;font-size:12.5px;letter-spacing:.01em;color:var(--ink-soft);background:transparent;border:none;box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:99px;padding:9px 16px;cursor:pointer;transition:color .25s,box-shadow .25s,transform .15s;}
+#roomBody .ac-btn:hover{color:var(--ink);box-shadow:inset 0 0 0 1px rgba(127,127,127,.42);transform:translateY(-1px);}
+@media(max-width:560px){#roomBody .room-concierge{flex-direction:column;align-items:flex-start;}}
 @media(max-width:560px){#assetRoot .assets-concierge{flex-direction:column;align-items:flex-start;}}#assetRoot .afilter{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:11px;letter-spacing:.06em;font-weight:500;color:var(--ink-soft);background:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,.32));border:1px solid var(--sage-line);border-radius:99px;padding:7px 14px;cursor:pointer;transition:color .25s,box-shadow .25s,background .25s,transform .25s;}
 #assetRoot .afilter:hover{transform:translateY(-1px);box-shadow:var(--shadow);}
 #assetRoot .afilter.is-active{color:#fff;background:var(--sage);border-color:transparent;box-shadow:var(--shadow);}
@@ -1103,7 +1114,7 @@ const roomRegistry = {
   foyer:        { id:'foyer',        label:'Foyer',        purpose:'The arrival — name, tagline, and the doors into every room.',  emptyState:'Move your brand in to begin.',                render:()=>{ try{ applyBrandHome(); }catch(e){} } },
   identity:     { id:'identity',     label:'Identity',     purpose:'The lead mark, name and tagline — who the brand is.',          emptyState:'Add a logo to anchor the identity.',          render:(root)=>{ renderIdentityBrain(root); } },
   color:        { id:'color',        label:'Color',        purpose:'The palette and where each colour belongs.',                  emptyState:'Colours appear once a logo is read.',         render:(root)=>{ renderColorBrain(root); } },
-  typography:   { id:'typography',   label:'Typography',   purpose:'Display and body type — the voice in letterform.',            emptyState:'Type is detected or set by hand.',            render:(root)=>{ renderTypographyBrain(root); renderFontUploads(root); } },
+  typography:   { id:'typography',   label:'Typography',   purpose:'Display and body type — the voice in letterform.',            emptyState:'Type is detected or set by hand.',            render:(root)=>{ renderTypographyBrain(root); renderFontUploads(root); renderRoomConcierge('typography', root); } },
   voice:        { id:'voice',        label:'Voice',        purpose:'Tone, positioning and the words the brand uses.',             emptyState:"Voice is drawn from the brand's strategy.",    render:()=>{} },
   assets:       { id:'assets',       label:'Assets',       purpose:'Every logo, photo and document, organized by role.',          emptyState:'Add files, or move a brand in.',              render:(root)=>{ renderAssetsRoom(); renderAssetsConcierge(root); renderAssetsBrain(root); renderGuidelineReader(root); } },
   applications: { id:'applications', label:'Applications', purpose:'The brand in use — signature, social and ready pieces.',       emptyState:'Applications build from the identity.',       render:(root)=>{ renderApplications(root); renderApplicationsBrain(root); } },
@@ -1809,6 +1820,61 @@ function renderAssetsConcierge(root){
       });
     });
   }catch(e){ console.warn('[assets-concierge] render skipped:', e); }
+}
+/* ── Room concierge: context-aware host prompts, one per room (generalizes the Assets concierge) ── */
+const ROOM_CONCIERGE = {
+  typography(){
+    var t=(typeof brandState!=='undefined'&&brandState.typography)||{}, offers=[];
+    var display=t.display, body=t.body;
+    if(display && !body){
+      offers.push({ key:'body-missing',
+        q:'Your display face is set, but body type isn\u2019t chosen yet.',
+        sub:'Long-form text falls back to a system font until a body face is named.',
+        actions:[
+          {label:'Use display for both', intent:'display-as-body', run:function(){ try{ if(!brand.type)brand.type={}; brand.type.body=display; saveBrand(); }catch(e){} }},
+          {label:'I\u2019ll pick one', intent:'body-pending', run:function(){}}
+        ]});
+    } else if(display && body && String(display).toLowerCase()===String(body).toLowerCase()){
+      offers.push({ key:'one-voice',
+        q:'Display and body are the same face \u2014 one voice throughout.',
+        sub:'A single typeface can read as intentional, or flatten hierarchy.',
+        actions:[
+          {label:'Intentional', intent:'intentional', run:function(){}},
+          {label:'I\u2019ll differentiate', intent:'wanted', run:function(){}}
+        ]});
+    }
+    return offers;
+  }
+};
+function renderRoomConcierge(roomKey, root){
+  try{
+    var host = root && root.id==='roomBody' ? root
+             : (root && root.querySelector && root.querySelector('#roomBody')) || document.getElementById('roomBody');
+    if(!host) return;
+    host.querySelectorAll('.room-concierge').forEach(function(e){ e.remove(); });
+    var build = ROOM_CONCIERGE[roomKey]; if(typeof build!=='function') return;
+    var offers=[]; try{ offers = build()||[]; }catch(e){ return; }
+    var offer = offers.find(function(o){
+      try{ return !(brand && brand.brandIntent && brand.brandIntent[roomKey+':'+o.key]); }catch(e){ return true; }
+    });
+    if(!offer) return;
+    var panel=document.createElement('div'); panel.className='room-concierge';
+    panel.innerHTML =
+        '<div class="ac-text"><span class="ac-q">'+offer.q+'</span><span class="ac-sub">'+(offer.sub||'')+'</span></div>'
+      + '<div class="ac-acts">'+offer.actions.map(function(a,i){
+          return '<button type="button" class="ac-btn" data-i="'+i+'">'+a.label+'</button>'; }).join('')+'</div>';
+    host.insertAdjacentElement('afterbegin', panel);
+    panel.querySelectorAll('[data-i]').forEach(function(btn){
+      btn.addEventListener('click',function(){
+        var a=offer.actions[+btn.getAttribute('data-i')]; if(!a) return;
+        try{ if(typeof a.run==='function') a.run(); }catch(e){}
+        try{ setBrandIntent(roomKey+':'+offer.key, a.intent||'answered'); }catch(e){}
+        panel.classList.add('dismissing');
+        try{ announceWorkspaceUpdate('Noted \u2014 I\u2019ll keep that in mind.', roomKey); }catch(e){}
+        setTimeout(function(){ try{ renderRoomConcierge(roomKey, document.getElementById('roomBody')); }catch(e){} }, 520);
+      });
+    });
+  }catch(e){ console.warn('[room-concierge] render skipped:', e); }
 }
 async function enhanceAssetThumbs(root){                     // swap logo thumbnails for their knocked-out, trimmed version so they float instead of sitting on a white tile
   for(const thumb of root.querySelectorAll('.asset-thumb[data-asset]')){
