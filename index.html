@@ -1691,7 +1691,7 @@ function assetCardHTML(a,isLogoGroup,variantLabel,pub){
       ? '<div class="asset-thumb '+(isLogoGroup||a.ext==='svg'?'':'cover')+onDark+'"><img alt="" src="'+a.url+'"></div>'
       : '<div class="asset-thumb doc" data-file="'+a.url+'">'+((a.ext||'file').toUpperCase())+'</div>';
     const acts = isImg
-      ? '<button class="pub-act" type="button" data-aact="dl" data-aname="'+esc(fn)+'">Download</button><button class="pub-act" type="button" data-aact="copy">Copy</button><button class="pub-act" type="button" data-aact="send">Send</button>'
+      ? '<button class="pub-act" type="button" data-aact="dl" data-aname="'+esc(fn)+'">Download</button><button class="pub-act" type="button" data-aact="copy">Copy</button><button class="pub-act" type="button" data-aact="send">Share</button>'
       : '<button class="pub-act" type="button" data-aact="dl" data-aname="'+esc(fn)+'">Download</button>';
     return '<div class="asset-card pub">'
       +pthumb
@@ -2289,7 +2289,7 @@ const PUBLISHED_TOOLBAR_JS = `(function(){
   }
   document.addEventListener("click", function(e){
     var b=e.target.closest(".pub-act"); if(!b) return;
-    var card=b.closest(".asset-card"); if(!card) return;
+    var card=b.closest(".asset-card,.mk,.gd-logocell"); if(!card) return;
     var src=srcOf(card); if(!src){ toast("Nothing to grab"); return; }
     var nm=b.getAttribute("data-aname"); if(!nm){ var ne=card.querySelector(".asset-name"); nm=ne?ne.textContent.trim():"asset"; }
     var act=b.getAttribute("data-aact");
