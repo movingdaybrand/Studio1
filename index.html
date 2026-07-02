@@ -4193,7 +4193,8 @@ async function moveInFiles(fileList){
   const coldArrival = !brand.name && !(brand.logos||[]).length && activeRoom==='home'
     && !(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);   // a first arrival on the home — not an additive add-files
   setStatus('Moving in '+files.length+' item'+(files.length===1?'':'s')+'…');
-  const imgs=[]; brand.docs=[]; let folderName='';
+  const hasBrand = !!(brand.name || (brand.logos||[]).length || (brand.colors||[]).length);   // returning to an existing brand → additive only, never a fresh move-in
+  const imgs=[]; if(!hasBrand) brand.docs=[]; let folderName='';
   for(const f of files){
     const name=f.name||''; const ext=(name.split('.').pop()||'').toLowerCase();
     if(f.webkitRelativePath && f.webkitRelativePath.includes('/') && !folderName) folderName=prettify(f.webkitRelativePath.split('/')[0]);
@@ -4206,7 +4207,20 @@ async function moveInFiles(fileList){
     else if(FONT_EXT.includes(ext)){ const ft=await fileToFont(f); if(ft){ brand.fonts=brand.fonts||[]; if(!brand.fonts.some(x=>x.family===ft.family)){ brand.fonts.push(ft); registerUploadedFont(ft); } } }
     else if(DOC_EXT.includes(ext)){ let durl=''; if(ext==='pdf'){ try{ durl=await new Promise(r=>{ const rd=new FileReader(); rd.onload=()=>r(rd.result); rd.onerror=()=>r(''); rd.readAsDataURL(f); }); }catch(e){} } brand.docs.push({id:newId(),name:name.split('/').pop(),ext,url:durl}); }
   }
-  await finishIntake(imgs,folderName);
+  if(hasBrand){                                        // existing brand → add new pieces WITHOUT re-sorting or overwriting name/colours/type
+    const d0=(brand.docs||[]).length, f0=(brand.fonts||[]).length;
+    try{ await analyzeAssets(imgs); }catch(e){}
+    imgs.forEach(function(im){ if(!im||!im.url) return; if(!im.id) im.id=newId(); im.role=im.role||'';
+      if(categoryForAsset(im)==='Photography'){ im.role='photography'; brand.photos.push(im); }
+      else brand.logos.push(im); });
+    try{ autoAssignFontRoles(); }catch(e){}
+    try{ renderAssetsRoom(); }catch(e){}
+    try{ applyUploads(roomBody); }catch(e){}
+    const total=imgs.length + ((brand.docs||[]).length-d0) + ((brand.fonts||[]).length-f0);
+    updateWorkspaceState({},{source:'assets',announce: total? (total+' file'+(total===1?'':'s')+' added \u2014 structure, colours, type, and name untouched.') : 'Nothing new to add.'});
+  } else {
+    await finishIntake(imgs,folderName);               // blank home → the full move-in
+  }
   if(coldArrival && activeRoom==='home' && (brand.logos.length||brand.colors.length||brand.name)) welcomeHomeArrival();   // welcome home → logo → environment, as one arrival
 }
 function loadImg(url){ return new Promise((res,rej)=>{ const i=new Image(); i.onload=()=>res(i); i.onerror=rej; i.src=url; }); }
