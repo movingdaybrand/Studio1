@@ -729,20 +729,6 @@ body.deep-immerse #assetRoot .assets-concierge{background:linear-gradient(160deg
 #assetRoot .ac-acts{display:flex;gap:9px;flex:none;flex-wrap:wrap;}
 #assetRoot .ac-btn{font-family:inherit;font-size:12.5px;letter-spacing:.01em;color:var(--ink-soft);background:transparent;border:none;box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:99px;padding:9px 16px;cursor:pointer;transition:color .25s,box-shadow .25s,transform .15s;}
 #assetRoot .ac-btn:hover{color:var(--ink);box-shadow:inset 0 0 0 1px rgba(127,127,127,.42);transform:translateY(-1px);}
-/* Room concierge — generic host prompt panel, mirrors .assets-concierge for any room */
-#roomBody .room-concierge{display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap;margin:clamp(4px,1vh,10px) 2px clamp(18px,2.4vh,26px);padding:clamp(16px,2vw,22px) clamp(18px,2.2vw,24px);border-radius:var(--r-md);background:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,.32));box-shadow:inset 0 0 0 1px var(--sage-line),var(--shadow);transition:opacity .5s ease,transform .5s ease;}
-body.deep-immerse #roomBody .room-concierge{background:linear-gradient(160deg,rgba(255,255,255,.07),rgba(255,255,255,.03));}
-#roomBody .room-concierge.dismissing{opacity:0;transform:translateY(-6px);}
-#roomBody .ac-text{display:flex;flex-direction:column;gap:4px;min-width:0;}
-#roomBody .ac-q{font-family:var(--display);font-weight:300;font-size:clamp(16px,1.8vw,20px);letter-spacing:-.01em;color:var(--ink);line-height:1.2;}
-#roomBody .ac-sub{font-size:12px;color:var(--ink-faint);font-weight:300;line-height:1.4;}
-#roomBody .ac-acts{display:flex;gap:9px;flex:none;flex-wrap:wrap;}
-#roomBody .ac-btn{font-family:inherit;font-size:12.5px;letter-spacing:.01em;color:var(--ink-soft);background:transparent;border:none;box-shadow:inset 0 0 0 1px var(--sage-line);border-radius:99px;padding:9px 16px;cursor:pointer;transition:color .25s,box-shadow .25s,transform .15s;}
-#roomBody .ac-btn:hover{color:var(--ink);box-shadow:inset 0 0 0 1px rgba(127,127,127,.42);transform:translateY(-1px);}
-@media(max-width:560px){#roomBody .room-concierge{flex-direction:column;align-items:flex-start;}}
-#roomBody .room-read{display:flex;align-items:center;gap:9px;margin:clamp(4px,1vh,10px) 2px clamp(10px,1.6vh,16px);font-size:13.5px;color:var(--ink-soft);font-weight:300;line-height:1.5;}
-#roomBody .room-read .rr-dot{width:6px;height:6px;border-radius:50%;background:var(--sage);flex:none;box-shadow:0 0 0 3px rgba(44,90,60,.10);}
-#roomBody .room-read b{font-weight:400;color:var(--ink);}
 @media(max-width:560px){#assetRoot .assets-concierge{flex-direction:column;align-items:flex-start;}}#assetRoot .afilter{display:inline-flex;align-items:center;gap:7px;font-family:inherit;font-size:11px;letter-spacing:.06em;font-weight:500;color:var(--ink-soft);background:linear-gradient(160deg,rgba(255,255,255,.5),rgba(255,255,255,.32));border:1px solid var(--sage-line);border-radius:99px;padding:7px 14px;cursor:pointer;transition:color .25s,box-shadow .25s,background .25s,transform .25s;}
 #assetRoot .afilter:hover{transform:translateY(-1px);box-shadow:var(--shadow);}
 #assetRoot .afilter.is-active{color:#fff;background:var(--sage);border-color:transparent;box-shadow:var(--shadow);}
@@ -1115,9 +1101,9 @@ const ROOM_META={
 /* Room registry: one definition per room (id, label, purpose, emptyState, render). Render fns delegate to the EXISTING renderers — structure only, behaviour unchanged. */
 const roomRegistry = {
   foyer:        { id:'foyer',        label:'Foyer',        purpose:'The arrival — name, tagline, and the doors into every room.',  emptyState:'Move your brand in to begin.',                render:()=>{ try{ applyBrandHome(); }catch(e){} } },
-  identity:     { id:'identity',     label:'Identity',     purpose:'The lead mark, name and tagline — who the brand is.',          emptyState:'Add a logo to anchor the identity.',          render:(root)=>{ renderIdentityBrain(root); renderRoomConcierge('identity', root); renderRoomRead('identity', root); } },
+  identity:     { id:'identity',     label:'Identity',     purpose:'The lead mark, name and tagline — who the brand is.',          emptyState:'Add a logo to anchor the identity.',          render:(root)=>{ renderIdentityBrain(root); } },
   color:        { id:'color',        label:'Color',        purpose:'The palette and where each colour belongs.',                  emptyState:'Colours appear once a logo is read.',         render:(root)=>{ renderColorBrain(root); } },
-  typography:   { id:'typography',   label:'Typography',   purpose:'Display and body type — the voice in letterform.',            emptyState:'Type is detected or set by hand.',            render:(root)=>{ renderTypographyBrain(root); renderFontUploads(root); renderRoomConcierge('typography', root); } },
+  typography:   { id:'typography',   label:'Typography',   purpose:'Display and body type — the voice in letterform.',            emptyState:'Type is detected or set by hand.',            render:(root)=>{ renderTypographyBrain(root); renderFontUploads(root); } },
   voice:        { id:'voice',        label:'Voice',        purpose:'Tone, positioning and the words the brand uses.',             emptyState:"Voice is drawn from the brand's strategy.",    render:()=>{} },
   assets:       { id:'assets',       label:'Assets',       purpose:'Every logo, photo and document, organized by role.',          emptyState:'Add files, or move a brand in.',              render:(root)=>{ renderAssetsRoom(); renderAssetsConcierge(root); renderAssetsBrain(root); renderGuidelineReader(root); } },
   applications: { id:'applications', label:'Applications', purpose:'The brand in use — signature, social and ready pieces.',       emptyState:'Applications build from the identity.',       render:(root)=>{ renderApplications(root); renderApplicationsBrain(root); } },
@@ -1824,151 +1810,6 @@ function renderAssetsConcierge(root){
     });
   }catch(e){ console.warn('[assets-concierge] render skipped:', e); }
 }
-/* ── Room specialists: one focused "employee" per room. Local-first —
-   observe() is deterministic and instant; tools[] is where scoped AI plugs in later, per room. ── */
-const SPECIALISTS = {
-  identity: {
-    id:'identity', name:'Identity Lead', title:'Primary identity & colour',
-    domain:'The lead mark, the name/tagline, and whether a palette is established.',
-    tools:{
-      // Scoped AI: read ONE mark via the identity fast-lane on the existing analyzer. Wired to nothing yet — test from console.
-      async readMark(asset){
-        if(!asset || !asset.url) throw new Error('readMark needs an asset with a url');
-        var m=/^data:([^;]+)/.exec(asset.url||''); 
-        var type=m?m[1]:('image/'+String(asset.ext||'png').toLowerCase().replace(/^jpg$/,'jpeg'));
-        var res=await fetch('/api/analyze-brand-files',{ method:'POST', headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({ mode:'identity', assets:[{ name:asset.name||'mark', type:type, dataUrl:asset.url }] }) });
-        if(!res.ok) throw new Error('identity read failed: '+res.status);
-        return await res.json();
-      }
-    },
-    read(s){
-      s=s||{}; var id=s.identity||{}, colors=s.colors||[], ov=s.overview||{};
-      if(!id.markCount && !(ov.name||id.name)) return null;
-      var name=String(ov.name||id.name||'').trim();
-      var lead = name ? (name+' is settled in.') : (id.primary ? 'Your primary mark is placed.' : null);
-      if(!lead) return null;
-      var bits=[];
-      var lum = id.primary && typeof id.primary.lum==='number' ? id.primary.lum : null;
-      if(lum!=null){ if(lum<90) bits.push('it reads dark'); else if(lum>190) bits.push('it reads light'); }
-      if(colors.length){ var lc=colors.find(function(c){ return String(c&&c.role||'').toLowerCase()==='primary'; })||colors[0]; var cn=lc&&(lc.name||lc.hex)||''; if(cn) bits.push(cn+' leads the palette'); }
-      var detail=bits.join(', '); if(detail) detail=detail.charAt(0).toUpperCase()+detail.slice(1)+'.';
-      return { lead:lead, detail:detail };
-    },
-    observe(s){
-      s=s||{}; var id=s.identity||{}, colors=s.colors||[], ov=s.overview||{}, out=[];
-      if(id.markCount>0 && !colors.length){
-        out.push({ key:'no-palette',
-          q:'Your marks are in, but no palette has been read yet.',
-          sub:'Colour anchors the whole system \u2014 the guide stays neutral until it\u2019s set.',
-          actions:[ {label:'Read colour from the mark', intent:'wants-palette', run:function(){}},
-                    {label:'I\u2019ll set it by hand', intent:'manual-palette', run:function(){}} ]});
-      }
-      if(id.markCount>0 && !ov.tagline){
-        out.push({ key:'no-tagline',
-          q:'You have a name, but no tagline yet.',
-          sub:'A line beside the name sets the tone \u2014 or the name can stand alone.',
-          actions:[ {label:'Name stands alone', intent:'intentional', run:function(){}},
-                    {label:'I\u2019ll add one', intent:'wanted', run:function(){}} ]});
-      }
-      return out;
-    }
-  },
-  typography: {
-    id:'typography', name:'Type Setter', title:'Display & body type',
-    domain:'The display and body faces, and whether hierarchy is established.',
-    tools:{},
-    observe(s){
-      var t=(s&&s.typography)||{}, out=[], display=t.display, body=t.body;
-      if(display && !body){
-        out.push({ key:'body-missing',
-          q:'Your display face is set, but body type isn\u2019t chosen yet.',
-          sub:'Long-form text falls back to a system font until a body face is named.',
-          actions:[ {label:'Use display for both', intent:'display-as-body', run:function(){ try{ if(!brand.type)brand.type={}; brand.type.body=display; saveBrand(); }catch(e){} }},
-                    {label:'I\u2019ll pick one', intent:'body-pending', run:function(){}} ]});
-      } else if(display && body && String(display).toLowerCase()===String(body).toLowerCase()){
-        out.push({ key:'one-voice',
-          q:'Display and body are the same face \u2014 one voice throughout.',
-          sub:'A single typeface can read as intentional, or flatten hierarchy.',
-          actions:[ {label:'Intentional', intent:'intentional', run:function(){}},
-                    {label:'I\u2019ll differentiate', intent:'wanted', run:function(){}} ]});
-      }
-      return out;
-    }
-  },
-  assets: {
-    id:'assets', name:'Assets Manager', title:'Files, formats, usage & sharing',
-    domain:'Every file\u2019s type and role, what\u2019s print-ready vs web-only, and what\u2019s missing.',
-    tools:{},
-    observe(s){
-      s=s||{}; var id=s.identity||{}, assets=s.assets||[], out=[];
-      var prim=id.primary;
-      if(prim && prim.ext && String(prim.ext).toLowerCase()!=='svg'){
-        out.push({ key:'primary-not-vector',
-          q:'Your primary mark is a '+String(prim.ext).toUpperCase()+', not a vector.',
-          sub:'It won\u2019t scale cleanly for large print or signage \u2014 an SVG would.',
-          actions:[ {label:'Fine for now', intent:'raster-ok', run:function(){}},
-                    {label:'Flag to prepare SVG', intent:'wants-vector', run:function(){}} ]});
-      }
-      var unassigned=(assets||[]).filter(function(a){ return a && !a.role; }).length;
-      if(!out.length && unassigned>0){
-        out.push({ key:'unassigned',
-          q:unassigned+' file'+(unassigned===1?'':'s')+' still '+(unassigned===1?'has':'have')+' no role.',
-          sub:'Assigning roles is what lets the guide and downloads organise themselves.',
-          actions:[ {label:'I\u2019ll assign them', intent:'will-assign', run:function(){}},
-                    {label:'Leave as supporting', intent:'leave', run:function(){}} ]});
-      }
-      return out;
-    }
-  }
-};
-function renderRoomConcierge(roomKey, root){
-  try{
-    try{ syncBrandState(); }catch(e){}
-    var host = root && root.id==='roomBody' ? root
-             : (root && root.querySelector && root.querySelector('#roomBody')) || document.getElementById('roomBody');
-    if(!host) return;
-    host.querySelectorAll('.room-concierge').forEach(function(e){ e.remove(); });
-    var spec = SPECIALISTS[roomKey]; if(!spec || typeof spec.observe!=='function') return;
-    var offers=[]; try{ offers = spec.observe(brandState)||[]; }catch(e){ return; }
-    var offer = offers.find(function(o){
-      try{ return !(brand && brand.brandIntent && brand.brandIntent[roomKey+':'+o.key]); }catch(e){ return true; }
-    });
-    if(!offer) return;
-    var panel=document.createElement('div'); panel.className='room-concierge';
-    panel.innerHTML =
-        '<div class="ac-text"><span class="ac-q">'+offer.q+'</span><span class="ac-sub">'+(offer.sub||'')+'</span></div>'
-      + '<div class="ac-acts">'+offer.actions.map(function(a,i){
-          return '<button type="button" class="ac-btn" data-i="'+i+'">'+a.label+'</button>'; }).join('')+'</div>';
-    host.insertAdjacentElement('afterbegin', panel);
-    panel.querySelectorAll('[data-i]').forEach(function(btn){
-      btn.addEventListener('click',function(){
-        var a=offer.actions[+btn.getAttribute('data-i')]; if(!a) return;
-        try{ if(typeof a.run==='function') a.run(); }catch(e){}
-        try{ setBrandIntent(roomKey+':'+offer.key, a.intent||'answered'); }catch(e){}
-        panel.classList.add('dismissing');
-        try{ announceWorkspaceUpdate('Noted \u2014 '+spec.name+' has it.', roomKey); }catch(e){}
-        setTimeout(function(){ try{ renderRoomConcierge(roomKey, document.getElementById('roomBody')); }catch(e){} }, 520);
-      });
-    });
-  }catch(e){ console.warn('[room-concierge] render skipped:', e); }
-}
-
-function renderRoomRead(roomKey, root){
-  try{
-    try{ syncBrandState(); }catch(e){}
-    var host = root && root.id==='roomBody' ? root
-             : (root && root.querySelector && root.querySelector('#roomBody')) || document.getElementById('roomBody');
-    if(!host) return;
-    host.querySelectorAll('.room-read').forEach(function(e){ e.remove(); });
-    var spec=SPECIALISTS[roomKey]; if(!spec || typeof spec.read!=='function') return;
-    var r; try{ r=spec.read(brandState); }catch(e){ return; }
-    if(!r || !r.lead) return;
-    var el=document.createElement('div'); el.className='room-read';
-    el.innerHTML='<span class="rr-dot" aria-hidden="true"></span><span><b>'+r.lead+'</b>'+(r.detail?' '+r.detail:'')+'</span>';
-    host.insertAdjacentElement('afterbegin', el);
-  }catch(e){ console.warn('[room-read] skipped:', e); }
-}
 async function enhanceAssetThumbs(root){                     // swap logo thumbnails for their knocked-out, trimmed version so they float instead of sitting on a white tile
   for(const thumb of root.querySelectorAll('.asset-thumb[data-asset]')){
     if(thumb.classList.contains('cover')||thumb.classList.contains('doc')) continue;   // photos & docs keep their own treatment
@@ -2189,7 +2030,8 @@ async function renderRoomForPublish(key){
   }catch(e){ console.warn('[publish] room render failed:',key,e); }
   // strip editor-only chrome → clean read-only capture
   tmp.querySelectorAll('[contenteditable]').forEach(n=>n.removeAttribute('contenteditable'));
-  tmp.querySelectorAll('[data-action],.asset-replace,.edit-hint,.mk-dl,.gd-logo-dl,.lib-upload,.id-edit,.edit-dot,.id-read,.color-read,.type-read,.assets-read,.apps-read').forEach(n=>n.remove());
+  tmp.querySelectorAll('[data-action],.asset-replace,.edit-hint,.mk-dl,.lib-upload,.id-edit,.edit-dot,.id-read,.color-read,.type-read,.assets-read,.apps-read').forEach(n=>n.remove());
+  tmp.querySelectorAll('.gd-logo-dl').forEach(function(b){ b.setAttribute('data-aact','dl'); var f=b.getAttribute('data-fname'); if(f) b.setAttribute('data-aname', f); });
   if(key==='identity'){ const h=tmp.querySelector('.id-hero.logo-named'); if(h){ const nm=h.querySelector('.id-name'); if(nm) nm.remove(); } }   // wordmark logo carries the name → no duplicate in the client view
   // Deliverables: drop editor-only actions + non-functional inputs; keep client downloads (package, PDF, signature, icon)
   tmp.querySelectorAll('[data-deliv="home"],[data-deliv="guides"],[data-deliv="palette"],[data-deliv="save"],[data-deliv="review"],[data-deliv="versions"],.sig-fields,.ig-bgs').forEach(n=>n.remove());
@@ -2288,7 +2130,7 @@ const PUBLISHED_TOOLBAR_JS = `(function(){
     }).catch(function(){ saveURL(src,name); });
   }
   document.addEventListener("click", function(e){
-    var b=e.target.closest(".pub-act"); if(!b) return;
+    var b=e.target.closest(".pub-act,.gd-logo-dl"); if(!b) return;
     var card=b.closest(".asset-card,.mk,.gd-logocell"); if(!card) return;
     var src=srcOf(card); if(!src){ toast("Nothing to grab"); return; }
     var nm=b.getAttribute("data-aname"); if(!nm){ var ne=card.querySelector(".asset-name"); nm=ne?ne.textContent.trim():"asset"; }
