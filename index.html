@@ -2205,6 +2205,7 @@ async function buildHomeHTML(){
   if(!pane) throw new Error('home shell not found');
   const clone=pane.cloneNode(true);
   clone.className='glasspane md-room-home';            // start on the home view, drop any live md-room-* state
+  clone.querySelectorAll('.editing').forEach(function(n){ n.classList.remove('editing'); });   // never ship editor state (e.g. the 'Replace' hover) to the client home
 
   // HOME view: keep the four public room cards working, strip editor-only chrome
   const homeView=clone.querySelector('#home'); if(homeView){ homeView.className='view show'; }
